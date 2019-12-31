@@ -1,4 +1,4 @@
-package com.example.binu.myapplication;
+package com.sportstalk;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.binu.myapplication", appContext.getPackageName());
+        assertEquals("com.sportstalk", appContext.getPackageName());
     }
 }
