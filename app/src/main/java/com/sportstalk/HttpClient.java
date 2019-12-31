@@ -65,7 +65,6 @@ public class HttpClient {
      **/
     private String action;
 
-    //key:vfZSpHsWrkun7Yd_fUJcWAHrNjx6VRpEqMCEP3LJV9Tg
     public HttpClient(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, APICallback apiCallback) {
         this.context = context;
         this.httpMethod = httpMethod;
@@ -79,6 +78,7 @@ public class HttpClient {
         this.action = action;
     }
 
+    /** execute the HTTP requests using Volley **/
     protected void execute() {
         Log.d(TAG, " url " + url);
         RequestQueue queue = Volley.newRequestQueue(context);
