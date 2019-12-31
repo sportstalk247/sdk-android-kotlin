@@ -20,6 +20,10 @@ import java.util.concurrent.TimeUnit;
 
 public class SportsTalkClient {
 
+    /** invalid polling frequency message **/
+    private final String INVALID_POLLING_FREQUENCY = "Invalid poll _pollFrequency.  Must be between 250ms and 5000ms";
+    /** error message in case not joined the room **/
+    private final String NO_ROOM_SET = "No room set.  You must join a room before you can get updates!";
     /**
      * Android Log
      **/
@@ -85,6 +89,7 @@ public class SportsTalkClient {
      **/
     private EventHandler eventHandler;
 
+
     public SportsTalkClient(final String apiKey) {
         this.apiKey = apiKey;
     }
@@ -97,8 +102,7 @@ public class SportsTalkClient {
         this.context          = sportsTalkConfig.getContext();
         this.user             = sportsTalkConfig.getUser();
         this.eventHandler     = sportsTalkConfig.getEventHandler();
-
-        startPollUpdate();
+        this.apiCallback      = sportsTalkConfig.getApiCallback();
     }
 
     /**
@@ -108,9 +112,17 @@ public class SportsTalkClient {
         this.endpoint = endpoint;
     }
 
+    /**
+     * sets polling frequency
+     * @param pollFrequency
+     */
+    public void setUpdateFrequency(long pollFrequency) {
+        this.pollFrequency = pollFrequency;
+    }
+
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void listRooms(Map<String, String> data, APICallback apiCallback) {
+    public void listRooms(Map<String, String> data) {
         HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/room", new FN().getApiHeaders(apiKey), data, apiCallback);
         httpClient.setAction("listRooms");
         httpClient.execute();
@@ -118,13 +130,19 @@ public class SportsTalkClient {
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void listUsers(Context context, APICallback apiCallback) {
+    public void listUsers() {
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/?limit=100&cursor=", new FN().getApiHeaders(apiKey), data, apiCallback);
+        httpClient.setAction("listUsers");
         httpClient.execute();
     }
 
-    private void startPollUpdate() {
+    /**
+     * starts polling. The default polling frequency is 800ms
+     */
+    private void startPollUpdate() throws SportsTalkSettingsException {
+        if(updatesAPI == null || roomAPI == null) throw new SportsTalkSettingsException("");
+        if(pollFrequency <250 || pollFrequency>5000) throw new SportsTalkSettingsException(INVALID_POLLING_FREQUENCY);
         ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
         Runnable task = new Runnable() {
             @TargetApi(Build.VERSION_CODES.N)
@@ -180,6 +198,10 @@ public class SportsTalkClient {
         return completableFuture;
     }
 
+    /**
+     * handle the data returned from the polling
+     * @param data
+     */
     private void handlePoll(JSONObject data) {
         try {
             JSONArray array = data.getJSONArray("data");
@@ -209,7 +231,7 @@ public class SportsTalkClient {
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void listParticipants(Context context, APICallback apiCallback, int roomId, String cursor, int maxResults) {
+    public void listParticipants(int roomId, String cursor, int maxResults) {
         HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/room/" + roomId + "/participants?cursor=" + cursor + "&maxresults=" + maxResults, new FN().getApiHeaders(apiKey), null, apiCallback);
         httpClient.setAction("listParticipants");
         httpClient.execute();
@@ -217,18 +239,24 @@ public class SportsTalkClient {
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void joinRoom(final APICallback apiCallback, String roomId, Map<String, String> data) {
+    public void joinRoom(String roomId, Map<String, String> data) {
         APICallback apiCallback1 = new APICallback() {
             @Override
             public void execute(ApiResult<JSONObject> jsonObject, String action) {
                 try {
                     roomIdentifier = jsonObject.getData().getJSONObject("data").getJSONObject("room").getString("id");
-                    roomAPI = endpoint + "/room/" + roomIdentifier;
+                    roomAPI    = endpoint + "/room/" + roomIdentifier;
                     commandAPI = roomAPI + "/command";
                     updatesAPI = roomAPI + "/updates";
 
+                    // starts polling
+                    startPollUpdate();
                 } catch (JSONException e) {
                     e.printStackTrace();
+                    Log.e(TAG, e.getMessage());
+                } catch(SportsTalkSettingsException e) {
+                    e.printStackTrace();
+                    Log.e(TAG, e.getMessage());
                 }
                 apiCallback.execute(jsonObject, action);
             }
@@ -252,7 +280,7 @@ public class SportsTalkClient {
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void sendCommand(final String command, final CommandOptions commandOption, String roomId, APICallback apiCallback) {
+    public void sendCommand(final String command, final CommandOptions commandOption, String roomId) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.endpoint).append("/room/").append(roomId).append("/command");
         Map<String, String> data = new HashMap<>();
@@ -263,13 +291,13 @@ public class SportsTalkClient {
         data.put("custompayload", "");
 
         HttpClient httpClient = new HttpClient(context, "POST", sb.toString(), new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("command");
+        httpClient.setAction("sendCommand");
         httpClient.execute();
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void sendReply(Context context, final String command, final CommandOptions commandOption, int roomId, Map<String, String> data, APICallback apiCallback) {
+    public void sendReply(final String command, final CommandOptions commandOption, int roomId, Map<String, String> data) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.endpoint).append("/room/").append(roomId).append("/command");
         data.put("command", command);
@@ -309,6 +337,7 @@ public class SportsTalkClient {
         data.put("custompayload", new JSONObject(custom).toString());
 
         HttpClient httpClient = new HttpClient(context, "POST", commandAPI, new FN().getApiHeaders(apiKey), data, apiCallback);
+        httpClient.setAction("sendAdvertisement");
         httpClient.execute();
     }
 
@@ -341,7 +370,7 @@ public class SportsTalkClient {
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void createOrUpdateUser(APICallback apiCallback) {
+    public void createOrUpdateUser() {
         Map<String, String> data = new HashMap<>();
         data.put("userid",      user.getUserId());
         data.put("handle",      user.getHandle());
@@ -383,8 +412,8 @@ public class SportsTalkClient {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void listUserMessages(int limit, String cursor) {
-        HttpClient httpClient = new HttpClient(context, "GET", this.roomAPI + "/user/?limit=" + limit + "&cursor=" + cursor, new FN().getApiHeaders(apiKey), null, apiCallback);
-        httpClient.setAction("listUserMessage");
+        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/?limit=" + limit + "&cursor=" + cursor, new FN().getApiHeaders(apiKey), null, apiCallback);
+        httpClient.setAction("listUserMessages");
         httpClient.execute();
     }
 }

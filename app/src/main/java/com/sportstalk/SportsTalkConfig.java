@@ -44,6 +44,16 @@ public class SportsTalkConfig {
     private Context context;
     private EventHandler eventHandler;
 
+    public APICallback getApiCallback() {
+        return apiCallback;
+    }
+
+    public void setApiCallback(APICallback apiCallback) {
+        this.apiCallback = apiCallback;
+    }
+
+    private APICallback apiCallback;
+
     public User getUser() {
         return user;
     }
