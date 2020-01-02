@@ -152,7 +152,6 @@ public class SportsTalkClient {
                 CompletableFuture completableFuture = getUpdates();
                 try {
                     final ApiResult<JSONObject> apiResult1 = (ApiResult) completableFuture.get();
-                    Log.d(TAG, ".....got response from update calling handlepoll.......");
                     if (apiResult1 != null)
                         handlePoll(apiResult1.getData());
                 } catch (ExecutionException e) {
@@ -209,6 +208,7 @@ public class SportsTalkClient {
             for (int i = 0; i < len; i++) {
                 JSONObject jsonObject = array.getJSONObject(i);
                 String eventType = jsonObject.getString("eventtype");
+                String eventKind = jsonObject.getString("kind");
                 Event event = new Event();
                 event.setAdded(Integer.parseInt(jsonObject.getString("added")));
                 event.setId(jsonObject.getString("id"));
@@ -216,12 +216,20 @@ public class SportsTalkClient {
                 event.setBody(jsonObject.getString("body"));
                 event.setUserId(jsonObject.getString("userid"));
                 event.setEventType(EventType.Purge);
-                if (eventType.equals("Purge")) {
-                    eventHandler.onPurge(event);
-                } else if (eventType.equals("Reaction")) {
-                    eventHandler.onReaction(event);
-                } else if (eventType.equals("Reply")) {
-                    eventHandler.onReaction(event);
+                event.setKind(Kind.chat);
+
+                if("chat.event".equals(eventKind)) {
+                    if (eventType.equals("Purge")) {
+                        eventHandler.onPurge(event);
+                    } else if (eventType.equals("Reaction")) {
+                        eventHandler.onReaction(event);
+                    } else if (eventType.equals("Reply")) {
+                        eventHandler.onReaction(event);
+                    } else if (eventType.equals("Speech")) {
+                        eventHandler.onSpeech(event);
+                    }else {
+                        eventHandler.onChat(event);
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -250,6 +258,7 @@ public class SportsTalkClient {
                     updatesAPI = roomAPI + "/updates";
 
                     // starts polling
+                    Thread.sleep(500);
                     startPollUpdate();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -257,7 +266,11 @@ public class SportsTalkClient {
                 } catch(SportsTalkSettingsException e) {
                     e.printStackTrace();
                     Log.e(TAG, e.getMessage());
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                    Log.e(TAG, ie.getMessage());
                 }
+
                 apiCallback.execute(jsonObject, action);
             }
 

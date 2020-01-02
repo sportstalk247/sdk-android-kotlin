@@ -54,6 +54,16 @@ public class MainActivity extends AppCompatActivity {
             public void onPurge(Event event) {
                 Log.d(TAG, " onPurge start ...");
             }
+
+            @Override
+            public void onSpeech(Event event) {
+                Log.d(TAG, "Onspeech start....");
+            }
+
+            @Override
+            public void onChat(Event event) {
+                Log.d(TAG, "Onchat started.....");
+            }
         };
 
         APICallback apiCallback = new APICallback() {
@@ -109,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         addDelay();
         CommandOptions commandOptions = new CommandOptions();
 
-        
+
         setContentView(R.layout.activity_main);
     }
 
