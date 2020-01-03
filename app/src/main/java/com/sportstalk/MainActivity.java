@@ -120,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
         addDelay();
         CommandOptions commandOptions = new CommandOptions();
 
-
         setContentView(R.layout.activity_main);
     }
 

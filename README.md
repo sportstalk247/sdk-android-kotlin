@@ -16,23 +16,27 @@
  
  Then commit these changes to the repository
  
+ Once you take the build, it will generate an .aar file instead of .apk file.
+ 
  How to distribute
  =================
- We can use jitpack repository support to distribute it.
  
- At the time of implementation, we need to add the followig line:
  
- allprojects {
-        repositories {
-            jcenter()
-            maven { url "https://jitpack.io" }
-        }
-   }
-   
-Add this dependencies at the time of using this module.   
-   dependencies {
-        implementation 'com.sportstalk:sportstalk247:1.0'
-   }
+ How to extends this SDK
+ =======================
+ Currently sportstalk SDK makes use of Android Volley API to make the HTTP call. This is done with the help of HttpClient class.
+ But in case if it is required to change the implementation, then only HttpClient needs to be modified. No other parts of the
+ code needs to be changed for this.
  
-The 'jitpack' repo will checkout the code from the github and create an aar file automatically based on the build.gradle file.
+ The data received from the HTTP operations is through a callback object passed to it. So if you want to change the HTTP operation with a new
+ implementation, you just needs to use this callback object. 
+ 
+ How to use Push Notification
+ ============================
+ If we enable push notification at the time of implementation, then push notification can be enabled.
+ 
+ SportsTalkConfig config = new SportsTalkConfig();
+ config.setPushEnabled(true);
+ 
+ Next, provide imeplementation for push notification in else block in joinRoom() method.
  

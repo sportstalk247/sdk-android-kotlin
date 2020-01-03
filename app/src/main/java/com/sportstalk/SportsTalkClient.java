@@ -89,6 +89,7 @@ public class SportsTalkClient {
      **/
     private EventHandler eventHandler;
 
+    private boolean isPushEnabled;
 
     public SportsTalkClient(final String apiKey) {
         this.apiKey = apiKey;
@@ -103,6 +104,7 @@ public class SportsTalkClient {
         this.user             = sportsTalkConfig.getUser();
         this.eventHandler     = sportsTalkConfig.getEventHandler();
         this.apiCallback      = sportsTalkConfig.getApiCallback();
+        this.isPushEnabled    = sportsTalkConfig.isPushEnabled();
     }
 
     /**
@@ -258,8 +260,12 @@ public class SportsTalkClient {
                     updatesAPI = roomAPI + "/updates";
 
                     // starts polling
-                    Thread.sleep(500);
-                    startPollUpdate();
+                    if(!isPushEnabled) {
+                        Thread.sleep(500);
+                        startPollUpdate();
+                    }else {
+                        // register for push notification
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                     Log.e(TAG, e.getMessage());
@@ -270,7 +276,6 @@ public class SportsTalkClient {
                     ie.printStackTrace();
                     Log.e(TAG, ie.getMessage());
                 }
-
                 apiCallback.execute(jsonObject, action);
             }
 
