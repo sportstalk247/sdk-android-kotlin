@@ -2,7 +2,11 @@ package com.sportstalk;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
@@ -10,8 +14,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -156,6 +165,7 @@ public class SportsTalkClient {
                     final ApiResult<JSONObject> apiResult1 = (ApiResult) completableFuture.get();
                     if (apiResult1 != null)
                         handlePoll(apiResult1.getData());
+                        CompletableFuture.allOf(completableFuture);
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
@@ -197,6 +207,39 @@ public class SportsTalkClient {
             }
         });
         return completableFuture;
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void startPollUpdate2() {
+        Map<String, String> data = new HashMap<>();
+        APICallback apiCallback = new APICallback() {
+            @Override
+            public void execute(ApiResult<JSONObject> apiResult, String action) {
+                handlePoll(apiResult.getData());
+            }
+
+            @Override
+            public void error(ApiResult<JSONObject> apiResult, String action) {
+            }
+        };
+
+        final HttpClient httpClient = new HttpClient(context, "GET", updatesAPI, new FN().getApiHeaders(apiKey), data, apiCallback);
+        httpClient.setAction("update");
+
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
+            @TargetApi(Build.VERSION_CODES.N)
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void run () {
+                //send volley request here
+                if (updatesAPI != null) {
+                    httpClient.execute();
+                }
+            }
+        };
+        timer.schedule(task, 0, 1000);
     }
 
     /**
@@ -262,17 +305,19 @@ public class SportsTalkClient {
                     // starts polling
                     if(!isPushEnabled) {
                         Thread.sleep(500);
-                        startPollUpdate();
+                        startPollUpdate2();
                     }else {
                         // register for push notification
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                     Log.e(TAG, e.getMessage());
-                } catch(SportsTalkSettingsException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, e.getMessage());
-                } catch (InterruptedException ie) {
+                }
+//                catch(SportsTalkSettingsException e) {
+//                    e.printStackTrace();
+//                    Log.e(TAG, e.getMessage());
+//                }
+                catch (InterruptedException ie) {
                     ie.printStackTrace();
                     Log.e(TAG, ie.getMessage());
                 }
@@ -315,10 +360,12 @@ public class SportsTalkClient {
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void sendReply(final String command, final CommandOptions commandOption, int roomId, Map<String, String> data) {
+    public void sendReply(final String command, final CommandOptions commandOption, String roomId, Map<String, String> data) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.endpoint).append("/room/").append(roomId).append("/command");
         data.put("command", command);
+        data.put("userid",  user.getUserId());
+        data.put("replyto", commandOption.getReplyTo());
         HttpClient httpClient = new HttpClient(context, "POST", sb.toString(), new FN().getApiHeaders(apiKey), data, apiCallback);
         httpClient.setAction("sendReply");
         httpClient.execute();
@@ -430,7 +477,7 @@ public class SportsTalkClient {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void listUserMessages(int limit, String cursor) {
-        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/?limit=" + limit + "&cursor=" + cursor, new FN().getApiHeaders(apiKey), null, apiCallback);
+        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/"+user.getUserId()+"/?limit=" + limit + "&cursor=" + cursor, new FN().getApiHeaders(apiKey), null, apiCallback);
         httpClient.setAction("listUserMessages");
         httpClient.execute();
     }

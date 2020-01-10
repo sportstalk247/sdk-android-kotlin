@@ -65,6 +65,8 @@ public class HttpClient {
      **/
     private String action;
 
+    private JsonObjectRequest jsonObjectRequest;
+
     public HttpClient(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, APICallback apiCallback) {
         this.context = context;
         this.httpMethod = httpMethod;
@@ -72,19 +74,18 @@ public class HttpClient {
         this.apiHeaders = apiHeaders;
         this.data = data;
         this.apiCallback = apiCallback;
+        queue = Volley.newRequestQueue(context);
+        initVolley();
     }
 
     public void setAction(final String action) {
         this.action = action;
     }
 
-    /** execute the HTTP requests using Volley **/
-    protected void execute() {
-        Log.d(TAG, " url " + url);
-        RequestQueue queue = Volley.newRequestQueue(context);
+    private void initVolley() {
         int command = httpMethod.equals("GET") ? 0 : 1;
         if (data == null) data = new HashMap<>();
-        final JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(command, url, new JSONObject(data), new Response.Listener<JSONObject>() {
+        jsonObjectRequest = new JsonObjectRequest(command, url, new JSONObject(data), new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 ApiResult result = new ApiResult();
@@ -105,11 +106,12 @@ public class HttpClient {
                 return apiHeaders;
             }
         };
+    }
+
+    /** execute the HTTP requests using Volley **/
+    protected void execute() {
+        Log.d(TAG, " url " + url);
+        //RequestQueue queue = Volley.newRequestQueue(context);
         queue.add(jsonObjectRequest);
-        queue.addRequestFinishedListener(new RequestQueue.RequestFinishedListener<Object>() {
-            @Override
-            public void onRequestFinished(Request<Object> request) {
-            }
-        });
     }
 }

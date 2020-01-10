@@ -80,7 +80,11 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, " join room callback ..." + apiResult.getData());
                 } else if ("sendCommand".equals(action)) {
                     Log.d(TAG, " command callback ..." + apiResult.getData());
-                } else if ("user".equals(action)) {
+
+                }else if("sendReply".equals(action)) {
+                    Log.d(TAG, " reply callback ..." + apiResult.getData());
+                }
+                else if ("user".equals(action)) {
                     Log.d(TAG, " user callback ..." + apiResult.getData());
                 } else if ("listUserMessages".equals(action)) {
                     Log.d(TAG, " list user messages callback ..." + apiResult.getData());
@@ -103,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
         final SportsTalkClient sportsTalkClient = new SportsTalkClient(sportsTalkConfig);
 
         ///// start the operations
-        sportsTalkClient.createOrUpdateUser();
-        addDelay();
+        //sportsTalkClient.createOrUpdateUser();
+        //addDelay();
         Map<String, String> data = new HashMap<>();
         data.put("userId",      user.getUserId());
         data.put("handle",      user.getHandle());
@@ -115,10 +119,16 @@ public class MainActivity extends AppCompatActivity {
         sportsTalkClient.joinRoom("5dd9d5a038a28326ccfe5743", data);
         addDelay();
         sportsTalkClient.sendCommand("hello", null, "5dd9d5a038a28326ccfe5743");
-        addDelay();
-        sportsTalkClient.listUserMessages(100, "");
+        //addDelay();
+        //sportsTalkClient.listUserMessages(100, "");
+        //addDelay();
+
         addDelay();
         CommandOptions commandOptions = new CommandOptions();
+        commandOptions.setReplyTo("001864a867604101b29672e904da688a");
+        //Map<String, String>data = new HashMap<>();
+        data.clear();
+        //sportsTalkClient.sendReply("my reply", commandOptions, "5dd9d5a038a28326ccfe5743", data);
 
         setContentView(R.layout.activity_main);
     }
