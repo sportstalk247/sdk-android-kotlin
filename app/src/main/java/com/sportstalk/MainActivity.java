@@ -5,13 +5,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -19,6 +16,9 @@ public class MainActivity extends AppCompatActivity {
     private final String TAG = MainActivity.class.getName();
 
     private SportsTalkClient sportsTalkClient;
+
+    private AdvertisementOptions.Room room;
+
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -34,101 +34,72 @@ public class MainActivity extends AppCompatActivity {
         EventHandler eventHandler = new EventHandler() {
             @Override
             public void onEventStart(Event event) {
-                Log.d(TAG, " onPoll start ...");
+                System.out.println(" event start.. " + event);
+
             }
 
             @Override
             public void onReaction(Event event) {
-                Log.d(TAG, " onReaction start ..." + event.getId());
-                // send reaction
-               // CommandOptions commandOptions = new CommandOptions();
-               // commandOptions.setReplyTo("");
-               // sportsTalkClient.sendReaction("hello", Reaction.like, event.getId(), commandOptions );
             }
 
             @Override
             public void onAdminCommand(Event event) {
-                Log.d(TAG, " onAdmin start ...");
             }
 
             @Override
             public void onPurge(Event event) {
-                Log.d(TAG, " onPurge start ...");
+                System.out.println(" purge.. " + event);
             }
 
             @Override
             public void onSpeech(Event event) {
-                Log.d(TAG, "Onspeech start....");
+                System.out.println(" speech.. " + event);
             }
 
             @Override
             public void onChat(Event event) {
-                Log.d(TAG, "Onchat started.....");
-            }
-        };
-
-        APICallback apiCallback = new APICallback() {
-            @Override
-            public void execute(ApiResult<JSONObject> apiResult, String action) {
-                if ("listRooms".equals(action)) {
-                    try {
-                        Log.d(TAG, " list rooms callback ..." + apiResult.getData().getJSONObject("data"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                } else if ("joinRoom".equals(action)) {
-                    Log.d(TAG, " join room callback ..." + apiResult.getData());
-                } else if ("sendCommand".equals(action)) {
-                    Log.d(TAG, " command callback ..." + apiResult.getData());
-
-                }else if("sendReply".equals(action)) {
-                    Log.d(TAG, " reply callback ..." + apiResult.getData());
-                }
-                else if ("user".equals(action)) {
-                    Log.d(TAG, " user callback ..." + apiResult.getData());
-                } else if ("listUserMessages".equals(action)) {
-                    Log.d(TAG, " list user messages callback ..." + apiResult.getData());
-                }
+                System.out.println(" chat.. " + event);
             }
 
             @Override
-            public void error(ApiResult<JSONObject> apiResult, String action) {
+            public void onNetworkResponse(List<EventResult> list) {
+                room = (AdvertisementOptions.Room) list.get(0).getCustomPayload();
+                System.out.println(" room id " + room.getId());
+
+                RoomResult result = new RoomResult();
+                result.setId(room.getId());
+                Map<String, String>data1 = new HashMap<>();
+                sportsTalkClient.joinRoom(result, room.getId(), data1);
+
+            }
+
+            @Override
+            public void onHelp(ApiResult apiResult) {
+
+            }
+
+            @Override
+            public void onGoalCommand(EventResult eventResult) {
             }
         };
-
         sportsTalkConfig.setEventHandler(eventHandler);
-        sportsTalkConfig.setApiCallback(apiCallback);
 
         User user = new User();
         user.setUserId("001864a867604101b29672e904da688a");
         user.setDisplayName("Aldo");
         sportsTalkConfig.setUser(user);
 
-        final SportsTalkClient sportsTalkClient = new SportsTalkClient(sportsTalkConfig);
-
-        ///// start the operations
-        //sportsTalkClient.createOrUpdateUser();
-        //addDelay();
+        sportsTalkClient = SportsTalkClient.create(sportsTalkConfig);
         Map<String, String> data = new HashMap<>();
         data.put("userId",      user.getUserId());
         data.put("handle",      user.getHandle());
         data.put("displayname", user.getDisplayName());
         data.put("puctureurl",  user.getPictureUrl());
         data.put("profileurl",  user.getProfileUrl());
-
-        sportsTalkClient.joinRoom("5dd9d5a038a28326ccfe5743", data);
+        sportsTalkClient.createRoom();
         addDelay();
-        sportsTalkClient.sendCommand("hello", null, "5dd9d5a038a28326ccfe5743");
-        //addDelay();
-        //sportsTalkClient.listUserMessages(100, "");
-        //addDelay();
-
         addDelay();
-        CommandOptions commandOptions = new CommandOptions();
-        commandOptions.setReplyTo("001864a867604101b29672e904da688a");
-        //Map<String, String>data = new HashMap<>();
-        data.clear();
-        //sportsTalkClient.sendReply("my reply", commandOptions, "5dd9d5a038a28326ccfe5743", data);
+
 
         setContentView(R.layout.activity_main);
     }
