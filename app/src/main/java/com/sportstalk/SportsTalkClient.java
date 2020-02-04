@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import com.sportstalk.api.Room;
 import com.sportstalk.rest.HttpClient;
 import com.sportstalk.api.RestfulEventManager;
 import com.sportstalk.api.RestfulRoomManager;
@@ -98,7 +99,7 @@ public class SportsTalkClient {
 
     private RestfulUserManager userManager;
 
-    private AdvertisementOptions.Room currentRom;
+    private Room currentRom;
 
     public SportsTalkClient(final String apiKey) {
         this.apiKey = apiKey;
@@ -125,7 +126,7 @@ public class SportsTalkClient {
             @Override
             public void execute(ApiResult<JSONObject> apiResult, String action) {
                 if("createRoom".equals(action)) {
-                    currentRom = new AdvertisementOptions.Room();
+                    currentRom = new Room();
                     try {
                         String id = apiResult.getData().getJSONObject("data").getString("id");
                         currentRom.setId(id);
@@ -301,7 +302,7 @@ public class SportsTalkClient {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void createRoom() {
-        AdvertisementOptions.Room room = new AdvertisementOptions.Room();
+        Room room = new Room();
         room.setSlug("test");
         roomManager.createRoom(room, user.getUserId());
     }

@@ -10,14 +10,14 @@ import com.sportstalk.User;
 public interface IEventManager {
     public void startTalk();
     public void stopTalk();
-    public void setCurrentRoom(AdvertisementOptions.Room room);
+    public void setCurrentRoom(Room room);
     public void setEventHandlers(EventHandler eventHandlers);
-    public AdvertisementOptions.Room getCurrentRoom();
+    public Room getCurrentRoom();
     public void getUpdates();
-    public void sendCommand(User user, AdvertisementOptions.Room room, String command, CommandOptions options);
+    public void sendCommand(User user, Room room, String command, CommandOptions options);
     public void sendReply(User user, String message, String replyTo, CommandOptions commandOptions );
-    public void sendReaction(User user, AdvertisementOptions.Room room, Reaction reaction, String reactionToMessageId, CommandOptions commandOptions);
-    public void sendAdvertisement(User user, AdvertisementOptions.Room room, AdvertisementOptions advertisementOptions);
-    public void sendGoal(User user, AdvertisementOptions.Room room, String img, String message, GoalOptions goalOptions);
+    public void sendReaction(User user, Room room, Reaction reaction, String reactionToMessageId, CommandOptions commandOptions);
+    public void sendAdvertisement(User user, Room room, AdvertisementOptions advertisementOptions);
+    public void sendGoal(User user, Room room, String img, String message, GoalOptions goalOptions);
     public EventHandler getEventHandlers();
 }

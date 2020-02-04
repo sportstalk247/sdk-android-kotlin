@@ -7,6 +7,8 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 
 
+import com.sportstalk.api.Room;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private SportsTalkClient sportsTalkClient;
 
-    private AdvertisementOptions.Room room;
+    private Room room;
 
 
     @TargetApi(Build.VERSION_CODES.N)
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onNetworkResponse(List<EventResult> list) {
-                room = (AdvertisementOptions.Room) list.get(0).getCustomPayload();
+                room = (Room) list.get(0).getCustomPayload();
                 System.out.println(" room id " + room.getId());
 
                 RoomResult result = new RoomResult();

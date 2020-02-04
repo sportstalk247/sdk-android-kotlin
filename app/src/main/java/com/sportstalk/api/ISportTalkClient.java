@@ -12,7 +12,7 @@ public interface ISportTalkClient {
     public void startTalk();
     public void stopTalk();
     public List<RoomResult> listRooms();
-    public AdvertisementOptions.RoomUserResult joinRoom(RoomResult room);
-    public AdvertisementOptions.Room getCurrentRoom();
+    public RoomUserResult joinRoom(RoomResult room);
+    public Room getCurrentRoom();
     public List<UserResult> listParticipants(String cursor, int maxResults);
 }
