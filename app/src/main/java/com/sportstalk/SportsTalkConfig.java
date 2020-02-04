@@ -44,6 +44,16 @@ public class SportsTalkConfig {
     private Context context;
     private EventHandler eventHandler;
 
+    public boolean isPushEnabled() {
+        return isPushEnabled;
+    }
+
+    public void setPushEnabled(boolean pushEnabled) {
+        isPushEnabled = pushEnabled;
+    }
+
+    private boolean isPushEnabled;
+
     public APICallback getApiCallback() {
         return apiCallback;
     }

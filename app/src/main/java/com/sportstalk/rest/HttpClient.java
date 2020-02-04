@@ -1,4 +1,4 @@
-package com.sportstalk;
+package com.sportstalk.rest;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -7,12 +7,14 @@ import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.sportstalk.APICallback;
+import com.sportstalk.ApiResult;
+import com.sportstalk.EventHandler;
 
 import org.json.JSONObject;
 
@@ -67,6 +69,8 @@ public class HttpClient {
 
     private JsonObjectRequest jsonObjectRequest;
 
+    private EventHandler eventHandler;
+
     public HttpClient(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, APICallback apiCallback) {
         this.context = context;
         this.httpMethod = httpMethod;
@@ -74,6 +78,17 @@ public class HttpClient {
         this.apiHeaders = apiHeaders;
         this.data = data;
         this.apiCallback = apiCallback;
+        queue = Volley.newRequestQueue(context);
+        initVolley();
+    }
+
+    public HttpClient(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, EventHandler eventHandler) {
+        this.context = context;
+        this.httpMethod = httpMethod;
+        this.url = url;
+        this.apiHeaders = apiHeaders;
+        this.data = data;
+        this.eventHandler = eventHandler;
         queue = Volley.newRequestQueue(context);
         initVolley();
     }
@@ -109,9 +124,12 @@ public class HttpClient {
     }
 
     /** execute the HTTP requests using Volley **/
-    protected void execute() {
+    public void execute() {
         Log.d(TAG, " url " + url);
-        //RequestQueue queue = Volley.newRequestQueue(context);
         queue.add(jsonObjectRequest);
+    }
+
+    protected void setApiCallback(APICallback apiCallback) {
+        this.apiCallback = apiCallback;
     }
 }
