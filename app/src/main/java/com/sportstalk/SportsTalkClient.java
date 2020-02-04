@@ -4,19 +4,21 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
+
+import com.sportstalk.rest.HttpClient;
+import com.sportstalk.api.RestfulEventManager;
+import com.sportstalk.api.RestfulRoomManager;
+import com.sportstalk.api.RestfulUserManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SportsTalkClient {
 
@@ -80,21 +82,29 @@ public class SportsTalkClient {
      * sports talk configuration file
      **/
     private SportsTalkConfig sportsTalkConfig;
-    /**
-     * Completable future object
-     **/
-    private CompletableFuture completableFuture = null;
+
     /**
      * call back used to fetch poll data
      **/
     private EventHandler eventHandler;
 
+    private boolean isPushEnabled;
+
+    private RestfulRoomManager roomManager;
+
+    private RestfulEventManager eventManager;
+
+    private static SportsTalkClient sportsTalkClient;
+
+    private RestfulUserManager userManager;
+
+    private AdvertisementOptions.Room currentRom;
 
     public SportsTalkClient(final String apiKey) {
         this.apiKey = apiKey;
     }
 
-    public SportsTalkClient(final SportsTalkConfig sportsTalkConfig) {
+    private SportsTalkClient(final SportsTalkConfig sportsTalkConfig) {
         this.appId            = sportsTalkConfig.getAppId();
         this.apiKey           = sportsTalkConfig.getApiKey();
         this.userId           = sportsTalkConfig.getUserId();
@@ -102,14 +112,70 @@ public class SportsTalkClient {
         this.context          = sportsTalkConfig.getContext();
         this.user             = sportsTalkConfig.getUser();
         this.eventHandler     = sportsTalkConfig.getEventHandler();
-        this.apiCallback      = sportsTalkConfig.getApiCallback();
+        this.isPushEnabled    = sportsTalkConfig.isPushEnabled();
+        sportsTalkConfig.setEndpoint(this.endpoint);
+        registerApiCallback();
+        sportsTalkConfig.setApiCallback(apiCallback);
+        setConfig(sportsTalkConfig);
     }
 
+    private void registerApiCallback() {
+        apiCallback = new APICallback() {
+            @RequiresApi(api = Build.VERSION_CODES.N)
+            @Override
+            public void execute(ApiResult<JSONObject> apiResult, String action) {
+                if("createRoom".equals(action)) {
+                    currentRom = new AdvertisementOptions.Room();
+                    try {
+                        String id = apiResult.getData().getJSONObject("data").getString("id");
+                        currentRom.setId(id);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    java.util.List<EventResult>list = new ArrayList<>();
+                    EventResult eventResult = new EventResult();
+                    eventResult.setCustomPayload(currentRom);
+                    list.add(eventResult);
+                    sportsTalkConfig.getEventHandler().onNetworkResponse(list);
+                }else if("joinRoom".equals(action)) {
+                    roomAPI    = endpoint + "/room/" + roomIdentifier;
+                    commandAPI = roomAPI + "/command";
+                    updatesAPI = roomAPI + "/updates";
+                    startTalk();
+                }
+             }
+
+            @Override
+            public void error(ApiResult<JSONObject> jsonObject, String action) {
+                System.out.println("*** any error *** " + jsonObject.getData());
+            }
+        };
+    }
     /**
      * sets end point
      **/
     public void setEndpoint(final String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    /**
+     * a Factory  for creating SportsTalkClient
+     * @param sportsTalkConfig
+     */
+    public static SportsTalkClient create(SportsTalkConfig sportsTalkConfig) {
+        if(sportsTalkClient == null)
+        sportsTalkClient = new SportsTalkClient(sportsTalkConfig);
+        return sportsTalkClient;
+    }
+
+    public void setConfig(final SportsTalkConfig config) {
+        sportsTalkConfig = config;
+        if(eventManager == null) eventManager = new RestfulEventManager(config, config.getEventHandler());
+        if(roomManager == null) roomManager = new RestfulRoomManager(config);
+        if(userManager == null) userManager = new RestfulUserManager(config);
+
+        registerApiCallback();
+        sportsTalkConfig.setApiCallback(apiCallback);
     }
 
     /**
@@ -123,9 +189,7 @@ public class SportsTalkClient {
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void listRooms(Map<String, String> data) {
-        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/room", new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("listRooms");
-        httpClient.execute();
+        roomManager.listRooms();
     }
 
     @TargetApi(Build.VERSION_CODES.N)
@@ -137,65 +201,43 @@ public class SportsTalkClient {
         httpClient.execute();
     }
 
-    /**
-     * starts polling. The default polling frequency is 800ms
-     */
-    private void startPollUpdate() throws SportsTalkSettingsException {
-        if(updatesAPI == null || roomAPI == null) throw new SportsTalkSettingsException("");
-        if(pollFrequency <250 || pollFrequency>5000) throw new SportsTalkSettingsException(INVALID_POLLING_FREQUENCY);
-        ScheduledExecutorService ses = Executors.newScheduledThreadPool(1);
-        Runnable task = new Runnable() {
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void startTalk() {
+        eventManager.setCurrentRoom(currentRom);
+        eventManager.startTalk();
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void startPollUpdate() {
+        Map<String, String> data = new HashMap<>();
+        APICallback apiCallback = new APICallback() {
+            @Override
+            public void execute(ApiResult<JSONObject> apiResult, String action) {
+                handlePoll(apiResult.getData());
+            }
+
+            @Override
+            public void error(ApiResult<JSONObject> apiResult, String action) {
+            }
+        };
+
+        final HttpClient httpClient = new HttpClient(context, "GET", updatesAPI, new FN().getApiHeaders(apiKey), data, apiCallback);
+        httpClient.setAction("update");
+
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask() {
             @TargetApi(Build.VERSION_CODES.N)
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
-            public void run() {
-                CompletableFuture completableFuture = getUpdates();
-                try {
-                    final ApiResult<JSONObject> apiResult1 = (ApiResult) completableFuture.get();
-                    Log.d(TAG, ".....got response from update calling handlepoll.......");
-                    if (apiResult1 != null)
-                        handlePoll(apiResult1.getData());
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        ses.scheduleAtFixedRate(task, 0L, pollFrequency, TimeUnit.MILLISECONDS);
-    }
-
-    @android.support.annotation.RequiresApi(api = Build.VERSION_CODES.N)
-    public CompletableFuture getUpdates() {
-        completableFuture = CompletableFuture.runAsync(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(800);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                APICallback apiCallback = new APICallback() {
-                    @Override
-                    public void execute(ApiResult<JSONObject> apiResult, String action) {
-                        completableFuture.complete(apiResult);
-                    }
-
-                    @Override
-                    public void error(ApiResult<JSONObject> apiResult, String action) {
-                        completableFuture.complete(apiResult);
-                    }
-                };
-
-                Map<String, String> data = new HashMap<>();
+            public void run () {
+                //send volley request here
                 if (updatesAPI != null) {
-                    HttpClient httpClient = new HttpClient(context, "GET", updatesAPI, new FN().getApiHeaders(apiKey), data, apiCallback);
-                    httpClient.setAction("update");
                     httpClient.execute();
                 }
             }
-        });
-        return completableFuture;
+        };
+        timer.schedule(task, 0, 1000);
     }
 
     /**
@@ -209,6 +251,7 @@ public class SportsTalkClient {
             for (int i = 0; i < len; i++) {
                 JSONObject jsonObject = array.getJSONObject(i);
                 String eventType = jsonObject.getString("eventtype");
+                String eventKind = jsonObject.getString("kind");
                 Event event = new Event();
                 event.setAdded(Integer.parseInt(jsonObject.getString("added")));
                 event.setId(jsonObject.getString("id"));
@@ -216,12 +259,23 @@ public class SportsTalkClient {
                 event.setBody(jsonObject.getString("body"));
                 event.setUserId(jsonObject.getString("userid"));
                 event.setEventType(EventType.Purge);
-                if (eventType.equals("Purge")) {
-                    eventHandler.onPurge(event);
-                } else if (eventType.equals("Reaction")) {
-                    eventHandler.onReaction(event);
-                } else if (eventType.equals("Reply")) {
-                    eventHandler.onReaction(event);
+                event.setKind(Kind.chat);
+
+                if("chat.event".equals(eventKind)) {
+                    if (eventType.equals("Purge")) {
+                        eventHandler.onPurge(event);
+                    } else if (eventType.equals("Reaction")) {
+                        eventHandler.onReaction(event);
+                    } else if (eventType.equals("Reply")) {
+                        eventHandler.onReaction(event);
+                    } else if (eventType.equals("Speech")) {
+                        eventHandler.onSpeech(event);
+                    } else if (eventType.equals("api.result")) {
+                        eventHandler.onEventStart(event);
+                    }
+                    else {
+                        eventHandler.onChat(event);
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -232,46 +286,29 @@ public class SportsTalkClient {
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void listParticipants(int roomId, String cursor, int maxResults) {
-        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/room/" + roomId + "/participants?cursor=" + cursor + "&maxresults=" + maxResults, new FN().getApiHeaders(apiKey), null, apiCallback);
-        httpClient.setAction("listParticipants");
-        httpClient.execute();
+        roomManager.listParticipants(currentRom, cursor, maxResults);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void joinRoom(String roomId, Map<String, String> data) {
-        APICallback apiCallback1 = new APICallback() {
-            @Override
-            public void execute(ApiResult<JSONObject> jsonObject, String action) {
-                try {
-                    roomIdentifier = jsonObject.getData().getJSONObject("data").getJSONObject("room").getString("id");
-                    roomAPI    = endpoint + "/room/" + roomIdentifier;
-                    commandAPI = roomAPI + "/command";
-                    updatesAPI = roomAPI + "/updates";
+    public void joinRoom(RoomResult roomResult, String roomId, Map<String, String> data) {
+        roomManager.joinRoom(user, roomResult);
+        roomIdentifier = currentRom.getId();
+        roomAPI    = endpoint + "/room/" + roomIdentifier;
+        commandAPI = roomAPI + "/command";
+        updatesAPI = roomAPI + "/updates";
+    }
 
-                    // starts polling
-                    startPollUpdate();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, e.getMessage());
-                } catch(SportsTalkSettingsException e) {
-                    e.printStackTrace();
-                    Log.e(TAG, e.getMessage());
-                }
-                apiCallback.execute(jsonObject, action);
-            }
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void createRoom() {
+        AdvertisementOptions.Room room = new AdvertisementOptions.Room();
+        room.setSlug("test");
+        roomManager.createRoom(room, user.getUserId());
+    }
 
-            @Override
-            public void error(ApiResult<JSONObject> jsonObject, String action) {
-                apiCallback.error(jsonObject, action);
-            }
-        };
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.endpoint).append("/room/").append(roomId).append("/join");
-        HttpClient httpClient = new HttpClient(context, "POST", sb.toString(), new FN().getApiHeaders(apiKey), data, apiCallback1);
-        httpClient.setAction("joinRoom");
-        httpClient.execute();
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void deleteRoom(String roomId){
+        roomManager.deleteRoom(roomId);
     }
 
     public String getCurrentRoom() {
@@ -281,106 +318,41 @@ public class SportsTalkClient {
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void sendCommand(final String command, final CommandOptions commandOption, String roomId) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.endpoint).append("/room/").append(roomId).append("/command");
-        Map<String, String> data = new HashMap<>();
-        data.put("command", command);
-        data.put("userid", user.getUserId());
-        data.put("customtype", "");
-        data.put("customid", "");
-        data.put("custompayload", "");
-
-        HttpClient httpClient = new HttpClient(context, "POST", sb.toString(), new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("sendCommand");
-        httpClient.execute();
+        eventManager.sendCommand(user, currentRom,command, commandOption);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void sendReply(final String command, final CommandOptions commandOption, int roomId, Map<String, String> data) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.endpoint).append("/room/").append(roomId).append("/command");
-        data.put("command", command);
-        HttpClient httpClient = new HttpClient(context, "POST", sb.toString(), new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("sendReply");
-        httpClient.execute();
+    public void sendReply(final String message, String replyTo, final CommandOptions commandOption, String roomId, Map<String, String> data) {
+        eventManager.sendReply(user,message, replyTo, commandOption);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void sendReaction(String message, Reaction reaction, String reactToMessageId, CommandOptions commandOptions) {
-        Map<String, String> data = new HashMap<>();
-
-        data.put("userid",    userId);
-        data.put("reaction",  reaction.name());
-        data.put("reacted", "true");
-
-        HttpClient httpClient = new HttpClient(context, "POST", endpoint + "/room/" + roomIdentifier + "/react/" + reactToMessageId, new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("sendReaction");
-        httpClient.execute();
+        eventManager.sendReaction(user, currentRom,reaction, reactToMessageId, commandOptions);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void sendAdvertisement(AdvertisementOptions advertisement) {
-        Map<String, String> data = new HashMap<>();
-        data.put("command",    "advertisement");
-        data.put("customtype", "advertisement");
-        data.put("userid",        user.getUserId());
-        data.put("command",    "advertisement");
-
-        Map<String, String> custom = new HashMap<>();
-        custom.put("img", advertisement.getImg());
-        custom.put("link",advertisement.getLink());
-        custom.put("id",  advertisement.getId());
-
-        data.put("custompayload", new JSONObject(custom).toString());
-
-        HttpClient httpClient = new HttpClient(context, "POST", commandAPI, new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("sendAdvertisement");
-        httpClient.execute();
+        eventManager.sendAdvertisement(user, currentRom, advertisement);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void sendGoal(String message, String img, GoalOptions goalOptions) {
-        Map<String, String> data = new HashMap<>();
-        data.put("command",     message);
-        data.put("customtype","goal");
-        data.put("userid",       user.getUserId());
-
-        Map<String, String> custom = new HashMap<>();
-        data.put("img",  img);
-        data.put("link", "");
-
-        data.put("custompayload", new JSONObject(custom).toString());
-
-        HttpClient httpClient = new HttpClient(context, "POST", commandAPI, new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("sendGoal");
-        httpClient.execute();
+        eventManager.sendGoal(user, currentRom, message,img, goalOptions);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void setBanStatus(String userId, boolean isBanned) {
-        Map<String, String> data = new HashMap<>();
-        data.put("banned", Boolean.toString(isBanned));
-        HttpClient httpClient = new HttpClient(context, "POST", this.endpoint + "/user/" + userId + "/ban", new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("banStatus");
-        httpClient.execute();
+        userManager.setBanStatus(user, isBanned);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void createOrUpdateUser() {
-        Map<String, String> data = new HashMap<>();
-        data.put("userid",      user.getUserId());
-        data.put("handle",      user.getHandle());
-        data.put("displayname", user.getDisplayName());
-        data.put("profileurl",  user.getPictureUrl());
-        data.put("pictureurl",  user.getPictureUrl());
-
-        HttpClient httpClient = new HttpClient(context, "POST", this.endpoint + "/user/" + user.getUserId(), new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("user");
-        httpClient.execute();
+        userManager.createOrUpdateUser(user);
     }
 
     @TargetApi(Build.VERSION_CODES.N)
@@ -412,7 +384,7 @@ public class SportsTalkClient {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void listUserMessages(int limit, String cursor) {
-        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/?limit=" + limit + "&cursor=" + cursor, new FN().getApiHeaders(apiKey), null, apiCallback);
+        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/"+user.getUserId()+"/?limit=" + limit + "&cursor=" + cursor, new FN().getApiHeaders(apiKey), null, apiCallback);
         httpClient.setAction("listUserMessages");
         httpClient.execute();
     }
