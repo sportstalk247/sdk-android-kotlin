@@ -1,4 +1,18 @@
 
+ Import into Android Studio
+ ==========================
+ Import the project into Android studio and change the following line in 'build.gradle' file.
+  
+  Comment the following line:
+  
+  apply plugin: 'com.android.library'
+  
+  and uncomment the next line
+  apply plugin: 'com.android.application'
+  
+  Next, uncomment the application id so that you can create an apk file and test it in the emulator.
+  
+ 
  How to build
  ============
  
@@ -38,5 +52,10 @@
  SportsTalkConfig config = new SportsTalkConfig();
  config.setPushEnabled(true);
  
- Next, provide imeplementation for push notification in else block in joinRoom() method.
+ Polling
+ ========
+ The polling is started with the RestfulEventManager class. In order to avail the server side data, the SDK is using callback. The callback class is EventHandler.java and you need to register this callback in the implementation code.
+ 
+ You can check 'MainActivity.java' for more information.
+ 
  

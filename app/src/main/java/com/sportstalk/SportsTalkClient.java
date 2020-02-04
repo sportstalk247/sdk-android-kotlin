@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
+import com.sportstalk.api.Room;
 import com.sportstalk.rest.HttpClient;
 import com.sportstalk.api.RestfulEventManager;
 import com.sportstalk.api.RestfulRoomManager;
@@ -98,7 +99,7 @@ public class SportsTalkClient {
 
     private RestfulUserManager userManager;
 
-    private AdvertisementOptions.Room currentRom;
+    private Room currentRom;
 
     public SportsTalkClient(final String apiKey) {
         this.apiKey = apiKey;
@@ -125,7 +126,7 @@ public class SportsTalkClient {
             @Override
             public void execute(ApiResult<JSONObject> apiResult, String action) {
                 if("createRoom".equals(action)) {
-                    currentRom = new AdvertisementOptions.Room();
+                    currentRom = new Room();
                     try {
                         String id = apiResult.getData().getJSONObject("data").getString("id");
                         currentRom.setId(id);
@@ -207,81 +208,6 @@ public class SportsTalkClient {
         eventManager.startTalk();
     }
 
-    @TargetApi(Build.VERSION_CODES.N)
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    private void startPollUpdate() {
-        Map<String, String> data = new HashMap<>();
-        APICallback apiCallback = new APICallback() {
-            @Override
-            public void execute(ApiResult<JSONObject> apiResult, String action) {
-                handlePoll(apiResult.getData());
-            }
-
-            @Override
-            public void error(ApiResult<JSONObject> apiResult, String action) {
-            }
-        };
-
-        final HttpClient httpClient = new HttpClient(context, "GET", updatesAPI, new FN().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("update");
-
-        Timer timer = new Timer();
-        TimerTask task = new TimerTask() {
-            @TargetApi(Build.VERSION_CODES.N)
-            @RequiresApi(api = Build.VERSION_CODES.N)
-            @Override
-            public void run () {
-                //send volley request here
-                if (updatesAPI != null) {
-                    httpClient.execute();
-                }
-            }
-        };
-        timer.schedule(task, 0, 1000);
-    }
-
-    /**
-     * handle the data returned from the polling
-     * @param data
-     */
-    private void handlePoll(JSONObject data) {
-        try {
-            JSONArray array = data.getJSONArray("data");
-            int len = array == null ? 0 : array.length();
-            for (int i = 0; i < len; i++) {
-                JSONObject jsonObject = array.getJSONObject(i);
-                String eventType = jsonObject.getString("eventtype");
-                String eventKind = jsonObject.getString("kind");
-                Event event = new Event();
-                event.setAdded(Integer.parseInt(jsonObject.getString("added")));
-                event.setId(jsonObject.getString("id"));
-                event.setRoomId(jsonObject.getString("roomId"));
-                event.setBody(jsonObject.getString("body"));
-                event.setUserId(jsonObject.getString("userid"));
-                event.setEventType(EventType.Purge);
-                event.setKind(Kind.chat);
-
-                if("chat.event".equals(eventKind)) {
-                    if (eventType.equals("Purge")) {
-                        eventHandler.onPurge(event);
-                    } else if (eventType.equals("Reaction")) {
-                        eventHandler.onReaction(event);
-                    } else if (eventType.equals("Reply")) {
-                        eventHandler.onReaction(event);
-                    } else if (eventType.equals("Speech")) {
-                        eventHandler.onSpeech(event);
-                    } else if (eventType.equals("api.result")) {
-                        eventHandler.onEventStart(event);
-                    }
-                    else {
-                        eventHandler.onChat(event);
-                    }
-                }
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -301,7 +227,7 @@ public class SportsTalkClient {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void createRoom() {
-        AdvertisementOptions.Room room = new AdvertisementOptions.Room();
+        Room room = new Room();
         room.setSlug("test");
         roomManager.createRoom(room, user.getUserId());
     }

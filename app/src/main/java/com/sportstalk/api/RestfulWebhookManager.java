@@ -8,7 +8,6 @@ import com.sportstalk.SportsTalkConfig;
 import com.sportstalk.Utils;
 import com.sportstalk.rest.HttpClient;
 
-import java.security.SecurityPermission;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ public class RestfulWebhookManager implements IWebhookManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void createWebhook(AdvertisementOptions.Webhook webhook) {
+    public void createWebhook(Webhook webhook) {
 
         Map<String, String> data = new HashMap<>();
         data.put("label", "");
@@ -54,7 +53,7 @@ public class RestfulWebhookManager implements IWebhookManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void updateWebhook(AdvertisementOptions.Webhook webhook) {
+    public void updateWebhook(Webhook webhook) {
         Map<String, String> data = new HashMap<>();
         data.put("label", "");
         data.put("url", "");
@@ -69,7 +68,7 @@ public class RestfulWebhookManager implements IWebhookManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void deleteWebhook(AdvertisementOptions.Webhook webhook) {
+    public void deleteWebhook(Webhook webhook) {
         Map<String, String> data = new HashMap<>();
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "DELETE", sportsTalkConfig.getEndpoint() + "/webhook/" + webhook.getId(), apiHeaders, data, sportsTalkConfig.getApiCallback());

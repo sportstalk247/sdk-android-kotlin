@@ -1,5 +1,7 @@
 package com.sportstalk;
 
-public class RoomResult extends AdvertisementOptions.Room {
+import com.sportstalk.api.Room;
+
+public class RoomResult extends Room {
 
 }

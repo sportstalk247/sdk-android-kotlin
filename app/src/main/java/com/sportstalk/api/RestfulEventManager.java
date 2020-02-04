@@ -32,7 +32,7 @@ public class RestfulEventManager implements IEventManager {
     private SportsTalkConfig sportsTalkConfig;
     private boolean polling;
     private Map<String, String> apiHeaders;
-    private AdvertisementOptions.Room currentRoom;
+    private Room currentRoom;
     private String updatesApi;
     private EventHandler eventHandler = null;
     private String roomApi;
@@ -176,7 +176,7 @@ public class RestfulEventManager implements IEventManager {
     }
 
     @Override
-    public void setCurrentRoom(AdvertisementOptions.Room room) {
+    public void setCurrentRoom(Room room) {
         this.lastCursor = 0;
         this.lastMessageId = null;
         this.firstMessageId = null;
@@ -193,7 +193,7 @@ public class RestfulEventManager implements IEventManager {
     }
 
     @Override
-    public AdvertisementOptions.Room getCurrentRoom() {
+    public Room getCurrentRoom() {
         return this.currentRoom;
     }
 
@@ -203,7 +203,7 @@ public class RestfulEventManager implements IEventManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void sendCommand(User user, AdvertisementOptions.Room room, String command, CommandOptions options) {
+    public void sendCommand(User user, Room room, String command, CommandOptions options) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/room/").append(room.getId()).append("/command");
         Map<String, String> data = new HashMap<>();
@@ -234,7 +234,7 @@ public class RestfulEventManager implements IEventManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void sendReaction(User user, AdvertisementOptions.Room room, Reaction reaction, String reactionToMessageId, CommandOptions commandOptions) {
+    public void sendReaction(User user, Room room, Reaction reaction, String reactionToMessageId, CommandOptions commandOptions) {
         Map<String, String> data = new HashMap<>();
         data.put("userid",    user.getUserId());
         data.put("reaction",  reaction.name());
@@ -246,7 +246,7 @@ public class RestfulEventManager implements IEventManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void sendAdvertisement(User user, AdvertisementOptions.Room room, AdvertisementOptions advertisementOptions) {
+    public void sendAdvertisement(User user, Room room, AdvertisementOptions advertisementOptions) {
 
         Map<String, String> data = new HashMap<>();
         data.put("command",    "advertisement");
@@ -269,7 +269,7 @@ public class RestfulEventManager implements IEventManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void sendGoal(User user, AdvertisementOptions.Room room, String img, String message, GoalOptions goalOptions) {
+    public void sendGoal(User user, Room room, String img, String message, GoalOptions goalOptions) {
         Map<String, String> data = new HashMap<>();
         data.put("command",     message);
         data.put("customtype","goal");

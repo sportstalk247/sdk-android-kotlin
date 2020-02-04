@@ -24,7 +24,7 @@ public class RestfulRoomManager implements IRoomManager {
 
     private Map<String, String> apiHeaders;
 
-    private List<AdvertisementOptions.Room> knownRooms;
+    private List<Room> knownRooms;
 
     private String roomIdentifier;
 
@@ -43,9 +43,9 @@ public class RestfulRoomManager implements IRoomManager {
 
     private boolean isPushEnabled;
 
-    private CompletableFuture<AdvertisementOptions.Room> roomFuture;
+    private CompletableFuture<Room> roomFuture;
 
-    private AdvertisementOptions.Room userCreatedRoom;
+    private Room userCreatedRoom;
 
     public RestfulRoomManager(final SportsTalkConfig sportsTalkConfig) {
             setConfig(sportsTalkConfig);
@@ -66,7 +66,7 @@ public class RestfulRoomManager implements IRoomManager {
         httpClient.execute();
     }
 
-    public List<AdvertisementOptions.Room> getKnownRooms() {
+    public List<Room> getKnownRooms() {
         return knownRooms;
     }
 
@@ -81,7 +81,7 @@ public class RestfulRoomManager implements IRoomManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void createRoom(final AdvertisementOptions.Room room, final String userId) {
+    public void createRoom(final Room room, final String userId) {
 
                 Map<String,String>data = new HashMap<>();
                 data.put("slug", room.getSlug());
@@ -99,7 +99,7 @@ public class RestfulRoomManager implements IRoomManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void listParticipants(AdvertisementOptions.Room room, String cursor, int maxResults) {
+    public void listParticipants(Room room, String cursor, int maxResults) {
         Map<String, String>data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sportsTalkConfig.getEndpoint() + "/room/" + room.getId()+"/participants?cursor=" + cursor + "&maxresults=" + maxResults, apiHeaders, data, sportsTalkConfig.getEventHandler());
         httpClient.setAction("listParticipants");
