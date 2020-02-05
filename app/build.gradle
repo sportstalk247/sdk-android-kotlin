@@ -5,10 +5,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         //applicationId "com.sportstalk.myapplication"
-<<<<<<< HEAD
-        applicationId "com.example.binu.myapplication"
-=======
->>>>>>> 44bd5566c594505c78fe5c1558af7fdc6f747fd7
+     //   applicationId "com.example.binu.myapplication"
         minSdkVersion 22
         targetSdkVersion 28
         versionCode 1
@@ -33,4 +30,3 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }
-
