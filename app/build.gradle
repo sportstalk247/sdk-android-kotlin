@@ -5,7 +5,6 @@ android {
     compileSdkVersion 28
     defaultConfig {
         //applicationId "com.sportstalk.myapplication"
-     //   applicationId "com.example.binu.myapplication"
         minSdkVersion 22
         targetSdkVersion 28
         versionCode 1
