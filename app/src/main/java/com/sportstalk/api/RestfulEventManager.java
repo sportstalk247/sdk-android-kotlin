@@ -150,7 +150,6 @@ public class RestfulEventManager implements IEventManager {
                 event.setUserId(jsonObject.getString("userid"));
                 event.setEventType(EventType.Purge);
                 event.setKind(Kind.chat);
-                System.out.println("eventKind " + eventKind);
                 if("chat.event".equals(eventKind)) {
                     if (eventType.equals("Purge")) {
                         eventHandler.onPurge(event);
@@ -213,7 +212,7 @@ public class RestfulEventManager implements IEventManager {
         data.put("customid", "");
         data.put("custompayload", "");
 
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getEventHandler());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendCommand");
         httpClient.execute();
     }
@@ -227,7 +226,7 @@ public class RestfulEventManager implements IEventManager {
         data.put("command", message);
         data.put("userid",  user.getUserId());
         data.put("replyto", commandOptions.getReplyTo());
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getEventHandler());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendReply");
         httpClient.execute();
     }
@@ -239,7 +238,7 @@ public class RestfulEventManager implements IEventManager {
         data.put("userid",    user.getUserId());
         data.put("reaction",  reaction.name());
         data.put("reacted", "true");
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/room/" + room.getId() + "/react/" + reactionToMessageId, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getEventHandler());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/room/" + room.getId() + "/react/" + reactionToMessageId, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendReaction");
         httpClient.execute();
     }
@@ -261,7 +260,7 @@ public class RestfulEventManager implements IEventManager {
 
         data.put("custompayload", new JSONObject(custom).toString());
 
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", this.commandApi, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getEventHandler());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", this.commandApi, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendAdvertisement");
         httpClient.execute();
 
@@ -281,7 +280,7 @@ public class RestfulEventManager implements IEventManager {
 
         data.put("custompayload", new JSONObject(custom).toString());
 
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", commandApi, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getEventHandler());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", commandApi, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendGoal");
         httpClient.execute();
     }

@@ -98,7 +98,13 @@ public class MainActivity extends AppCompatActivity {
         data.put("displayname", user.getDisplayName());
         data.put("puctureurl",  user.getPictureUrl());
         data.put("profileurl",  user.getProfileUrl());
-        sportsTalkClient.createRoom();
+        //sportsTalkClient.createRoom();
+        addDelay();
+        addDelay();
+
+        RoomResult roomResult = new RoomResult();
+        roomResult.setId(room ==null ? "5dd9d5a038a28326ccfe5743" : room.getId());
+        sportsTalkClient.joinRoom(roomResult,"5dd9d5a038a28326ccfe5743", data);
         addDelay();
         addDelay();
 
