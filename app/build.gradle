@@ -4,11 +4,7 @@ apply plugin: 'com.android.library'
 android {
     compileSdkVersion 28
     defaultConfig {
-        //applicationId "com.sportstalk.myapplication"
-<<<<<<< HEAD
-        applicationId "com.example.binu.myapplication"
-=======
->>>>>>> 44bd5566c594505c78fe5c1558af7fdc6f747fd7
+//        applicationId "com.sportstalk.myapplication"
         minSdkVersion 22
         targetSdkVersion 28
         versionCode 1
