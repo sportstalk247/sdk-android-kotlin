@@ -74,7 +74,7 @@ public class RestfulRoomManager implements IRoomManager {
     @Override
     public void deleteRoom(String id) {
         Map<String,String>data = new HashMap<>();
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "DELETE", sportsTalkConfig.getEndpoint() + "/room/"+id, apiHeaders, data, sportsTalkConfig.getEventHandler());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "DELETE", sportsTalkConfig.getEndpoint() + "/room/"+id, apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("deleteRoom");
         httpClient.execute();
     }

@@ -175,6 +175,8 @@ public class SportsTalkClient {
         if(roomManager == null) roomManager = new RestfulRoomManager(config);
         if(userManager == null) userManager = new RestfulUserManager(config);
 
+        currentRom = new Room();
+
         registerApiCallback();
         sportsTalkConfig.setApiCallback(apiCallback);
     }
@@ -219,7 +221,13 @@ public class SportsTalkClient {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void joinRoom(RoomResult roomResult, String roomId, Map<String, String> data) {
         roomManager.joinRoom(user, roomResult);
+        if(currentRom.getId() == null) roomIdentifier = roomId;
+        else
         roomIdentifier = currentRom.getId();
+
+        if(currentRom != null)
+        currentRom.setId(roomIdentifier);
+
         roomAPI    = endpoint + "/room/" + roomIdentifier;
         commandAPI = roomAPI + "/command";
         updatesAPI = roomAPI + "/updates";
