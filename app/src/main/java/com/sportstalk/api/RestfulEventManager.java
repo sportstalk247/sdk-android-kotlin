@@ -3,6 +3,7 @@ package com.sportstalk.api;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 
 import com.sportstalk.APICallback;
 import com.sportstalk.AdvertisementOptions;
@@ -138,6 +139,7 @@ public class RestfulEventManager implements IEventManager {
                 return;
             }
 
+
             for (int i = 0; i < len; i++) {
                 JSONObject jsonObject = array.getJSONObject(i);
                 String eventType = jsonObject.getString("eventtype");
@@ -148,6 +150,13 @@ public class RestfulEventManager implements IEventManager {
                 event.setRoomId(jsonObject.getString("roomId"));
                 event.setBody(jsonObject.getString("body"));
                 event.setUserId(jsonObject.getString("userid"));
+                JSONObject userJsonObject = jsonObject.getJSONObject("user");
+                User user = new User();
+                user.setHandle(userJsonObject.getString("handle"));
+                user.setDisplayName(userJsonObject.getString("displayname"));
+                user.setPictureUrl(userJsonObject.getString("pictureurl"));
+                user.setProfileUrl(userJsonObject.getString("profileurl"));
+                event.setUser(user);
                 event.setEventType(EventType.Purge);
                 event.setKind(Kind.chat);
                 if("chat.event".equals(eventKind)) {
