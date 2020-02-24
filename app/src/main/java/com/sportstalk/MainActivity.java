@@ -9,6 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 
 import com.sportstalk.api.Room;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Room room;
 
+    private boolean once = false;
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -49,18 +53,44 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
+            public void onReply(Event event) {
+
+            }
+
+            @Override
             public void onPurge(Event event) {
                 System.out.println(" purge.. " + event);
             }
 
             @Override
             public void onSpeech(Event event) {
-                System.out.println(" speech.. " + event);
+                try {
+                    JSONObject jsonObject = new JSONObject(event.getCustomPayload().toString());
+                    if(jsonObject != null && jsonObject.has("img")) {
+                        String img = jsonObject.getString("img");
+                        System.out.println(" img " + img);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(" speech.. " + event.getCustomPayload());
             }
 
             @Override
             public void onChat(Event event) {
-                System.out.println(" chat.. " + event);
+
+                //System.out.println(" chat.. " + event);
+                if(!once) {
+                    System.out.println(" sending reply ....");
+                    CommandOptions commandOptions = new CommandOptions();
+                    commandOptions.setReplyTo(event.getId());
+                    Map<String, String> data = new HashMap<>();
+                    //sportsTalkClient.sendCommand("hello", commandOptions, "5dd9d5a038a28326ccfe5743");
+                    //sportsTalkClient.sendReply("testing reply", event.getId(),commandOptions, "5dd9d5a038a28326ccfe5743", data);
+                    sendGoalCommand();
+                    once = true;
+                }
+
             }
 
             @Override
@@ -81,7 +111,8 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onGoalCommand(EventResult eventResult) {
+            public void onGoalCommand(EventResult event) {
+                System.out.println(" *** on Goal command " + event.getBody());
             }
         };
         sportsTalkConfig.setEventHandler(eventHandler);
@@ -118,6 +149,13 @@ public class MainActivity extends AppCompatActivity {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void sendGoalCommand() {
+        GoalOptions goalOptions = new GoalOptions();
+        goalOptions.setLink("");
+        sportsTalkClient.sendGoal("GOAL", "https://res.cloudinary.com/sportstalk247/image/upload/v1575821595/goal_l6ho1d.jpg", goalOptions);
     }
 
 }

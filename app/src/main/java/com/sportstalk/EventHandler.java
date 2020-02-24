@@ -10,6 +10,7 @@ public interface EventHandler {
     public void onEventStart(Event event);
     public void onReaction(Event event);
     public void onAdminCommand(Event event);
+    public void onReply(Event event);
     public void onPurge(Event event);
     public void onSpeech(Event event);
     public void onChat(Event event);

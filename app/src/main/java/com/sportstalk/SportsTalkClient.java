@@ -38,7 +38,7 @@ public class SportsTalkClient {
     /**
      * default endpoint
      **/
-    private String endpoint = "http://api-origin.sportstalk247.com/api/v3";
+    private String endpoint = "http://api-origin.sportstalk247.com/api/v3"; //"https://api.sportstalk247.com/api/v3";
     /**
      * api key
      **/
