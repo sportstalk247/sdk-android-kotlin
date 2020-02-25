@@ -9,6 +9,7 @@ import com.sportstalk.APICallback;
 import com.sportstalk.AdvertisementOptions;
 import com.sportstalk.ApiResult;
 import com.sportstalk.CommandOptions;
+import com.sportstalk.Constants;
 import com.sportstalk.Event;
 import com.sportstalk.EventHandler;
 import com.sportstalk.EventType;
@@ -159,14 +160,15 @@ public class RestfulEventManager implements IEventManager {
                 event.setUser(user);
                 event.setEventType(EventType.Purge);
                 event.setKind(Kind.chat);
+                event.setCustomPayload(jsonObject.getString("custompayload"));
                 if("chat.event".equals(eventKind)) {
                     if (eventType.equals("Purge")) {
                         eventHandler.onPurge(event);
                     } else if (eventType.equals("Reaction")) {
                         eventHandler.onReaction(event);
-                    } else if (eventType.equals("Reply")) {
-                        eventHandler.onReaction(event);
-                    } else if (eventType.equals("Speech")) {
+                    } else if (eventType.equals("reply")) {
+                        eventHandler.onReply(event);
+                    } else if (eventType.equalsIgnoreCase("Speech")) {
                         eventHandler.onSpeech(event);
                     }else if (eventType.equals("api.result")) {
                         eventHandler.onEventStart(event);
@@ -224,6 +226,7 @@ public class RestfulEventManager implements IEventManager {
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendCommand");
         httpClient.execute();
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -235,7 +238,8 @@ public class RestfulEventManager implements IEventManager {
         data.put("command", message);
         data.put("userid",  user.getUserId());
         data.put("replyto", commandOptions.getReplyTo());
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
+
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendReply");
         httpClient.execute();
     }
@@ -277,7 +281,7 @@ public class RestfulEventManager implements IEventManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void sendGoal(User user, Room room, String img, String message, GoalOptions goalOptions) {
+    public void sendGoal(User user, Room room, String message, String img, GoalOptions goalOptions) {
         Map<String, String> data = new HashMap<>();
         data.put("command",     message);
         data.put("customtype","goal");
@@ -287,8 +291,8 @@ public class RestfulEventManager implements IEventManager {
         data.put("img",  img);
         data.put("link", "");
 
-        data.put("custompayload", new JSONObject(custom).toString());
-
+        String s = String.format("{\"img\":\"%s\",\"link\":\"%s\"}", img, goalOptions.getLink());
+        data.put("custompayload", s);
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", commandApi, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendGoal");
         httpClient.execute();

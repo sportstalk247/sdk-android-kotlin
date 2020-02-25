@@ -111,6 +111,8 @@ public class HttpClient {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(TAG, " error -> " + error.getMessage());
+                String actualError = new String(error.networkResponse.data);
+                Log.d(TAG, " actual error -> " + actualError);
                 ApiResult result = new ApiResult();
                 result.setData(error);
                 apiCallback.error(result, action);
@@ -126,6 +128,8 @@ public class HttpClient {
     /** execute the HTTP requests using Volley **/
     public void execute() {
         Log.d(TAG, " url " + url);
+
+        Log.d(TAG, " request " + jsonObjectRequest);
         queue.add(jsonObjectRequest);
     }
 
