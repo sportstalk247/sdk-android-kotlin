@@ -1,13 +1,20 @@
 package com.sportstalk;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.RequiresApi;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
 
 
-import com.sportstalk.api.Room;
+import com.sportstalk.models.chat.EventResult;
+import com.sportstalk.models.chat.Room;
+import com.sportstalk.models.chat.CommandOptions;
+import com.sportstalk.models.chat.GoalOptions;
+import com.sportstalk.models.chat.RoomResult;
+import com.sportstalk.models.common.ApiResult;
+import com.sportstalk.models.common.SportsTalkConfig;
+import com.sportstalk.models.common.User;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,7 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+import androidx.annotation.RequiresApi;
+
+public class MainActivity extends Activity {
 
     private final String TAG = MainActivity.class.getName();
 

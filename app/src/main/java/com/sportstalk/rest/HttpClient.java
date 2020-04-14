@@ -3,17 +3,19 @@ package com.sportstalk.rest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
+import android.telephony.mbms.MbmsErrors;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.sportstalk.APICallback;
-import com.sportstalk.ApiResult;
+import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.EventHandler;
 
 import org.json.JSONObject;
@@ -21,6 +23,10 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+
+import androidx.annotation.RequiresApi;
+import androidx.lifecycle.MutableLiveData;
 
 @TargetApi(Build.VERSION_CODES.N)
 @RequiresApi(api = Build.VERSION_CODES.N)
@@ -71,6 +77,12 @@ public class HttpClient {
 
     private EventHandler eventHandler;
 
+    private CountDownLatch countDownLatch = new CountDownLatch(1);
+
+    private JSONObject jsonObject;
+
+    private VolleyError volleyError;
+
     public HttpClient(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, APICallback apiCallback) {
         this.context = context;
         this.httpMethod = httpMethod;
@@ -98,24 +110,28 @@ public class HttpClient {
     }
 
     private void initVolley() {
-        int command = httpMethod.equals("GET") ? 0 : 1;
+        int command = getHttpCommandType(httpMethod);//httpMethod.equals("GET") ? 0 : 1;
         if (data == null) data = new HashMap<>();
         jsonObjectRequest = new JsonObjectRequest(command, url, new JSONObject(data), new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                jsonObject = response;
                 ApiResult result = new ApiResult();
                 result.setData(response);
-                apiCallback.execute(result, action);
+                countDownLatch.countDown();
+                //apiCallback.execute(result, action);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(TAG, " error -> " + error.getMessage());
+                volleyError = error;
                 String actualError = new String(error.networkResponse.data);
                 Log.d(TAG, " actual error -> " + actualError);
                 ApiResult result = new ApiResult();
-                result.setData(error);
-                apiCallback.error(result, action);
+                result.setErrors(actualError);
+                countDownLatch.countDown();
+             //   apiCallback.error(result, action);
             }
         }) {
             @Override
@@ -126,14 +142,36 @@ public class HttpClient {
     }
 
     /** execute the HTTP requests using Volley **/
-    public void execute() {
+    public ApiResult execute() {
         Log.d(TAG, " url " + url);
-
         Log.d(TAG, " request " + jsonObjectRequest);
         queue.add(jsonObjectRequest);
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        ApiResult apiResult = new ApiResult();
+        if(volleyError != null) apiResult.setErrors(volleyError);
+        else
+        apiResult.setData(jsonObject);
+        return apiResult;
     }
 
     protected void setApiCallback(APICallback apiCallback) {
         this.apiCallback = apiCallback;
     }
+
+    private int getHttpCommandType(String method) {
+        int command = 0;
+
+        if("POST".equals(method)) return 1;
+        else if("PUT".equals(method)) return 2;
+        else if("DELETE".equals(method)) return 3;
+
+        return command;
+    }
+
 }

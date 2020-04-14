@@ -1,5 +1,8 @@
 package com.sportstalk;
 
+import com.sportstalk.models.chat.EventResult;
+import com.sportstalk.models.common.ApiResult;
+
 import java.util.List;
 
 /**

@@ -3,23 +3,32 @@ package com.sportstalk;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.RequiresApi;
 
-import com.sportstalk.api.Room;
+import com.sportstalk.api.RoomUserResult;
+import com.sportstalk.models.chat.EventResult;
+import com.sportstalk.models.chat.Room;
+import com.sportstalk.models.chat.AdvertisementOptions;
+import com.sportstalk.models.chat.CommandOptions;
+import com.sportstalk.models.chat.GoalOptions;
+import com.sportstalk.models.chat.RoomResult;
+import com.sportstalk.models.common.ApiResult;
+import com.sportstalk.models.common.Reaction;
+import com.sportstalk.models.common.SportsTalkConfig;
+import com.sportstalk.models.common.User;
 import com.sportstalk.rest.HttpClient;
-import com.sportstalk.api.RestfulEventManager;
-import com.sportstalk.api.RestfulRoomManager;
-import com.sportstalk.api.RestfulUserManager;
+import com.sportstalk.api.impl.RestfulEventManager;
+import com.sportstalk.api.impl.RestfulRoomManager;
+import com.sportstalk.api.impl.RestfulUserManager;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+
+import androidx.annotation.RequiresApi;
 
 public class SportsTalkClient {
 
@@ -38,7 +47,7 @@ public class SportsTalkClient {
     /**
      * default endpoint
      **/
-    private String endpoint = "http://api-origin.sportstalk247.com/api/v3"; //"https://api.sportstalk247.com/api/v3";
+    private String endpoint = "https://api.sportstalk247.com/api/v3/5dcb569438a2830dc0a28e22"; //"http://api-origin.sportstalk247.com/api/v3";
     /**
      * api key
      **/
@@ -152,6 +161,7 @@ public class SportsTalkClient {
             }
         };
     }
+
     /**
      * sets end point
      **/
@@ -191,8 +201,8 @@ public class SportsTalkClient {
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void listRooms(Map<String, String> data) {
-        roomManager.listRooms();
+    public List<Room> listRooms(Map<String, String> data) {
+        return roomManager.listRooms();
     }
 
     @TargetApi(Build.VERSION_CODES.N)
@@ -205,7 +215,7 @@ public class SportsTalkClient {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void startTalk() {
+    public void startTalk() {
         eventManager.setCurrentRoom(currentRom);
         eventManager.startTalk();
     }
@@ -220,7 +230,8 @@ public class SportsTalkClient {
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void joinRoom(RoomResult roomResult, String roomId, Map<String, String> data) {
-        roomManager.joinRoom(user, roomResult);
+        RoomUserResult roomUserResult = roomManager.joinRoom(user, roomResult);
+
         if(currentRom.getId() == null) roomIdentifier = roomId;
         else
         roomIdentifier = currentRom.getId();
@@ -321,5 +332,10 @@ public class SportsTalkClient {
         HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/"+user.getUserId()+"/?limit=" + limit + "&cursor=" + cursor, new FN().getApiHeaders(apiKey), null, apiCallback);
         httpClient.setAction("listUserMessages");
         httpClient.execute();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void callUpdate() {
+        eventManager.startTalk();
     }
 }

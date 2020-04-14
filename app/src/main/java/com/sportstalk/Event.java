@@ -1,5 +1,9 @@
 package com.sportstalk;
 
+import com.sportstalk.models.chat.EventType;
+import com.sportstalk.models.common.Kind;
+import com.sportstalk.models.common.User;
+
 import java.util.List;
 
 public class Event<T> {
