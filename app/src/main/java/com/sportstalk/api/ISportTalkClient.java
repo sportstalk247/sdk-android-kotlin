@@ -1,9 +1,9 @@
 package com.sportstalk.api;
 
-import com.sportstalk.AdvertisementOptions;
 import com.sportstalk.EventHandler;
-import com.sportstalk.RoomResult;
-import com.sportstalk.UserResult;
+import com.sportstalk.models.chat.RoomResult;
+import com.sportstalk.models.common.UserResult;
+import com.sportstalk.models.chat.Room;
 
 import java.util.List;
 

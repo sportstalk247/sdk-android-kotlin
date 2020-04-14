@@ -1,8 +1,8 @@
 package com.sportstalk;
 
-import org.json.JSONObject;
+import com.sportstalk.models.common.ApiResult;
 
-import java.io.Serializable;
+import org.json.JSONObject;
 
 /**
  * This interface provides support for callback when a response received
