@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.sportstalk.api.RoomUserResult;
-import com.sportstalk.error.SettingsException;
 import com.sportstalk.models.chat.CommandOptions;
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.Room;
@@ -22,8 +21,6 @@ import com.sportstalk.models.conversation.CommentRequest;
 import com.sportstalk.models.conversation.Conversation;
 import com.sportstalk.models.conversation.ConversationDeletionResponse;
 import com.sportstalk.models.conversation.ConversationListResponse;
-import com.sportstalk.models.conversation.ConversationResponse;
-import com.sportstalk.models.conversation.ReactionResponse;
 import com.sportstalk.models.conversation.Vote;
 
 import java.util.ArrayList;
@@ -35,27 +32,56 @@ public class TestingActivity  extends Activity {
 
     private static final String TAG = TestingActivity.class.getName();
 
+    private String roomId = null;
+    private ChatClient client;
+
+    private int i = 1;
+
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         final User user = new User();
-        user.setUserId("001864a867604101b29672e904da688a");
-        user.setDisplayName("handle");
-        user.setHandle("handle");
-        user.setHandleLowerCase("handle");
+        user.setUserId("sarah");
+        user.setDisplayName("sarah");
+        user.setHandle("sarah");
+        user.setHandleLowerCase("sarah");
 
         final SportsTalkConfig sportsTalkConfig       = new SportsTalkConfig();
-        sportsTalkConfig.setApiKey("QZF6YKDKSUCeL03tdA2l2gx4ckSvC7LkGsgmix-pBZLA");
+        sportsTalkConfig.setApiKey("QZF6YKDKSUCeL03tdA2l2gx4ckSvC7LkGsgmix-pBZLA"); //QZF6YKDKSUCeL03tdA2l2gx4ckSvC7LkGsgmix-pBZLA
         sportsTalkConfig.setContext(TestingActivity.this.getApplicationContext());
-        sportsTalkConfig.setAppId("5e92a5ce38a28d0b6453687a");
-        sportsTalkConfig.setEndpoint("https://api.sportstalk247.com/api/v3");
+        sportsTalkConfig.setAppId("5e92a5ce38a28d0b6453687a"); //5e92a5ce38a28d0b6453687a
+
+        sportsTalkConfig.setEndpoint("https://api.sportstalk247.com/api/v3"); //https://api.sportstalk247.com/api/v3
 
         final EventHandler eventHandler = new EventHandler() {
             @Override
             public void onEventStart(Event event) {
-                System.out.println(".. onevent started..");
+                System.out.println(".. onevent started.." + event.getBody());
+                //CommandOptions commandOptions = new CommandOptions();
+                //commandOptions.setReplyTo(roomId);
+
+               // ApiResult apiResult = client.sendCommand("hello", commandOptions);
+               // Log.d(TAG, " message... " + apiResult.getMessage());
+
+                new AsyncTask() {
+                    @Override
+                    protected Void doInBackground(Object... objects) {
+                        if(i == 1) {
+                            CommandOptions commandOptions = new CommandOptions();
+                            commandOptions.setReplyTo(roomId);
+                            Log.d(TAG,"**** going to send command");
+                            ApiResult apiResult = client.sendCommand("hello", commandOptions);
+                            Log.d(TAG, " **** message... " + apiResult.getMessage());
+                        }
+
+
+                        i+=1;
+                        return null;
+                    }
+                }.execute();
             }
 
             @Override
@@ -76,17 +102,33 @@ public class TestingActivity  extends Activity {
             }
 
             @Override
-            public void onSpeech(Event event) {
+            public void onSpeech(Event event){
+                new AsyncTask() {
+                    @Override
+                    protected Void doInBackground(Object... objects) {
+                        if(i == 1) {
+                            CommandOptions commandOptions = new CommandOptions();
+                            commandOptions.setReplyTo(roomId);
+                            Log.d(TAG,"**** going to send command");
+                            ApiResult apiResult = client.sendCommand("hello", commandOptions);
+                            Log.d(TAG, " **** message... " + apiResult.getMessage());
+                        }
+
+                        i+=1;
+                        return null;
+                    }
+                }.execute();
 
             }
 
             @Override
             public void onChat(Event event) {
-
+                System.out.println(".. onchat event started..");
             }
 
             @Override
             public void onNetworkResponse(List<EventResult> list) {
+                System.out.println(".. onnetwork response ..");
             }
 
             @Override
@@ -105,7 +147,7 @@ public class TestingActivity  extends Activity {
         new AsyncTask() {
             @Override
             protected Void doInBackground(Object... objects) {
-                ChatClient client = ChatClient.create(sportsTalkConfig);
+                client = ChatClient.create(sportsTalkConfig);
                 ConversationClient conversationClient = ConversationClient.create(sportsTalkConfig, null, null, null);
 
                 Room room = new Room();
@@ -117,9 +159,15 @@ public class TestingActivity  extends Activity {
 
                 RoomUserResult roomUserResult = client.joinRoom(roomResult);
                 client.setRoom(roomUserResult.getRoomResult());
+                roomId = roomResult.getId();
+
                 Log.d(TAG, ".. joined room.. " + roomResult.getId());
 
+                EventResult eventResult = client.listUserMessages(user, roomUserResult.getRoomResult(),"", 100);
+                Log.d(TAG, "event result " + eventResult.getBody());
+//
                 client.startTalk(); // This step is mandatory, otherwise cannot send command
+
                 Log.d(TAG, ".. started talk.. ");
 
                 addDelay();
@@ -149,7 +197,7 @@ public class TestingActivity  extends Activity {
                 //client.stopTalk();
 
                 Log.d(TAG, "now creating conversation...");
-                doConversationTestSequences(sportsTalkConfig);
+                //doConversationTestSequences(sportsTalkConfig);
 
                 return null;
             }
