@@ -343,7 +343,22 @@ public class AndroidTestConversation {
     }
 
     @Test
-    public void test() {
+    public void whenCoversationIdIsNullThenUpdatedCommentIsNull() {
+        Conversation conv = new Conversation();
+        //conv.setConversationId(conversationTestId);
+        conv.setModerationType(ModerationType.post);
+        conv.setMaxReports(3);
+        conv.setConversationIsOpen(true);
+        List<String> tgs = new ArrayList<>();
+        tgs.add("taga");
+        tgs.add("tagb");
+        conv.setTags(tgs);
+        conv.setProperty("sportstalk247.com/apidemo");
+        conversationClient.setConversation(conv);
 
+        Comment comment = new Comment();
+        Comment response = conversationClient.updateComment(comment);
+        Assert.assertNull(response);
     }
+
 }
