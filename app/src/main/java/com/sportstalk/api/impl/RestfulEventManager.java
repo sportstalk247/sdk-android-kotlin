@@ -186,6 +186,7 @@ public class RestfulEventManager implements IEventManager {
                     }else if (eventType.equals("api.result")) {
                         eventHandler.onEventStart(event);
                     }
+
                     else {
                         eventHandler.onChat(event);
                     }
@@ -232,10 +233,11 @@ public class RestfulEventManager implements IEventManager {
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/command");
         Map<String, String> data = new HashMap<>();
         data.put("command", command);
+        System.out.println(" .... this use id ... " + this.user.getUserId());
         data.put("userid", this.user.getUserId());
-        data.put("customtype", "");
-        data.put("customid", "");
-        data.put("custompayload", "");
+        //data.put("customtype", "");
+       // data.put("customid", "");
+       // data.put("custompayload", "");
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendCommand");

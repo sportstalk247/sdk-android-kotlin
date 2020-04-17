@@ -125,7 +125,7 @@ public class ChatClient  implements IChatClient {
     public void setConfig(final SportsTalkConfig config) {
         sportsTalkConfig = config;
         sportsTalkConfig.setEndpoint(sportsTalkConfig.getEndpoint() + "/" + sportsTalkConfig.getAppId());
-        Log.d(TAG, "... endpoint.. " + endpoint);
+//        Log.d(TAG, "... endpoint.. " + endpoint);
         if(eventManager == null) eventManager = new RestfulEventManager(sportsTalkConfig, config.getEventHandler());
         if(roomManager == null) roomManager = new RestfulRoomManager(sportsTalkConfig);
         if(userManager == null) userManager = new RestfulUserManager(sportsTalkConfig);
@@ -203,7 +203,7 @@ public class ChatClient  implements IChatClient {
     @Override
     public RoomUserResult joinRoom(RoomResult room) {
         currentRom = room;
-        return roomManager.joinRoom(null, room);
+        return roomManager.joinRoom(this.user, room);
     }
 
     @Override
@@ -268,6 +268,11 @@ public class ChatClient  implements IChatClient {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ApiResult deleteRoom(Room room) {
         return this.roomManager.deleteRoom(room.getId());
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public EventResult listUserMessages(User user, Room room, String cursor, int limit) {
+        return this.roomManager.listUserMessages(user, room, cursor, limit);
     }
 
 }

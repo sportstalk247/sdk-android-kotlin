@@ -3,7 +3,6 @@ package com.sportstalk.rest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.telephony.mbms.MbmsErrors;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
@@ -118,8 +117,9 @@ public class HttpClient {
                 jsonObject = response;
                 ApiResult result = new ApiResult();
                 result.setData(response);
+                if(apiCallback != null)
+                apiCallback.execute(result, action);
                 countDownLatch.countDown();
-                //apiCallback.execute(result, action);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -139,19 +139,21 @@ public class HttpClient {
                 return apiHeaders;
             }
         };
+        Log.d(TAG, "request::: " + new String(jsonObjectRequest.getBody()));
     }
 
     /** execute the HTTP requests using Volley **/
     public ApiResult execute() {
-        Log.d(TAG, " url " + url);
+        //Log.d(TAG, " url " + url);
         Log.d(TAG, " request " + jsonObjectRequest);
         queue.add(jsonObjectRequest);
-
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        //queue.getCache().clear();
 
         ApiResult apiResult = new ApiResult();
         if(volleyError != null) apiResult.setErrors(volleyError);
