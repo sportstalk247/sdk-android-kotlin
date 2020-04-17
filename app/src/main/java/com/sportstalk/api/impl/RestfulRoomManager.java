@@ -2,16 +2,17 @@ package com.sportstalk.api.impl;
 
 import android.os.Build;
 
+import com.sportstalk.Utils;
 import com.sportstalk.api.RoomUserResult;
+import com.sportstalk.api.chat.IRoomManager;
+import com.sportstalk.models.chat.EventResult;
+import com.sportstalk.models.chat.Room;
+import com.sportstalk.models.chat.RoomResult;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
-import com.sportstalk.models.chat.RoomResult;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
 import com.sportstalk.models.common.UserResult;
-import com.sportstalk.Utils;
-import com.sportstalk.api.chat.IRoomManager;
-import com.sportstalk.models.chat.Room;
 import com.sportstalk.rest.HttpClient;
 
 import org.json.JSONArray;
@@ -153,6 +154,10 @@ public class RestfulRoomManager implements IRoomManager {
         StringBuilder sb = new StringBuilder();
         sb.append(sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/join");
         Map<String, String>data = new HashMap<>();
+        data.put("userid", user.getUserId());
+        data.put("handle", user.getHandle());
+        data.put("displayname", user.getDisplayName());
+
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("joinRoom");
         JSONObject jsonObject = (JSONObject) httpClient.execute().getData();
@@ -222,6 +227,19 @@ public class RestfulRoomManager implements IRoomManager {
         RoomUserResult roomUserResult = new RoomUserResult();
         roomUserResult.setRoomResult(createRoomResult(jsonObject));
         return roomUserResult;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public EventResult listUserMessages(User user, Room room, String cursor, int limit) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/messagesbyuser/").append(user.getUserId());
+        Map<String, String>data = new HashMap<>();
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
+        JSONObject jsonObject = (JSONObject) httpClient.execute().getData();
+        EventResult eventResult = new EventResult();
+        eventResult.setBody(jsonObject.toString());
+        return eventResult;
     }
 
 }

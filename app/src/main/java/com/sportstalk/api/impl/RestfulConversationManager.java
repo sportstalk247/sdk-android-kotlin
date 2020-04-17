@@ -13,7 +13,6 @@ import com.sportstalk.models.conversation.Comment;
 import com.sportstalk.models.conversation.Conversation;
 import com.sportstalk.models.conversation.ConversationDeletionResponse;
 import com.sportstalk.models.conversation.ConversationListResponse;
-import com.sportstalk.models.conversation.ConversationRequest;
 import com.sportstalk.models.conversation.ConversationResponse;
 import com.sportstalk.rest.HttpClient;
 
@@ -61,7 +60,10 @@ public class RestfulConversationManager implements IConversationManager {
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
+        System.out.println((VolleyError)apiResult.getErrors());
         JSONObject jsonObject = (JSONObject)apiResult.getData();
+        ConversationResponse response = null;
+        if(apiResult.getErrors() != null) return response;
         return createConversationResponse(jsonObject,"data");
     }
 
@@ -73,6 +75,7 @@ public class RestfulConversationManager implements IConversationManager {
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
+        if(apiResult.getErrors()!= null) return null;
         JSONObject jsonObject = (JSONObject)apiResult.getData();
         return createConversationResponse(jsonObject,"data");
     }
