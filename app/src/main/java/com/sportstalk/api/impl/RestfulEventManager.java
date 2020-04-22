@@ -98,6 +98,7 @@ public class RestfulEventManager implements IEventManager {
         if(timer != null) {
             timer.cancel();
             timer = null;
+
         }
     }
 

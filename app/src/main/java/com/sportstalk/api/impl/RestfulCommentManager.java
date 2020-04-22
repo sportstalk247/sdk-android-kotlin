@@ -320,6 +320,7 @@ public class RestfulCommentManager implements ICommentManager {
         try {
             responseComment.setId(response.getString("id"));
             responseComment.setBody(response.getString("body"));
+            if(response.has("replyto"))
             responseComment.setReplyTo(response.getString("replyto"));
             // gets user details
             JSONObject userObject = response.optJSONObject("user");

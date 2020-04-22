@@ -3,11 +3,9 @@ package com.sportstalk;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
-import android.util.Log;
 
 import com.sportstalk.api.RoomUserResult;
 import com.sportstalk.api.chat.IChatClient;
-import com.sportstalk.api.chat.ITalkClient;
 import com.sportstalk.api.impl.RestfulEventManager;
 import com.sportstalk.api.impl.RestfulRoomManager;
 import com.sportstalk.api.impl.RestfulUserManager;
@@ -245,7 +243,7 @@ public class ChatClient  implements IChatClient {
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ApiResult sendGoal(String message, String img, GoalOptions goalOptions) {
-        return eventManager.sendGoal(null, null,message, img, goalOptions);
+        return eventManager.sendGoal(this.user, null,message, img, goalOptions);
     }
 
     @Override
