@@ -6,26 +6,22 @@ import android.os.Build;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.Volley;
 import com.sportstalk.APICallback;
-import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.EventHandler;
+import com.sportstalk.models.common.ApiResult;
 
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 
 import androidx.annotation.RequiresApi;
-import androidx.lifecycle.MutableLiveData;
 
 @TargetApi(Build.VERSION_CODES.N)
 @RequiresApi(api = Build.VERSION_CODES.N)
@@ -63,10 +59,6 @@ public class HttpClient {
      * callback object
      **/
     private APICallback apiCallback;
-    /**
-     * Completable future object
-     **/
-    private CompletableFuture completableFuture;
     /**
      * name of the current polling action
      **/
@@ -117,8 +109,6 @@ public class HttpClient {
                 jsonObject = response;
                 ApiResult result = new ApiResult();
                 result.setData(response);
-                if(apiCallback != null)
-                apiCallback.execute(result, action);
                 countDownLatch.countDown();
             }
         }, new Response.ErrorListener() {
@@ -131,29 +121,37 @@ public class HttpClient {
                 ApiResult result = new ApiResult();
                 result.setErrors(actualError);
                 countDownLatch.countDown();
-             //   apiCallback.error(result, action);
             }
         }) {
             @Override
             public Map getHeaders() throws AuthFailureError {
                 return apiHeaders;
             }
+
+            @Override
+            public Priority getPriority() {
+                if(!url.endsWith("updates")) return Priority.IMMEDIATE;
+                return super.getPriority();
+            }
+
         };
         Log.d(TAG, "request::: " + new String(jsonObjectRequest.getBody()));
     }
 
     /** execute the HTTP requests using Volley **/
     public ApiResult execute() {
-        //Log.d(TAG, " url " + url);
         Log.d(TAG, " request " + jsonObjectRequest);
+
+        if(url.endsWith("updates")) {
+            jsonObjectRequest.setTag("updates");
+        }else queue.cancelAll("updates");
+
         queue.add(jsonObjectRequest);
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        //queue.getCache().clear();
 
         ApiResult apiResult = new ApiResult();
         if(volleyError != null) apiResult.setErrors(volleyError);

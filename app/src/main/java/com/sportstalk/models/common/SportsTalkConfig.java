@@ -4,7 +4,6 @@ import android.content.Context;
 
 import com.sportstalk.APICallback;
 import com.sportstalk.EventHandler;
-import com.sportstalk.models.common.User;
 
 public class SportsTalkConfig {
 

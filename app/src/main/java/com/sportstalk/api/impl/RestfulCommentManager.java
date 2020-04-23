@@ -320,6 +320,7 @@ public class RestfulCommentManager implements ICommentManager {
         try {
             responseComment.setId(response.getString("id"));
             responseComment.setBody(response.getString("body"));
+            if(response.has("replyto"))
             responseComment.setReplyTo(response.getString("replyto"));
             // gets user details
             JSONObject userObject = response.optJSONObject("user");
@@ -332,6 +333,8 @@ public class RestfulCommentManager implements ICommentManager {
             responseComment.setProfileUrl(userObject.getString("profileurl"));
             responseComment.setBanned(userObject.getBoolean("banned"));
 
+            responseComment.setVoteScore(response.getInt("votescore"));
+            responseComment.setLikeCount(response.getInt("votecount"));
         } catch (JSONException e) {
             e.printStackTrace();
         }

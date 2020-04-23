@@ -9,6 +9,25 @@ public class Comment extends User {
     private String body;
     private String replyTo;
 
+    private int voteScore;
+    private int likeCount;
+
+    public int getVoteScore() {
+        return voteScore;
+    }
+
+    public void setVoteScore(int voteScore) {
+        this.voteScore = voteScore;
+    }
+
+    public int getLikeCount() {
+        return likeCount;
+    }
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
+    }
+
     public List<String> getTags() {
         return tags;
     }
