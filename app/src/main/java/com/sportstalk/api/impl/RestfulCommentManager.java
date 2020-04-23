@@ -333,6 +333,8 @@ public class RestfulCommentManager implements ICommentManager {
             responseComment.setProfileUrl(userObject.getString("profileurl"));
             responseComment.setBanned(userObject.getBoolean("banned"));
 
+            responseComment.setVoteScore(response.getInt("votescore"));
+            responseComment.setLikeCount(response.getInt("votecount"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
