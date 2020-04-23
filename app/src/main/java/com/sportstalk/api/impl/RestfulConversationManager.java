@@ -130,6 +130,32 @@ public class RestfulConversationManager implements IConversationManager {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
+    public ConversationListResponse listConversationsByCustomer(String customId) {
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/find/conversation/bycustomid?customid=" + customId);
+        Map<String, String> data = new HashMap<>();
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
+        ApiResult apiResult = httpClient.execute();
+        JSONObject jsonObject = (JSONObject)apiResult.getData();
+        List<Conversation>list = new ArrayList<>();
+        ConversationListResponse conversationListResponse = new ConversationListResponse();
+
+        try {
+            JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("conversations");
+            int size = jsonArray == null ? 0 : jsonArray.length();
+            for(int i = 0; i<size; i++) {
+                JSONObject conversionObject = jsonArray.getJSONObject(i);
+                list.add(createConversationResponse(conversionObject));
+            }
+            conversationListResponse.setConversations(list);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return  conversationListResponse;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ConversationDeletionResponse deleteConversation(Conversation conversation) {
         StringBuilder sb = new StringBuilder();
