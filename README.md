@@ -32,8 +32,25 @@
  
  Once you take the build, it will generate an .aar file instead of .apk file.
  
- How to distribute
- =================
+ How to use this SDK in other your own application
+ =================================================
+ Since it is creating an '.aar' file, we can import this aar file into you app module build.gradle file
+ with the help of Android Studio.
+ 
+ Click on File -> Project Structure. Then click on 'Dependencies' tab on the left pane of the window.
+ Next click on name of module(app)  and click on '+' button on Module section.
+ 
+ It will open Create new module window and scroll down to 'Import .JAR/.AAR Package' and select and click on 'Next' button.
+ Then locate the path of the .aar file generated. You can see it under 'build/outputs/aar' folder. In Subproject field name, 
+ give the name of the module. By default, it will use the name of the .aar module and click 'Next' button.
+ 
+ Next click on 'apply' button and in the 'Declared dependencies', click on '+' button and select 'Module dependency' and 
+ select the name of the module you have imported and then click on 'Apply' button.
+ 
+ Once it is synced,  it will be added to the build.gradle file.
+ 
+ 
+ implementation project(path: ':app-debug') where 'app-debug' is the name of the android-sdk module that is imported.
  
  
  How to extends this SDK
