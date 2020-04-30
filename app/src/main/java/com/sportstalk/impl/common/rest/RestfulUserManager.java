@@ -1,8 +1,7 @@
-package com.sportstalk.impl.rest;
+package com.sportstalk.impl.common.rest;
 
 import android.os.Build;
 
-import com.sportstalk.impl.Utils;
 import com.sportstalk.api.chat.IUserManager;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
@@ -29,7 +28,7 @@ public class RestfulUserManager implements IUserManager {
 
     private void setConfig(SportsTalkConfig sportsTalkConfig) {
         this.sportsTalkConfig = sportsTalkConfig;
-        this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
+        this.apiHeaders = Utils.getApiHeaders(sportsTalkConfig.getApiKey());
     }
 
 

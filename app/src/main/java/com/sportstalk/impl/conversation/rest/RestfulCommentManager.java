@@ -1,13 +1,14 @@
-package com.sportstalk.impl.rest;
+package com.sportstalk.impl.conversation.rest;
 
 import android.os.Build;
 
 import com.sportstalk.impl.Messages;
-import com.sportstalk.impl.Utils;
+import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.api.conversation.ICommentManager;
 import com.sportstalk.error.RequireUserException;
 import com.sportstalk.error.SettingsException;
 import com.sportstalk.error.ValidationException;
+import com.sportstalk.impl.common.rest.HttpClient;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.Reaction;
@@ -49,7 +50,7 @@ public class RestfulCommentManager implements ICommentManager {
     public void setConfig(SportsTalkConfig config) {
         this.sportsTalkConfig = config;
         this.user = config.getUser();
-        this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
+        this.apiHeaders = new Utils().getApiHeaders(this.sportsTalkConfig.getApiKey());
     }
 
     @Override

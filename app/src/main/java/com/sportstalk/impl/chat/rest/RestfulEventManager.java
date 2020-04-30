@@ -1,12 +1,13 @@
-package com.sportstalk.impl.rest;
+package com.sportstalk.impl.chat.rest;
 
 import android.annotation.TargetApi;
 import android.os.Build;
 
 import com.sportstalk.api.APICallback;
+import com.sportstalk.impl.common.rest.HttpClient;
 import com.sportstalk.models.chat.Event;
 import com.sportstalk.api.chat.EventHandler;
-import com.sportstalk.impl.Utils;
+import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.api.chat.IEventManager;
 import com.sportstalk.models.chat.AdvertisementOptions;
 import com.sportstalk.models.chat.CommandOptions;
@@ -63,7 +64,7 @@ public class RestfulEventManager implements IEventManager {
     private void setConfig(SportsTalkConfig sportsTalkConfig) {
         this.sportsTalkConfig = sportsTalkConfig;
         this.user = sportsTalkConfig.getUser();
-        this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
+        this.apiHeaders = Utils.getApiHeaders(sportsTalkConfig.getApiKey());
         this.eventHandler = sportsTalkConfig.getEventHandler();
     }
 
@@ -250,7 +251,7 @@ public class RestfulEventManager implements IEventManager {
         data.put("userid", this.user.getUserId());
         data.put("reaction", reaction.name());
         data.put("reacted", "true");
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/chat/rooms/" + currentRoom.getId() + "/react/" + reactionToMessageId, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/chat/rooms/" + currentRoom.getId() + "/react/" + reactionToMessageId, Utils.getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendReaction");
         return httpClient.execute();
     }
@@ -272,7 +273,7 @@ public class RestfulEventManager implements IEventManager {
 
         data.put("custompayload", new JSONObject(custom).toString());
 
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", this.commandApi, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", this.commandApi, Utils.getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendAdvertisement");
         return httpClient.execute();
     }
@@ -291,7 +292,7 @@ public class RestfulEventManager implements IEventManager {
 
         String s = String.format("{\"img\":\"%s\",\"link\":\"%s\"}", img, goalOptions.getLink());
         data.put("custompayload", s);
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", commandApi, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", commandApi, Utils.getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendGoal");
         return httpClient.execute();
     }
@@ -313,7 +314,7 @@ public class RestfulEventManager implements IEventManager {
         data.put("reporttype", ReportType.Abuse.name());
         data.put("userid", this.user.getUserId());
 
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/chat/rooms/" + currentRoom.getId() + "/events/" + eventResult.getId() + "/report/" + reportReason.getUserId(), new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/chat/rooms/" + currentRoom.getId() + "/events/" + eventResult.getId() + "/report/" + reportReason.getUserId(), Utils.getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         return httpClient.execute();
     }
 

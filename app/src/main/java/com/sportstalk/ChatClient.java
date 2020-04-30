@@ -5,13 +5,13 @@ import android.content.Context;
 import android.os.Build;
 
 import com.sportstalk.api.APICallback;
-import com.sportstalk.impl.Utils;
+import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.api.chat.EventHandler;
 import com.sportstalk.api.chat.IChatClient;
 import com.sportstalk.impl.Messages;
-import com.sportstalk.impl.rest.RestfulEventManager;
-import com.sportstalk.impl.rest.RestfulRoomManager;
-import com.sportstalk.impl.rest.RestfulUserManager;
+import com.sportstalk.impl.chat.rest.RestfulEventManager;
+import com.sportstalk.impl.chat.rest.RestfulRoomManager;
+import com.sportstalk.impl.common.rest.RestfulUserManager;
 import com.sportstalk.error.SettingsException;
 import com.sportstalk.models.chat.AdvertisementOptions;
 import com.sportstalk.models.chat.CommandOptions;
@@ -28,7 +28,7 @@ import com.sportstalk.models.common.ReportType;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
 import com.sportstalk.models.common.UserResult;
-import com.sportstalk.impl.rest.HttpClient;
+import com.sportstalk.impl.common.rest.HttpClient;
 
 import java.util.HashMap;
 import java.util.List;

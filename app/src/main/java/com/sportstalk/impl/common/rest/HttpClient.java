@@ -1,4 +1,4 @@
-package com.sportstalk.impl.rest;
+package com.sportstalk.impl.common.rest;
 
 import android.annotation.TargetApi;
 import android.content.Context;

@@ -1,8 +1,7 @@
-package com.sportstalk.impl.rest;
+package com.sportstalk.impl.common.rest;
 
 import android.os.Build;
 
-import com.sportstalk.impl.Utils;
 import com.sportstalk.api.chat.IWebhookManager;
 import com.sportstalk.models.Webhook;
 import com.sportstalk.models.common.SportsTalkConfig;
@@ -74,6 +73,6 @@ public class RestfulWebhookManager implements IWebhookManager {
     @Override
     public void setConfig(final SportsTalkConfig config) {
         this.sportsTalkConfig = sportsTalkConfig;
-        this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
+        this.apiHeaders = Utils.getApiHeaders(sportsTalkConfig.getApiKey());
     }
 }

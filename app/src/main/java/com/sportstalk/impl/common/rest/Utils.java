@@ -1,4 +1,4 @@
-package com.sportstalk.impl;
+package com.sportstalk.impl.common.rest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,9 +7,9 @@ import static com.sportstalk.impl.Constants.CONTENT_TYPE;
 import static com.sportstalk.impl.Constants.X_API_TOKEN;
 
 public class Utils {
-    private final String MIME_JSON = "application/json";
+    private static final String MIME_JSON = "application/json";
 
-    public Map<String, String> getApiHeaders(String apiKey) {
+    public static Map<String, String> getApiHeaders(String apiKey) {
         Map<String, String> headers = new HashMap<>();
         headers.put(CONTENT_TYPE, MIME_JSON);
         headers.put("Accept", MIME_JSON);
