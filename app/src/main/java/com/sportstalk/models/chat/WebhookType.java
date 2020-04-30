@@ -1,7 +1,7 @@
 package com.sportstalk.models.chat;
 
 public enum WebhookType {
-    speech ,
+    speech,
     custom,
     reply,
     reaction,

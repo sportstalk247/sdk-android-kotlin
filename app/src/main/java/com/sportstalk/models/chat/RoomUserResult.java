@@ -1,9 +1,11 @@
-package com.sportstalk.api;
+package com.sportstalk.models.chat;
 
-import com.sportstalk.models.chat.RoomResult;
 import com.sportstalk.models.common.UserResult;
 
 public class RoomUserResult {
+    private UserResult userResult;
+    private RoomResult roomResult;
+
     public UserResult getUserResult() {
         return userResult;
     }
@@ -19,8 +21,5 @@ public class RoomUserResult {
     public void setRoomResult(RoomResult roomResult) {
         this.roomResult = roomResult;
     }
-
-    private UserResult userResult;
-    private RoomResult roomResult;
 
 }

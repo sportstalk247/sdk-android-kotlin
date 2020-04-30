@@ -34,7 +34,7 @@ public class RestfulConversationManager implements IConversationManager {
     private Map<String, String> apiHeaders;
 
     public RestfulConversationManager(SportsTalkConfig config) {
-     this.sportsTalkConfig = config;
+        this.sportsTalkConfig = config;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -47,37 +47,35 @@ public class RestfulConversationManager implements IConversationManager {
         data.put("owneruserid", conversation.getOwnerUserId());
         data.put("property", conversation.getProperty());
         data.put("moderation", conversation.getModerationType().name());
-        data.put("maxreports", conversation.getMaxReports()+"");
+        data.put("maxreports", conversation.getMaxReports() + "");
         data.put("title", conversation.getTitle());
         data.put("maxcommentlen", conversation.getMaxCommentLen() + "");
         data.put("conversationisopen", String.valueOf(conversation.isConversationIsOpen()));
         StringBuilder tagBuilder = new StringBuilder();
-        for(String tag: conversation.getTags()) tagBuilder.append(tag).append(",");
-        //data.put("tags", tagBuilder.substring(0, tagBuilder.length()-1));
+        for (String tag : conversation.getTags()) tagBuilder.append(tag).append(",");
         data.put("customid", conversation.getCustomId());
         data.put("udf1", conversation.getUdf1());
         data.put("udf2", conversation.getUdf2());
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
-        System.out.println((VolleyError)apiResult.getErrors());
-        JSONObject jsonObject = (JSONObject)apiResult.getData();
+        JSONObject jsonObject = (JSONObject) apiResult.getData();
         ConversationResponse response = null;
-        if(apiResult.getErrors() != null) return response;
-        return createConversationResponse(jsonObject,"data");
+        if (apiResult.getErrors() != null) return response;
+        return createConversationResponse(jsonObject, "data");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ConversationResponse getConversation(Conversation conversation) {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" +  conversation.getConversationId());
+        sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + conversation.getConversationId());
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
-        if(apiResult.getErrors()!= null) return null;
-        JSONObject jsonObject = (JSONObject)apiResult.getData();
-        return createConversationResponse(jsonObject,"data");
+        if (apiResult.getErrors() != null) return null;
+        JSONObject jsonObject = (JSONObject) apiResult.getData();
+        return createConversationResponse(jsonObject, "data");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -88,12 +86,12 @@ public class RestfulConversationManager implements IConversationManager {
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
-        JSONObject jsonObject = (JSONObject)apiResult.getData();
-        List<Conversation>list = new ArrayList<>();
+        JSONObject jsonObject = (JSONObject) apiResult.getData();
+        List<Conversation> list = new ArrayList<>();
         try {
             JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("conversations");
             int size = jsonArray == null ? 0 : jsonArray.length();
-            for(int i = 0; i<size; i++) {
+            for (int i = 0; i < size; i++) {
                 JSONObject conversionObject = jsonArray.getJSONObject(i);
                 list.add(createConversationResponse(conversionObject));
             }
@@ -111,14 +109,14 @@ public class RestfulConversationManager implements IConversationManager {
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
-        JSONObject jsonObject = (JSONObject)apiResult.getData();
-        List<Conversation>list = new ArrayList<>();
+        JSONObject jsonObject = (JSONObject) apiResult.getData();
+        List<Conversation> list = new ArrayList<>();
         ConversationListResponse conversationListResponse = new ConversationListResponse();
 
         try {
             JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("conversations");
             int size = jsonArray == null ? 0 : jsonArray.length();
-            for(int i = 0; i<size; i++) {
+            for (int i = 0; i < size; i++) {
                 JSONObject conversionObject = jsonArray.getJSONObject(i);
                 list.add(createConversationResponse(conversionObject));
             }
@@ -126,7 +124,7 @@ public class RestfulConversationManager implements IConversationManager {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return  conversationListResponse;
+        return conversationListResponse;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -137,14 +135,14 @@ public class RestfulConversationManager implements IConversationManager {
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
-        JSONObject jsonObject = (JSONObject)apiResult.getData();
-        List<Conversation>list = new ArrayList<>();
+        JSONObject jsonObject = (JSONObject) apiResult.getData();
+        List<Conversation> list = new ArrayList<>();
         ConversationListResponse conversationListResponse = new ConversationListResponse();
 
         try {
             JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("conversations");
             int size = jsonArray == null ? 0 : jsonArray.length();
-            for(int i = 0; i<size; i++) {
+            for (int i = 0; i < size; i++) {
                 JSONObject conversionObject = jsonArray.getJSONObject(i);
                 list.add(createConversationResponse(conversionObject));
             }
@@ -152,7 +150,7 @@ public class RestfulConversationManager implements IConversationManager {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return  conversationListResponse;
+        return conversationListResponse;
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -161,15 +159,15 @@ public class RestfulConversationManager implements IConversationManager {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/").append(conversation.getConversationId());
         Map<String, String> data = new HashMap<>();
-        HttpClient httpClient    = new HttpClient(sportsTalkConfig.getContext(), "DELETE", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
-        ApiResult apiResult      = httpClient.execute();
-        JSONObject jsonObject    = null;
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "DELETE", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
+        ApiResult apiResult = httpClient.execute();
+        JSONObject jsonObject = null;
         ConversationDeletionResponse response = null;
         try {
-            if(apiResult.getErrors()!= null) {
-                VolleyError volleyError = (VolleyError)apiResult.getErrors();
+            if (apiResult.getErrors() != null) {
+                VolleyError volleyError = (VolleyError) apiResult.getErrors();
                 jsonObject = new JSONObject(new String(volleyError.networkResponse.data));
-            }else {
+            } else {
                 jsonObject = (JSONObject) apiResult.getData();
             }
 
@@ -178,9 +176,8 @@ public class RestfulConversationManager implements IConversationManager {
             JSONObject responseObject = jsonObject.getJSONObject("data");
             response.setConversationId(responseObject.getString("conversationid"));
             response.setUserid(responseObject.getString("userid"));
-//            response.setDeletedConversation(Kind.valueOf(responseObject.getInt("deletedconversations")+""));
-            if(responseObject.has("deletedcomments"))
-            response.setDeletedComments(responseObject.getInt("deletedcomments"));
+            if (responseObject.has("deletedcomments"))
+                response.setDeletedComments(responseObject.getInt("deletedcomments"));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -197,7 +194,7 @@ public class RestfulConversationManager implements IConversationManager {
         ConversationResponse response = new ConversationResponse();
         try {
             JSONObject responseObject = jsonObject.getJSONObject(data);
-             response = createConversationResponse(responseObject);
+            response = createConversationResponse(responseObject);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -222,12 +219,6 @@ public class RestfulConversationManager implements IConversationManager {
             String sTag = jsonObject.getString("tags");
             tags.add(sTag);
             response.setTags(tags);
-//
-//            for(int i = 0; i<jsonArray.length(); i++) {
-//                String tag = jsonArray.getString(i);
-//                tags.add(tag);
-//            }
-            //response.setTags(tags);
 
             response.setCustomId(jsonObject.getString("customid"));
             response.setUdf1(jsonObject.getString("udf1"));

@@ -92,22 +92,13 @@ public class RestfulCommentManager implements ICommentManager {
         data.put("userid", user.getUserId());
         data.put("body", comment.getBody());
         StringBuilder tagBuilder = new StringBuilder();
-        for(String tag: comment.getTags()) tagBuilder.append(tag).append(",");
-        //data.put("tags", "taga,tagb"); //TODO tags field does not accept
+        for (String tag : comment.getTags()) tagBuilder.append(tag).append(",");
         data.put("handle", user.getHandle());
         data.put("displayname", user.getDisplayName());
         data.put("title", conversation.getTitle());
         data.put("pictureurl", user.getPictureUrl());
         data.put("profileurl", user.getProfileUrl());
 
-//        StringBuilder tagBuilder = new StringBuilder();
-//        for (String tag : comment.getTags()) tagBuilder.append(tag).append(",");
-//        data.put("tags", tagBuilder.substring(0, tagBuilder.length() - 1).toString());
-//        data.put("customid", conversation.getCustomId());
-//        data.put("udf1", conversation.getUdf1());
-//        data.put("udf2", conversation.getUdf2());
-
-        System.out.println(" data -> " + data);
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
@@ -125,7 +116,7 @@ public class RestfulCommentManager implements ICommentManager {
         data.put("body", comment.getBody());
         StringBuilder tagBuilder = new StringBuilder();
         for (String tag : comment.getTags()) tagBuilder.append(tag).append(",");
-        data.put("tags", tagBuilder.substring(0, tagBuilder.length() - 1).toString());
+        data.put("tags", tagBuilder.substring(0, tagBuilder.length() - 1));
         data.put("handle", user.getHandle());
         data.put("displayname", user.getDisplayName());
         data.put("picturerurl", user.getPictureUrl());
@@ -135,7 +126,7 @@ public class RestfulCommentManager implements ICommentManager {
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
 
-        return createComment(jsonObject,"data");
+        return createComment(jsonObject, "data");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -149,7 +140,7 @@ public class RestfulCommentManager implements ICommentManager {
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
 
-        return createComment(jsonObject,"data");
+        return createComment(jsonObject, "data");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -181,7 +172,7 @@ public class RestfulCommentManager implements ICommentManager {
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "PUT", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
-        return createComment(jsonObject,"data");
+        return createComment(jsonObject, "data");
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -205,7 +196,7 @@ public class RestfulCommentManager implements ICommentManager {
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/report");
         Map<String, String> data = new HashMap<>();
         data.put("reporttype", ReportType.Abuse.name());
-        data.put("userid",  user.getHandle());
+        data.put("userid", user.getHandle());
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
@@ -312,7 +303,8 @@ public class RestfulCommentManager implements ICommentManager {
     }
 
     private void requireConversation() throws SettingsException {
-        if (conversation.getConversationId() == null) throw new SettingsException(Messages.NO_CONVERSATION_SET);
+        if (conversation.getConversationId() == null)
+            throw new SettingsException(Messages.NO_CONVERSATION_SET);
     }
 
     private Comment createComment(JSONObject response) {
@@ -320,8 +312,8 @@ public class RestfulCommentManager implements ICommentManager {
         try {
             responseComment.setId(response.getString("id"));
             responseComment.setBody(response.getString("body"));
-            if(response.has("replyto"))
-            responseComment.setReplyTo(response.getString("replyto"));
+            if (response.has("replyto"))
+                responseComment.setReplyTo(response.getString("replyto"));
             // gets user details
             JSONObject userObject = response.optJSONObject("user");
             responseComment.setKind(Kind.user);
@@ -342,7 +334,7 @@ public class RestfulCommentManager implements ICommentManager {
     }
 
     private Comment createComment(JSONObject jsonObject, String data) {
-        if(jsonObject == null) return null;
+        if (jsonObject == null) return null;
         try {
             return createComment(jsonObject.getJSONObject(data));
         } catch (JSONException e) {

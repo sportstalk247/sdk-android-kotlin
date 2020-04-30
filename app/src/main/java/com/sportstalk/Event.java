@@ -8,7 +8,7 @@ import java.util.List;
 
 public class Event<T> {
     private Kind kind;
-    private String  id;
+    private String id;
     private String roomId;
     private int added;
     private String body;
@@ -18,6 +18,8 @@ public class Event<T> {
     private String customType;
     private String customId;
     private T customPayload;
+    private T replyTo;
+    private List<Event> reactions;
 
     public Kind getKind() {
         return kind;
@@ -122,7 +124,4 @@ public class Event<T> {
     public void setReactions(List<Event> reactions) {
         this.reactions = reactions;
     }
-
-    private T replyTo;
-    private List<Event> reactions;
 }

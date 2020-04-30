@@ -1,11 +1,10 @@
 package com.sportstalk.api.impl;
 
 import android.os.Build;
-//import android.support.annotation.RequiresApi;
 
-import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.Utils;
 import com.sportstalk.api.chat.IWebhookManager;
+import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.rest.HttpClient;
 
 import java.util.HashMap;
@@ -77,5 +76,4 @@ public class RestfulWebhookManager implements IWebhookManager {
         this.sportsTalkConfig = sportsTalkConfig;
         this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
     }
-
 }

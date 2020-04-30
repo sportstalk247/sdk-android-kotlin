@@ -1,6 +1,6 @@
 package com.sportstalk.models.conversation;
 
-public enum CommentSortDirection  {
+public enum CommentSortDirection {
     forward,
     backward
 }

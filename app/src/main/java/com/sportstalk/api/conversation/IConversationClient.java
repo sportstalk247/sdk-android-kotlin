@@ -14,19 +14,33 @@ import com.sportstalk.models.conversation.Vote;
 import java.util.List;
 
 public interface IConversationClient extends ISportsTalkConfigurable, IUserConfigurable {
-    public SportsTalkConfig getConfig();
-    public Conversation createConversation(Conversation conversation, boolean status);
-    public Conversation setConversation(Conversation conversation);
-    public Conversation getConversation(Conversation conversation);
-    public List<Conversation> getConversationsByProperty(String property);
-    public ConversationDeletionResponse deleteConversation(Conversation conversation);
-    public Comment makeComment(String replyTo, Comment comment);
-    public Comment getComment(Comment comment);
-    public void deleteComment(Comment comment);
-    public Comment updateComment(Comment comment);
-    public Comment reactToComment(Comment comment, Reaction reaction);
-    public Comment voteOnComment(Comment comment, Vote vote);
-    public Comment reportComment(Comment comment, ReportType reportType);
-    public List<Comment> getCommentReplies(Comment comment, CommentRequest request);
-    public List<Comment> getComments(CommentRequest commentRequest, Conversation conversation);
+    SportsTalkConfig getConfig();
+
+    Conversation createConversation(Conversation conversation, boolean status);
+
+    Conversation setConversation(Conversation conversation);
+
+    Conversation getConversation(Conversation conversation);
+
+    List<Conversation> getConversationsByProperty(String property);
+
+    ConversationDeletionResponse deleteConversation(Conversation conversation);
+
+    Comment makeComment(String replyTo, Comment comment);
+
+    Comment getComment(Comment comment);
+
+    void deleteComment(Comment comment);
+
+    Comment updateComment(Comment comment);
+
+    Comment reactToComment(Comment comment, Reaction reaction);
+
+    Comment voteOnComment(Comment comment, Vote vote);
+
+    Comment reportComment(Comment comment, ReportType reportType);
+
+    List<Comment> getCommentReplies(Comment comment, CommentRequest request);
+
+    List<Comment> getComments(CommentRequest commentRequest, Conversation conversation);
 }

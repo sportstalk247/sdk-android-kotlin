@@ -8,6 +8,14 @@ import com.sportstalk.EventHandler;
 public class SportsTalkConfig {
 
     private String appId;
+    private String apiKey;
+    private String userId;
+    private String endpoint;
+    private Context context;
+    private EventHandler eventHandler;
+    private boolean isPushEnabled;
+    private APICallback apiCallback;
+    private User user;
 
     public String getAppId() {
         return appId;
@@ -41,12 +49,6 @@ public class SportsTalkConfig {
         this.endpoint = endpoint;
     }
 
-    private String apiKey;
-    private String userId;
-    private String endpoint;
-    private Context context;
-    private EventHandler eventHandler;
-
     public boolean isPushEnabled() {
         return isPushEnabled;
     }
@@ -54,8 +56,6 @@ public class SportsTalkConfig {
     public void setPushEnabled(boolean pushEnabled) {
         isPushEnabled = pushEnabled;
     }
-
-    private boolean isPushEnabled;
 
     public APICallback getApiCallback() {
         return apiCallback;
@@ -65,8 +65,6 @@ public class SportsTalkConfig {
         this.apiCallback = apiCallback;
     }
 
-    private APICallback apiCallback;
-
     public User getUser() {
         return user;
     }
@@ -74,8 +72,6 @@ public class SportsTalkConfig {
     public void setUser(User user) {
         this.user = user;
     }
-
-    private User user;
 
     public Context getContext() {
         return context;
@@ -85,12 +81,12 @@ public class SportsTalkConfig {
         this.context = context;
     }
 
-    public void setEventHandler(EventHandler eventHandler) {
-        this.eventHandler = eventHandler;
-    }
-
     public EventHandler getEventHandler() {
         return eventHandler;
+    }
+
+    public void setEventHandler(EventHandler eventHandler) {
+        this.eventHandler = eventHandler;
     }
 
 }

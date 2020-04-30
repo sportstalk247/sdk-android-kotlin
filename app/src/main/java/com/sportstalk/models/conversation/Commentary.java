@@ -5,6 +5,7 @@ import java.util.List;
 public class Commentary {
 
     private Conversation conversation;
+    private List<Comment> comments;
 
     public Conversation getConversation() {
         return conversation;
@@ -21,6 +22,4 @@ public class Commentary {
     public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
-
-    private List<Comment> comments;
 }

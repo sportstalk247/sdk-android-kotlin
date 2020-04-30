@@ -1,13 +1,21 @@
 package com.sportstalk.models.common;
 
 public class ApiResult<T> {
-    /** any message  **/
+    /**
+     * any message
+     **/
     private String message;
-    /** error information **/
+    /**
+     * error information
+     **/
     private T errors;
-    /** error code **/
+    /**
+     * error code
+     **/
     private int code;
-    /** response data **/
+    /**
+     * response data
+     **/
     private T data;
 
     public String getMessage() {

@@ -1,13 +1,19 @@
 package com.sportstalk.api.impl;
 
 import com.sportstalk.models.chat.EventResult;
-import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.chat.WebhookType;
+import com.sportstalk.models.common.Kind;
 
 import java.util.List;
 
 public class Webhook {
     private String id;
+    private Kind kind;
+    private String label;
+    private String url;
+    private boolean enabled;
+    private WebhookType type;
+    private List<EventResult> events;
 
     public String getId() {
         return id;
@@ -64,11 +70,4 @@ public class Webhook {
     public void setEvents(List<EventResult> events) {
         this.events = events;
     }
-
-    private Kind kind;
-    private String label;
-    private String url;
-    private boolean enabled;
-    private WebhookType type;
-    private List<EventResult> events;
 }

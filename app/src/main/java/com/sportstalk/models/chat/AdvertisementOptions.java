@@ -1,7 +1,5 @@
 package com.sportstalk.models.chat;
 
-import java.util.List;
-
 public class AdvertisementOptions {
     private String img;
     private String link;

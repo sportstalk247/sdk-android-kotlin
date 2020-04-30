@@ -10,14 +10,23 @@ import java.util.List;
  * reaction, admin command, purge etc
  */
 public interface EventHandler {
-    public void onEventStart(Event event);
-    public void onReaction(Event event);
-    public void onAdminCommand(Event event);
-    public void onReply(Event event);
-    public void onPurge(Event event);
-    public void onSpeech(Event event);
-    public void onChat(Event event);
-    public void onNetworkResponse(List<EventResult> list);
-    public void onHelp(ApiResult apiResult);
-    public void onGoalCommand(EventResult eventResult);
+    void onEventStart(Event event);
+
+    void onReaction(Event event);
+
+    void onAdminCommand(Event event);
+
+    void onReply(Event event);
+
+    void onPurge(Event event);
+
+    void onSpeech(Event event);
+
+    void onChat(Event event);
+
+    void onNetworkResponse(List<EventResult> list);
+
+    void onHelp(ApiResult apiResult);
+
+    void onGoalCommand(EventResult eventResult);
 }

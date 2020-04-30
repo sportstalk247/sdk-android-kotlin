@@ -131,3 +131,39 @@ public void onAdminCommand(Event event)
 1. It is mandatory to join a room first before getting any events
 
 2. In order to get these events, it is required to call **startTalk()** 
+
+# How to download the SDK from public repository
+
+The SpprtsTalk SDK has been published into **jitpack.io**.
+
+In order to use it in your application, just do the following:
+
+1. Add the following in root  **build.gradle** file
+```
+allprojects {
+    repositories {
+    ...
+    maven {
+            url "https://jitpack.io"
+
+        }
+  }
+}
+
+```  
+
+2. Add the following lines in your module build.gradle file
+
+```
+implementation 'com.gitlab.sportstalk247:sdk-android:master'
+```
+
+3. Add the following token into the **gradle.properties** file
+
+```
+authToken=jp_5r3bbdtodp10jmr1qde9hkc27o
+```
+
+Then sync again. That is all.
+
+The SDK has been imported into your project.

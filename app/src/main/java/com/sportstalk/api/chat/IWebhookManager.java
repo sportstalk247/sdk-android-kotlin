@@ -4,8 +4,11 @@ import com.sportstalk.api.common.ISportsTalkConfigurable;
 import com.sportstalk.api.impl.Webhook;
 
 public interface IWebhookManager extends ISportsTalkConfigurable {
-    public void ListWebhooks();
-    public void createWebhook(Webhook webhook);
-    public void updateWebhook(Webhook webhook);
-    public void deleteWebhook(Webhook webhook);
+    void ListWebhooks();
+
+    void createWebhook(Webhook webhook);
+
+    void updateWebhook(Webhook webhook);
+
+    void deleteWebhook(Webhook webhook);
 }

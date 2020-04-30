@@ -9,6 +9,7 @@ public class User {
     private String displayName;
     private String pictureUrl;
     private String profileUrl;
+    private boolean IsBanned;
 
     public Kind getKind() {
         return kind;
@@ -73,6 +74,4 @@ public class User {
     public void setBanned(boolean banned) {
         IsBanned = banned;
     }
-
-    private boolean IsBanned;
 }

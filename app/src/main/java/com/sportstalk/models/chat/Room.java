@@ -4,6 +4,12 @@ public class Room {
 
     private String id;
     private String name;
+    private String description;
+    private String moderation;
+    private String slug;
+    private boolean enableAddress;
+    private boolean roomIsOpen;
+    private boolean enableEnterandExit;
 
     public String getName() {
         return name;
@@ -60,13 +66,6 @@ public class Room {
     public void setEnableEnterandExit(boolean enableEnterandExit) {
         this.enableEnterandExit = enableEnterandExit;
     }
-
-    private String description;
-    private String moderation;
-    private String slug;
-    private boolean enableAddress;
-    private boolean roomIsOpen;
-    private boolean enableEnterandExit;
 
     public String getId() {
         return id;

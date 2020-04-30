@@ -2,6 +2,11 @@ package com.sportstalk.models.conversation;
 
 public class CommentRequest {
 
+    private String cursor;
+    private boolean includeChildren;
+    private CommentSortMethod sortMethod;
+    private CommentSortDirection direction;
+
     public String getCursor() {
         return cursor;
     }
@@ -33,11 +38,6 @@ public class CommentRequest {
     public void setDirection(CommentSortDirection direction) {
         this.direction = direction;
     }
-
-    private String cursor;
-    private boolean includeChildren;
-    private CommentSortMethod sortMethod;
-    private CommentSortDirection direction;
 
 
 }
