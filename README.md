@@ -1,4 +1,89 @@
 
+ # How to use
+ 
+ You can download the latest SportsTalk Android SDK from the following location:
+ https://gitlab.com/sportstalk247/sdk-android.git 
+ 
+ You need to register SportsTalk API with 'Appkey' and 'Token'. 
+ 
+ 
+ How to get API Key and Token
+ 
+ You need to visit the dashboard with the following URL:
+ https://dashboard.sportstalk247.com
+ 
+ Then click on ''Application Management'' link to generate the above
+ 
+ # SportsTalk Chat SDK
+ 
+ This SDK contains the following modules:
+ 
+ ```
+  - users
+  - Chats ( Room and Moderation)
+  - Comments(Conversation and Moderation)  
+ ```
+ 
+ These are the important modules.
+ 
+ # Using the SDK
+ 
+ SportsTalk API is having implementation for REST end points which will give you the information about
+ users, rooms, chat messages and comments etc. 
+ 
+ This SDK is designed based on Even driven architecture where the events or information are retrieved from
+ the server by using polling mechanism.
+ 
+ ```
+ // create a SportsTalk client
+ 
+ SportsTalkConfig sportsTalkConfig = new SportsTalkConfig();
+        sportsTalkConfig.setApiKey("api key");
+        sportsTalkConfig.setContext(MainActivity.this.getApplicationContext());
+        sportsTalkConfig.setAppId("you app id");
+        sportsTalkConfig.setEndpoint("https://api.sportstalk247.com/api/v3");
+        sportsTalkConfig.setUser(user);
+        
+ ChatClient chatClient = ChatClient.create(sportsTalkConfig);
+ 
+// Create a Room
+RoomResult room = new RoomResult();
+room.setName("test-room");
+room.setSlug("test-slug");
+
+//create a room
+RoomResult roomResult = chatClient.createRoom(room); 
+
+// join room
+RoomUserResult roomUserResult = chatClient.joinRoom(roomResult);
+
+// register for updates
+chatClient.startTalk();
+
+// send command
+CommandOptions options = new CommandOptions();
+chatClient.sendCommand(options, "my first comment"); 
+```
+
+**Register Event**
+
+Using EventHandler you can register the upates
+
+```
+eventHandler = new EventHandler() {
+            @Override
+            public void onEventStart(Event event) {
+            }
+            
+            @Override
+            public void onChatStart(Event event) {
+            }
+ 
+            ...
+};
+sportsTalkConfig.setEventHandler(eventHandler);
+```
+            
  Import into Android Studio
  ==========================
  Import the project into Android studio and change the following line in 'build.gradle' file.
