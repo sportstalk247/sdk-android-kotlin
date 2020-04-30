@@ -176,7 +176,7 @@ public class ChatClient implements IChatClient {
     @RequiresApi(api = Build.VERSION_CODES.N)
     public void listUsers() {
         Map<String, String> data = new HashMap<>();
-        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/?limit=100&cursor=", new FN().getApiHeaders(apiKey), data, apiCallback);
+        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/?limit=100&cursor=", new Utils().getApiHeaders(apiKey), data, apiCallback);
         httpClient.setAction("listUsers");
         httpClient.execute();
     }
