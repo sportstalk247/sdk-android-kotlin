@@ -1,6 +1,5 @@
-package com.sportstalk;
+package com.sportstalk.models.chat;
 
-import com.sportstalk.models.chat.EventType;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.User;
 

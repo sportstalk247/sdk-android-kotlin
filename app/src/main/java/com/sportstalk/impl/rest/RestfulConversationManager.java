@@ -1,9 +1,9 @@
-package com.sportstalk.api.impl;
+package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
 import com.android.volley.VolleyError;
-import com.sportstalk.Utils;
+import com.sportstalk.impl.Utils;
 import com.sportstalk.api.conversation.IConversationManager;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
@@ -14,7 +14,6 @@ import com.sportstalk.models.conversation.Conversation;
 import com.sportstalk.models.conversation.ConversationDeletionResponse;
 import com.sportstalk.models.conversation.ConversationListResponse;
 import com.sportstalk.models.conversation.ConversationResponse;
-import com.sportstalk.rest.HttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;

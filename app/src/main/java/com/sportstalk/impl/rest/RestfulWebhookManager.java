@@ -1,11 +1,11 @@
-package com.sportstalk.api.impl;
+package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
-import com.sportstalk.Utils;
+import com.sportstalk.impl.Utils;
 import com.sportstalk.api.chat.IWebhookManager;
+import com.sportstalk.api.impl.Webhook;
 import com.sportstalk.models.common.SportsTalkConfig;
-import com.sportstalk.rest.HttpClient;
 
 import java.util.HashMap;
 import java.util.Map;

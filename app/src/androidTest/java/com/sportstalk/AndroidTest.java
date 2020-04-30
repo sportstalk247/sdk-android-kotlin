@@ -2,7 +2,9 @@ package com.sportstalk;
 
 import android.content.Context;
 
+import com.sportstalk.api.chat.EventHandler;
 import com.sportstalk.models.chat.CommandOptions;
+import com.sportstalk.models.chat.Event;
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.Room;
 import com.sportstalk.models.chat.RoomResult;

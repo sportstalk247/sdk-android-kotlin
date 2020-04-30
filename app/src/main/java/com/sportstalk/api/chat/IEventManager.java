@@ -1,6 +1,5 @@
 package com.sportstalk.api.chat;
 
-import com.sportstalk.EventHandler;
 import com.sportstalk.models.chat.AdvertisementOptions;
 import com.sportstalk.models.chat.CommandOptions;
 import com.sportstalk.models.chat.EventResult;

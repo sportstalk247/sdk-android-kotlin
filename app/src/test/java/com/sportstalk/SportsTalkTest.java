@@ -1,12 +1,14 @@
 package com.sportstalk;
 
+import com.sportstalk.api.chat.EventHandler;
+import com.sportstalk.models.chat.Event;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.annotation.Config;
 
 import java.util.HashMap;
 import java.util.List;

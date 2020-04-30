@@ -1,8 +1,8 @@
-package com.sportstalk.api.impl;
+package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
-import com.sportstalk.Utils;
+import com.sportstalk.impl.Utils;
 import com.sportstalk.api.chat.IRoomManager;
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.Room;
@@ -13,7 +13,6 @@ import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
 import com.sportstalk.models.common.UserResult;
-import com.sportstalk.rest.HttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -1,4 +1,4 @@
-package com.sportstalk;
+package com.sportstalk.impl;
 
 public class Messages {
 

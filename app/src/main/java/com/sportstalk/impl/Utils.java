@@ -1,10 +1,10 @@
-package com.sportstalk;
+package com.sportstalk.impl;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.sportstalk.Constants.CONTENT_TYPE;
-import static com.sportstalk.Constants.X_API_TOKEN;
+import static com.sportstalk.impl.Constants.CONTENT_TYPE;
+import static com.sportstalk.impl.Constants.X_API_TOKEN;
 
 public class Utils {
     private final String MIME_JSON = "application/json";

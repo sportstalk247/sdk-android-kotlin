@@ -1,12 +1,12 @@
-package com.sportstalk.api.impl;
+package com.sportstalk.impl.rest;
 
 import android.annotation.TargetApi;
 import android.os.Build;
 
 import com.sportstalk.APICallback;
-import com.sportstalk.Event;
-import com.sportstalk.EventHandler;
-import com.sportstalk.Utils;
+import com.sportstalk.models.chat.Event;
+import com.sportstalk.api.chat.EventHandler;
+import com.sportstalk.impl.Utils;
 import com.sportstalk.api.chat.IEventManager;
 import com.sportstalk.models.chat.AdvertisementOptions;
 import com.sportstalk.models.chat.CommandOptions;
@@ -21,8 +21,6 @@ import com.sportstalk.models.common.ReportReason;
 import com.sportstalk.models.common.ReportType;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
-import com.sportstalk.rest.HttpClient;
-import com.sportstalk.rest.HttpClient2;
 
 import org.json.JSONArray;
 import org.json.JSONException;

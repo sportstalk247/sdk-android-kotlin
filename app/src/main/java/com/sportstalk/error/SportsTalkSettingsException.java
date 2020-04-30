@@ -1,4 +1,4 @@
-package com.sportstalk;
+package com.sportstalk.error;
 
 public class SportsTalkSettingsException extends Exception {
     public SportsTalkSettingsException(String message) {

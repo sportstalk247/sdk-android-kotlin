@@ -1,4 +1,4 @@
-package com.sportstalk.rest;
+package com.sportstalk.impl.rest;
 
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -12,7 +12,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.sportstalk.APICallback;
-import com.sportstalk.EventHandler;
+import com.sportstalk.api.chat.EventHandler;
 import com.sportstalk.models.common.ApiResult;
 
 import org.json.JSONObject;

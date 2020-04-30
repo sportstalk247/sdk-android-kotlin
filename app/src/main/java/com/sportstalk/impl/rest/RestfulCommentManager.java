@@ -1,9 +1,9 @@
-package com.sportstalk.api.impl;
+package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
-import com.sportstalk.Messages;
-import com.sportstalk.Utils;
+import com.sportstalk.impl.Messages;
+import com.sportstalk.impl.Utils;
 import com.sportstalk.api.conversation.ICommentManager;
 import com.sportstalk.error.RequireUserException;
 import com.sportstalk.error.SettingsException;
@@ -21,7 +21,6 @@ import com.sportstalk.models.conversation.Commentary;
 import com.sportstalk.models.conversation.Conversation;
 import com.sportstalk.models.conversation.ReactionResponse;
 import com.sportstalk.models.conversation.Vote;
-import com.sportstalk.rest.HttpClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
