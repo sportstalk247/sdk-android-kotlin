@@ -1,78 +1,133 @@
 
- Import into Android Studio
- ==========================
- Import the project into Android studio and change the following line in 'build.gradle' file.
-  
-  Comment the following line:
-  
-  apply plugin: 'com.android.library'
-  
-  and uncomment the next line
-  apply plugin: 'com.android.application'
-  
-  Next, uncomment the application id so that you can create an apk file and test it in the emulator.
-  
+ # How to use
  
- How to build
- ============
+ You can download the latest SportsTalk Android SDK from the following location:
+ https://gitlab.com/sportstalk247/sdk-android.git 
  
- Import this application into the Android Studio and change the following line in 'build.gradle' file.
- 
- apply plugin: 'com.android.application'
- 
- Change the above line to as follows:
- 
- apply plugin: 'com.android.library'
- 
- Then 'sync project with Gradle file'
- 
- Now this becomes an Android library (with .aar file)
- 
- Then commit these changes to the repository
- 
- Once you take the build, it will generate an .aar file instead of .apk file.
- 
- How to use this SDK in other your own application
- =================================================
- Since it is creating an '.aar' file, we can import this aar file into you app module build.gradle file
- with the help of Android Studio.
- 
- Click on File -> Project Structure. Then click on 'Dependencies' tab on the left pane of the window.
- Next click on name of module(app)  and click on '+' button on Module section.
- 
- It will open Create new module window and scroll down to 'Import .JAR/.AAR Package' and select and click on 'Next' button.
- Then locate the path of the .aar file generated. You can see it under 'build/outputs/aar' folder. In Subproject field name, 
- give the name of the module. By default, it will use the name of the .aar module and click 'Next' button.
- 
- Next click on 'apply' button and in the 'Declared dependencies', click on '+' button and select 'Module dependency' and 
- select the name of the module you have imported and then click on 'Apply' button.
- 
- Once it is synced,  it will be added to the build.gradle file.
+ You need to register SportsTalk API with 'Appkey' and 'Token'. 
  
  
- implementation project(path: ':app-debug') where 'app-debug' is the name of the android-sdk module that is imported.
+ How to get API Key and Token
  
+ You need to visit the dashboard with the following URL:
+ https://dashboard.sportstalk247.com
  
- How to extends this SDK
- =======================
- Currently sportstalk SDK makes use of Android Volley API to make the HTTP call. This is done with the help of HttpClient class.
- But in case if it is required to change the implementation, then only HttpClient needs to be modified. No other parts of the
- code needs to be changed for this.
+ Then click on ''Application Management'' link to generate the above
  
- The data received from the HTTP operations is through a callback object passed to it. So if you want to change the HTTP operation with a new
- implementation, you just needs to use this callback object. 
+ # SportsTalk Chat SDK
  
- How to use Push Notification
- ============================
- If we enable push notification at the time of implementation, then push notification can be enabled.
+ This SDK contains the following modules:
  
- SportsTalkConfig config = new SportsTalkConfig();
- config.setPushEnabled(true);
+ ```
+  - users
+  - Chats ( Room and Moderation)
+  - Comments(Conversation and Moderation)  
+ ```
  
- Polling
- ========
- The polling is started with the RestfulEventManager class. In order to avail the server side data, the SDK is using callback. The callback class is EventHandler.java and you need to register this callback in the implementation code.
+ These are the important modules.
  
- You can check 'MainActivity.java' for more information.
+ # Using the SDK
  
+ SportsTalk API is having implementation for REST end points which will give you the information about
+ users, rooms, chat messages and comments etc. 
  
+ This SDK is designed based on Even driven architecture where the events or information are retrieved from
+ the server by using polling mechanism.
+ 
+ ```
+ // create a SportsTalk client
+ 
+ SportsTalkConfig sportsTalkConfig = new SportsTalkConfig();
+        sportsTalkConfig.setApiKey("api key");
+        sportsTalkConfig.setContext(MainActivity.this.getApplicationContext());
+        sportsTalkConfig.setAppId("you app id");
+        sportsTalkConfig.setEndpoint("https://api.sportstalk247.com/api/v3");
+        sportsTalkConfig.setUser(user);
+        
+ ChatClient chatClient = ChatClient.create(sportsTalkConfig);
+ 
+// Create a Room
+RoomResult room = new RoomResult();
+room.setName("test-room");
+room.setSlug("test-slug");
+
+//create a room
+RoomResult roomResult = chatClient.createRoom(room); 
+
+// join room
+RoomUserResult roomUserResult = chatClient.joinRoom(roomResult);
+
+// register for updates
+chatClient.startTalk();
+
+// send command
+CommandOptions options = new CommandOptions();
+chatClient.sendCommand(options, "my first comment"); 
+```
+
+# Register Event
+
+Using EventHandler you can register the upates
+
+```
+eventHandler = new EventHandler() {
+            @Override
+            public void onEventStart(Event event) {
+            }
+            
+            @Override
+            public void onChatStart(Event event) {
+            }
+ 
+            ...
+};
+sportsTalkConfig.setEventHandler(eventHandler);
+```
+
+The Android SDK demo can be downloaded from : (https://gitlab.com/sportstalk247/android-demo)
+You can check the web demo using JavaSCript SDK : (https://www.sportstalk247.com/demo.html)
+            
+# Events
+
+**Chat event**
+This is event is used to get the chat messages sent by other users
+```
+public void onChat(final Event event)
+```
+
+** Goal event **
+The goal event is used to get the goal image sent by the other users
+```
+public void onGoalCommand(EventResult eventResult)
+```
+
+** Purge event **
+This event is fired when the messages are deleted or purged
+```
+public void onPurge(Event event)
+```
+
+** Reply event **
+This event is fired when a reply to a chat message
+```
+public void onReply(final Event event)
+```
+
+** Reaction event **
+This event is fired when a user is recting to a message. (LIKE, VOTE etc)
+```
+public void onReaction(Event event)
+```
+
+** Admin Command  event **
+These event is fired when an admin user sends some message to the user. For example
+if the admin is executing a purge command, then this event will be fired. 
+```
+public void onAdminCommand(Event event)
+```
+
+# Points to Consider
+
+1. It is mandatory to join a room first before getting any events
+
+2. In order to get these events, it is required to call **startTalk()** 
