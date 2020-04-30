@@ -7,16 +7,16 @@ import java.util.List;
 public class Conversation extends HasConversationID {
 
     private String ownerUserId;
- private String property;
- private ModerationType moderationType;
- private int maxReports;
- private String title;
- private int maxCommentLen;
- private boolean conversationIsOpen;
- private List<String> tags;
- private String udf1;
- private String udf2;
- private String customId;
+    private String property;
+    private ModerationType moderationType;
+    private int maxReports;
+    private String title;
+    private int maxCommentLen;
+    private boolean conversationIsOpen;
+    private List<String> tags;
+    private String udf1;
+    private String udf2;
+    private String customId;
 
     public String getCustomId() {
         return customId;

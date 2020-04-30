@@ -34,15 +34,16 @@ public class AndroidTestConversation {
     ConversationClient conversationClient;
 
     String conversationTestId = "api-conversation-test-demo2";
+
     @Before
     public void setup() {
 
         context = InstrumentationRegistry.getInstrumentation().getContext();
 
         sportsTalkConfig = new SportsTalkConfig();
-        sportsTalkConfig.setApiKey("QZF6YKDKSUCeL03tdA2l2gx4ckSvC7LkGsgmix-pBZLA");
+        sportsTalkConfig.setApiKey("ZortLH1JUkuEJQ5YgkZjHwx-AZFkPSJkSYnEO1NA6y7A");
         sportsTalkConfig.setContext(context);
-        sportsTalkConfig.setAppId("5e92a5ce38a28d0b6453687a");
+        sportsTalkConfig.setAppId("5e9eff5338a28719345eb469");
         sportsTalkConfig.setEndpoint("https://api.sportstalk247.com/api/v3");
 
         user = new User();
@@ -58,7 +59,7 @@ public class AndroidTestConversation {
     }
 
     @Test
-    public void createConversationTest(){
+    public void createConversationTest() {
         Conversation conv = new Conversation();
         conv.setConversationId(conversationTestId);
         conv.setModerationType(ModerationType.post);
@@ -68,7 +69,8 @@ public class AndroidTestConversation {
         tgs.add("taga");
         tgs.add("tagb");
         conv.setTags(tgs);
-        conv.setProperty("sportstalk247.com/apidemo");
+        conv.setProperty("/api");
+        // conv.setOwnerUserId("sarah");
         Conversation createdConversation = conversationClient.createConversation(conv, true);
         Assert.assertTrue(createdConversation.getConversationId().equals(conversationTestId));
     }
@@ -77,7 +79,7 @@ public class AndroidTestConversation {
     public void listConversationTest() {
         ConversationListResponse conversationListResponse = conversationClient.listConversations();
         int size = conversationListResponse.getConversations().size();
-        Assert.assertTrue(size >0);
+        Assert.assertTrue(size > 0);
     }
 
 
@@ -102,13 +104,15 @@ public class AndroidTestConversation {
         Assert.assertNull(result);
     }
 
-    @Test
+    //@Test
     public void whenThereIsValidCommentThenCommentIdShouldNoBlank() {
 
         Conversation conv = new Conversation();
-        conv.setConversationId(conversationTestId);
+        conv.setConversationId("api-conversation-test-demo2");
         conv.setModerationType(ModerationType.post);
         conv.setMaxReports(3);
+        conv.setMaxCommentLen(100);
+        conv.setOwnerUserId("sarah");
         conv.setConversationIsOpen(true);
         List<String> tgs = new ArrayList<>();
         tgs.add("taga");
@@ -118,16 +122,17 @@ public class AndroidTestConversation {
         conversationClient.setConversation(conv);
 
         Comment comment = new Comment();
- //       comment.setId("test-comment-id");
+        //comment.setId("test-comment-id");
         comment.setBody("test");
-        List<String>tags = new ArrayList<>();
+
+        List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
         Comment result = conversationClient.makeComment("", comment);
         Assert.assertNotNull(result.getId());
     }
 
-    @Test
+    //@Test
     public void whenReplyToIsNotEmptyThenGeneratedCommentShouldNotBeNull() {
 
         Conversation conv = new Conversation();
@@ -145,7 +150,7 @@ public class AndroidTestConversation {
         Comment comment = new Comment();
         comment.setId("test-comment-id");
         comment.setBody("test");
-        List<String>tags = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
         Comment result = conversationClient.makeComment("sarah", comment);
@@ -184,7 +189,7 @@ public class AndroidTestConversation {
 
         Comment comment = new Comment();
         comment.setBody("");
-        List<String>tags = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
         tags.add("");
         comment.setTags(tags);
         Comment result = conversationClient.makeComment("", comment);
@@ -285,11 +290,11 @@ public class AndroidTestConversation {
 
         Comment comment = new Comment();
         CommentRequest commentRequest = new CommentRequest();
-        List<Comment>list = conversationClient.getCommentReplies(comment, commentRequest);
+        List<Comment> list = conversationClient.getCommentReplies(comment, commentRequest);
         Assert.assertTrue(list.isEmpty());
     }
 
-    @Test
+    // @Test
     public void whenConversationIdIsNullThenCommentRepliesShuldBeEmpty() {
 
         Conversation conv = new Conversation();
@@ -306,14 +311,14 @@ public class AndroidTestConversation {
 
         Comment comment = new Comment();
         comment.setBody("test comment only");
-        List<String>tags = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
         Comment response = conversationClient.makeComment("", comment);
         conv.setConversationId(null);
         conversationClient.setConversation(conv);
         CommentRequest commentRequest = new CommentRequest();
-        List<Comment>list = conversationClient.getCommentReplies(response, commentRequest);
+        List<Comment> list = conversationClient.getCommentReplies(response, commentRequest);
         Assert.assertTrue(list.isEmpty());
     }
 
@@ -333,7 +338,7 @@ public class AndroidTestConversation {
 
         Comment comment = new Comment();
         comment.setBody("test comment only");
-        List<String>tags = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
         comment.setId(null);
@@ -359,6 +364,44 @@ public class AndroidTestConversation {
         Comment comment = new Comment();
         Comment response = conversationClient.updateComment(comment);
         Assert.assertNull(response);
+    }
+
+    @Test
+    public void whenCommentLengthIsZeroOfConversationThenGeneratedCommentIsNull() {
+        Conversation conversation = new Conversation();
+        List<String> tgs = new ArrayList<>();
+        tgs.add("taga");
+        tgs.add("tagb");
+        conversation.setTags(tgs);
+        conversation.setConversationId("api-conversation-test-demo2");
+        Conversation returnConversation = conversationClient.getConversation(conversation);
+        returnConversation.setTags(tgs);
+        returnConversation.setMaxCommentLen(0);
+        returnConversation.setOwnerUserId("sarah");
+        Conversation updated = conversationClient.createConversation(returnConversation, false);
+        Assert.assertEquals(0, updated.getMaxCommentLen());
+
+        // create comment
+        Comment comment = new Comment();
+        comment.setBody("this is a comment for testing");
+        comment.setTags(tgs);
+        conversationClient.setConversation(updated);
+        Comment nComment = conversationClient.makeComment("", comment);
+        Assert.assertNull(nComment);
+    }
+
+    //@Test
+    public void whenUserIdIsNullThenConversationIsNull() {
+        Conversation conversation = new Conversation();
+        List<String> tgs = new ArrayList<>();
+        tgs.add("taga");
+        tgs.add("tagb");
+        conversation.setTags(tgs);
+        conversation.setMaxCommentLen(100);
+        conversation.setConversationId("api-conversation-test-demo2");
+        conversation.setModerationType(ModerationType.post);
+        Conversation conv = conversationClient.createConversation(conversation, true);
+        Assert.assertNull(conv);
     }
 
 }

@@ -6,11 +6,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.sportstalk.api.RoomUserResult;
 import com.sportstalk.models.chat.CommandOptions;
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.Room;
 import com.sportstalk.models.chat.RoomResult;
+import com.sportstalk.models.chat.RoomUserResult;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.ModerationType;
 import com.sportstalk.models.common.Reaction;
@@ -28,7 +28,7 @@ import java.util.List;
 
 import androidx.annotation.RequiresApi;
 
-public class TestingActivity  extends Activity {
+public class TestingActivity extends Activity {
 
     private static final String TAG = TestingActivity.class.getName();
 
@@ -49,7 +49,7 @@ public class TestingActivity  extends Activity {
         user.setHandle("sarah");
         user.setHandleLowerCase("sarah");
 
-        final SportsTalkConfig sportsTalkConfig       = new SportsTalkConfig();
+        final SportsTalkConfig sportsTalkConfig = new SportsTalkConfig();
         sportsTalkConfig.setApiKey("QZF6YKDKSUCeL03tdA2l2gx4ckSvC7LkGsgmix-pBZLA"); //QZF6YKDKSUCeL03tdA2l2gx4ckSvC7LkGsgmix-pBZLA
         sportsTalkConfig.setContext(TestingActivity.this.getApplicationContext());
         sportsTalkConfig.setAppId("5e92a5ce38a28d0b6453687a"); //5e92a5ce38a28d0b6453687a
@@ -60,25 +60,20 @@ public class TestingActivity  extends Activity {
             @Override
             public void onEventStart(Event event) {
                 System.out.println(".. onevent started.." + event.getBody());
-                //CommandOptions commandOptions = new CommandOptions();
-                //commandOptions.setReplyTo(roomId);
-
-               // ApiResult apiResult = client.sendCommand("hello", commandOptions);
-               // Log.d(TAG, " message... " + apiResult.getMessage());
 
                 new AsyncTask() {
                     @Override
                     protected Void doInBackground(Object... objects) {
-                        if(i == 1) {
+                        if (i == 1) {
                             CommandOptions commandOptions = new CommandOptions();
                             commandOptions.setReplyTo(roomId);
-                            Log.d(TAG,"**** going to send command");
+                            Log.d(TAG, "**** going to send command");
                             ApiResult apiResult = client.sendCommand("hello", commandOptions);
                             Log.d(TAG, " **** message... " + apiResult.getMessage());
                         }
 
 
-                        i+=1;
+                        i += 1;
                         return null;
                     }
                 }.execute();
@@ -102,19 +97,19 @@ public class TestingActivity  extends Activity {
             }
 
             @Override
-            public void onSpeech(Event event){
+            public void onSpeech(Event event) {
                 new AsyncTask() {
                     @Override
                     protected Void doInBackground(Object... objects) {
-                        if(i == 1) {
+                        if (i == 1) {
                             CommandOptions commandOptions = new CommandOptions();
                             commandOptions.setReplyTo(roomId);
-                            Log.d(TAG,"**** going to send command");
+                            Log.d(TAG, "**** going to send command");
                             ApiResult apiResult = client.sendCommand("hello", commandOptions);
                             Log.d(TAG, " **** message... " + apiResult.getMessage());
                         }
 
-                        i+=1;
+                        i += 1;
                         return null;
                     }
                 }.execute();
@@ -163,9 +158,8 @@ public class TestingActivity  extends Activity {
 
                 Log.d(TAG, ".. joined room.. " + roomResult.getId());
 
-                EventResult eventResult = client.listUserMessages(user, roomUserResult.getRoomResult(),"", 100);
+                EventResult eventResult = client.listUserMessages(user, roomUserResult.getRoomResult(), "", 100);
                 Log.d(TAG, "event result " + eventResult.getBody());
-//
                 client.startTalk(); // This step is mandatory, otherwise cannot send command
 
                 Log.d(TAG, ".. started talk.. ");
@@ -178,7 +172,7 @@ public class TestingActivity  extends Activity {
                 conv.setModerationType(ModerationType.post);
                 conv.setMaxReports(3);
                 conv.setConversationIsOpen(true);
-                List<String>tgs = new ArrayList<>();
+                List<String> tgs = new ArrayList<>();
                 tgs.add("taga");
                 tgs.add("tagb");
                 conv.setTags(tgs);
@@ -194,10 +188,10 @@ public class TestingActivity  extends Activity {
                 Log.d(TAG, " message... " + apiResult.getMessage());
 
                 Log.d(TAG, "stop talk....");
-                //client.stopTalk();
+                client.stopTalk();
 
                 Log.d(TAG, "now creating conversation...");
-                //doConversationTestSequences(sportsTalkConfig);
+                doConversationTestSequences(sportsTalkConfig);
 
                 return null;
             }
@@ -214,14 +208,14 @@ public class TestingActivity  extends Activity {
         conversation.setTitle("Test conversation");
         conversation.setMaxCommentLen(512);
         conversation.setConversationIsOpen(true);
-        List<String>tags = new ArrayList<>();
+        List<String> tags = new ArrayList<>();
         tags.add("taga");
         tags.add("tagb");
         conversation.setTags(tags);
         conversation.setUdf1("/sample/userdefined1");
         conversation.setUdf2("/sample/userdefined2");
 
-        ConversationClient conversationClient =  ConversationClient.create(sportsTalkConfig, conversation, null,null);
+        ConversationClient conversationClient = ConversationClient.create(sportsTalkConfig, conversation, null, null);
         Comment comment = new Comment();
         comment.setBody("this is a test comment");
         comment.setTags(tags);
@@ -240,7 +234,7 @@ public class TestingActivity  extends Activity {
         System.out.println(" total comments ... " + list.size());
 
         Log.d(TAG, "get all comment replies");
-        List<Comment> replies = conversationClient.getCommentReplies(comment,null);
+        List<Comment> replies = conversationClient.getCommentReplies(comment, null);
         Log.d(TAG, " ... comment replies " + replies.size());
 
         Log.d(TAG, "get single comment...");
@@ -258,7 +252,7 @@ public class TestingActivity  extends Activity {
         secondConversation.setModerationType(ModerationType.post);
         secondConversation.setMaxReports(3);
         secondConversation.setConversationIsOpen(true);
-        List<String>tgs = new ArrayList<>();
+        List<String> tgs = new ArrayList<>();
         tgs.add("taga");
         tgs.add("tagb");
         secondConversation.setTags(tgs);
@@ -268,7 +262,7 @@ public class TestingActivity  extends Activity {
 
         Log.d(TAG, "*** getting single conversations ...");
         Conversation singleConv = conversationClient.getConversation(createdConversation);
-        Log.d(TAG, "... getting single conv " +  singleConv.getConversationId());
+        Log.d(TAG, "... getting single conv " + singleConv.getConversationId());
 
         Log.d(TAG, " getting all conversations.....");
         ConversationListResponse listResponse = conversationClient.listConversations();
@@ -287,6 +281,4 @@ public class TestingActivity  extends Activity {
             e.printStackTrace();
         }
     }
-
-
 }

@@ -11,6 +11,7 @@ public class Comment extends User {
 
     private int voteScore;
     private int likeCount;
+    private List<String> tags;
 
     public int getVoteScore() {
         return voteScore;
@@ -35,8 +36,6 @@ public class Comment extends User {
     public void setTags(List<String> tags) {
         this.tags = tags;
     }
-
-    private List<String> tags;
 
     public String getId() {
         return id;

@@ -4,24 +4,25 @@ import android.annotation.TargetApi;
 import android.os.Build;
 
 import com.sportstalk.APICallback;
-import com.sportstalk.models.chat.AdvertisementOptions;
-import com.sportstalk.models.chat.EventResult;
-import com.sportstalk.models.common.ApiResult;
-import com.sportstalk.models.chat.CommandOptions;
 import com.sportstalk.Event;
 import com.sportstalk.EventHandler;
+import com.sportstalk.Utils;
+import com.sportstalk.api.chat.IEventManager;
+import com.sportstalk.models.chat.AdvertisementOptions;
+import com.sportstalk.models.chat.CommandOptions;
+import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.EventType;
 import com.sportstalk.models.chat.GoalOptions;
+import com.sportstalk.models.chat.Room;
+import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.Reaction;
 import com.sportstalk.models.common.ReportReason;
 import com.sportstalk.models.common.ReportType;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
-import com.sportstalk.Utils;
-import com.sportstalk.api.chat.IEventManager;
-import com.sportstalk.models.chat.Room;
 import com.sportstalk.rest.HttpClient;
+import com.sportstalk.rest.HttpClient2;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,6 +37,8 @@ import java.util.concurrent.CountDownLatch;
 import androidx.annotation.RequiresApi;
 
 public class RestfulEventManager implements IEventManager {
+    CountDownLatch countDownLatch = null;
+    JSONObject jsonObject = null;
     private SportsTalkConfig sportsTalkConfig;
     private boolean polling;
     private Map<String, String> apiHeaders;
@@ -45,21 +48,18 @@ public class RestfulEventManager implements IEventManager {
     private String roomApi;
     private String commandApi;
     private User user;
-
-    private long   lastCursor;
+    private long lastCursor;
     private String lastMessageId;
     private String firstMessageId;
-    private long   firstMessageTime;
-
+    private long firstMessageTime;
     private int pollFrequency = 800;
+    private Timer timer;
 
     public RestfulEventManager(SportsTalkConfig sportsTalkConfig, EventHandler eventHandler) {
         setConfig(sportsTalkConfig);
     }
 
-
     /**
-     *
      * @param sportsTalkConfig
      */
     private void setConfig(SportsTalkConfig sportsTalkConfig) {
@@ -69,9 +69,9 @@ public class RestfulEventManager implements IEventManager {
         this.eventHandler = sportsTalkConfig.getEventHandler();
     }
 
-
     /**
      * sets user
+     *
      * @param user
      */
     public void setUser(User user) {
@@ -81,6 +81,7 @@ public class RestfulEventManager implements IEventManager {
 
     /**
      * sets polling frequency
+     *
      * @param pollFrequency
      */
     public void setPollingFrequency(int pollFrequency) {
@@ -95,17 +96,13 @@ public class RestfulEventManager implements IEventManager {
 
     @Override
     public void stopTalk() {
-        if(timer != null) {
+        if (timer != null) {
             timer.cancel();
             timer = null;
 
         }
     }
 
-    CountDownLatch countDownLatch = null;
-    JSONObject jsonObject = null;
-
-    private Timer timer;
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void startPollUpdate() {
         Map<String, String> data = new HashMap<>();
@@ -118,11 +115,10 @@ public class RestfulEventManager implements IEventManager {
 
             @Override
             public void error(ApiResult<JSONObject> apiResult, String action) {
-                System.out.println("... any error??? " );
             }
         };
 
-        final HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", updatesApi, apiHeaders, data, apiCallback);
+        final HttpClient2 httpClient = new HttpClient2(sportsTalkConfig.getContext(), "GET", updatesApi, apiHeaders, data, apiCallback);
         httpClient.setAction("update");
 
         timer = new Timer();
@@ -130,10 +126,10 @@ public class RestfulEventManager implements IEventManager {
             @TargetApi(Build.VERSION_CODES.N)
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
-            public void run () {
+            public void run() {
                 //send volley request here
                 if (updatesApi != null) {
-                   jsonObject =  (JSONObject)httpClient.execute().getData();
+                    jsonObject = (JSONObject) httpClient.execute().getData();
                     handlePollUpdates(jsonObject);
                 }
             }
@@ -142,14 +138,13 @@ public class RestfulEventManager implements IEventManager {
     }
 
     /**
-     *
      * @param data
      */
     private void handlePollUpdates(JSONObject data) {
         try {
             JSONArray array = data.getJSONArray("data");
             int len = array == null ? 0 : array.length();
-            if(len == 0) {
+            if (len == 0) {
                 Event event = new Event();
                 eventHandler.onEventStart(event);
                 return;
@@ -175,7 +170,7 @@ public class RestfulEventManager implements IEventManager {
                 event.setEventType(EventType.Purge);
                 event.setKind(Kind.chat);
                 event.setCustomPayload(jsonObject.getString("custompayload"));
-                if("chat.event".equals(eventKind)) {
+                if ("chat.event".equals(eventKind)) {
                     if (eventType.equals("Purge")) {
                         eventHandler.onPurge(event);
                     } else if (eventType.equals("Reaction")) {
@@ -184,20 +179,23 @@ public class RestfulEventManager implements IEventManager {
                         eventHandler.onReply(event);
                     } else if (eventType.equalsIgnoreCase("Speech")) {
                         eventHandler.onSpeech(event);
-                    }else if (eventType.equals("api.result")) {
+                    } else if (eventType.equals("api.result")) {
                         eventHandler.onEventStart(event);
-                    }
-
-                    else {
+                    } else {
                         eventHandler.onChat(event);
                     }
-                }else{
+                } else {
                     eventHandler.onEventStart(event);
                 }
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public Room getCurrentRoom() {
+        return this.currentRoom;
     }
 
     @Override
@@ -208,19 +206,9 @@ public class RestfulEventManager implements IEventManager {
         this.firstMessageTime = 0L;
         this.currentRoom = room;
 
-        this.roomApi = this.sportsTalkConfig.getEndpoint() + "/chat/rooms/"+ this.currentRoom.getId();
+        this.roomApi = this.sportsTalkConfig.getEndpoint() + "/chat/rooms/" + this.currentRoom.getId();
         this.commandApi = this.roomApi + "/command";
         this.updatesApi = this.roomApi + "/updates";
-    }
-
-    @Override
-    public void setEventHandlers(EventHandler eventHandlers) {
-        this.eventHandler = eventHandlers;
-    }
-
-    @Override
-    public Room getCurrentRoom() {
-        return this.currentRoom;
     }
 
     @Override
@@ -236,9 +224,6 @@ public class RestfulEventManager implements IEventManager {
         data.put("command", command);
         System.out.println(" .... this use id ... " + this.user.getUserId());
         data.put("userid", this.user.getUserId());
-        //data.put("customtype", "");
-       // data.put("customid", "");
-       // data.put("custompayload", "");
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendCommand");
@@ -250,9 +235,9 @@ public class RestfulEventManager implements IEventManager {
     public ApiResult sendReply(User user, String message, String replyTo, CommandOptions commandOptions) {
         StringBuilder sb = new StringBuilder();
         sb.append(sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(currentRoom.getId()).append("/command");
-        Map<String, String>data = new HashMap<>();
+        Map<String, String> data = new HashMap<>();
         data.put("command", message);
-        data.put("userid",  this.user.getUserId());
+        data.put("userid", this.user.getUserId());
         data.put("replyto", commandOptions.getReplyTo());
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
@@ -264,8 +249,8 @@ public class RestfulEventManager implements IEventManager {
     @Override
     public ApiResult sendReaction(User user, Room room, Reaction reaction, String reactionToMessageId, CommandOptions commandOptions) {
         Map<String, String> data = new HashMap<>();
-        data.put("userid",    this.user.getUserId());
-        data.put("reaction",  reaction.name());
+        data.put("userid", this.user.getUserId());
+        data.put("reaction", reaction.name());
         data.put("reacted", "true");
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/chat/rooms/" + currentRoom.getId() + "/react/" + reactionToMessageId, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendReaction");
@@ -277,34 +262,33 @@ public class RestfulEventManager implements IEventManager {
     public ApiResult sendAdvertisement(User user, Room room, AdvertisementOptions advertisementOptions) {
 
         Map<String, String> data = new HashMap<>();
-        data.put("command",    "advertisement");
+        data.put("command", "advertisement");
         data.put("customtype", "advertisement");
-        data.put("userid",        this.user.getUserId());
-        data.put("command",    "advertisement");
+        data.put("userid", this.user.getUserId());
+        data.put("command", "advertisement");
 
         Map<String, String> custom = new HashMap<>();
-        custom.put("img",  advertisementOptions.getImg());
+        custom.put("img", advertisementOptions.getImg());
         custom.put("link", advertisementOptions.getLink());
-        custom.put("id",   advertisementOptions.getId());
+        custom.put("id", advertisementOptions.getId());
 
         data.put("custompayload", new JSONObject(custom).toString());
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", this.commandApi, new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("sendAdvertisement");
         return httpClient.execute();
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ApiResult sendGoal(User user, Room room, String message, String img, GoalOptions goalOptions) {
         Map<String, String> data = new HashMap<>();
-        data.put("command",     message);
-        data.put("customtype","goal");
-        data.put("userid",       user.getUserId());
+        data.put("command", message);
+        data.put("customtype", "goal");
+        data.put("userid", user.getUserId());
 
         Map<String, String> custom = new HashMap<>();
-        data.put("img",  img);
+        data.put("img", img);
         data.put("link", "");
 
         String s = String.format("{\"img\":\"%s\",\"link\":\"%s\"}", img, goalOptions.getLink());
@@ -319,16 +303,20 @@ public class RestfulEventManager implements IEventManager {
         return null;
     }
 
+    @Override
+    public void setEventHandlers(EventHandler eventHandlers) {
+        this.eventHandler = eventHandlers;
+    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ApiResult reportEvent(EventResult eventResult, ReportReason reportReason) {
         Map<String, String> data = new HashMap<>();
         data.put("reporttype", ReportType.Abuse.name());
-        data.put("userid",        this.user.getUserId());
+        data.put("userid", this.user.getUserId());
 
-        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/chat/rooms/"+currentRoom.getId() + "/events/" + eventResult.getId() + "/report/" + reportReason.getUserId(), new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sportsTalkConfig.getEndpoint() + "/chat/rooms/" + currentRoom.getId() + "/events/" + eventResult.getId() + "/report/" + reportReason.getUserId(), new Utils().getApiHeaders(sportsTalkConfig.getApiKey()), data, sportsTalkConfig.getApiCallback());
         return httpClient.execute();
-
     }
 
 }

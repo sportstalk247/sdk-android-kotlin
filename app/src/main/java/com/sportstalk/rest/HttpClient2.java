@@ -25,7 +25,7 @@ import androidx.annotation.RequiresApi;
 
 @TargetApi(Build.VERSION_CODES.N)
 @RequiresApi(api = Build.VERSION_CODES.N)
-public class HttpClient {
+public class HttpClient2 {
 
     /**
      * log handler
@@ -74,7 +74,7 @@ public class HttpClient {
 
     private VolleyError volleyError;
 
-    public HttpClient(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, APICallback apiCallback) {
+    public HttpClient2(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, APICallback apiCallback) {
         this.context = context;
         this.httpMethod = httpMethod;
         this.url = url;
@@ -85,7 +85,7 @@ public class HttpClient {
         initVolley();
     }
 
-    public HttpClient(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, EventHandler eventHandler) {
+    public HttpClient2(Context context, String httpMethod, String url, Map<String, String> apiHeaders, Map<String, String> data, EventHandler eventHandler) {
         this.context = context;
         this.httpMethod = httpMethod;
         this.url = url;

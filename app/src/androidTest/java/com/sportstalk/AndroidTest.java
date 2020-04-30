@@ -2,9 +2,12 @@ package com.sportstalk;
 
 import android.content.Context;
 
-import com.sportstalk.api.RoomUserResult;
+import com.sportstalk.models.chat.CommandOptions;
+import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.Room;
 import com.sportstalk.models.chat.RoomResult;
+import com.sportstalk.models.chat.RoomUserResult;
+import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
 
@@ -14,6 +17,8 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+
+import java.util.List;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -34,9 +39,9 @@ public class AndroidTest {
         context = InstrumentationRegistry.getInstrumentation().getContext();
 
         sportsTalkConfig = new SportsTalkConfig();
-        sportsTalkConfig.setApiKey("QZF6YKDKSUCeL03tdA2l2gx4ckSvC7LkGsgmix-pBZLA");
+        sportsTalkConfig.setApiKey("ZortLH1JUkuEJQ5YgkZjHwx-AZFkPSJkSYnEO1NA6y7A");
         sportsTalkConfig.setContext(context);
-        sportsTalkConfig.setAppId("5e92a5ce38a28d0b6453687a");
+        sportsTalkConfig.setAppId("5e9eff5338a28719345eb469");
         sportsTalkConfig.setEndpoint("https://api.sportstalk247.com/api/v3");
 
         user = new User();
@@ -45,6 +50,59 @@ public class AndroidTest {
         user.setHandle("sarah");
         user.setHandleLowerCase("sarah");
         sportsTalkConfig.setUser(user);
+
+        final EventHandler eventHandler = new EventHandler() {
+            @Override
+            public void onEventStart(Event event) {
+
+            }
+
+            @Override
+            public void onReaction(Event event) {
+
+            }
+
+            @Override
+            public void onAdminCommand(Event event) {
+
+            }
+
+            @Override
+            public void onReply(Event event) {
+
+            }
+
+            @Override
+            public void onPurge(Event event) {
+
+            }
+
+            @Override
+            public void onSpeech(Event event) {
+                    System.out.println(" event ");
+            }
+
+            @Override
+            public void onChat(Event event) {
+
+            }
+
+            @Override
+            public void onNetworkResponse(List<EventResult> list) {
+
+            }
+
+            @Override
+            public void onHelp(ApiResult apiResult) {
+
+            }
+
+            @Override
+            public void onGoalCommand(EventResult eventResult) {
+
+            }
+        };
+        sportsTalkConfig.setEventHandler(eventHandler);
         chatClient = ChatClient.create(sportsTalkConfig);
     }
 
@@ -57,13 +115,19 @@ public class AndroidTest {
 
         roomResult = chatClient.createRoom(room);
         Assert.assertNotNull(roomResult.getId());
+        RoomUserResult roomUserResult = chatClient.joinRoom(roomResult);
+        chatClient.setRoom(roomUserResult.getRoomResult());
+        chatClient.startTalk();
+
     }
 
     @Test
-    public void joinRoomTest() {
-        System.out.println(" room id " + roomResult.getId());
-        RoomUserResult roomUserResult = chatClient.joinRoom(roomResult);
-        Assert.assertNotNull(roomUserResult);
+    public void testSendCommand() {
+
+        final CommandOptions commandOptions = new CommandOptions();
+
+        ApiResult result = chatClient.sendCommand("hello h a r u", commandOptions);
+
     }
 
 }

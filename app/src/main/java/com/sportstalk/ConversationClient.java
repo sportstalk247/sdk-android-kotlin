@@ -39,20 +39,33 @@ public class ConversationClient implements IConversationClient {
     }
 
     public static ConversationClient create(SportsTalkConfig sportsTalkConfig, Conversation initialConversation, IConversationManager commentManager, IConversationManager conversationManager) {
-        if(conversationClient == null) conversationClient = new ConversationClient(sportsTalkConfig,initialConversation);
-        if(initialConversation != null)
-        conversationClient.setConversation(initialConversation);
+        if (conversationClient == null)
+            conversationClient = new ConversationClient(sportsTalkConfig, initialConversation);
+        if (initialConversation != null)
+            conversationClient.setConversation(initialConversation);
         return conversationClient;
     }
 
     public static ConversationClient create(SportsTalkConfig sportsTalkConfig) {
-        if(conversationClient == null) conversationClient = new ConversationClient(sportsTalkConfig, null);
+        if (conversationClient == null)
+            conversationClient = new ConversationClient(sportsTalkConfig, null);
         return conversationClient;
     }
 
     @Override
     public SportsTalkConfig getConfig() {
         return sportsTalkConfig;
+    }
+
+    @Override
+    public void setConfig(SportsTalkConfig config) {
+        this.sportsTalkConfig = config;
+        if (commentManager == null)
+            commentManager = new RestfulCommentManager(conversation, config);
+        if (conversationManager == null)
+            conversationManager = new RestfulConversationManager(config);
+        conversationManager.setConfig(this.sportsTalkConfig);
+        commentManager.setConfig(this.sportsTalkConfig);
     }
 
     @Override
@@ -117,7 +130,7 @@ public class ConversationClient implements IConversationClient {
 
     @Override
     public Comment reportComment(Comment comment, ReportType reportType) {
-        commentManager.report(comment,reportType);
+        commentManager.report(comment, reportType);
         return comment;
     }
 
@@ -129,17 +142,6 @@ public class ConversationClient implements IConversationClient {
     @Override
     public List<Comment> getComments(CommentRequest commentRequest, Conversation conversation) {
         return commentManager.getComments(commentRequest, conversation).getComments();
-    }
-
-    @Override
-    public void setConfig(SportsTalkConfig config) {
-        this.sportsTalkConfig = config;
-        if(commentManager == null)
-        commentManager  = new RestfulCommentManager(conversation, config);
-        if(conversationManager == null)
-            conversationManager = new RestfulConversationManager(config);
-        conversationManager.setConfig(this.sportsTalkConfig);
-        commentManager.setConfig(this.sportsTalkConfig);
     }
 
     public ConversationListResponse listConversations() {
