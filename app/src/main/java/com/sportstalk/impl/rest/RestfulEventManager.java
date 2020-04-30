@@ -116,7 +116,7 @@ public class RestfulEventManager implements IEventManager {
             }
         };
 
-        final HttpClient2 httpClient = new HttpClient2(sportsTalkConfig.getContext(), "GET", updatesApi, apiHeaders, data, apiCallback);
+        final HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", updatesApi, apiHeaders, data, apiCallback);
         httpClient.setAction("update");
 
         timer = new Timer();
