@@ -2,7 +2,7 @@ package com.sportstalk.models.common;
 
 import android.content.Context;
 
-import com.sportstalk.APICallback;
+import com.sportstalk.api.APICallback;
 import com.sportstalk.api.chat.EventHandler;
 
 public class SportsTalkConfig {

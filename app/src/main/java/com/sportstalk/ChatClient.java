@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 
+import com.sportstalk.api.APICallback;
 import com.sportstalk.impl.Utils;
 import com.sportstalk.api.chat.EventHandler;
 import com.sportstalk.api.chat.IChatClient;

@@ -4,7 +4,7 @@ import android.os.Build;
 
 import com.sportstalk.impl.Utils;
 import com.sportstalk.api.chat.IWebhookManager;
-import com.sportstalk.api.impl.Webhook;
+import com.sportstalk.models.Webhook;
 import com.sportstalk.models.common.SportsTalkConfig;
 
 import java.util.HashMap;

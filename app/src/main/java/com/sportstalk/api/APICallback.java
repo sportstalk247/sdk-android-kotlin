@@ -1,4 +1,4 @@
-package com.sportstalk;
+package com.sportstalk.api;
 
 import com.sportstalk.models.common.ApiResult;
 

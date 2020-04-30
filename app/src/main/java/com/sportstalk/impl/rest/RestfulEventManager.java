@@ -3,7 +3,7 @@ package com.sportstalk.impl.rest;
 import android.annotation.TargetApi;
 import android.os.Build;
 
-import com.sportstalk.APICallback;
+import com.sportstalk.api.APICallback;
 import com.sportstalk.models.chat.Event;
 import com.sportstalk.api.chat.EventHandler;
 import com.sportstalk.impl.Utils;

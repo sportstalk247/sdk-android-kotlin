@@ -1,7 +1,7 @@
 package com.sportstalk.api.chat;
 
 import com.sportstalk.api.common.ISportsTalkConfigurable;
-import com.sportstalk.api.impl.Webhook;
+import com.sportstalk.models.Webhook;
 
 public interface IWebhookManager extends ISportsTalkConfigurable {
     void ListWebhooks();

@@ -11,7 +11,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.sportstalk.APICallback;
+import com.sportstalk.api.APICallback;
 import com.sportstalk.api.chat.EventHandler;
 import com.sportstalk.models.common.ApiResult;
 

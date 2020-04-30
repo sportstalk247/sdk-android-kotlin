@@ -1,4 +1,4 @@
-package com.sportstalk.api.impl;
+package com.sportstalk.models;
 
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.WebhookType;

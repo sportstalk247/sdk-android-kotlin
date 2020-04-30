@@ -1,6 +1,6 @@
 package com.sportstalk.models.chat;
 
-import com.sportstalk.api.impl.Webhook;
+import com.sportstalk.models.Webhook;
 
 public class ChatWebhook extends Webhook {
 }
