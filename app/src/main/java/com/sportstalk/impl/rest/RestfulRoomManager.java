@@ -2,7 +2,7 @@ package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
-import com.sportstalk.impl.Utils;
+import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.api.chat.IRoomManager;
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.Room;

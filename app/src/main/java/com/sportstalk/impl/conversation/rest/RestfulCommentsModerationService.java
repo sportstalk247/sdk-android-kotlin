@@ -4,7 +4,7 @@ import android.os.Build;
 
 import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.api.conversation.IConversationModerationService;
-import com.sportstalk.impl.common.rest.HttpClient;
+import com.sportstalk.impl.rest.HttpClient;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.SportsTalkConfig;

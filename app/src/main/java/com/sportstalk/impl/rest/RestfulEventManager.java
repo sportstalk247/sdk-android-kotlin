@@ -7,7 +7,7 @@ import android.util.Log;
 import com.sportstalk.api.APICallback;
 import com.sportstalk.models.chat.Event;
 import com.sportstalk.api.chat.EventHandler;
-import com.sportstalk.impl.Utils;
+import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.api.chat.IEventManager;
 import com.sportstalk.models.chat.AdvertisementOptions;
 import com.sportstalk.models.chat.CommandOptions;

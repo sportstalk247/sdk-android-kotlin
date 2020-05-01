@@ -2,7 +2,6 @@ package com.sportstalk.models.common;
 
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.WebhookType;
-import com.sportstalk.models.common.Kind;
 
 import java.util.List;
 

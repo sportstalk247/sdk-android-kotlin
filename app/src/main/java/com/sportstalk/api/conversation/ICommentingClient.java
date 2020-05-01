@@ -2,6 +2,8 @@ package com.sportstalk.api.conversation;
 
 import com.sportstalk.api.common.ISportsTalkConfigurable;
 import com.sportstalk.api.common.IUserConfigurable;
+import com.sportstalk.error.RequireUserException;
+import com.sportstalk.error.SettingsException;
 import com.sportstalk.models.common.Reaction;
 import com.sportstalk.models.common.ReportType;
 import com.sportstalk.models.common.SportsTalkConfig;
@@ -35,13 +37,14 @@ public interface ICommentingClient extends ISportsTalkConfigurable, IUserConfigu
 
     Comment updateComment(Comment comment);
 
-    Comment reactToComment(Comment comment, Reaction reaction);
+    Comment reactToComment(Comment comment, Reaction reaction) throws RequireUserException, SettingsException;
 
-    Comment voteOnComment(Comment comment, Vote vote);
+    Comment voteOnComment(Comment comment, Vote vote) throws RequireUserException;
 
-    Comment reportComment(Comment comment, ReportType reportType);
+    Comment reportComment(Comment comment, ReportType reportType) throws RequireUserException;
 
     List<Comment> getCommentReplies(Comment comment, CommentRequest request);
 
     List<Comment> getComments(CommentRequest commentRequest, Conversation conversation);
 }
+

@@ -2,6 +2,7 @@ package com.sportstalk;
 
 import android.content.Context;
 
+import com.sportstalk.error.SportsTalkException;
 import com.sportstalk.models.common.ModerationType;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
@@ -128,7 +129,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
-        Comment result = conversationClient.makeComment("", comment);
+        Comment result = conversationClient.createComment(comment);
         Assert.assertNotNull(result.getId());
     }
 
@@ -153,7 +154,8 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
-        Comment result = conversationClient.makeComment("sarah", comment);
+        comment.setReplyTo("sarah");
+        Comment result = conversationClient.createComment(comment);
         Assert.assertNotNull(result);
     }
 
@@ -192,7 +194,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("");
         comment.setTags(tags);
-        Comment result = conversationClient.makeComment("", comment);
+        Comment result = conversationClient.createComment(comment);
         Assert.assertNull(result);
     }
 
@@ -314,7 +316,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
-        Comment response = conversationClient.makeComment("", comment);
+        Comment response = conversationClient.createComment(comment);
         conv.setConversationId(null);
         conversationClient.setConversation(conv);
         CommentRequest commentRequest = new CommentRequest();
@@ -386,7 +388,7 @@ public class AndroidTestConversation {
         comment.setBody("this is a comment for testing");
         comment.setTags(tgs);
         conversationClient.setConversation(updated);
-        Comment nComment = conversationClient.makeComment("", comment);
+        Comment nComment = conversationClient.createComment(comment);
         Assert.assertNull(nComment);
     }
 
@@ -402,6 +404,27 @@ public class AndroidTestConversation {
         conversation.setModerationType(ModerationType.post);
         Conversation conv = conversationClient.createConversation(conversation, true);
         Assert.assertNull(conv);
+    }
+
+    @Test(expected = SportsTalkException.class)
+    public void WhenNoCommentForConversationThenItWillThrowException() {
+        Conversation conversation = new Conversation();
+        List<String> tgs = new ArrayList<>();
+        tgs.add("taga");
+        tgs.add("tagb");
+        conversation.setTags(tgs);
+        conversation.setMaxCommentLen(100);
+        conversation.setConversationId("api-conversation-test-demo2");
+        conversation.setModerationType(ModerationType.post);
+        conversation.setOwnerUserId("sarah");
+        conversationClient.setConversation(conversation);
+
+        // gets a particular comment
+        Comment comment = new Comment();
+        comment.setId("test");
+        comment.setTags(tgs);
+
+        Comment returnComment = conversationClient.getComment(comment);
     }
 
 }

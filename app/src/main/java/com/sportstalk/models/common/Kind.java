@@ -5,5 +5,6 @@ public enum Kind {
     room,
     user,
     api,
-    conversation
+    conversation,
+    deleteComment
 }

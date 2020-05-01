@@ -7,7 +7,7 @@ import com.sportstalk.models.common.SportsTalkConfig;
  * implement this interface.
  */
 public interface ISportsTalkConfigurable {
-    /**
+     /**
      * Sets the configuration.
      * @param config
      */

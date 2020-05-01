@@ -1,5 +1,6 @@
 package com.sportstalk.impl.rest;
 
+import android.annotation.TargetApi;
 import android.os.Build;
 
 import com.sportstalk.impl.Utils;
@@ -91,4 +92,17 @@ public class RestfulUserManager implements IUserManager {
         }
         return userResult;
     }
+
+    /**
+     * lists all users
+     */
+    @TargetApi(Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void listUsers() {
+        Map<String, String> data = new HashMap<>();
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sportsTalkConfig.getEndpoint() + "/user/?limit=100&cursor=", apiHeaders, data, sportsTalkConfig.getApiCallback());
+        httpClient.setAction("listUsers");
+        httpClient.execute();
+    }
+
 }

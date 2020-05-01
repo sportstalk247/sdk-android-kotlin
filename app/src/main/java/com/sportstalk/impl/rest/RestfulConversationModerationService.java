@@ -2,8 +2,8 @@ package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
-import com.sportstalk.impl.Utils;
 import com.sportstalk.api.conversation.IConversationModerationService;
+import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.SportsTalkConfig;
@@ -133,3 +133,4 @@ public class RestfulConversationModerationService implements IConversationModera
     }
 
 }
+

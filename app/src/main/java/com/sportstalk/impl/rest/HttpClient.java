@@ -13,6 +13,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.sportstalk.api.APICallback;
 import com.sportstalk.api.chat.EventHandler;
+import com.sportstalk.error.SportsTalkException;
 import com.sportstalk.models.common.ApiResult;
 
 import org.json.JSONObject;
@@ -156,7 +157,10 @@ public class HttpClient {
         }
 
         ApiResult apiResult = new ApiResult();
-        if (volleyError != null) apiResult.setErrors(volleyError);
+        if (volleyError != null) {
+            apiResult.setErrors(volleyError);
+             throw new SportsTalkException(new String(volleyError.networkResponse.data));
+        }
         else
             apiResult.setData(jsonObject);
         return apiResult;

@@ -106,11 +106,17 @@ public class AndroidTest {
         };
         sportsTalkConfig.setEventHandler(eventHandler);
         chatClient = ChatClient.create(sportsTalkConfig);
+
+        // create a room
+        Room room = new Room();
+        room.setName("Test Room22");
+        room.setSlug("chat-test-room " + System.currentTimeMillis() );
+        roomResult = chatClient.createRoom(room);
+
     }
 
-    @Test
+//    @Test
     public void createRoomTest() {
-
         Room room = new Room();
         room.setName("Test Room2");
         room.setSlug("chat-test-room " + System.currentTimeMillis() );
@@ -118,7 +124,9 @@ public class AndroidTest {
         //Assert.assertNotNull(roomResult.getId());
         RoomResult r = new RoomResult();
         r.setId("5eab249f38a29418485d0c96");
+        chatClient.setRoom(r);
 
+        chatClient.setUser(user);
         RoomUserResult roomUserResult = chatClient.joinRoom(r);
         chatClient.setRoom(roomUserResult.getRoomResult());
         chatClient.startChat();
@@ -132,14 +140,19 @@ public class AndroidTest {
 
     @Test
     public void testSendCommand() {
-        RoomResult r = new RoomResult();
-        r.setId("5eab249f38a29418485d0c96");
-        r.setOwnerId("sarah");
-        RoomUserResult roomUserResult = chatClient.joinRoom(r);
+        RoomUserResult roomUserResult = chatClient.joinRoom(roomResult);
         Assert.assertNotNull(roomUserResult);
         final CommandOptions commandOptions = new CommandOptions();
         ApiResult result = chatClient.sendCommand("hello h a r u", commandOptions);
-        Assert.assertNotNull(result.getErrors());
+        Assert.assertNull(result.getErrors());
     }
 
+    @Test
+    public void joinAlreadyExisitingRoom() {
+        chatClient.setUser(user);
+        RoomResult r = new RoomResult();
+        r.setId("5eabe56238a29418485d111f");
+        RoomUserResult roomUserResult = chatClient.joinRoom(r);
+        Assert.assertNotNull(roomUserResult);
+    }
 }
