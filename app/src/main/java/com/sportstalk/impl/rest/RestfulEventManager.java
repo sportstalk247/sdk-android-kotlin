@@ -160,6 +160,7 @@ public class RestfulEventManager implements IEventManager {
                 event.setRoomId(jsonObject.getString("roomid"));
                 event.setBody(jsonObject.getString("body"));
                 event.setUserId(jsonObject.getString("userid"));
+
                 JSONObject userJsonObject = jsonObject.getJSONObject("user");
                 User user = new User();
                 user.setHandle(userJsonObject.getString("handle"));
@@ -176,6 +177,8 @@ public class RestfulEventManager implements IEventManager {
                     } else if (eventType.equals("Reaction")) {
                         eventHandler.onReaction(event);
                     } else if (eventType.equals("reply")) {
+                        JSONObject replyObject = jsonObject.getJSONObject("replyto");
+                        event.setReplyTo(replyObject);
                         eventHandler.onReply(event);
                     } else if (eventType.equalsIgnoreCase("Speech")) {
                         eventHandler.onSpeech(event);
@@ -222,7 +225,6 @@ public class RestfulEventManager implements IEventManager {
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/command");
         Map<String, String> data = new HashMap<>();
         data.put("command", command);
-        System.out.println(" .... this use id ... " + this.user.getUserId());
         data.put("userid", this.user.getUserId());
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());

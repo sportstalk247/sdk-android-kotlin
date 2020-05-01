@@ -170,6 +170,7 @@ public class RestfulRoomManager implements IRoomManager {
      * @return
      */
     private RoomResult createRoomResult(JSONObject jsonObject) {
+        if(jsonObject == null) return null;
         RoomResult roomResult = new RoomResult();
         try {
             JSONObject object = jsonObject.getJSONObject("data");
