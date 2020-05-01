@@ -5,12 +5,15 @@ import android.content.Context;
 import com.sportstalk.api.APICallback;
 import com.sportstalk.api.chat.EventHandler;
 
+/**
+ * The class that handles configuration for most services.
+ */
 public class SportsTalkConfig {
 
-    private String appId;
-    private String apiKey;
+    private String appId = "";
+    private String apiKey = "";
     private String userId;
-    private String endpoint;
+    private String endpoint = "https://api.sportstalk247.com/api/v3";
     private Context context;
     private EventHandler eventHandler;
     private boolean isPushEnabled;

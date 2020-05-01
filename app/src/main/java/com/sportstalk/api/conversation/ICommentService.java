@@ -14,7 +14,7 @@ import com.sportstalk.models.conversation.Vote;
 
 import java.util.List;
 
-public interface ICommentManager extends ISportsTalkConfigurable, IUserConfigurable {
+public interface ICommentService extends ISportsTalkConfigurable, IUserConfigurable {
 
     Conversation setConversation(Conversation conversation);
 

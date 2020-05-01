@@ -8,7 +8,7 @@ import com.sportstalk.models.conversation.ConversationResponse;
 
 import java.util.List;
 
-public interface IConversationManager extends ISportsTalkConfigurable {
+public interface IConversationService extends ISportsTalkConfigurable {
     ConversationResponse createConversation(Conversation conversation);
 
     ConversationResponse getConversation(Conversation conversation);

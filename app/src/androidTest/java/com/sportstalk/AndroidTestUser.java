@@ -21,7 +21,7 @@ public class AndroidTestUser {
     SportsTalkConfig sportsTalkConfig;
     User user;
     ChatClient chatClient;
-    ConversationClient conversationClient;
+    CommentingClient conversationClient;
 
 
     @Before
@@ -33,7 +33,7 @@ public class AndroidTestUser {
         sportsTalkConfig.setAppId("5e9eff5338a28719345eb469");
         sportsTalkConfig.setEndpoint("https://api.sportstalk247.com/api/v3");
         chatClient = ChatClient.create(sportsTalkConfig);
-        conversationClient = ConversationClient.create(sportsTalkConfig, null, null, null);
+        conversationClient = CommentingClient.create(sportsTalkConfig, null, null, null);
     }
 
     @Test

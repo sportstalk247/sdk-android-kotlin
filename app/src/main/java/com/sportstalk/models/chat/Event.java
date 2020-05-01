@@ -5,6 +5,10 @@ import com.sportstalk.models.common.User;
 
 import java.util.List;
 
+/**
+ * Generic Class that wraps chat events.
+ * @param <T>
+ */
 public class Event<T> {
     private Kind kind;
     private String id;

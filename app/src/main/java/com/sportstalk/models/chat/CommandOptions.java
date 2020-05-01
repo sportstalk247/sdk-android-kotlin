@@ -1,5 +1,8 @@
 package com.sportstalk.models.chat;
 
+/**
+ * Used for setting custom properties on chat commands.
+ */
 public class CommandOptions {
 
     private String customType;

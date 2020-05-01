@@ -1,5 +1,9 @@
 package com.sportstalk.models.common;
 
+/**
+ * The reason for reporting a comment or chat event.
+ * Typical reason is "Abuse"
+ */
 public class ReportReason {
 
     private ReportType reportType;

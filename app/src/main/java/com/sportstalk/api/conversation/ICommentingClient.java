@@ -13,10 +13,10 @@ import com.sportstalk.models.conversation.Vote;
 
 import java.util.List;
 
-public interface IConversationClient extends ISportsTalkConfigurable, IUserConfigurable {
+public interface ICommentingClient extends ISportsTalkConfigurable, IUserConfigurable {
     SportsTalkConfig getConfig();
 
-    Conversation createConversation(Conversation conversation, boolean status);
+    Conversation createConversation(Conversation conversation);
 
     Conversation setConversation(Conversation conversation);
 
@@ -26,7 +26,8 @@ public interface IConversationClient extends ISportsTalkConfigurable, IUserConfi
 
     ConversationDeletionResponse deleteConversation(Conversation conversation);
 
-    Comment makeComment(String replyTo, Comment comment);
+    Comment makeComment(Comment comment);
+    Comment makeComment(Comment comment, String replyTo);
 
     Comment getComment(Comment comment);
 

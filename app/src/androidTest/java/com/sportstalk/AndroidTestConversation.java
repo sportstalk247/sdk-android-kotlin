@@ -31,7 +31,7 @@ public class AndroidTestConversation {
     User user;
     ChatClient chatClient;
 
-    ConversationClient conversationClient;
+    CommentingClient conversationClient;
 
     String conversationTestId = "api-conversation-test-demo2";
 
@@ -54,7 +54,7 @@ public class AndroidTestConversation {
         sportsTalkConfig.setUser(user);
         chatClient = ChatClient.create(sportsTalkConfig);
 
-        conversationClient = ConversationClient.create(sportsTalkConfig, null, null, null);
+        conversationClient = CommentingClient.create(sportsTalkConfig, null, null, null);
 
     }
 

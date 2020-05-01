@@ -121,7 +121,7 @@ public class AndroidTest {
 
         RoomUserResult roomUserResult = chatClient.joinRoom(r);
         chatClient.setRoom(roomUserResult.getRoomResult());
-        chatClient.startTalk();
+        chatClient.startChat();
 
         try {
             Thread.sleep(1000);
