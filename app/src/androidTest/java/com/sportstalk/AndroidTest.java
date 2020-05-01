@@ -112,24 +112,34 @@ public class AndroidTest {
     public void createRoomTest() {
 
         Room room = new Room();
-        room.setName("Test Room");
-        room.setSlug("chat-test-room");
+        room.setName("Test Room2");
+        room.setSlug("chat-test-room " + System.currentTimeMillis() );
+        //roomResult = chatClient.createRoom(room);
+        //Assert.assertNotNull(roomResult.getId());
+        RoomResult r = new RoomResult();
+        r.setId("5eab249f38a29418485d0c96");
 
-        roomResult = chatClient.createRoom(room);
-        Assert.assertNotNull(roomResult.getId());
-        RoomUserResult roomUserResult = chatClient.joinRoom(roomResult);
+        RoomUserResult roomUserResult = chatClient.joinRoom(r);
         chatClient.setRoom(roomUserResult.getRoomResult());
         chatClient.startTalk();
 
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testSendCommand() {
-
+        RoomResult r = new RoomResult();
+        r.setId("5eab249f38a29418485d0c96");
+        r.setOwnerId("sarah");
+        RoomUserResult roomUserResult = chatClient.joinRoom(r);
+        Assert.assertNotNull(roomUserResult);
         final CommandOptions commandOptions = new CommandOptions();
-
         ApiResult result = chatClient.sendCommand("hello h a r u", commandOptions);
-
+        Assert.assertNotNull(result.getErrors());
     }
 
 }
