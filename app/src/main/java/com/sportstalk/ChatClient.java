@@ -36,20 +36,12 @@ import java.util.Map;
 
 import androidx.annotation.RequiresApi;
 
+/**
+ * This is the primary client used for Chat interface building.
+ * If you are creating a Chat UI, start here.
+ */
 public class ChatClient implements IChatClient {
 
-    /**
-     * chat client
-     **/
-    private static ChatClient chatClient;
-    /**
-     * invalid polling frequency message
-     **/
-    private final String INVALID_POLLING_FREQUENCY = "Invalid poll _pollFrequency.  Must be between 250ms and 5000ms";
-    /**
-     * error message in case not joined the room
-     **/
-    private final String NO_ROOM_SET = "No room set.  You must join a room before you can get updates!";
     /**
      * Android Log
      **/
@@ -70,10 +62,6 @@ public class ChatClient implements IChatClient {
      * application id
      **/
     private String appId;
-    /**
-     * default polling interval in milliseconds
-     **/
-    private long pollFrequency = 800;
     /**
      * user id
      **/
@@ -127,8 +115,7 @@ public class ChatClient implements IChatClient {
     }
 
     public static ChatClient create(SportsTalkConfig sportsTalkConfig) {
-        if (chatClient == null) chatClient = new ChatClient(sportsTalkConfig);
-        return chatClient;
+        return new ChatClient(sportsTalkConfig);
     }
 
     public void setConfig(final SportsTalkConfig config) {
@@ -151,16 +138,6 @@ public class ChatClient implements IChatClient {
     public void setEndpoint(final String endpoint) {
         this.endpoint = endpoint;
     }
-
-    /**
-     * sets polling frequency
-     *
-     * @param pollFrequency
-     */
-    public void setUpdateFrequency(long pollFrequency) {
-        this.pollFrequency = pollFrequency;
-    }
-
 
     /**
      * lists all users
@@ -186,7 +163,7 @@ public class ChatClient implements IChatClient {
      * starts talk which will start polling
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void startTalk() {
+    public void startChat() {
         eventManager.setCurrentRoom(currentRom);
         eventManager.startTalk();
     }
@@ -194,7 +171,7 @@ public class ChatClient implements IChatClient {
     /**
      * stops the talk
      */
-    public void stopTalk() {
+    public void stopChat() {
         eventManager.stopTalk();
     }
 

@@ -3,7 +3,7 @@ package com.sportstalk.impl.common.rest;
 import android.os.Build;
 
 import com.sportstalk.api.chat.IWebhookManager;
-import com.sportstalk.models.Webhook;
+import com.sportstalk.models.common.Webhook;
 import com.sportstalk.models.common.SportsTalkConfig;
 
 import java.util.HashMap;

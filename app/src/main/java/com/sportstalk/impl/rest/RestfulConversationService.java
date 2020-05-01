@@ -1,11 +1,10 @@
-package com.sportstalk.impl.conversation.rest;
+package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
 import com.android.volley.VolleyError;
-import com.sportstalk.impl.common.rest.Utils;
-import com.sportstalk.api.conversation.IConversationManager;
-import com.sportstalk.impl.common.rest.HttpClient;
+import com.sportstalk.impl.Utils;
+import com.sportstalk.api.conversation.IConversationService;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.ModerationType;
@@ -27,13 +26,13 @@ import java.util.Map;
 
 import androidx.annotation.RequiresApi;
 
-public class RestfulConversationManager implements IConversationManager {
+public class RestfulConversationService implements IConversationService {
 
 
     private SportsTalkConfig sportsTalkConfig;
     private Map<String, String> apiHeaders;
 
-    public RestfulConversationManager(SportsTalkConfig config) {
+    public RestfulConversationService(SportsTalkConfig config) {
         this.sportsTalkConfig = config;
     }
 
@@ -187,7 +186,7 @@ public class RestfulConversationManager implements IConversationManager {
     @Override
     public void setConfig(SportsTalkConfig config) {
         this.sportsTalkConfig = config;
-        this.apiHeaders = Utils.getApiHeaders(sportsTalkConfig.getApiKey());
+        this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
     }
 
     private ConversationResponse createConversationResponse(JSONObject jsonObject, String data) {

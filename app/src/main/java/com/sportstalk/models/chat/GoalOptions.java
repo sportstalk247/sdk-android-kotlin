@@ -1,5 +1,8 @@
 package com.sportstalk.models.chat;
 
+/**
+ * Options for the built-in GOAL type utilizing event cusotm fields.
+ */
 public class GoalOptions {
     private String score;
     private String link;

@@ -3,7 +3,7 @@ package com.sportstalk.impl.rest;
 import android.os.Build;
 
 import com.sportstalk.impl.Utils;
-import com.sportstalk.api.conversation.IConversationModerationManager;
+import com.sportstalk.api.conversation.IConversationModerationService;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.SportsTalkConfig;
@@ -21,12 +21,12 @@ import java.util.Map;
 
 import androidx.annotation.RequiresApi;
 
-public class RestfulConversationModerationManager implements IConversationModerationManager {
+public class RestfulConversationModerationService implements IConversationModerationService {
 
     private SportsTalkConfig sportsTalkConfig;
     private Map<String, String> apiHeaders;
 
-    public RestfulConversationModerationManager(SportsTalkConfig sportsTalkConfig) {
+    public RestfulConversationModerationService(SportsTalkConfig sportsTalkConfig) {
         setConfig(sportsTalkConfig);
     }
 

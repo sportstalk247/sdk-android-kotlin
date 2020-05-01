@@ -218,7 +218,7 @@ public class RestfulEventManager implements IEventManager {
     @Override
     public ApiResult sendCommand(User user, Room room, String command, CommandOptions options) {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/command");
+        sb.append(this.sportsTalkConfig.getEndpoint()).append("/").append(sportsTalkConfig.getAppId()).append("/chat/rooms/").append(room.getId()).append("/command");
         Map<String, String> data = new HashMap<>();
         data.put("command", command);
         System.out.println(" .... this use id ... " + this.user.getUserId());

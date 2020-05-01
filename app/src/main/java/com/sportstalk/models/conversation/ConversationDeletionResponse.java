@@ -1,12 +1,28 @@
 package com.sportstalk.models.conversation;
 
+import com.sportstalk.api.conversation.HasConversationID;
 import com.sportstalk.models.common.Kind;
 
-public class ConversationDeletionResponse extends HasConversationID {
+/**
+ * This is the class describing the data model for the server response that is sent when a conversation is deleted.
+ *
+ */
+public class ConversationDeletionResponse implements HasConversationID {
     private Kind deletedConversation;
     private String userid;
     private int deletedConversations;
     private int deletedComments;
+    private String conversationId;
+
+    @Override
+    public String getConversationId() {
+        return conversationId;
+    }
+
+    @Override
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
 
     public Kind getDeletedConversation() {
         return deletedConversation;

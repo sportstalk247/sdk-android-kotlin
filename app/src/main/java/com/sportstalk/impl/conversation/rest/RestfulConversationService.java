@@ -1,10 +1,11 @@
-package com.sportstalk.impl.rest;
+package com.sportstalk.impl.conversation.rest;
 
 import android.os.Build;
 
 import com.android.volley.VolleyError;
-import com.sportstalk.impl.Utils;
-import com.sportstalk.api.conversation.IConversationManager;
+import com.sportstalk.impl.common.rest.Utils;
+import com.sportstalk.api.conversation.IConversationService;
+import com.sportstalk.impl.common.rest.HttpClient;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.ModerationType;
@@ -26,16 +27,33 @@ import java.util.Map;
 
 import androidx.annotation.RequiresApi;
 
-public class RestfulConversationManager implements IConversationManager {
+/**
+ * This class encapsulates the Sportstalk Conversation REST api.
+ * Typically, you should use the CommentingClient, however there are cases where you will want the extra methods aforded by this service.
+ * Currently, the CommentingClient uses this service behind the scenes, but this is NOT guaranteed.
+ *
+ * You should use this Service if you need to do just conversation object manipulations on the server
+ */
+public class RestfulConversationService implements IConversationService {
 
 
     private SportsTalkConfig sportsTalkConfig;
     private Map<String, String> apiHeaders;
 
-    public RestfulConversationManager(SportsTalkConfig config) {
+    /**
+     * Create a new service.
+     * You only need one of these services per application, as the service is stateless otherwise.
+     * @param config
+     */
+    public RestfulConversationService(SportsTalkConfig config) {
         this.sportsTalkConfig = config;
     }
 
+    /**
+     * Creates a new conversation on the server.
+     * @param conversation
+     * @return
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ConversationResponse createConversation(Conversation conversation) {
@@ -61,9 +79,14 @@ public class RestfulConversationManager implements IConversationManager {
         JSONObject jsonObject = (JSONObject) apiResult.getData();
         ConversationResponse response = null;
         if (apiResult.getErrors() != null) return response;
-        return createConversationResponse(jsonObject, "data");
+        return _createConversationResponse(jsonObject, "data");
     }
 
+    /**
+     * Retrieve details about a conversation from the server
+     * @param conversation
+     * @return the conversation
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ConversationResponse getConversation(Conversation conversation) {
@@ -74,14 +97,19 @@ public class RestfulConversationManager implements IConversationManager {
         ApiResult apiResult = httpClient.execute();
         if (apiResult.getErrors() != null) return null;
         JSONObject jsonObject = (JSONObject) apiResult.getData();
-        return createConversationResponse(jsonObject, "data");
+        return _createConversationResponse(jsonObject, "data");
     }
 
+    /**
+     * Get conversations by property.
+     * @param property
+     * @return a list of conversations with that property string
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public List<Conversation> getConversationsByProperty(String property) {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment?propertyid=").append(property);
+        sb.append(this.sportsTalkConfig.getEndpoint()).append("/"+this.sportsTalkConfig.getAppId()).append("/comment?propertyid=").append(property);
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
@@ -92,7 +120,7 @@ public class RestfulConversationManager implements IConversationManager {
             int size = jsonArray == null ? 0 : jsonArray.length();
             for (int i = 0; i < size; i++) {
                 JSONObject conversionObject = jsonArray.getJSONObject(i);
-                list.add(createConversationResponse(conversionObject));
+                list.add(_createConversationResponse(conversionObject));
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -100,11 +128,15 @@ public class RestfulConversationManager implements IConversationManager {
         return list;
     }
 
+    /**
+     * Get a list of available conversations for your application.
+     * @return the server response
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ConversationListResponse listConversations() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations");
+        sb.append(this.sportsTalkConfig.getEndpoint()).append("/"+this.sportsTalkConfig.getAppId()).append("/comment/conversations");
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
@@ -117,7 +149,7 @@ public class RestfulConversationManager implements IConversationManager {
             int size = jsonArray == null ? 0 : jsonArray.length();
             for (int i = 0; i < size; i++) {
                 JSONObject conversionObject = jsonArray.getJSONObject(i);
-                list.add(createConversationResponse(conversionObject));
+                list.add(_createConversationResponse(conversionObject));
             }
             conversationListResponse.setConversations(list);
         } catch (JSONException e) {
@@ -126,11 +158,16 @@ public class RestfulConversationManager implements IConversationManager {
         return conversationListResponse;
     }
 
+    /**
+     * Get conversations for your customID.
+     * @param customId
+     * @return the list of conversations
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public ConversationListResponse listConversationsByCustomer(String customId) {
+    public ConversationListResponse listConversationsByCustomID(String customId) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/find/conversation/bycustomid?customid=" + customId);
+        sb.append(this.sportsTalkConfig.getEndpoint()).append("/"+this.sportsTalkConfig.getAppId()).append("/comment/find/conversation/bycustomid?customid=" + customId);
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
@@ -143,7 +180,7 @@ public class RestfulConversationManager implements IConversationManager {
             int size = jsonArray == null ? 0 : jsonArray.length();
             for (int i = 0; i < size; i++) {
                 JSONObject conversionObject = jsonArray.getJSONObject(i);
-                list.add(createConversationResponse(conversionObject));
+                list.add(_createConversationResponse(conversionObject));
             }
             conversationListResponse.setConversations(list);
         } catch (JSONException e) {
@@ -152,11 +189,16 @@ public class RestfulConversationManager implements IConversationManager {
         return conversationListResponse;
     }
 
+    /**
+     * Deletes a conversation
+     * @param conversation
+     * @return the server response.
+     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public ConversationDeletionResponse deleteConversation(Conversation conversation) {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/").append(conversation.getConversationId());
+        sb.append(this.sportsTalkConfig.getEndpoint()).append("/"+this.sportsTalkConfig.getAppId()).append("/comment/conversations/").append(conversation.getConversationId());
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "DELETE", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
@@ -183,24 +225,39 @@ public class RestfulConversationManager implements IConversationManager {
         return response;
     }
 
+    /**
+     * Set the config.
+     * @param config
+     */
     @Override
     public void setConfig(SportsTalkConfig config) {
         this.sportsTalkConfig = config;
-        this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
+        this.apiHeaders = Utils.getApiHeaders(sportsTalkConfig.getApiKey());
     }
 
-    private ConversationResponse createConversationResponse(JSONObject jsonObject, String data) {
+    /**
+     * Map data string to JSON.
+     * @param jsonObject
+     * @param data
+     * @return
+     */
+    private ConversationResponse _createConversationResponse(JSONObject jsonObject, String data) {
         ConversationResponse response = new ConversationResponse();
         try {
             JSONObject responseObject = jsonObject.getJSONObject(data);
-            response = createConversationResponse(responseObject);
+            response = _createConversationResponse(responseObject);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return response;
     }
 
-    private ConversationResponse createConversationResponse(JSONObject jsonObject) {
+    /**
+     * Map JSON to the ConversationResponse
+     * @param jsonObject
+     * @return the mapped response
+     */
+    private ConversationResponse _createConversationResponse(JSONObject jsonObject) {
         ConversationResponse response = new ConversationResponse();
         try {
             response.setKind(Kind.conversation);
@@ -229,6 +286,11 @@ public class RestfulConversationManager implements IConversationManager {
         return response;
     }
 
+    /**
+     *
+     * @param response
+     * @return
+     */
     private Comment createComment(JSONObject response) {
         Comment responseComment = new Comment();
         try {
