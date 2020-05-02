@@ -1,10 +1,7 @@
 package com.sportstalk.api
 
 import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.chat.ChatRoom
-import com.sportstalk.models.chat.CreateChatRoomRequest
-import com.sportstalk.models.chat.DeleteChatRoomResponse
-import com.sportstalk.models.chat.UpdateChatRoomRequest
+import com.sportstalk.models.chat.*
 import java.util.concurrent.CompletableFuture
 
 interface ChatApiService {
@@ -36,5 +33,20 @@ interface ChatApiService {
      * - Updates an existing room
      */
     fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
+
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/join
+     * - https://apiref.sportstalk247.com/?version=latest#eb3f78c3-a8bb-4390-ab25-77ce7072ddda
+     * - Join A Room(Authenticated User)
+     */
+    fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/join
+     * - https://apiref.sportstalk247.com/?version=latest#eb3f78c3-a8bb-4390-ab25-77ce7072ddda
+     * - Join A Room(Anonymous User)
+     */
+    fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+
 
 }

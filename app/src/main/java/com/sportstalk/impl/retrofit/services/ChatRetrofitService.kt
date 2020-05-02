@@ -1,10 +1,7 @@
 package com.sportstalk.impl.retrofit.services
 
 import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.chat.ChatRoom
-import com.sportstalk.models.chat.CreateChatRoomRequest
-import com.sportstalk.models.chat.DeleteChatRoomResponse
-import com.sportstalk.models.chat.UpdateChatRoomRequest
+import com.sportstalk.models.chat.*
 import retrofit2.http.*
 import java.util.concurrent.CompletableFuture
 
@@ -34,5 +31,18 @@ interface ChatRetrofitService {
             @Path("chatroomid") chatRoomId: String,
             @Body request: UpdateChatRoomRequest
     ): CompletableFuture<ApiResponse<ChatRoom>>
+
+    @POST("{appId}/chat/rooms/{chatroomid}/join")
+    fun joinRoom(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Body request: JoinChatRoomRequest
+    ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+
+    @POST("{appId}/chat/rooms/{chatRoomIdOrLabel}/join")
+    fun joinRoom(
+            @Path("appId") appId: String,
+            @Path("chatRoomIdOrLabel") chatRoomId: String
+    ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
 }
