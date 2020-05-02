@@ -304,8 +304,6 @@ class UsersApiServiceTest {
         // Should create a test user first
         val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
 
-        val testInputBand = true
-
         val testExpectedResult = ApiResponse<User>(
                 kind = "api.result",
                 /*message = "@handle_test1 was banned",*/
@@ -315,14 +313,14 @@ class UsersApiServiceTest {
                         userid = testInputRequest.userid,
                         handle = testInputRequest.handle,
                         displayname = testInputRequest.displayname,
-                        banned = testInputBand
+                        banned = true
                 )
         )
 
         // WHEN
         val testActualResult = usersApiService.banUser(
                 userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
-                banned = testInputBand
+                banned = true
         ).get()
 
         // THEN
@@ -345,10 +343,74 @@ class UsersApiServiceTest {
         assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
         assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
-        assertTrue { testActualResult.data?.banned == testInputBand }
+        assertTrue { testActualResult.data?.banned == true }
 
         // Perform Delete Test User
         deleteTestUsers(testActualResult.data?.userid)
     }
+
+    @Test
+    fun `6) Restore User`() {
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1",
+                displayname = "Test 1"
+        )
+        // Should create a test user first
+        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+
+        // The test user should be BANNED first
+        usersApiService.banUser(
+                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+                banned = true
+        ).get()
+
+        val testExpectedResult = ApiResponse<User>(
+                kind = "api.result",
+                /*message = "@handle_test1 was banned",*/
+                code = 200,
+                data = User(
+                        kind = "app.user",
+                        userid = testInputRequest.userid,
+                        handle = testInputRequest.handle,
+                        displayname = testInputRequest.displayname,
+                        banned = false
+                )
+        )
+
+        // WHEN
+        val testActualResult = usersApiService.banUser(
+                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+                banned = false
+        ).get()
+
+        // THEN
+        println(
+                "`Restore User`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(User.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        // "@handle_test1 was restored"
+        assertTrue { testActualResult.message?.contains(testCreatedUser.data?.handle!!) == true }
+        assertTrue { testActualResult.message?.contains("was restored") == true }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data != null }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
+        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
+        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
+        assertTrue { testActualResult.data?.banned == false }
+
+        // Perform Delete Test User
+        deleteTestUsers(testActualResult.data?.userid)
+    }
+
+
 
 }
