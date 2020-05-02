@@ -52,4 +52,12 @@ class ChatApiServiceImpl(
                     appId = appId,
                     chatRoomId = chatRoomIdOrLabel
             )
+
+    override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>> =
+            service.listRoomParticipants(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    limit = limit,
+                    cursor = cursor
+            )
 }

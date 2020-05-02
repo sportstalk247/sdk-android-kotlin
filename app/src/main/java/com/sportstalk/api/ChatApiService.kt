@@ -48,5 +48,15 @@ interface ChatApiService {
      */
     fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
+    /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/participants?cursor&limit=200
+     * - https://apiref.sportstalk247.com/?version=latest#1b1b82a9-2b2f-4785-993b-baed6e7eba7b
+     * - List all the participants in the specified room
+     */
+    fun listRoomParticipants(
+            chatRoomId: String,
+            limit: Int? = null /* Defaults to 200 on backend API server */,
+            cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>>
 
 }

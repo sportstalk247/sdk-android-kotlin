@@ -444,6 +444,89 @@ class ChatApiServiceTest {
         assertTrue { testActualResult.data?.room == null }
     }
 
+    @Test
+    fun `7) List Room Participants`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}-${System.currentTimeMillis()}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+
+        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                slug = testChatRoomData.slug,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+
+        val testInputJoinRequest = JoinChatRoomRequest(
+                roomid = testCreatedChatRoomData.id!!,
+                userid = testCreatedUserData.userid!!
+        )
+
+        // WHEN
+        val testJoinChatRoomData = chatApiService.joinRoom(request = testInputJoinRequest).get().data!!
+
+        val testExpectedResult = ApiResponse<ListChatRoomParticipantsResponse>(
+                kind = "api.result",
+                message = "Success",
+                code = 200,
+                data = ListChatRoomParticipantsResponse(
+                        kind = "list.chatparticipants",
+                        participants = listOf(
+                                ChatRoomParticipant(
+                                        kind = "chat.participant",
+                                        user = testJoinChatRoomData.user!!
+                                )
+                        )
+                )
+        )
+
+        val testInputChatRoomId = testJoinChatRoomData.room?.id!!
+        val testInputLimit = 10
+
+        // WHEN
+        val testActualResult = chatApiService.listRoomParticipants(
+                chatRoomId = testInputChatRoomId,
+                limit = testInputLimit
+        ).get()
+
+        // THEN
+        println(
+                "`List Room Participants`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(ListChatRoomParticipantsResponse.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.message == testExpectedResult.message }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.participants?.first()?.kind == testExpectedResult.data?.participants?.first()?.kind }
+        assertTrue { testActualResult.data?.participants?.first()?.user == testExpectedResult.data?.participants?.first()?.user }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
 
     object TestData {
         val users = listOf(

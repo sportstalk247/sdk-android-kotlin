@@ -45,4 +45,12 @@ interface ChatRetrofitService {
             @Path("chatRoomIdOrLabel") chatRoomId: String
     ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
+    @GET("{appId}/chat/rooms/{chatroomid}/participants")
+    fun listRoomParticipants(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>>
+
 }
