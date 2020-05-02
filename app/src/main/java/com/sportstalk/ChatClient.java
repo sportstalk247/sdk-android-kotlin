@@ -21,6 +21,7 @@ import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Reaction;
 import com.sportstalk.models.common.ReportReason;
 import com.sportstalk.models.common.ReportType;
+import com.sportstalk.models.common.SearchType;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
 import com.sportstalk.models.common.UserResult;
@@ -339,4 +340,36 @@ public class ChatClient implements IChatClient {
     public UserResult createOrUpdateUser(User user, boolean status) {
         return this.userManager.createOrUpdateUser(user);
     }
+
+    /**
+     * list all users
+     * @param limit
+     * @param cursor
+     * @return
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public List<User> listUsers(int limit, String cursor) {
+        return userManager.listUsers(limit, cursor);
+    }
+
+    /**
+     * deletes a user
+     * @param user
+     * @return
+     */
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public User deleteUser(User user) {
+        return userManager.deleteUser(user);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public List<User> searchUsers(SearchType searchType, int limit) {
+        return userManager.searchUsers(searchType, limit);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public UserResult setBanStatus(User user, boolean status) {
+        return userManager.setBanStatus(user, status);
+    }
+
 }
