@@ -54,7 +54,7 @@ public class RestfulRoomManager implements IRoomManager {
         ApiResult apiResult = httpClient.execute();
         try {
             List<Room> list = new ArrayList<>();
-            JSONArray array = ((JSONObject) apiResult.getData()).getJSONArray("data");
+            JSONArray array = ((JSONObject) apiResult.getData()).getJSONObject("data").getJSONArray("rooms");
             for (int i = 0; i < array.length(); i++) {
                 RoomResult room = new RoomResult();
                 room.setKind(Kind.chat);
@@ -63,7 +63,7 @@ public class RestfulRoomManager implements IRoomManager {
                 room.setName(array.getJSONObject(i).getString("name"));
                 room.setDescription(array.getJSONObject(i).getString("description"));
                 room.setSlug(array.getJSONObject(i).getString("slug"));
-                room.setEnableEnterandExit(array.getJSONObject(i).getBoolean("enableEnterAndExit"));
+                room.setEnableEnterandExit(array.getJSONObject(i).getBoolean("enableenterandexit"));
                 room.setRoomIsOpen(array.getJSONObject(i).getBoolean("open"));
                 room.setInRoom(array.getJSONObject(i).getInt("inroom"));
                 room.setWhenModified(array.getJSONObject(i).getString("whenmodified"));
