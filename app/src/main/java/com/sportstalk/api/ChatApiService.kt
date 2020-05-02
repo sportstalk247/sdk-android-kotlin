@@ -3,6 +3,7 @@ package com.sportstalk.api
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatRoom
 import com.sportstalk.models.chat.CreateRoomRequest
+import com.sportstalk.models.chat.DeleteChatRoomResponse
 import java.util.concurrent.CompletableFuture
 
 interface ChatApiService {
@@ -20,5 +21,14 @@ interface ChatApiService {
      * - Get the details for a room
      */
     fun getRoomDetails(chatRoomId: String): CompletableFuture<ApiResponse<ChatRoom>>
+
+    /**
+     * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}
+     * - https://apiref.sportstalk247.com/?version=latest#c5ae345d-004d-478a-b543-5abaf691000d
+     * - Deletes the specified room and all events contained therein) by ID
+     */
+    fun deleteRoom(chatRoomId: String): CompletableFuture<ApiResponse<DeleteChatRoomResponse>>
+
+
 
 }

@@ -6,6 +6,7 @@ import com.sportstalk.Dependencies
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatRoom
 import com.sportstalk.models.chat.CreateRoomRequest
+import com.sportstalk.models.chat.DeleteChatRoomResponse
 import com.sportstalk.models.users.User
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
@@ -79,7 +80,10 @@ class ChatApiServiceTest {
      * Helper function to clean up Test Users from the Backend Server
      */
     private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
-        // TODO::
+        for(id in chatRoomIds) {
+            id ?: continue
+            chatApiService.deleteRoom(chatRoomId = id).get()
+        }
     }
 
     @Test
@@ -201,6 +205,57 @@ class ChatApiServiceTest {
 
         // Perform Delete Test User
         deleteTestChatRooms(testActualResult.data?.id)
+    }
+
+    @Test
+    fun `3) Delete Room`() {
+        // GIVEN
+        val testData = TestData.chatRooms(appId).first()
+        val testInputRequest = CreateRoomRequest(
+                name = testData.name!!,
+                slug = testData.slug,
+                description = testData.description,
+                moderation = testData.moderation,
+                enableactions = testData.enableactions,
+                enableenterandexit = testData.enableenterandexit,
+                enableprofanityfilter = testData.enableprofanityfilter,
+                delaymessageseconds = testData.delaymessageseconds,
+                roomisopen = testData.open,
+                maxreports = testData.maxreports
+        )
+
+        val testCreatedChatRoomData = chatApiService.createRoom(testInputRequest).get().data!!
+
+        val testExpectedResult = ApiResponse<DeleteChatRoomResponse>(
+                kind = "api.result",
+                message = "Room deleted successfully.",
+                code = 200,
+                data = DeleteChatRoomResponse(
+                        kind = "deleted.room",
+                        deletedEventsCount = 0,
+                        room = testCreatedChatRoomData
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.deleteRoom(
+                chatRoomId = testCreatedChatRoomData.id!!
+        ).get()
+
+        // THEN
+        println(
+                "`Delete Room`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(DeleteChatRoomResponse.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.message == testExpectedResult.message }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.room == testExpectedResult.data?.room }
     }
 
 

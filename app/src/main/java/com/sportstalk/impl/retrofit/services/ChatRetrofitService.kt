@@ -3,10 +3,8 @@ package com.sportstalk.impl.retrofit.services
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatRoom
 import com.sportstalk.models.chat.CreateRoomRequest
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import com.sportstalk.models.chat.DeleteChatRoomResponse
+import retrofit2.http.*
 import java.util.concurrent.CompletableFuture
 
 interface ChatRetrofitService {
@@ -22,5 +20,11 @@ interface ChatRetrofitService {
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String
     ): CompletableFuture<ApiResponse<ChatRoom>>
+
+    @DELETE("{appId}/chat/rooms/{chatroomid}")
+    fun deleteRoom(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String
+    ): CompletableFuture<ApiResponse<DeleteChatRoomResponse>>
 
 }
