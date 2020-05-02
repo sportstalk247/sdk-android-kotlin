@@ -15,8 +15,10 @@ import net.bytebuddy.utility.RandomString
 import okhttp3.OkHttpClient
 import org.junit.After
 import org.junit.Before
+import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import retrofit2.Retrofit
@@ -24,6 +26,7 @@ import kotlin.test.assertTrue
 
 @UnstableDefault
 @ImplicitReflectionSerializer
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 class UsersApiServiceTest {
 
@@ -61,7 +64,7 @@ class UsersApiServiceTest {
     }
 
     @Test
-    fun `Create or Update User`() {
+    fun `1) Create or Update User`() {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -82,12 +85,16 @@ class UsersApiServiceTest {
 
         // WHEN
         val testActualResult = usersApiService.createUpdateUser(request = testInputRequest).get()
-        println(
-                "`Create or Update User`() -> testActualResult = " +
-                        json.stringify(ApiResponse.serializer(User.serializer()), testActualResult)
-        )
 
         // THEN
+        println(
+                "`Create or Update User`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(User.serializer()),
+                                testActualResult
+                        )
+        )
+        
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.message == testExpectedResult.message }
         assertTrue { testActualResult.code == testExpectedResult.code }
@@ -100,7 +107,7 @@ class UsersApiServiceTest {
     }
 
     @Test
-    fun `Delete User`() {
+    fun `2) Delete User`() {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -124,22 +131,74 @@ class UsersApiServiceTest {
         val testActualResult = usersApiService.deleteUser(
                 userId = testCreatedUser.data?.userid ?: testInputRequest.userid
         ).get()
-        println(
-                "`Delete User`() -> testActualResult = " +
-                        json.stringify(ApiResponse.serializer(DeleteUserResponse.serializer()), testActualResult)
-        )
 
         // THEN
+        println(
+                "`Delete User`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(DeleteUserResponse.serializer()),
+                                testActualResult
+                        )
+        )
+
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.message == testExpectedResult.message }
         assertTrue { testActualResult.code == testExpectedResult.code }
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.user?.userid == testExpectedResult.data?.user?.userid }
-        assertTrue { testActualResult.data?.user?.handle == testExpectedResult.data?.user?.handle }
         assertTrue { testActualResult.data?.user?.handle?.contains(testExpectedResult.data?.user?.handle!!) == true }
         assertTrue { testActualResult.data?.user?.handlelowercase?.contains(testExpectedResult.data?.user?.handle!!.toLowerCase()) == true }
         assertTrue { testActualResult.data?.user?.displayname == testExpectedResult.data?.user?.displayname }
+
+    }
+
+    @Test
+    fun `3) Get User Details`() {
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1",
+                displayname = "Test 1"
+        )
+        // Should create a test user first
+        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+
+        val testExpectedResult = ApiResponse<User>(
+                kind = "api.result",
+                message = "Success",
+                code = 200,
+                data = User(
+                        kind = "app.user",
+                        userid = testInputRequest.userid,
+                        handle = testInputRequest.handle,
+                        displayname = testInputRequest.displayname
+                )
+        )
+
+        // WHEN
+        val testActualResult = usersApiService.getUserDetails(
+                userId = testCreatedUser.data?.userid ?: testInputRequest.userid
+        ).get()
+
+        // THEN
+        println(
+                "`Get User Details`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(User.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.message == testExpectedResult.message }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data != null }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
+        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
+        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
 
     }
 

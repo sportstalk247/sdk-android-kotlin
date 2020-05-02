@@ -23,4 +23,11 @@ interface UsersApiService {
      */
     fun deleteUser(userId: String): CompletableFuture<ApiResponse<DeleteUserResponse>>
 
+    /**
+     * [GET] /{{api_appid}}/user/users/{{userId}}
+     * - https://apiref.sportstalk247.com/?version=latest#3323caa9-cc3d-4569-826c-69070ca51758
+     * - This will return all the information about the user.
+     */
+    fun getUserDetails(userId: String): CompletableFuture<ApiResponse<User>>
+
 }

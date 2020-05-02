@@ -7,10 +7,7 @@ import com.sportstalk.models.users.DeleteUserResponse
 import com.sportstalk.models.users.User
 import retrofit2.Retrofit
 import retrofit2.create
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 import java.util.concurrent.CompletableFuture
 
 class UsersApiServiceImpl(
@@ -32,6 +29,12 @@ class UsersApiServiceImpl(
                     appId = appId,
                     userId = userId
             )
+
+    override fun getUserDetails(userId: String): CompletableFuture<ApiResponse<User>> =
+            service.getUserDetails(
+                    appId = appId,
+                    userId = userId
+            )
 }
 
 interface UsersRetrofitService {
@@ -48,5 +51,11 @@ interface UsersRetrofitService {
             @Path("appId") appId: String,
             @Path("userId") userId: String
     ): CompletableFuture<ApiResponse<DeleteUserResponse>>
+
+    @GET("{appId}/user/users/{userId}")
+    fun getUserDetails(
+            @Path("appId") appId: String,
+            @Path("userId") userId: String
+    ): CompletableFuture<ApiResponse<User>>
 
 }
