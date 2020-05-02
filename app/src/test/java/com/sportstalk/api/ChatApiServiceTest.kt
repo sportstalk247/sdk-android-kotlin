@@ -154,6 +154,54 @@ class ChatApiServiceTest {
         deleteTestChatRooms(testActualResult.data?.id)
     }
 
+    @Test
+    fun `2) Get Room Details`() {
+        // GIVEN
+        val testData = TestData.chatRooms(appId).first()
+        val testInputRequest = CreateRoomRequest(
+                name = testData.name!!,
+                slug = testData.slug,
+                description = testData.description,
+                moderation = testData.moderation,
+                enableactions = testData.enableactions,
+                enableenterandexit = testData.enableenterandexit,
+                enableprofanityfilter = testData.enableprofanityfilter,
+                delaymessageseconds = testData.delaymessageseconds,
+                roomisopen = testData.open,
+                maxreports = testData.maxreports
+        )
+
+        val testCreatedChatRoomData = chatApiService.createRoom(testInputRequest).get().data!!
+
+        val testExpectedResult = ApiResponse<ChatRoom>(
+                kind = "api.result",
+                message = "Success",
+                code = 200,
+                data = testCreatedChatRoomData
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.getRoomDetails(
+                chatRoomId = testCreatedChatRoomData.id!!
+        ).get()
+
+        // THEN
+        println(
+                "`Get Room Details`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(ChatRoom.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.message == testExpectedResult.message }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data == testExpectedResult.data }
+
+        // Perform Delete Test User
+        deleteTestChatRooms(testActualResult.data?.id)
+    }
 
 
     object TestData {

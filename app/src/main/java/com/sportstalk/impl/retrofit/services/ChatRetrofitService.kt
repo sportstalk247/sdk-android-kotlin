@@ -4,6 +4,7 @@ import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatRoom
 import com.sportstalk.models.chat.CreateRoomRequest
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
 import java.util.concurrent.CompletableFuture
@@ -14,6 +15,12 @@ interface ChatRetrofitService {
     fun createRoom(
             @Path("appId") appId: String,
             @Body request: CreateRoomRequest
+    ): CompletableFuture<ApiResponse<ChatRoom>>
+
+    @GET("{appId}/chat/rooms/{chatroomid}")
+    fun getRoomDetails(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String
     ): CompletableFuture<ApiResponse<ChatRoom>>
 
 }

@@ -21,4 +21,10 @@ class ChatApiServiceImpl(
                     appId = appId,
                     request = request
             )
+
+    override fun getRoomDetails(chatRoomId: String): CompletableFuture<ApiResponse<ChatRoom>> =
+            service.getRoomDetails(
+                    appId = appId,
+                    chatRoomId = chatRoomId
+            )
 }
