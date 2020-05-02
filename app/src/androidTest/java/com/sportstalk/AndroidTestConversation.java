@@ -55,7 +55,7 @@ public class AndroidTestConversation {
         sportsTalkConfig.setUser(user);
         chatClient = ChatClient.create(sportsTalkConfig);
 
-        conversationClient = CommentingClient.create(sportsTalkConfig, null, null, null);
+        conversationClient = CommentingClient.create(sportsTalkConfig, null);
 
     }
 
@@ -72,7 +72,7 @@ public class AndroidTestConversation {
         conv.setTags(tgs);
         conv.setProperty("/api");
         // conv.setOwnerUserId("sarah");
-        Conversation createdConversation = conversationClient.createConversation(conv, true);
+        Conversation createdConversation = conversationClient.createConversation(conv);
         Assert.assertTrue(createdConversation.getConversationId().equals(conversationTestId));
     }
 
@@ -129,7 +129,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
-        Comment result = conversationClient.createComment(comment);
+        Comment result = conversationClient.makeComment(comment);
         Assert.assertNotNull(result.getId());
     }
 
@@ -155,7 +155,7 @@ public class AndroidTestConversation {
         tags.add("taga");
         comment.setTags(tags);
         comment.setReplyTo("sarah");
-        Comment result = conversationClient.createComment(comment);
+        Comment result = conversationClient.makeComment(comment);
         Assert.assertNotNull(result);
     }
 
@@ -171,7 +171,7 @@ public class AndroidTestConversation {
         tgs.add("tagb");
         conv.setTags(tgs);
         conv.setProperty("sportstalk247.com/apidemo");
-        Conversation createdConversation = conversationClient.createConversation(conv, true);
+        Conversation createdConversation = conversationClient.createConversation(conv);
         Assert.assertNull(createdConversation);
     }
 
@@ -194,7 +194,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("");
         comment.setTags(tags);
-        Comment result = conversationClient.createComment(comment);
+        Comment result = conversationClient.makeComment(comment);
         Assert.assertNull(result);
     }
 
@@ -316,7 +316,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
-        Comment response = conversationClient.createComment(comment);
+        Comment response = conversationClient.makeComment(comment);
         conv.setConversationId(null);
         conversationClient.setConversation(conv);
         CommentRequest commentRequest = new CommentRequest();
@@ -380,7 +380,7 @@ public class AndroidTestConversation {
         returnConversation.setTags(tgs);
         returnConversation.setMaxCommentLen(0);
         returnConversation.setOwnerUserId("sarah");
-        Conversation updated = conversationClient.createConversation(returnConversation, false);
+        Conversation updated = conversationClient.createConversation(returnConversation);
         Assert.assertEquals(0, updated.getMaxCommentLen());
 
         // create comment
@@ -388,7 +388,7 @@ public class AndroidTestConversation {
         comment.setBody("this is a comment for testing");
         comment.setTags(tgs);
         conversationClient.setConversation(updated);
-        Comment nComment = conversationClient.createComment(comment);
+        Comment nComment = conversationClient.makeComment(comment);
         Assert.assertNull(nComment);
     }
 
@@ -402,7 +402,7 @@ public class AndroidTestConversation {
         conversation.setMaxCommentLen(100);
         conversation.setConversationId("api-conversation-test-demo2");
         conversation.setModerationType(ModerationType.post);
-        Conversation conv = conversationClient.createConversation(conversation, true);
+        Conversation conv = conversationClient.createConversation(conversation);
         Assert.assertNull(conv);
     }
 
