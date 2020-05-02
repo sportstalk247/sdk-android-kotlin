@@ -35,16 +35,29 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [
-                "apiUrlEndpoint": locProp['sportstalk.api.url.endpoint'],
                 "apiAuthToken": locProp['sportstalk.api.auth_token'],
                 "apiAppId": locProp['sportstalk.api.app_id'],
         ]
     }
 
     buildTypes {
+        debug {
+            debuggable true
+
+            manifestPlaceholders = [
+                    // TODO:: When multiple environments are setup(i.e. DEV Environment), change this value accordingly
+                    "apiUrlEndpoint": "https://api.sportstalk247.com/api/v3/"
+            ]
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            manifestPlaceholders = [
+                    // TODO:: When multiple environments are setup(i.e. PROD Environment), change this value accordingly
+                    "apiUrlEndpoint": "https://api.sportstalk247.com/api/v3/"
+            ]
         }
     }
 
