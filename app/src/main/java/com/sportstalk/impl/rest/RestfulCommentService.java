@@ -2,12 +2,12 @@ package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
-import com.sportstalk.impl.Messages;
-import com.sportstalk.impl.Utils;
 import com.sportstalk.api.conversation.ICommentService;
 import com.sportstalk.error.RequireUserException;
 import com.sportstalk.error.SettingsException;
 import com.sportstalk.error.ValidationException;
+import com.sportstalk.impl.Messages;
+import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.Reaction;
@@ -230,7 +230,7 @@ public class RestfulCommentService implements ICommentService {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void vote(Comment comment, Vote vote) {
+    public Comment vote(Comment comment, Vote vote) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/vote");
         Map<String, String> data = new HashMap<>();
@@ -240,6 +240,8 @@ public class RestfulCommentService implements ICommentService {
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
+        //TODO map result
+        return comment;
     }
 
     /**
@@ -249,7 +251,7 @@ public class RestfulCommentService implements ICommentService {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void report(Comment comment, ReportType reportType) {
+    public Comment report(Comment comment, ReportType reportType) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/report");
         Map<String, String> data = new HashMap<>();
@@ -259,6 +261,7 @@ public class RestfulCommentService implements ICommentService {
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
+        return comment;
     }
 
     /**
@@ -270,30 +273,27 @@ public class RestfulCommentService implements ICommentService {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public ReactionResponse react(Comment comment, Reaction reaction, boolean enabled) {
+    public ReactionResponse react(Comment comment, Reaction reaction, boolean enabled) throws RequireUserException, SettingsException {
 
         ReactionResponse reactionResponse = null;
-        try {
-            this.requireConversation();
-            this.requireUser();
+
+        this.requireConversation();
+        this.requireUser();
 
 
-            StringBuilder sb = new StringBuilder();
-            sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/react");
-            Map<String, String> data = new HashMap<>();
-            data.put("userid", user.getUserId());
-            data.put("reaction", Reaction.like.name());
-            data.put("reacted", String.valueOf(true));
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/react");
+        Map<String, String> data = new HashMap<>();
+        data.put("userid", user.getUserId());
+        data.put("reaction", Reaction.like.name());
+        data.put("reacted", String.valueOf(true));
 
-            HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
-            ApiResult apiResult = httpClient.execute();
-            JSONObject jsonObject = (JSONObject) apiResult.getData();
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
+        ApiResult apiResult = httpClient.execute();
+        JSONObject jsonObject = (JSONObject) apiResult.getData();
 
-            reactionResponse = new ReactionResponse();
+        reactionResponse = new ReactionResponse();
 
-        } catch (SettingsException se) {
-        } catch (RequireUserException rue) {
-        }
 
         return reactionResponse;
     }
@@ -439,3 +439,4 @@ public class RestfulCommentService implements ICommentService {
     }
 
 }
+

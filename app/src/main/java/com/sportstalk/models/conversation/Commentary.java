@@ -1,5 +1,4 @@
 package com.sportstalk.models.conversation;
-
 import java.util.List;
 
 /**

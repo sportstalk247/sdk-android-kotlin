@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface IChatClient extends ITalkClient {
 
-    /**
+     /**
      * Provide callbacks to power your UI when new events are received
      * @param eventHandlerConfig
      */
@@ -28,7 +28,7 @@ public interface IChatClient extends ITalkClient {
      */
     void startChat();
 
-    /**
+     /**
      * End the chat session.  New events will not be retrieved. However, if the underlying chat implementation has an event queue that still has items remaining,
      * those items may continue to be emitted until that queue is drained.  This is implementation specific.
      */
@@ -42,13 +42,13 @@ public interface IChatClient extends ITalkClient {
      */
     ApiResult report(EventResult eventResult, ReportType reportType);
 
-    /**
+      /**
      * List available chat rooms.
      * @return
      */
     List<Room> listRooms();
 
-    /**
+      /**
      * Add a user to a room. Necessary before being able to contribute to the room.
      * You do not need to join a room to read the chat, only to participate.
      * @param room
@@ -56,13 +56,13 @@ public interface IChatClient extends ITalkClient {
      */
     RoomUserResult joinRoom(RoomResult room);
 
-    /**
+        /**
      * Get the currently set room, if any.  May return null if no room has been set or the room was deleted.
      * @return
      */
     Room getCurrentRoom();
 
-    /**
+     /**
      * List participants in a room.  Requires you to have joined a room first.
      * @param cursor
      * @param maxResults

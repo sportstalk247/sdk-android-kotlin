@@ -1,18 +1,14 @@
 package com.sportstalk;
 
-import android.annotation.TargetApi;
-import android.content.Context;
 import android.os.Build;
 
 import com.sportstalk.api.APICallback;
-import com.sportstalk.impl.Utils;
-import com.sportstalk.api.chat.EventHandler;
 import com.sportstalk.api.chat.IChatClient;
+import com.sportstalk.error.SettingsException;
 import com.sportstalk.impl.Messages;
 import com.sportstalk.impl.rest.RestfulEventManager;
 import com.sportstalk.impl.rest.RestfulRoomManager;
-import com.sportstalk.impl.rest.RestfulUserManager;
-import com.sportstalk.error.SettingsException;
+import com.sportstalk.impl.common.rest.RestfulUserManager;
 import com.sportstalk.models.chat.AdvertisementOptions;
 import com.sportstalk.models.chat.CommandOptions;
 import com.sportstalk.models.chat.EventHandlerConfig;
@@ -28,11 +24,8 @@ import com.sportstalk.models.common.ReportType;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
 import com.sportstalk.models.common.UserResult;
-import com.sportstalk.impl.rest.HttpClient;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import androidx.annotation.RequiresApi;
 
@@ -54,38 +47,7 @@ public class ChatClient implements IChatClient {
      * default endpoint
      **/
     private String endpoint = "https://api.sportstalk247.com/api/v3"; //"http://api-origin.sportstalk247.com/api/v3";
-    /**
-     * api key
-     **/
-    private String apiKey;
-    /**
-     * application id
-     **/
-    private String appId;
-    /**
-     * user id
-     **/
-    private String userId;
-    /**
-     * room id
-     **/
-    private String roomIdentifier;
-    /**
-     * endpoint for room related activities
-     **/
-    private String roomAPI;
-    /**
-     * endpoint for command related activities
-     **/
-    private String commandAPI;
-    /**
-     * endpoint for update related activities
-     **/
-    private String updatesAPI;
-    /**
-     * application context
-     **/
-    private Context context;
+
     /**
      * user object
      **/
@@ -94,10 +56,7 @@ public class ChatClient implements IChatClient {
      * sports talk configuration file
      **/
     private SportsTalkConfig sportsTalkConfig;
-    /**
-     * call back used to fetch poll data
-     **/
-    private EventHandler eventHandler;
+
     private RestfulRoomManager roomManager;
     /**
      * Restful event manager
@@ -139,17 +98,6 @@ public class ChatClient implements IChatClient {
         this.endpoint = endpoint;
     }
 
-    /**
-     * lists all users
-     */
-    @TargetApi(Build.VERSION_CODES.N)
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    public void listUsers() {
-        Map<String, String> data = new HashMap<>();
-        HttpClient httpClient = new HttpClient(context, "GET", this.endpoint + "/user/?limit=100&cursor=", new Utils().getApiHeaders(apiKey), data, apiCallback);
-        httpClient.setAction("listUsers");
-        httpClient.execute();
-    }
 
     @Override
     public void setEventHandlers(EventHandlerConfig eventHandlerConfig) {

@@ -1,5 +1,4 @@
 package com.sportstalk.models.conversation;
-
 public class CommentRequest {
 
     private String cursor;

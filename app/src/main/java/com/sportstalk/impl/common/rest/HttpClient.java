@@ -1,5 +1,4 @@
 package com.sportstalk.impl.common.rest;
-
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -173,3 +172,4 @@ public class HttpClient {
     }
 
 }
+

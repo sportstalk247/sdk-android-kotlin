@@ -3,8 +3,8 @@ package com.sportstalk.impl.rest;
 import android.os.Build;
 
 import com.android.volley.VolleyError;
-import com.sportstalk.impl.Utils;
 import com.sportstalk.api.conversation.IConversationService;
+import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.ModerationType;

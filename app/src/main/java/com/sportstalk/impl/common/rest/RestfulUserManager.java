@@ -1,8 +1,10 @@
 package com.sportstalk.impl.common.rest;
 
+import android.annotation.TargetApi;
 import android.os.Build;
 
 import com.sportstalk.api.chat.IUserManager;
+import com.sportstalk.impl.rest.HttpClient;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.SportsTalkConfig;
@@ -28,7 +30,7 @@ public class RestfulUserManager implements IUserManager {
 
     private void setConfig(SportsTalkConfig sportsTalkConfig) {
         this.sportsTalkConfig = sportsTalkConfig;
-        this.apiHeaders = Utils.getApiHeaders(sportsTalkConfig.getApiKey());
+        this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
     }
 
 
@@ -90,4 +92,17 @@ public class RestfulUserManager implements IUserManager {
         }
         return userResult;
     }
+
+    /**
+     * lists all users
+     */
+    @TargetApi(Build.VERSION_CODES.N)
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void listUsers() {
+        Map<String, String> data = new HashMap<>();
+        HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sportsTalkConfig.getEndpoint() + "/user/?limit=100&cursor=", apiHeaders, data, sportsTalkConfig.getApiCallback());
+        httpClient.setAction("listUsers");
+        httpClient.execute();
+    }
+
 }
