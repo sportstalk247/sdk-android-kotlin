@@ -41,4 +41,11 @@ interface UsersApiService {
             cursor: String? = null
     ): CompletableFuture<ApiResponse<ListUsersResponse>>
 
+    /**
+     * [POST] /{{api_appid}}/user/users/{{userId}}/ban
+     * - https://apiref.sportstalk247.com/?version=latest#211d5614-b251-4815-bf76-d8f6f66f97ab
+     * - Will toggle the user's banned flag
+     */
+    fun banUser(userId: String, banned: Boolean): CompletableFuture<ApiResponse<User>>
+
 }

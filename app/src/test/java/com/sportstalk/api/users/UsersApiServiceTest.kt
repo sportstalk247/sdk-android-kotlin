@@ -64,7 +64,10 @@ class UsersApiServiceTest {
     fun cleanUp() {
     }
 
-    fun deleteTestUsers(vararg userIds: String?) {
+    /**
+     * Helper function to clean up Test Users from the Backend Server
+     */
+    private fun deleteTestUsers(vararg userIds: String?) {
         for(id in userIds) {
             id ?: continue
             usersApiService.deleteUser(userId = id).get()
@@ -288,6 +291,64 @@ class UsersApiServiceTest {
 
         // Perform Delete Test User
         deleteTestUsers(testCreatedUser1.userid, testCreatedUser2.userid)
+    }
+
+    @Test
+    fun `5) Ban User`() {
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1",
+                displayname = "Test 1"
+        )
+        // Should create a test user first
+        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+
+        val testInputBand = true
+
+        val testExpectedResult = ApiResponse<User>(
+                kind = "api.result",
+                /*message = "@handle_test1 was banned",*/
+                code = 200,
+                data = User(
+                        kind = "app.user",
+                        userid = testInputRequest.userid,
+                        handle = testInputRequest.handle,
+                        displayname = testInputRequest.displayname,
+                        banned = testInputBand
+                )
+        )
+
+        // WHEN
+        val testActualResult = usersApiService.banUser(
+                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+                banned = testInputBand
+        ).get()
+
+        // THEN
+        println(
+                "`Ban User`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(User.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        // "@handle_test1 was banned"
+        assertTrue { testActualResult.message?.contains(testCreatedUser.data?.handle!!) == true }
+        assertTrue { testActualResult.message?.contains("was banned") == true }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data != null }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
+        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
+        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
+        assertTrue { testActualResult.data?.banned == testInputBand }
+
+        // Perform Delete Test User
+        deleteTestUsers(testActualResult.data?.userid)
     }
 
 }

@@ -2,10 +2,7 @@ package com.sportstalk.impl.retrofit.users
 
 import com.sportstalk.api.users.UsersApiService
 import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.users.CreateUpdateUserRequest
-import com.sportstalk.models.users.DeleteUserResponse
-import com.sportstalk.models.users.ListUsersResponse
-import com.sportstalk.models.users.User
+import com.sportstalk.models.users.*
 import retrofit2.Retrofit
 import retrofit2.create
 import retrofit2.http.*
@@ -43,6 +40,13 @@ class UsersApiServiceImpl(
                     cursor = cursor,
                     limit = limit
             )
+
+    override fun banUser(userId: String, banned: Boolean): CompletableFuture<ApiResponse<User>> =
+            service.banUser(
+                    appId = appId,
+                    userId = userId,
+                    request = BanUserRequest(banned)
+            )
 }
 
 interface UsersRetrofitService {
@@ -72,5 +76,12 @@ interface UsersRetrofitService {
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null
     ): CompletableFuture<ApiResponse<ListUsersResponse>>
+
+    @POST("{appId}/user/users/{userId}/ban")
+    fun banUser(
+            @Path("appId") appId: String,
+            @Path("userId") userId: String,
+            @Body request: BanUserRequest
+    ): CompletableFuture<ApiResponse<User>>
 
 }
