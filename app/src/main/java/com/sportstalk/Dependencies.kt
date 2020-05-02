@@ -7,7 +7,6 @@ import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import java.util.concurrent.TimeUnit
 
 object Dependencies {
@@ -56,7 +55,7 @@ object Dependencies {
 
         @JvmStatic
         fun getInstance(context: Context): OkHttpClient {
-            if(mInstance != null) {
+            if (mInstance != null) {
                 return mInstance!!
             }
 
@@ -66,8 +65,8 @@ object Dependencies {
                     .addInterceptor { chain ->
                         chain.proceed(
                                 chain.request().newBuilder()
-                                    .addHeader("x-api-token", authToken)
-                                    .build()
+                                        .addHeader("x-api-token", authToken)
+                                        .build()
                         )
                     }
                     .connectTimeout(60, TimeUnit.SECONDS)
@@ -89,14 +88,13 @@ object Dependencies {
                 okHttpClient: OkHttpClient,
                 urlEndpoint: String
         ): retrofit2.Retrofit {
-            if(mInstance != null) {
+            if (mInstance != null) {
                 return mInstance!!
             }
 
             return retrofit2.Retrofit.Builder()
                     .baseUrl(urlEndpoint)
                     .addConverterFactory(Json.asConverterFactory(MediaType.get("application/json")))
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .client(okHttpClient)
                     .build()
         }
