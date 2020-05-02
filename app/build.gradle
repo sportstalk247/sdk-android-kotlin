@@ -1,27 +1,73 @@
 //apply plugin: 'com.android.application'
 apply plugin: 'com.android.library'
 
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-android-extensions'
+
+apply plugin: 'kotlin-kapt'
+
 android {
-    compileSdkVersion 28
-    testOptions.unitTests.includeAndroidResources = true
+
+    /* Prepare signing config credentials */
+    Properties locProp = new Properties()
+    File propFile = project.rootProject.file('local.properties')
+    if (propFile.exists()) {
+        locProp.load(propFile.newDataInputStream())
+    }
+
+    buildToolsVersion = rootProject.ext.buildToolsVersion
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    lintOptions {
+        abortOnError false
+    }
+
     defaultConfig {
 //        applicationId "com.sportstalk.myapplication"
-        minSdkVersion 22
-        targetSdkVersion 28
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders = [
+                "apiAuthToken": locProp['sportstalk.api.auth_token'],
+                "apiAppId": locProp['sportstalk.api.app_id'],
+        ]
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    kapt {
+        generateStubs = true
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+
+    // https://stackoverflow.com/a/48988779/11419056
+    // * Go to Build, Execution, Deployment > Compiler > Kotlin Compiler BUT Other Settings > Kotlin compiler
+    // * Change the Target JVM version to 1.8, then Apply
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/main.kotlin_module'
+    }
+
     testOptions {
         unitTests {
             includeAndroidResources = true
-
+            returnDefaultValues = true
         }
 
     }
@@ -31,22 +77,45 @@ dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.volley:volley:1.1.1'
     testImplementation 'org.apache.httpcomponents:httpclient:4.5'
-    testImplementation 'junit:junit:4.12'
-    testImplementation 'org.robolectric:robolectric:4.3'
-    testImplementation 'org.mockito:mockito-all:1.10.19'
 
-    implementation "androidx.lifecycle:lifecycle-runtime:2.0.0"
-    implementation "androidx.lifecycle:lifecycle-extensions:2.0.0"
+    testImplementation "org.robolectric:robolectric:$rootProject.roboelectric"
+    // testImplementation 'org.mockito:mockito-all:1.10.19'
 
-    testImplementation 'androidx.test:core:1.0.0';
-    testImplementation 'androidx.test.ext:junit:1.0.0';
-    testImplementation 'androidx.test:runner:1.1.0';
-    testImplementation 'androidx.test:rules:1.1.0'
+    // Jetbrains Kotlin Dependencies
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 
-    androidTestImplementation 'junit:junit:4.12';
-    androidTestImplementation 'androidx.test:core:1.0.0';
-    androidTestImplementation 'androidx.test.ext:junit:1.0.0';
-    androidTestImplementation 'androidx.test:runner:1.1.0';
-    androidTestImplementation 'androidx.test:rules:1.1.0'
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofitVersion"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofitVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+
+    // RxAndroid
+    implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxAndroidVersion"
+    implementation "io.reactivex.rxjava2:rxkotlin:$rootProject.rxkotlinVersion"
+
+    // AndroidX Lifecycle
+    implementation "androidx.lifecycle:lifecycle-extensions:$androidXLifecycleVersion"
+    kapt "androidx.lifecycle:lifecycle-compiler:$androidXLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidXLifecycleVersion"
+
+    // Coroutine
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
+    testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
+
+    androidTestImplementation "androidx.test:runner:$rootProject.androidXTest"
+    androidTestImplementation "androidx.test:rules:$rootProject.androidXTest"
+    androidTestImplementation "junit:junit:$rootProject.ext.junitVersion"
+    androidTestImplementation "org.mockito:mockito-android:$rootProject.ext.mockitoVersion"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.androidXTestExt"
 }
 
