@@ -17,12 +17,16 @@ public interface EventHandler {
 
     void onAdminCommand(Event event);
 
+    /** this method is fired when a reply to a message */
     void onReply(Event event);
 
+    /** this method is fired when a message is deleted */
     void onPurge(Event event);
 
+    /* this method is fired when event type speech*/
     void onSpeech(Event event);
 
+    /** this method is fired when a new chat message is sent*/
     void onChat(Event event);
 
     void onNetworkResponse(List<EventResult> list);

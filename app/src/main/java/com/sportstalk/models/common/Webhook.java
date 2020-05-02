@@ -16,7 +16,7 @@ public class Webhook {
     private String url;
     private boolean enabled;
     private WebhookType type;
-    private List<EventResult> events;
+    private List<WebhooKEvent> events;
 
     /**
      * The Sportstalk ID of the webhook
@@ -106,7 +106,7 @@ public class Webhook {
      * Get the events that trigger the hook
      * @return event list
      */
-    public List<EventResult> getEvents() {
+    public List<WebhooKEvent> getEvents() {
         return events;
     }
 
@@ -115,7 +115,7 @@ public class Webhook {
      * If you set invalid types for the hook, then updating the hook will result in an error from the server.
      * To update settings on the server, use the WebhookService.
      */
-    public void setEvents(List<EventResult> events) {
+    public void setEvents(List<WebhooKEvent> events) {
         this.events = events;
     }
 }
