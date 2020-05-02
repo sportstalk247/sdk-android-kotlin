@@ -2,6 +2,8 @@ package com.sportstalk.api.conversation;
 
 import com.sportstalk.api.common.ISportsTalkConfigurable;
 import com.sportstalk.api.common.IUserConfigurable;
+import com.sportstalk.error.RequireUserException;
+import com.sportstalk.error.SettingsException;
 import com.sportstalk.models.common.Reaction;
 import com.sportstalk.models.common.ReportType;
 import com.sportstalk.models.common.SportsTalkConfig;
@@ -13,10 +15,10 @@ import com.sportstalk.models.conversation.Vote;
 
 import java.util.List;
 
-public interface ICommentingClient extends ISportsTalkConfigurable, IUserConfigurable {
+public interface IConversationClient extends ISportsTalkConfigurable, IUserConfigurable {
     SportsTalkConfig getConfig();
 
-    Conversation createConversation(Conversation conversation);
+    Conversation createConversation(Conversation conversation, boolean status);
 
     Conversation setConversation(Conversation conversation);
 
@@ -26,8 +28,7 @@ public interface ICommentingClient extends ISportsTalkConfigurable, IUserConfigu
 
     ConversationDeletionResponse deleteConversation(Conversation conversation);
 
-    Comment makeComment(Comment comment);
-    Comment makeComment(Comment comment, String replyTo);
+    Comment createComment(Comment comment);
 
     Comment getComment(Comment comment);
 
@@ -35,7 +36,7 @@ public interface ICommentingClient extends ISportsTalkConfigurable, IUserConfigu
 
     Comment updateComment(Comment comment);
 
-    Comment reactToComment(Comment comment, Reaction reaction);
+    Comment reactToComment(Comment comment, Reaction reaction) throws SettingsException, RequireUserException;
 
     Comment voteOnComment(Comment comment, Vote vote);
 
@@ -45,4 +46,3 @@ public interface ICommentingClient extends ISportsTalkConfigurable, IUserConfigu
 
     List<Comment> getComments(CommentRequest commentRequest, Conversation conversation);
 }
-

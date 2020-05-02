@@ -1,10 +1,7 @@
 package com.sportstalk;
-
 import com.sportstalk.api.conversation.ICommentService;
 import com.sportstalk.api.conversation.ICommentingClient;
 import com.sportstalk.api.conversation.IConversationService;
-import com.sportstalk.error.RequireUserException;
-import com.sportstalk.error.SettingsException;
 import com.sportstalk.impl.rest.RestfulCommentService;
 import com.sportstalk.impl.rest.RestfulConversationService;
 import com.sportstalk.models.common.Reaction;
@@ -212,7 +209,7 @@ public class CommentingClient implements ICommentingClient {
      * @return
      */
     @Override
-    public Comment reactToComment(Comment comment, Reaction reaction) throws RequireUserException, SettingsException {
+    public Comment reactToComment(Comment comment, Reaction reaction) {
         ReactionResponse reactionResponse = commentService.react(comment, reaction, true);
         return comment;
     }
@@ -224,8 +221,9 @@ public class CommentingClient implements ICommentingClient {
      * @return
      */
     @Override
-    public Comment voteOnComment(Comment comment, Vote vote) throws RequireUserException {
-       return commentService.vote(comment, vote);
+    public Comment voteOnComment(Comment comment, Vote vote) {
+        commentService.vote(comment, vote);
+        return comment;
     }
 
     /**
@@ -235,7 +233,7 @@ public class CommentingClient implements ICommentingClient {
      * @return
      */
     @Override
-    public Comment reportComment(Comment comment, ReportType reportType) throws RequireUserException {
+    public Comment reportComment(Comment comment, ReportType reportType) {
         commentService.report(comment, reportType);
         return comment;
     }

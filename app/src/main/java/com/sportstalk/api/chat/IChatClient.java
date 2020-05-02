@@ -26,13 +26,13 @@ public interface IChatClient extends ITalkClient {
     /**
      * Begin receiving new events from the Sportstalk Server.
      */
-    void startChat();
+    void startTalk();
 
      /**
      * End the chat session.  New events will not be retrieved. However, if the underlying chat implementation has an event queue that still has items remaining,
      * those items may continue to be emitted until that queue is drained.  This is implementation specific.
      */
-    void stopChat();
+    void stopTalk();
 
     /**
      * Report a chat event for violating community standards
