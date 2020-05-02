@@ -128,7 +128,6 @@ public class RestfulConversationService implements IConversationService {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     public ConversationListResponse listConversationsByCustomer(String customId) {
-
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/find/conversation/bycustomid?customid=" + customId);
         Map<String, String> data = new HashMap<>();

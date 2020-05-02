@@ -164,29 +164,20 @@ public class RestfulConversationService implements IConversationService {
      * @return the list of conversations
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public ConversationListResponse listConversationsByCustomID(String customId) {
-
+    public ConversationResponse listConversationsByCustomID(String customId) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/"+this.sportsTalkConfig.getAppId()).append("/comment/find/conversation/bycustomid?customid=" + customId);
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
-        List<Conversation> list = new ArrayList<>();
-        ConversationListResponse conversationListResponse = new ConversationListResponse();
-
         try {
-            JSONArray jsonArray = jsonObject.getJSONObject("data").getJSONArray("conversations");
-            int size = jsonArray == null ? 0 : jsonArray.length();
-            for (int i = 0; i < size; i++) {
-                JSONObject conversionObject = jsonArray.getJSONObject(i);
-                list.add(_createConversationResponse(conversionObject));
-            }
-            conversationListResponse.setConversations(list);
+            JSONObject dataObject = jsonObject.getJSONObject("data");
+            return _createConversationResponse(dataObject);
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return conversationListResponse;
+        return null;
     }
 
     /**
@@ -277,7 +268,9 @@ public class RestfulConversationService implements IConversationService {
             response.setTags(tags);
 
             response.setCustomId(jsonObject.getString("customid"));
+            if(jsonObject.has("udf1"))
             response.setUdf1(jsonObject.getString("udf1"));
+            if(jsonObject.has("udf2"))
             response.setUdf2(jsonObject.getString("udf2"));
             response.setCommentCount(jsonObject.getInt("commentcount"));
         } catch (JSONException e) {
