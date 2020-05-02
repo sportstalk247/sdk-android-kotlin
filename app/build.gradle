@@ -7,7 +7,13 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
+apply plugin: 'kotlinx-serialization'
+
 android {
+
+    buildToolsVersion '29.0.0'
+
+    compileSdkVersion 28
 
     /* Prepare signing config credentials */
     Properties locProp = new Properties()
@@ -15,10 +21,6 @@ android {
     if (propFile.exists()) {
         locProp.load(propFile.newDataInputStream())
     }
-
-    buildToolsVersion = rootProject.ext.buildToolsVersion
-
-    compileSdkVersion rootProject.ext.compileSdkVersion
 
     lintOptions {
         abortOnError false
@@ -85,10 +87,11 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinx_serialization_version"
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
-    implementation "com.squareup.retrofit2:converter-moshi:$rootProject.retrofitVersion"
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$rootProject.retrofitKotlinxSerializationConverterVersion")
     implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofitVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
