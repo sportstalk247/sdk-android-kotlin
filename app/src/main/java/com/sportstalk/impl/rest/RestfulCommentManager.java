@@ -2,12 +2,12 @@ package com.sportstalk.impl.rest;
 
 import android.os.Build;
 
-import com.sportstalk.api.conversation.ICommentService;
+import com.sportstalk.impl.Messages;
+import com.sportstalk.impl.common.rest.Utils;
+import com.sportstalk.api.conversation.ICommentManager;
 import com.sportstalk.error.RequireUserException;
 import com.sportstalk.error.SettingsException;
 import com.sportstalk.error.ValidationException;
-import com.sportstalk.impl.Messages;
-import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.Reaction;
@@ -33,25 +33,18 @@ import java.util.Map;
 
 import androidx.annotation.RequiresApi;
 
-/**
- * This is the service for managing comments via REST.
- * Most of the time you probably want the CommentingClient.
- */
-public class RestfulCommentService implements ICommentService {
+public class RestfulCommentManager implements ICommentManager {
     private SportsTalkConfig sportsTalkConfig;
     private User user;
     private Map<String, String> apiHeaders;
     private Conversation conversation;
     private String conversationId;
 
-    public RestfulCommentService(SportsTalkConfig sportsTalkConfig) {
+    public RestfulCommentManager(Conversation conversation, SportsTalkConfig sportsTalkConfig) {
+        if (conversation != null) setConversation(conversation);
         if (sportsTalkConfig != null) setConfig(sportsTalkConfig);
     }
 
-    /**
-     * Set the configuration if not set on construction, or to update the configuration.
-     * @param config
-     */
     @Override
     public void setConfig(SportsTalkConfig config) {
         this.sportsTalkConfig = config;
@@ -59,32 +52,17 @@ public class RestfulCommentService implements ICommentService {
         this.apiHeaders = new Utils().getApiHeaders(sportsTalkConfig.getApiKey());
     }
 
-    /**
-     * Set the user to be used in comments.
-     * @param user
-     */
     @Override
     public void setUser(User user) {
         this.user = user;
     }
 
-    /**
-     * Set the conversation that this comment service will make and read comments to.
-     * @param conversation
-     * @return
-     */
     @Override
     public Conversation setConversation(Conversation conversation) {
         this.conversation = conversation;
         return conversation;
     }
 
-    /**
-     * Create a new comment.
-     * @param comment the comment to create in the converations
-     * @param replyTo optional, if set the comment will be created as a reply to this one.
-     * @return the created comment
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Comment create(Comment comment, Comment replyTo) {
@@ -92,7 +70,7 @@ public class RestfulCommentService implements ICommentService {
             requireUser();
             requireConversation();
             if (replyTo != null) {
-                return makeComment(comment);
+                return createComment(comment);
             }
             return makeReply(comment, replyTo);
         } catch (RequireUserException e) {
@@ -105,13 +83,8 @@ public class RestfulCommentService implements ICommentService {
         return null;
     }
 
-    /**
-     * Creates a comment
-     * @param comment the comment to create
-     * @return the created comment
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private Comment makeComment(Comment comment) {
+    private Comment createComment(Comment comment) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/").append(this.conversation.getConversationId()).append("/comments");
         Map<String, String> data = new HashMap<>();
@@ -131,13 +104,6 @@ public class RestfulCommentService implements ICommentService {
         return createComment(jsonObject, "data");
     }
 
-    /**
-     * Creates the reply comment
-     * @param comment
-     * @param replyTo
-     * @return the created comment
-     * @throws ValidationException
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     private Comment makeReply(Comment comment, Comment replyTo) throws ValidationException {
         if (replyTo.getId() == null) throw new ValidationException(Messages.MISSING_REPLYTO_ID);
@@ -162,11 +128,6 @@ public class RestfulCommentService implements ICommentService {
         return createComment(jsonObject, "data");
     }
 
-    /**
-     * Get a specific comment
-     * @param comment
-     * @return the comment if it exists.
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Comment get(Comment comment) {
@@ -181,11 +142,6 @@ public class RestfulCommentService implements ICommentService {
         return createComment(jsonObject, "data");
     }
 
-    /**
-     * Delete a comment
-     * @param comment
-     * @return server response.
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public CommentDeletionResponse delete(Comment comment) {
@@ -200,14 +156,17 @@ public class RestfulCommentService implements ICommentService {
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
         CommentDeletionResponse response = new CommentDeletionResponse();
+        try {
+            JSONObject dataObject = jsonObject.getJSONObject("data");
+            response.setDeleteComment(Kind.valueOf(dataObject.getString("kind")));
+            String id = dataObject.getJSONObject("comment").getString("id");
+            response.setConversationId(id);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         return response;
     }
 
-    /**
-     * Update an existing comment
-     * @param comment
-     * @return the updated comment
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Comment update(Comment comment) {
@@ -223,14 +182,9 @@ public class RestfulCommentService implements ICommentService {
         return createComment(jsonObject, "data");
     }
 
-    /**
-     * vote on a comment
-     * @param comment
-     * @param vote
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void vote(Comment comment, Vote vote) {
+    public Comment vote(Comment comment, Vote vote) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/vote");
         Map<String, String> data = new HashMap<>();
@@ -240,16 +194,19 @@ public class RestfulCommentService implements ICommentService {
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
+        JSONObject response=null;
+        try {
+            response = jsonObject.getJSONObject("data");
+            return createComment(response);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    /**
-     * Report a comment for violating community principles.
-     * @param comment
-     * @param reportType
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void report(Comment comment, ReportType reportType) {
+    public Comment report(Comment comment, ReportType reportType) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/report");
         Map<String, String> data = new HashMap<>();
@@ -259,25 +216,22 @@ public class RestfulCommentService implements ICommentService {
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
+        JSONObject response=null;
+        try {
+            response = jsonObject.getJSONObject("data");
+            return createComment(response);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    /**
-     * React to a comment
-     * @param comment
-     * @param reaction
-     * @param enabled
-     * @return the reaction response.
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public ReactionResponse react(Comment comment, Reaction reaction, boolean enabled) {
-
+    public ReactionResponse react(Comment comment, Reaction reaction, boolean enabled) throws SettingsException, RequireUserException {
         ReactionResponse reactionResponse = null;
-        try {
             this.requireConversation();
             this.requireUser();
-
-
             StringBuilder sb = new StringBuilder();
             sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/react");
             Map<String, String> data = new HashMap<>();
@@ -288,22 +242,10 @@ public class RestfulCommentService implements ICommentService {
             HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
             ApiResult apiResult = httpClient.execute();
             JSONObject jsonObject = (JSONObject) apiResult.getData();
-
             reactionResponse = new ReactionResponse();
-
-        } catch (SettingsException se) {
-        } catch (RequireUserException rue) {
-        }
-
         return reactionResponse;
     }
 
-    /**
-     * Gets replies to a comment
-     * @param comment
-     * @param commentRequest
-     * @return the list of comments that were replies.
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public List<Comment> getReplies(Comment comment, CommentRequest commentRequest) {
@@ -332,12 +274,6 @@ public class RestfulCommentService implements ICommentService {
         return null;
     }
 
-    /**
-     * Get comments.
-     * @param commentRequest
-     * @param conversation
-     * @return
-     */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public Commentary getComments(CommentRequest commentRequest, Conversation conversation) {
@@ -367,19 +303,11 @@ public class RestfulCommentService implements ICommentService {
         return commentary;
     }
 
-    /**
-     * Get the conversation
-     * @return
-     */
     @Override
     public Conversation getConversation() {
         return this.conversation;
     }
 
-    /**
-     * Used to enforce having a user set for certain operations
-     * @throws RequireUserException
-     */
     private void requireUser() throws RequireUserException {
         if (user == null) throw new RequireUserException(Messages.MUST_SET_USER);
         if (user.getUserId() == null || user.getUserId().isEmpty())
@@ -387,10 +315,6 @@ public class RestfulCommentService implements ICommentService {
         if (user.getHandle() == null) throw new RequireUserException(Messages.USER_NEEDS_HANDLE);
     }
 
-    /**
-     * Used to enforce requiring a conversation to be set for certain operations
-     * @throws SettingsException
-     */
     private void requireConversation() throws SettingsException {
         if (conversation.getConversationId() == null)
             throw new SettingsException(Messages.NO_CONVERSATION_SET);
@@ -414,7 +338,10 @@ public class RestfulCommentService implements ICommentService {
             responseComment.setProfileUrl(userObject.getString("profileurl"));
             responseComment.setBanned(userObject.getBoolean("banned"));
 
+            if(response.has("votescore"))
             responseComment.setVoteScore(response.getInt("votescore"));
+
+            if(response.has("votecont"))
             responseComment.setLikeCount(response.getInt("votecount"));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -422,12 +349,6 @@ public class RestfulCommentService implements ICommentService {
         return responseComment;
     }
 
-    /**
-     * Map JSON to comment object.
-     * @param jsonObject
-     * @param data
-     * @return
-     */
     private Comment createComment(JSONObject jsonObject, String data) {
         if (jsonObject == null) return null;
         try {
@@ -439,4 +360,3 @@ public class RestfulCommentService implements ICommentService {
     }
 
 }
-

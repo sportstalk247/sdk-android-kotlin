@@ -41,6 +41,7 @@ public class Comment extends User {
         return likeCount;
     }
 
+
     /**
      * Set the number of likes on a comment.  This does NOT affect the score on the server.
      * Setting this will have no effect except on the local client display.
@@ -91,7 +92,6 @@ public class Comment extends User {
     public String getBody() {
         return body;
     }
-
     /**
      * Set the comment body.
      * @param body
@@ -99,7 +99,6 @@ public class Comment extends User {
     public void setBody(String body) {
         this.body = body;
     }
-
     /**
      * Get the reply to.  May be (and often is) null or an empty string.
      * @return
@@ -107,7 +106,6 @@ public class Comment extends User {
     public String getReplyTo() {
         return replyTo;
     }
-
     /**
      * Set the replyto parameter. Will not update the server unless use use the update method on the CommentingClient or CommentService.
      * @param replyTo

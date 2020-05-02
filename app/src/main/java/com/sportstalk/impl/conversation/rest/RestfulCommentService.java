@@ -1,5 +1,4 @@
 package com.sportstalk.impl.conversation.rest;
-
 import android.os.Build;
 
 import com.sportstalk.impl.Messages;
@@ -244,7 +243,7 @@ public class RestfulCommentService implements ICommentService {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public Comment vote(Comment comment, Vote vote) {
+    public void vote(Comment comment, Vote vote) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/vote");
         Map<String, String> data = new HashMap<>();
@@ -254,7 +253,6 @@ public class RestfulCommentService implements ICommentService {
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
-        return comment;
     }
 
     /**
@@ -264,7 +262,7 @@ public class RestfulCommentService implements ICommentService {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public Comment report(Comment comment, ReportType reportType) {
+    public void report(Comment comment, ReportType reportType) {
         StringBuilder sb = new StringBuilder();
         sb.append(this.sportsTalkConfig.getEndpoint()).append("/comment/conversations/" + this.conversation.getConversationId() + "/comments/").append(comment.getId()).append("/report");
         Map<String, String> data = new HashMap<>();
@@ -274,7 +272,6 @@ public class RestfulCommentService implements ICommentService {
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         ApiResult apiResult = httpClient.execute();
         JSONObject jsonObject = (JSONObject) apiResult.getData();
-        return comment;
     }
 
     /**
