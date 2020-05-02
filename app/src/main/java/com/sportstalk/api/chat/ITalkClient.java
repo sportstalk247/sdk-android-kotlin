@@ -2,9 +2,9 @@ package com.sportstalk.api.chat;
 
 import com.sportstalk.api.common.ISportsTalkConfigurable;
 import com.sportstalk.api.common.IUserConfigurable;
-import com.sportstalk.models.chat.AdvertisementOptions;
-import com.sportstalk.models.chat.CommandOptions;
-import com.sportstalk.models.chat.GoalOptions;
+import com.sportstalk.models.chat.deprecated.AdvertisementOptions;
+import com.sportstalk.models.chat.deprecated.CommandOptions;
+import com.sportstalk.models.chat.deprecated.GoalOptions;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Reaction;
 

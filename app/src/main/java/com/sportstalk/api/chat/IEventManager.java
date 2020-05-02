@@ -1,10 +1,10 @@
 package com.sportstalk.api.chat;
 
-import com.sportstalk.models.chat.AdvertisementOptions;
-import com.sportstalk.models.chat.CommandOptions;
-import com.sportstalk.models.chat.EventResult;
-import com.sportstalk.models.chat.GoalOptions;
-import com.sportstalk.models.chat.Room;
+import com.sportstalk.models.chat.deprecated.AdvertisementOptions;
+import com.sportstalk.models.chat.deprecated.CommandOptions;
+import com.sportstalk.models.chat.deprecated.EventResult;
+import com.sportstalk.models.chat.deprecated.GoalOptions;
+import com.sportstalk.models.chat.deprecated.Room;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Reaction;
 import com.sportstalk.models.common.ReportReason;

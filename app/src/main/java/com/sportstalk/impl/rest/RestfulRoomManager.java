@@ -4,10 +4,10 @@ import android.os.Build;
 
 import com.sportstalk.impl.Utils;
 import com.sportstalk.api.chat.IRoomManager;
-import com.sportstalk.models.chat.EventResult;
-import com.sportstalk.models.chat.Room;
-import com.sportstalk.models.chat.RoomResult;
-import com.sportstalk.models.chat.RoomUserResult;
+import com.sportstalk.models.chat.deprecated.EventResult;
+import com.sportstalk.models.chat.deprecated.Room;
+import com.sportstalk.models.chat.deprecated.RoomResult;
+import com.sportstalk.models.chat.deprecated.RoomUserResult;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.Kind;
 import com.sportstalk.models.common.SportsTalkConfig;

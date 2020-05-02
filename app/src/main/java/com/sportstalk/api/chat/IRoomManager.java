@@ -1,9 +1,9 @@
 package com.sportstalk.api.chat;
 
-import com.sportstalk.models.chat.EventResult;
-import com.sportstalk.models.chat.Room;
-import com.sportstalk.models.chat.RoomResult;
-import com.sportstalk.models.chat.RoomUserResult;
+import com.sportstalk.models.chat.deprecated.EventResult;
+import com.sportstalk.models.chat.deprecated.Room;
+import com.sportstalk.models.chat.deprecated.RoomResult;
+import com.sportstalk.models.chat.deprecated.RoomUserResult;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.User;
 

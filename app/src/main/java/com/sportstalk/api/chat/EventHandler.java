@@ -1,7 +1,7 @@
 package com.sportstalk.api.chat;
 
-import com.sportstalk.models.chat.Event;
-import com.sportstalk.models.chat.EventResult;
+import com.sportstalk.models.chat.deprecated.Event;
+import com.sportstalk.models.chat.deprecated.EventResult;
 import com.sportstalk.models.common.ApiResult;
 
 import java.util.List;

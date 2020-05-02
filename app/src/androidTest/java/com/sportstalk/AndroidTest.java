@@ -1,29 +1,10 @@
 package com.sportstalk;
 
-import android.content.Context;
-
-import com.sportstalk.api.chat.EventHandler;
-import com.sportstalk.models.chat.CommandOptions;
-import com.sportstalk.models.chat.Event;
-import com.sportstalk.models.chat.EventResult;
-import com.sportstalk.models.chat.Room;
-import com.sportstalk.models.chat.RoomResult;
-import com.sportstalk.models.chat.RoomUserResult;
-import com.sportstalk.models.common.ApiResult;
-import com.sportstalk.models.common.SportsTalkConfig;
-import com.sportstalk.models.common.User;
-
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 
-import java.util.List;
-
 import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
 
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

@@ -1,18 +1,7 @@
 package com.sportstalk;
 
-import com.sportstalk.api.chat.EventHandler;
-import com.sportstalk.models.chat.Event;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @RunWith(RobolectricTestRunner.class)
 public class SportsTalkTest {

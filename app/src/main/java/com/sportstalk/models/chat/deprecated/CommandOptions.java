@@ -1,4 +1,4 @@
-package com.sportstalk.models.chat;
+package com.sportstalk.models.chat.deprecated;
 
 /**
  * Used for setting custom properties on chat commands.

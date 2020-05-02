@@ -1,4 +1,4 @@
-package com.sportstalk.models.chat;
+package com.sportstalk.models.chat.deprecated;
 
 import com.sportstalk.models.common.Webhook;
 

@@ -1,4 +1,4 @@
-package com.sportstalk.models.chat;
+package com.sportstalk.models.chat.deprecated;
 
 /**
  * Options for the built-in GOAL type utilizing event cusotm fields.
