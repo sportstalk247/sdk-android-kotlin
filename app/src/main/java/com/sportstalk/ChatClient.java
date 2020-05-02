@@ -92,8 +92,7 @@ public class ChatClient implements IChatClient {
     }
 
     public static ChatClient create(SportsTalkConfig sportsTalkConfig) {
-        if (chatClient == null) chatClient = new ChatClient(sportsTalkConfig);
-        return chatClient;
+        return new ChatClient(sportsTalkConfig);
     }
 
     public void setConfig(final SportsTalkConfig config) {
@@ -140,7 +139,7 @@ public class ChatClient implements IChatClient {
      * starts talk which will start polling
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void startTalk() {
+    public void startChat() {
         eventManager.setCurrentRoom(currentRom);
         eventManager.startTalk();
     }
@@ -148,7 +147,7 @@ public class ChatClient implements IChatClient {
     /**
      * stops the talk
      */
-    public void stopTalk() {
+    public void stopChat() {
         eventManager.stopTalk();
     }
 
