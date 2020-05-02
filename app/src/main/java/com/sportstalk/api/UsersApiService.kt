@@ -1,4 +1,4 @@
-package com.sportstalk.api.users
+package com.sportstalk.api
 
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest

@@ -3,6 +3,7 @@ package com.sportstalk.api.users
 import android.app.Activity
 import android.content.Context
 import com.sportstalk.Dependencies
+import com.sportstalk.api.UsersApiService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse

@@ -3,8 +3,8 @@ package com.sportstalk
 import android.content.Context
 import android.content.pm.PackageManager
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.sportstalk.api.users.UsersApiService
-import com.sportstalk.impl.retrofit.users.UsersApiServiceImpl
+import com.sportstalk.api.UsersApiService
+import com.sportstalk.impl.UsersApiServiceImpl
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
