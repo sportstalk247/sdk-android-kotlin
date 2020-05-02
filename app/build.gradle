@@ -35,6 +35,7 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         manifestPlaceholders = [
+                "apiUrlEndpoint": locProp['sportstalk.api.url.endpoint'],
                 "apiAuthToken": locProp['sportstalk.api.auth_token'],
                 "apiAppId": locProp['sportstalk.api.app_id'],
         ]
@@ -95,6 +96,7 @@ dependencies {
     implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofitVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
 
     // RxAndroid
     implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxAndroidVersion"

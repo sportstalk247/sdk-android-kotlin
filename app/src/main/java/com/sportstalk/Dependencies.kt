@@ -3,13 +3,39 @@ package com.sportstalk
 import android.content.Context
 import android.content.pm.PackageManager
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.sportstalk.api.users.UsersApiService
+import com.sportstalk.impl.retrofit.users.UsersApiServiceImpl
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonBuilder
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
+import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
 object Dependencies {
+
+    object ApiEndpoint {
+        @JvmStatic
+        private var mInstance: String? = null
+
+        @JvmStatic
+        fun getInstance(context: Context): String? {
+            val appInfo =
+                    try {
+                        context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+                    } catch (err: Throwable) {
+                        err.printStackTrace()
+                        return null
+                    }
+
+            return appInfo.metaData.getString("sportstalk.api.url.endpoint")
+                    .also {
+                        // Assign to static mInstance
+                        mInstance = it
+                    }
+        }
+    }
 
     object AuthToken {
         @JvmStatic
@@ -26,7 +52,10 @@ object Dependencies {
                     }
 
             return appInfo.metaData.getString("sportstalk.api.auth_token")
-                    .also { mInstance = it }
+                    .also {
+                        // Assign to static mInstance
+                        mInstance = it
+                    }
         }
     }
 
@@ -45,21 +74,24 @@ object Dependencies {
                     }
 
             return appInfo.metaData.getString("sportstalk.api.app_id")
-                    .also { mInstance = it }
+                    .also {
+                        // Assign to static mInstance
+                        mInstance = it
+                    }
         }
     }
 
-    object OkHttp {
+    object _OkHttpClient {
         @JvmStatic
         private var mInstance: OkHttpClient? = null
 
         @JvmStatic
-        fun getInstance(context: Context): OkHttpClient {
+        fun getInstance(
+                authToken: String
+        ): OkHttpClient {
             if (mInstance != null) {
                 return mInstance!!
             }
-
-            val authToken = AuthToken.getInstance(context) ?: ""
 
             return OkHttpClient.Builder()
                     .addInterceptor { chain ->
@@ -72,32 +104,86 @@ object Dependencies {
                     .connectTimeout(60, TimeUnit.SECONDS)
                     .readTimeout(60, TimeUnit.SECONDS)
                     .build()
-                    .also { _instance ->
-                        mInstance = _instance
+                    .also {
+                        // Assign to static mInstance
+                        mInstance = it
                     }
         }
     }
 
-    @UnstableDefault
-    object Retrofit {
+    object _Json {
         @JvmStatic
-        private var mInstance: retrofit2.Retrofit? = null
+        private var mInstance: Json? = null
+
+        @JvmStatic
+        fun getInstance(): Json =
+                if (mInstance != null) mInstance!!
+                else Json(
+                        JsonBuilder()
+                                .apply {
+                                    prettyPrint = true
+                                    isLenient = true
+                                    ignoreUnknownKeys = true
+                                }
+                                .buildConfiguration()
+                ).also {
+                    // Assign to static mInstance
+                    mInstance = it
+                }
+    }
+
+    @UnstableDefault
+    object _Retrofit {
+        @JvmStatic
+        private var mInstance: Retrofit? = null
 
         @JvmStatic
         fun getInstance(
+                urlEndpoint: String,
                 okHttpClient: OkHttpClient,
-                urlEndpoint: String
-        ): retrofit2.Retrofit {
+                json: Json
+        ): Retrofit {
             if (mInstance != null) {
                 return mInstance!!
             }
 
-            return retrofit2.Retrofit.Builder()
+            return Retrofit.Builder()
                     .baseUrl(urlEndpoint)
-                    .addConverterFactory(Json.asConverterFactory(MediaType.get("application/json")))
+                    .addConverterFactory(
+                            json.asConverterFactory(MediaType.get("application/json"))
+                    )
                     .client(okHttpClient)
                     .build()
+                    .also {
+                        // Assign to static mInstance
+                        mInstance = it
+                    }
         }
     }
+
+    object ApiServices {
+
+        object Users {
+            @JvmStatic
+            private var mInstance: UsersApiService? = null
+
+            @JvmStatic
+            fun getInstance(
+                    appId: String,
+                    retrofit: retrofit2.Retrofit
+            ): UsersApiService {
+                return UsersApiServiceImpl(
+                        appId = appId,
+                        mRetrofit = retrofit
+                )
+                        .also {
+                            // Assign to static mInstance
+                            mInstance = it
+                        }
+            }
+        }
+
+    }
+
 
 }
