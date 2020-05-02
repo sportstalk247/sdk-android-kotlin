@@ -411,6 +411,148 @@ class UsersApiServiceTest {
         deleteTestUsers(testActualResult.data?.userid)
     }
 
+    @Test
+    fun `7) Search Users - By Handle`() {
+        // GIVEN
+        val testInputRequest1 = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "list_users_first",
+                displayname = "Test List Users 1"
+        )
+        // Should create a test user(s) first
+        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
 
+        val testExpectedResult = ApiResponse<ListUsersResponse>(
+                kind = "api.result",
+                code = 200,
+                data = ListUsersResponse(
+                        kind = "list.users",
+                        users = listOf(testCreatedUser1)
+                )
+        )
+
+        val testInputLimit = 10
+
+        // WHEN
+        val testActualResult1 = usersApiService.searchUsers(
+                handle = testCreatedUser1.handle!!,
+                limit = testInputLimit
+        ).get()
+
+        // THEN
+        println(
+                "`Search Users`() -> testActualResult1 = " +
+                        json.stringify(
+                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                testActualResult1
+                        )
+        )
+
+        assertTrue { testActualResult1.kind == testExpectedResult.kind }
+        assertTrue { testActualResult1.code == testExpectedResult.code }
+        assertTrue { testActualResult1.data != null }
+        assertTrue { testActualResult1.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult1.data?.users?.isNotEmpty() == true }
+        assertTrue { testActualResult1.data?.users?.any { it.handle == testCreatedUser1.handle } == true }
+
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUser1.userid)
+    }
+
+    @Test
+    fun `8) Search Users - By Name`() {
+        // GIVEN
+        val testInputRequest1 = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "list_users_first",
+                displayname = "Test List Users 1"
+        )
+        // Should create a test user(s) first
+        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+
+        val testExpectedResult = ApiResponse<ListUsersResponse>(
+                kind = "api.result",
+                code = 200,
+                data = ListUsersResponse(
+                        kind = "list.users",
+                        users = listOf(testCreatedUser1)
+                )
+        )
+
+        val testInputLimit = 10
+
+        // WHEN
+        val testActualResult1 = usersApiService.searchUsers(
+                name = testCreatedUser1.displayname,
+                limit = testInputLimit
+        ).get()
+
+        // THEN
+        println(
+                "`Search Users`() -> testActualResult1 = " +
+                        json.stringify(
+                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                testActualResult1
+                        )
+        )
+
+        assertTrue { testActualResult1.kind == testExpectedResult.kind }
+        assertTrue { testActualResult1.code == testExpectedResult.code }
+        assertTrue { testActualResult1.data != null }
+        assertTrue { testActualResult1.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult1.data?.users?.isNotEmpty() == true }
+        assertTrue { testActualResult1.data?.users?.any { it.displayname == testCreatedUser1.displayname } == true }
+
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUser1.userid)
+    }
+
+    @Test
+    fun `9) Search Users - By UserId`() {
+        // GIVEN
+        val testInputRequest1 = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "list_users_first",
+                displayname = "Test List Users 1"
+        )
+        // Should create a test user(s) first
+        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+
+        val testExpectedResult = ApiResponse<ListUsersResponse>(
+                kind = "api.result",
+                code = 200,
+                data = ListUsersResponse(
+                        kind = "list.users",
+                        users = listOf(testCreatedUser1)
+                )
+        )
+
+        val testInputLimit = 10
+
+        // WHEN
+        val testActualResult1 = usersApiService.searchUsers(
+                userid = testCreatedUser1.userid!!,
+                limit = testInputLimit
+        ).get()
+
+        // THEN
+        println(
+                "`Search Users`() -> testActualResult1 = " +
+                        json.stringify(
+                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                testActualResult1
+                        )
+        )
+
+        assertTrue { testActualResult1.kind == testExpectedResult.kind }
+        assertTrue { testActualResult1.code == testExpectedResult.code }
+        assertTrue { testActualResult1.data != null }
+        assertTrue { testActualResult1.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult1.data?.users?.isNotEmpty() == true }
+        assertTrue { testActualResult1.data?.users?.any { it.userid == testCreatedUser1.userid } == true }
+
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUser1.userid)
+    }
 
 }

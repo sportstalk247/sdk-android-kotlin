@@ -47,6 +47,24 @@ class UsersApiServiceImpl(
                     userId = userId,
                     request = BanUserRequest(banned)
             )
+
+    override fun searchUsers(
+            handle: String?,
+            name: String?,
+            userid: String?,
+            limit: Int?,
+            cursor: String?
+    ): CompletableFuture<ApiResponse<ListUsersResponse>> =
+            service.searchUsers(
+                    appId = appId,
+                    request = SearchUsersRequest(
+                            handle = handle,
+                            name = name,
+                            userid = userid,
+                            limit = limit,
+                            cursor = cursor
+                    )
+            )
 }
 
 interface UsersRetrofitService {
@@ -83,5 +101,11 @@ interface UsersRetrofitService {
             @Path("userId") userId: String,
             @Body request: BanUserRequest
     ): CompletableFuture<ApiResponse<User>>
+
+    @POST("{appId}/user/search")
+    fun searchUsers(
+            @Path("appId") appId: String,
+            @Body request: SearchUsersRequest
+    ): CompletableFuture<ApiResponse<ListUsersResponse>>
 
 }

@@ -48,4 +48,17 @@ interface UsersApiService {
      */
     fun banUser(userId: String, banned: Boolean): CompletableFuture<ApiResponse<User>>
 
+    /**
+     * [POST] /{{api_appid}}/user/search
+     * - https://apiref.sportstalk247.com/?version=latest#dea07871-86bb-4c12-bef3-d7290d762a06
+     * - Searches the users in an app
+     */
+    fun searchUsers(
+            handle: String? = null,
+            name: String? = null,
+            userid: String? = null,
+            limit: Int? = null /* Defaults to 200 on backend API server */,
+            cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListUsersResponse>>
+
 }
