@@ -2,8 +2,9 @@ package com.sportstalk.api
 
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatRoom
-import com.sportstalk.models.chat.CreateRoomRequest
+import com.sportstalk.models.chat.CreateChatRoomRequest
 import com.sportstalk.models.chat.DeleteChatRoomResponse
+import com.sportstalk.models.chat.UpdateChatRoomRequest
 import java.util.concurrent.CompletableFuture
 
 interface ChatApiService {
@@ -13,7 +14,7 @@ interface ChatApiService {
      * - https://apiref.sportstalk247.com/?version=latest#8b2eea78-82bc-4cae-9cfa-175a00a9e15b
      * - Creates a new chat room
      */
-    fun createRoom(request: CreateRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
+    fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}
@@ -29,6 +30,11 @@ interface ChatApiService {
      */
     fun deleteRoom(chatRoomId: String): CompletableFuture<ApiResponse<DeleteChatRoomResponse>>
 
-
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}
+     * - https://apiref.sportstalk247.com/?version=latest#96ef3138-4820-459b-b400-e9f25d5ddb00
+     * - Updates an existing room
+     */
+    fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
 
 }

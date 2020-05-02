@@ -3,7 +3,7 @@ package com.sportstalk.models.chat
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateRoomRequest(
+data class CreateChatRoomRequest(
         val name: String,
         val slug: String? = null,
         val description: String? = null,
