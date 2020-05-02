@@ -6,6 +6,7 @@ import com.sportstalk.Dependencies
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse
+import com.sportstalk.models.users.ListUsersResponse
 import com.sportstalk.models.users.User
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
@@ -63,6 +64,13 @@ class UsersApiServiceTest {
     fun cleanUp() {
     }
 
+    fun deleteTestUsers(vararg userIds: String?) {
+        for(id in userIds) {
+            id ?: continue
+            usersApiService.deleteUser(userId = id).get()
+        }
+    }
+
     @Test
     fun `1) Create or Update User`() {
         // GIVEN
@@ -94,7 +102,7 @@ class UsersApiServiceTest {
                                 testActualResult
                         )
         )
-        
+
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.message == testExpectedResult.message }
         assertTrue { testActualResult.code == testExpectedResult.code }
@@ -104,6 +112,9 @@ class UsersApiServiceTest {
         assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
         assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
+
+        // Perform Delete Test User
+        deleteTestUsers(testActualResult.data?.userid)
     }
 
     @Test
@@ -200,6 +211,83 @@ class UsersApiServiceTest {
         assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
 
+        // Perform Delete Test User
+        deleteTestUsers(testActualResult.data?.userid)
+    }
+
+    @Test
+    fun `4) List Users`() {
+        // GIVEN
+        val testInputRequest1 = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "list_users_first",
+                displayname = "Test List Users 1"
+        )
+        val testInputRequest2 = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "list_users_second",
+                displayname = "Test List Users 2"
+        )
+        // Should create a test user first
+        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser2 = usersApiService.createUpdateUser(request = testInputRequest2).get().data!!
+
+        val testExpectedResult = ApiResponse<ListUsersResponse>(
+                kind = "api.result",
+                message = "Success",
+                code = 200,
+                data = ListUsersResponse(
+                        kind = "list.users",
+                        users = listOf(testCreatedUser1, testCreatedUser2)
+                )
+        )
+
+        val testInputLimit = 10
+
+        // WHEN
+        val testActualResult1 = usersApiService.listUsers(
+                limit = testInputLimit,
+                cursor = testCreatedUser1.userid
+        ).get()
+        val testActualResult2 = usersApiService.listUsers(
+                limit = testInputLimit,
+                cursor = testCreatedUser2.userid
+        ).get()
+
+        // THEN
+        println(
+                "`List Users`() -> testActualResult1 = " +
+                        json.stringify(
+                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                testActualResult1
+                        )
+        )
+        println(
+                "`List Users`() -> testActualResult2 = " +
+                        json.stringify(
+                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                testActualResult2
+                        )
+        )
+
+        assertTrue { testActualResult1.kind == testExpectedResult.kind }
+        assertTrue { testActualResult1.message == testExpectedResult.message }
+        assertTrue { testActualResult1.code == testExpectedResult.code }
+        assertTrue { testActualResult1.data != null }
+        assertTrue { testActualResult1.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult1.data?.users?.isNotEmpty() == true }
+        assertTrue { testActualResult1.data?.users?.any { it.userid == testCreatedUser1.userid } == true }
+
+        assertTrue { testActualResult2.kind == testExpectedResult.kind }
+        assertTrue { testActualResult2.message == testExpectedResult.message }
+        assertTrue { testActualResult2.code == testExpectedResult.code }
+        assertTrue { testActualResult2.data != null }
+        assertTrue { testActualResult2.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult2.data?.users?.isNotEmpty() == true }
+        assertTrue { testActualResult2.data?.users?.any { it.userid == testCreatedUser2.userid } == true }
+
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUser1.userid, testCreatedUser2.userid)
     }
 
 }

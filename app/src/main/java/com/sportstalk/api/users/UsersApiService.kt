@@ -3,6 +3,7 @@ package com.sportstalk.api.users
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse
+import com.sportstalk.models.users.ListUsersResponse
 import com.sportstalk.models.users.User
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
@@ -29,5 +30,15 @@ interface UsersApiService {
      * - This will return all the information about the user.
      */
     fun getUserDetails(userId: String): CompletableFuture<ApiResponse<User>>
+
+    /**
+     * [GET] /{{api_appid}}/user/users/?limit={{limit}}&cursor={{cursor}}
+     * - https://apiref.sportstalk247.com/?version=latest#51718594-63ac-4c28-b249-8f47c3cb02b1
+     * - Gets a list of users
+     */
+    fun listUsers(
+            limit: Int? = null /* Defaults to 200 on backend API server */,
+            cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListUsersResponse>>
 
 }

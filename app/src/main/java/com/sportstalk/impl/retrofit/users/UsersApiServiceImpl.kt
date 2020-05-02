@@ -4,6 +4,7 @@ import com.sportstalk.api.users.UsersApiService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse
+import com.sportstalk.models.users.ListUsersResponse
 import com.sportstalk.models.users.User
 import retrofit2.Retrofit
 import retrofit2.create
@@ -35,6 +36,13 @@ class UsersApiServiceImpl(
                     appId = appId,
                     userId = userId
             )
+
+    override fun listUsers(limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListUsersResponse>> =
+            service.listUsers(
+                    appId = appId,
+                    cursor = cursor,
+                    limit = limit
+            )
 }
 
 interface UsersRetrofitService {
@@ -57,5 +65,12 @@ interface UsersRetrofitService {
             @Path("appId") appId: String,
             @Path("userId") userId: String
     ): CompletableFuture<ApiResponse<User>>
+
+    @GET("{appId}/user/users/")
+    fun listUsers(
+            @Path("appId") appId: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListUsersResponse>>
 
 }
