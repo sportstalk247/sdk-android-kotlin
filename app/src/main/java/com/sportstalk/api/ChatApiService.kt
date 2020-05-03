@@ -88,7 +88,7 @@ interface ChatApiService {
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/messagesbyuser/{{userid}}?cursor&limit=200
      * - https://apiref.sportstalk247.com/?version=latest#0ec044c6-a3c0-478f-985a-156f6f5b660a
-     * - List all the participants in the specified room
+     * - Gets a list of users messages
      */
     fun listMessagesByUser(
             chatRoomId: String,
@@ -96,5 +96,18 @@ interface ChatApiService {
             limit: Int? = null /* Defaults to 200 on backend API server */,
             cursor: String? = null
     ): CompletableFuture<ApiResponse<ListMessagesByUser>>
+
+//    TODO:: `Removes a message` API is broken at the moment
+//    /**
+//     * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}
+//     * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
+//     * - Removes a message from a room
+//     */
+//    fun removeMessage(
+//            chatRoomId: String,
+//            eventId: String
+//    ): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>>
+
+
 
 }

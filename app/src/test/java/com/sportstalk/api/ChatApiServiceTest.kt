@@ -911,6 +911,11 @@ class ChatApiServiceTest {
     }
 
     @Test
+    fun `J-4) Execute Chat Room - Purge User Messages`() {
+        // TODO:: Admin password is hardcoded as "zola".
+    }
+
+    @Test
     fun `K) List Messages By User`() {
         // GIVEN
         val testUserData = TestData.users.first()
@@ -995,6 +1000,11 @@ class ChatApiServiceTest {
         deleteTestChatRooms(testCreatedChatRoomData.id)
         // Perform Delete Test User
         deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `L) Remove a Message`() {
+        // TODO:: `Removes a message` API is broken at the moment
     }
 
     object TestData {
