@@ -72,6 +72,13 @@ interface ChatApiService {
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
      * - https://apiref.sportstalk247.com/?version=latest#c81e90fc-1a54-40bb-a75b-2fc935c12b59
      * - Executes a command in a chat room
+     *
+     * - https://apiref.sportstalk247.com/?version=latest#d291ac74-e3f2-48cc-a3f0-ae4470a950a4
+     * - Execute Dance Action
+     *
+     * - https://apiref.sportstalk247.com/?version=latest#d54ce72a-1a8a-4230-b950-0d1b345c20c6
+     * - Reply to a Message
+     *
      */
     fun executeChatCommand(
             chatRoomId: String,

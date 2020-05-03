@@ -8,5 +8,7 @@ data class ExecuteChatCommandRequest(
         val userid: String,
         val customtype: String? = null,
         val customid: String? = null,
-        val custompayload: String? = null
+        val custompayload: String? = null,
+        /** [ChatEvent.id] */
+        val replyto: String? = null
 )

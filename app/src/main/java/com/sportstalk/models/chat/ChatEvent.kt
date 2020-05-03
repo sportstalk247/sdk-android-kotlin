@@ -17,7 +17,7 @@ data class ChatEvent(
         val customtype: String? = null,
         val customid: String? = null,
         val custompayload: String? = null,
-        val replyto: String? = null,
+        val replyto: ChatEvent? = null,
         val reactions: List<String> = listOf(),
         val moderation: String? = null /* "na" */,
         val active: Boolean? = null,
