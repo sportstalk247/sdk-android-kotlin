@@ -85,4 +85,16 @@ interface ChatApiService {
             request: ExecuteChatCommandRequest
     ): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>>
 
+    /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/messagesbyuser/{{userid}}?cursor&limit=200
+     * - https://apiref.sportstalk247.com/?version=latest#0ec044c6-a3c0-478f-985a-156f6f5b660a
+     * - List all the participants in the specified room
+     */
+    fun listMessagesByUser(
+            chatRoomId: String,
+            userId: String,
+            limit: Int? = null /* Defaults to 200 on backend API server */,
+            cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListMessagesByUser>>
+
 }

@@ -910,6 +910,93 @@ class ChatApiServiceTest {
         deleteTestUsers(testCreatedUserData.userid)
     }
 
+    @Test
+    fun `K) List Messages By User`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = testUserData.handle,
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+
+        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                slug = testChatRoomData.slug,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                roomid = testCreatedChatRoomData.id!!,
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send a message to the created chat room
+        val testSendMessageData = chatApiService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        ).get().data?.speech!!
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputUserId = testCreatedUserData.userid!!
+        val testInputLimit = 10
+        val testExpectedResult = ApiResponse<ListMessagesByUser>(
+                kind = "api.result",
+                /*message = "",*/
+                code = 200,
+                data = ListMessagesByUser(
+                        kind = "list.chatevents",
+                        events = listOf(testSendMessageData)
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.listMessagesByUser(
+                chatRoomId = testInputChatRoomId,
+                userId = testInputUserId,
+                limit = testInputLimit
+        ).get()
+
+        // THEN
+        println(
+                "`List Messages By User`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(ListMessagesByUser.serializer() ),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.events!!.containsAll(testExpectedResult.data?.events!!) }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
     object TestData {
         val users = listOf(
                 User(

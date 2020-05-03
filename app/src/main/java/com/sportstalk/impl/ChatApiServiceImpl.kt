@@ -77,4 +77,18 @@ class ChatApiServiceImpl(
                     chatRoomId = chatRoomId,
                     request = request
             )
+
+    override fun listMessagesByUser(
+            chatRoomId: String,
+            userId: String,
+            limit: Int?,
+            cursor: String?
+    ): CompletableFuture<ApiResponse<ListMessagesByUser>> =
+            service.listMessagesByUser(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    userId = userId,
+                    limit = limit,
+                    cursor = cursor
+            )
 }

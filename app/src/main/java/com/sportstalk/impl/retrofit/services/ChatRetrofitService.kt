@@ -69,4 +69,13 @@ interface ChatRetrofitService {
             @Body request: ExecuteChatCommandRequest
     ): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>>
 
+    @GET("{appId}/chat/rooms/{chatroomid}/messagesbyuser/{userid}")
+    fun listMessagesByUser(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("userid") userId: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListMessagesByUser>>
+
 }
