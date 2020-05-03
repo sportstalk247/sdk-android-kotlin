@@ -1,9 +1,9 @@
-package com.sportstalk.api.users
+package com.sportstalk.api
 
 import android.app.Activity
 import android.content.Context
+import android.os.Build
 import com.sportstalk.Dependencies
-import com.sportstalk.api.UsersApiService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse
@@ -23,6 +23,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import retrofit2.Retrofit
 import kotlin.test.assertTrue
 
@@ -30,6 +31,7 @@ import kotlin.test.assertTrue
 @ImplicitReflectionSerializer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.P])
 class UsersApiServiceTest {
 
     private lateinit var context: Context
