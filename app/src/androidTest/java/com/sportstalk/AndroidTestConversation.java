@@ -129,7 +129,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
-        Comment result = conversationClient.makeComment(comment);
+        Comment result = conversationClient.publishComment(comment);
         Assert.assertNotNull(result.getId());
     }
 
@@ -155,7 +155,7 @@ public class AndroidTestConversation {
         tags.add("taga");
         comment.setTags(tags);
         comment.setReplyTo("sarah");
-        Comment result = conversationClient.makeComment(comment);
+        Comment result = conversationClient.publishComment(comment);
         Assert.assertNotNull(result);
     }
 
@@ -194,7 +194,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("");
         comment.setTags(tags);
-        Comment result = conversationClient.makeComment(comment);
+        Comment result = conversationClient.publishComment(comment);
         Assert.assertNull(result);
     }
 
@@ -316,7 +316,7 @@ public class AndroidTestConversation {
         List<String> tags = new ArrayList<>();
         tags.add("taga");
         comment.setTags(tags);
-        Comment response = conversationClient.makeComment(comment);
+        Comment response = conversationClient.publishComment(comment);
         conv.setConversationId(null);
         conversationClient.setConversation(conv);
         CommentRequest commentRequest = new CommentRequest();
@@ -388,7 +388,7 @@ public class AndroidTestConversation {
         comment.setBody("this is a comment for testing");
         comment.setTags(tgs);
         conversationClient.setConversation(updated);
-        Comment nComment = conversationClient.makeComment(comment);
+        Comment nComment = conversationClient.publishComment(comment);
         Assert.assertNull(nComment);
     }
 

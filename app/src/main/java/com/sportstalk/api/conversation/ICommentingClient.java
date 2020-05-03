@@ -26,8 +26,8 @@ public interface ICommentingClient extends ISportsTalkConfigurable, IUserConfigu
 
     ConversationDeletionResponse deleteConversation(Conversation conversation);
 
-    Comment makeComment(Comment comment);
-    Comment makeComment(Comment comment, String replyTo);
+    Comment publishComment(Comment comment);
+    Comment publishComment(Comment comment, String replyTo);
 
     Comment getComment(Comment comment);
 

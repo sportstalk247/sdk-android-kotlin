@@ -154,7 +154,7 @@ public class CommentingClient implements ICommentingClient {
      * @return
      */
     @Override
-    public Comment makeComment(Comment comment) {
+    public Comment publishComment(Comment comment) {
         return commentService.create(comment,null);
     }
 
@@ -165,7 +165,7 @@ public class CommentingClient implements ICommentingClient {
      * @return
      */
     @Override
-    public Comment makeComment(Comment comment, String replyTo) {
+    public Comment publishComment(Comment comment, String replyTo) {
         Comment replyToComment = new Comment();
         if(replyTo!=null) {
             replyToComment.setReplyTo(replyTo);
