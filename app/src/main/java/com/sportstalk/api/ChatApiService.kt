@@ -108,6 +108,15 @@ interface ChatApiService {
 //            eventId: String
 //    ): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>>
 
-
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/report
+     * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
+     * - Removes a message from a room
+     */
+    fun reportMessage(
+            chatRoomId: String,
+            eventId: String,
+            request: ReportMessageRequest
+    ): CompletableFuture<ApiResponse<ChatEvent>>
 
 }

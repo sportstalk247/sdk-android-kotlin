@@ -78,4 +78,12 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null
     ): CompletableFuture<ApiResponse<ListMessagesByUser>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/events/{eventid}/report")
+    fun reportMessage(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("eventid") eventId: String,
+            @Body request: ReportMessageRequest
+    ): CompletableFuture<ApiResponse<ChatEvent>>
+
 }

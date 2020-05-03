@@ -91,4 +91,16 @@ class ChatApiServiceImpl(
                     limit = limit,
                     cursor = cursor
             )
+
+    override fun reportMessage(
+            chatRoomId: String,
+            eventId: String,
+            request: ReportMessageRequest
+    ): CompletableFuture<ApiResponse<ChatEvent>> =
+            service.reportMessage(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    request = request
+            )
 }

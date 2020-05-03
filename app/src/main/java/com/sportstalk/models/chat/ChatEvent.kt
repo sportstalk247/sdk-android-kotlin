@@ -21,5 +21,11 @@ data class ChatEvent(
         val reactions: List<String> = listOf(),
         val moderation: String? = null /* "na" */,
         val active: Boolean? = null,
-        val reports: List<String> = listOf()
+        val reports: List<ChatEventReport> = listOf()
+)
+
+@Serializable
+data class ChatEventReport(
+        val userid: String? = null,
+        val reason: String? = null
 )
