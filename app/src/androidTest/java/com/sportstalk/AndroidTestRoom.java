@@ -8,6 +8,7 @@ import com.sportstalk.models.chat.Event;
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.Room;
 import com.sportstalk.models.chat.RoomResult;
+import com.sportstalk.models.chat.RoomUserResult;
 import com.sportstalk.models.common.ApiResult;
 import com.sportstalk.models.common.SportsTalkConfig;
 import com.sportstalk.models.common.User;
@@ -138,6 +139,70 @@ public class AndroidTestRoom {
         room.setName("Test Room23");
         room.setSlug("chat-test-room ");
         RoomResult roomResult = chatClient1.createRoom(room);
+    }
+
+    ///// join room scenario
+    @Test(expected = Exception.class)
+    public void joinRoomWithoutUserTestShouldFail() {
+        Room firstRoom  = null;
+        for(Room r : chatClient.listRooms()) {
+                firstRoom = r;
+                break;
+        }
+        RoomResult result = new RoomResult();
+        result.setId(firstRoom.getId());
+        result.setName(firstRoom.getName());
+        result.setSlug(firstRoom.getSlug());
+
+        sportsTalkConfig.setUser(null);
+        ChatClient chatClient = ChatClient.create(sportsTalkConfig);
+        RoomUserResult success = chatClient.joinRoom(result);
+    }
+
+    @Test(expected = Exception.class)
+    public void whenUserIsNullSendCommandShouldFail() {
+        Room firstRoom  = null;
+        for(Room r : chatClient.listRooms()) {
+            firstRoom = r;
+            break;
+        }
+        RoomResult result = new RoomResult();
+        result.setId(firstRoom.getId());
+        result.setName(firstRoom.getName());
+        result.setSlug(firstRoom.getSlug());
+
+        sportsTalkConfig.setUser(null);
+        ChatClient chatClient = ChatClient.create(sportsTalkConfig);
+        RoomUserResult success = chatClient.joinRoom(result);
+        ApiResult apiResult = chatClient.sendCommand("hello", null);
+    }
+
+    @Test
+    public void whenAUserIsSetAndJoinedRoomCanSendCommand() {
+        Room firstRoom  = null;
+
+        User user = new User();
+        user.setUserId("sarah");
+
+        SportsTalkConfig sportsTalkConfig = new SportsTalkConfig();
+        sportsTalkConfig.setApiKey("ZortLH1JUkuEJQ5YgkZjHwx-AZFkPSJkSYnEO1NA6y7A");
+        sportsTalkConfig.setContext(context);
+        sportsTalkConfig.setAppId("5e9eff5338a28719345eb469");
+        sportsTalkConfig.setEndpoint("https://api.sportstalk247.com/api/v3");
+        sportsTalkConfig.setUser(user);
+
+        ChatClient cc = ChatClient.create(sportsTalkConfig);
+        for(Room r : cc.listRooms()) {
+            firstRoom = r;
+            break;
+        }
+        RoomResult result = new RoomResult();
+        result.setId(firstRoom.getId());
+        result.setName(firstRoom.getName());
+        result.setSlug(firstRoom.getSlug());
+        RoomUserResult success = cc.joinRoom(result);
+        ApiResult apiResult = cc.sendCommand("hello", null);
+        Assert.assertEquals(0, apiResult.getCode());
     }
 
 }
