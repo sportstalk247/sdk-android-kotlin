@@ -153,9 +153,9 @@ public class RestfulRoomManager implements IRoomManager {
         StringBuilder sb = new StringBuilder();
         sb.append(sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/join");
         Map<String, String> data = new HashMap<>();
-        data.put("userid", user.getUserId());
-        data.put("handle", user.getHandle());
-        data.put("displayname", user.getDisplayName());
+        data.put("userid", user == null ? "" :user.getUserId());
+        data.put("handle", user == null ? "" :user.getHandle());
+        data.put("displayname", user == null ? "" :user.getDisplayName());
 
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("joinRoom");
@@ -217,8 +217,9 @@ public class RestfulRoomManager implements IRoomManager {
     @Override
     public RoomUserResult exitRoom(User user, Room room) {
         StringBuilder sb = new StringBuilder();
-        sb.append(sportsTalkConfig.getEndpoint()).append("/room/").append(room.getId()).append("/join");
+        sb.append(sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/exit");
         Map<String, String> data = new HashMap<>();
+        data.put("userid", user.getUserId());
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "POST", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         httpClient.setAction("exitRoom");
         JSONObject jsonObject = (JSONObject) httpClient.execute().getData();

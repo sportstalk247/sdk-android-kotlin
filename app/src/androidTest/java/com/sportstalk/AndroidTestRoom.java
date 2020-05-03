@@ -3,6 +3,7 @@ package com.sportstalk;
 import android.content.Context;
 
 import com.sportstalk.api.chat.EventHandler;
+import com.sportstalk.error.SettingsException;
 import com.sportstalk.error.SportsTalkException;
 import com.sportstalk.models.chat.Event;
 import com.sportstalk.models.chat.EventResult;
@@ -159,7 +160,7 @@ public class AndroidTestRoom {
         RoomUserResult success = chatClient.joinRoom(result);
     }
 
-    @Test(expected = Exception.class)
+    @Test(expected = SportsTalkException.class)
     public void whenUserIsNullSendCommandShouldFail() {
         Room firstRoom  = null;
         for(Room r : chatClient.listRooms()) {
@@ -203,6 +204,36 @@ public class AndroidTestRoom {
         RoomUserResult success = cc.joinRoom(result);
         ApiResult apiResult = cc.sendCommand("hello", null);
         Assert.assertEquals(0, apiResult.getCode());
+    }
+
+
+    @Test
+    public void testExitRoom() {
+
+        User user = new User();
+        user.setUserId("sarah");
+        user.setDisplayName("sarah");
+        user.setHandle("sarah");
+
+        Room room = null;
+        for(Room r: chatClient.listRooms()) {
+            room = r;
+            break;
+        }
+
+        RoomResult result = new RoomResult();
+        result.setId(room.getId());
+        result.setName(room.getName());
+        result.setSlug(room.getSlug());
+
+        RoomUserResult roomUserResult = chatClient.joinRoom(result);
+        chatClient.setRoom(roomUserResult.getRoomResult());
+           try {
+            RoomUserResult roomUserResult1 = chatClient.exitRoom();
+            Assert.assertNotNull(roomUserResult1);
+        } catch (SettingsException e) {
+            e.printStackTrace();
+        }
     }
 
 }
