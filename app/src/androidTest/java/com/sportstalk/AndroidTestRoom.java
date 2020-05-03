@@ -5,6 +5,7 @@ import android.content.Context;
 import com.sportstalk.api.chat.EventHandler;
 import com.sportstalk.error.SettingsException;
 import com.sportstalk.error.SportsTalkException;
+import com.sportstalk.models.chat.CommandOptions;
 import com.sportstalk.models.chat.Event;
 import com.sportstalk.models.chat.EventResult;
 import com.sportstalk.models.chat.Room;
@@ -234,6 +235,35 @@ public class AndroidTestRoom {
         } catch (SettingsException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testForUserMessages(){
+        Room room = null;
+        for(Room r: chatClient.listRooms()) {
+            room = r;
+            break;
+        }
+
+        RoomResult result = new RoomResult();
+        result.setId(room.getId());
+        result.setName(room.getName());
+        result.setSlug(room.getSlug());
+
+        RoomUserResult roomUserResult = chatClient.joinRoom(result);
+        chatClient.setRoom(roomUserResult.getRoomResult());
+
+        ApiResult apiResult = chatClient.sendCommand("hello", null);
+        List<EventResult>list = chatClient.listUserMessages(user, result, "", 100);
+
+        boolean find = false;
+        for(EventResult eventResult : list) {
+            if("hello".equals(eventResult.getBody())) {
+                find = true;
+                break;
+            }
+        }
+        Assert.assertEquals(true, find);
     }
 
 }

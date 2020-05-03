@@ -332,7 +332,7 @@ public class ChatClient implements IChatClient {
      * @return
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public EventResult listUserMessages(User user, Room room, String cursor, int limit) {
+    public List<EventResult> listUserMessages(User user, Room room, String cursor, int limit) {
         return this.roomManager.listUserMessages(user, room, cursor, limit);
     }
 

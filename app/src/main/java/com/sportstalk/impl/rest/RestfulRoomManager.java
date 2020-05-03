@@ -5,6 +5,7 @@ import android.os.Build;
 import com.sportstalk.impl.common.rest.Utils;
 import com.sportstalk.api.chat.IRoomManager;
 import com.sportstalk.models.chat.EventResult;
+import com.sportstalk.models.chat.EventType;
 import com.sportstalk.models.chat.Room;
 import com.sportstalk.models.chat.RoomResult;
 import com.sportstalk.models.chat.RoomUserResult;
@@ -230,15 +231,46 @@ public class RestfulRoomManager implements IRoomManager {
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public EventResult listUserMessages(User user, Room room, String cursor, int limit) {
+    public List<EventResult> listUserMessages(User user, Room room, String cursor, int limit) {
         StringBuilder sb = new StringBuilder();
-        sb.append(sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/messagesbyuser/").append(user.getUserId());
+        sb.append(sportsTalkConfig.getEndpoint()).append("/chat/rooms/").append(room.getId()).append("/messagesbyuser/").append(user.getUserId()).append("/?limit=").append(limit).append("&cursor=").append(cursor);
         Map<String, String> data = new HashMap<>();
         HttpClient httpClient = new HttpClient(sportsTalkConfig.getContext(), "GET", sb.toString(), apiHeaders, data, sportsTalkConfig.getApiCallback());
         JSONObject jsonObject = (JSONObject) httpClient.execute().getData();
-        EventResult eventResult = new EventResult();
-        eventResult.setBody(jsonObject.toString());
-        return eventResult;
+        List<EventResult>list = new ArrayList<>();
+
+        try {
+            JSONArray eventArray = jsonObject.getJSONObject("data").getJSONArray("events");
+            int size = eventArray == null ? 0 : eventArray.length();
+            for(int i = 0; i<size; i++) {
+                EventResult eventResult = new EventResult();
+                JSONObject eventObject = eventArray.getJSONObject(i);
+                eventResult.setKind(Kind.chat);
+                eventResult.setId(eventObject.getString("id"));
+                eventResult.setRoomId(eventObject.getString("roomid"));
+                eventResult.setBody(eventObject.getString("body"));
+                eventResult.setAdded(eventObject.getInt("added"));
+                String evt = eventObject.getString("eventtype");
+                evt = evt.substring(0, 1).toUpperCase() + evt.substring(1);
+                eventResult.setEventType(EventType.valueOf(evt));
+                eventResult.setUserId(eventObject.getString("userid"));
+
+                JSONObject userObject = eventObject.getJSONObject("user");
+                User evtUser = new User();
+                evtUser.setUserId(userObject.getString("userid"));
+                evtUser.setHandle(userObject.getString("handle"));
+                evtUser.setDisplayName(userObject.getString("displayname"));
+                evtUser.setProfileUrl(userObject.getString("profileurl"));
+                evtUser.setPictureUrl(userObject.getString("pictureurl"));
+                evtUser.setKind(Kind.user);
+                eventResult.setUser(evtUser);
+
+                list.add(eventResult);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
 }
