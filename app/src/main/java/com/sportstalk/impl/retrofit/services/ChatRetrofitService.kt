@@ -60,4 +60,13 @@ interface ChatRetrofitService {
             @Body request: ExitChatRoomRequest
     ): CompletableFuture<ApiResponse<ExitChatRoomResponse>>
 
+    // fun getUpdates: CompletableFuture<ApiResponse<???>>
+
+    @POST("{appId}/chat/rooms/{chatroomid}/command")
+    fun executeChatCommand(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Body request: ExecuteChatCommandRequest
+    ): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>>
+
 }

@@ -9,10 +9,8 @@ import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.User
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
-import kotlinx.serialization.serializer
 import net.bytebuddy.utility.RandomString
 import okhttp3.OkHttpClient
 import org.junit.After
@@ -92,7 +90,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `1) Create Room`() {
+    fun `A) Create Room`() {
         // GIVEN
         val testExpectedData = TestData.chatRooms(appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -164,7 +162,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `2) Get Room Details`() {
+    fun `B) Get Room Details`() {
         // GIVEN
         val testData = TestData.chatRooms(appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -213,7 +211,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `3) Delete Room`() {
+    fun `C) Delete Room`() {
         // GIVEN
         val testData = TestData.chatRooms(appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -264,7 +262,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `4) Update Room`() {
+    fun `D) Update Room`() {
         // GIVEN
         val testData = TestData.chatRooms(appId).first()
         // Should create a test chat room first
@@ -337,7 +335,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `5) Join Room - Authenticated User`() {
+    fun `E) Join Room - Authenticated User`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -410,7 +408,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `6) Join Room - Anonymous User`() {
+    fun `F) Join Room - Anonymous User`() {
         // GIVEN
         val testExpectedResult = ApiResponse<JoinChatRoomResponse>(
                 kind = "api.result",
@@ -447,7 +445,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `7) List Room Participants`() {
+    fun `G) List Room Participants`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -531,7 +529,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `8) Exit a Room`() {
+    fun `H) Exit a Room`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -595,6 +593,203 @@ class ChatApiServiceTest {
         assertTrue { testActualResult.message == testExpectedResult.message }
         assertTrue { testActualResult.code == testExpectedResult.code }
         assertTrue { testActualResult.data == null }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `I) Get Updates`() {
+        // TODO::
+    }
+
+    @Test
+    fun `J) Execute Chat Room - Speech`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = testUserData.handle,
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+
+        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                slug = testChatRoomData.slug,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                roomid = testCreatedChatRoomData.id!!,
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+
+        val testInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        val testExpectedResult = ApiResponse<ExecuteChatCommandResponse>(
+                kind = "api.result",
+                /*message = "",*/
+                code = 200,
+                data = ExecuteChatCommandResponse(
+                        kind = "chat.executecommand",
+                        op = "speech",
+                        room = testCreatedChatRoomData,
+                        speech = ChatEvent(
+                                kind = "chat.event",
+                                roomid = testCreatedChatRoomData.id,
+                                body = testInputRequest.command,
+                                eventtype = "speech",
+                                userid = testCreatedUserData.userid,
+                                user = testCreatedUserData
+                        ),
+                        action = null
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInputRequest
+        ).get()
+
+        // THEN
+        println(
+                "`Execute Chat Room - Speech`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.op == testExpectedResult.data?.op }
+        assertTrue { testActualResult.data?.room?.id == testExpectedResult.data?.room?.id }
+        assertTrue { testActualResult.data?.speech?.kind == testExpectedResult.data?.speech?.kind }
+        assertTrue { testActualResult.data?.speech?.roomid == testExpectedResult.data?.speech?.roomid }
+        assertTrue { testActualResult.data?.speech?.body == testExpectedResult.data?.speech?.body }
+        assertTrue { testActualResult.data?.speech?.eventtype == testExpectedResult.data?.speech?.eventtype }
+        assertTrue { testActualResult.data?.speech?.userid == testExpectedResult.data?.speech?.userid }
+        assertTrue { testActualResult.data?.speech?.user == testExpectedResult.data?.speech?.user }
+        assertTrue { testActualResult.data?.action == testExpectedResult.data?.action }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `J-2) Execute Chat Room - Action`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = testUserData.handle,
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+
+        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                slug = testChatRoomData.slug,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                roomid = testCreatedChatRoomData.id!!,
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+
+        val testInputRequest = ExecuteChatCommandRequest(
+                // "/high5 {{handle}}"
+                command = "/high5 ${testCreatedUserData.handle!!}",
+                userid = testCreatedUserData.userid!!
+        )
+        val testExpectedResult = ApiResponse<ExecuteChatCommandResponse>(
+                kind = "api.result",
+                /*message = "",*/
+                code = 200,
+                data = ExecuteChatCommandResponse(
+                        kind = "chat.executecommand",
+                        op = "action",
+                        room = testCreatedChatRoomData,
+                        speech = null,
+                        action = ChatEvent(
+                                kind = "chat.event",
+                                roomid = testCreatedChatRoomData.id,
+                                // "Test 1 gave Test 1 a high 5!"
+                                body = "${testCreatedUserData.displayname!!} gave ${testCreatedUserData.displayname!!} a high 5!",
+                                eventtype = "action",
+                                userid = testCreatedUserData.userid,
+                                user = testCreatedUserData
+                        )
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInputRequest
+        ).get()
+
+        // THEN
+        println(
+                "`Execute Chat Room - Action`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.op == testExpectedResult.data?.op }
+        assertTrue { testActualResult.data?.room?.id == testExpectedResult.data?.room?.id }
+        assertTrue { testActualResult.data?.speech == null }
+        assertTrue { testActualResult.data?.action?.kind == testExpectedResult.data?.action?.kind }
+        assertTrue { testActualResult.data?.action?.roomid == testExpectedResult.data?.action?.roomid }
+        assertTrue { testActualResult.data?.action?.body == testExpectedResult.data?.action?.body }
+        assertTrue { testActualResult.data?.action?.eventtype == testExpectedResult.data?.action?.eventtype }
+        assertTrue { testActualResult.data?.action?.userid == testExpectedResult.data?.action?.userid }
+        assertTrue { testActualResult.data?.action?.user == testExpectedResult.data?.action?.user }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)

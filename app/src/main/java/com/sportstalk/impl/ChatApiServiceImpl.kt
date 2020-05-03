@@ -67,4 +67,14 @@ class ChatApiServiceImpl(
                     chatRoomId = chatRoomId,
                     request = ExitChatRoomRequest(userid = userId)
             )
+
+    override fun executeChatCommand(
+            chatRoomId: String,
+            request: ExecuteChatCommandRequest
+    ): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>> =
+            service.executeChatCommand(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    request = request
+            )
 }
