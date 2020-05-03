@@ -53,4 +53,11 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null
     ): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/exit")
+    fun exitRoom(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Body request: ExitChatRoomRequest
+    ): CompletableFuture<ApiResponse<ExitChatRoomResponse>>
+
 }

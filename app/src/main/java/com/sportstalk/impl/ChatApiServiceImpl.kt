@@ -60,4 +60,11 @@ class ChatApiServiceImpl(
                     limit = limit,
                     cursor = cursor
             )
+
+    override fun exitRoom(chatRoomId: String, userId: String): CompletableFuture<ApiResponse<ExitChatRoomResponse>> =
+            service.exitRoom(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    request = ExitChatRoomRequest(userid = userId)
+            )
 }

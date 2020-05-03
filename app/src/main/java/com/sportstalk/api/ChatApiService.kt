@@ -59,4 +59,11 @@ interface ChatApiService {
             cursor: String? = null
     ): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>>
 
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/exit
+     * - https://apiref.sportstalk247.com/?version=latest#408b43ca-fca9-4f2d-8883-f6f725d140f2
+     * - Exit a Room
+     */
+    fun exitRoom(chatRoomId: String, userId: String): CompletableFuture<ApiResponse<ExitChatRoomResponse>>
+
 }
