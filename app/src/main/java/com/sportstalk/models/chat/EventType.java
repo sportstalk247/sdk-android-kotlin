@@ -6,5 +6,6 @@ public enum EventType {
     Reaction,
     RoomClosed,
     RoomOpen,
-    Action
+    Action,
+    Chat
 }

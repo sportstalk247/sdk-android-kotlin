@@ -32,5 +32,5 @@ public interface IRoomManager {
     RoomUserResult exitRoom(User user, Room room);
 
     /** list all user messages **/
-    EventResult listUserMessages(User user, Room room, String cursor, int limit);
+    List<EventResult> listUserMessages(User user, Room room, String cursor, int limit);
 }
