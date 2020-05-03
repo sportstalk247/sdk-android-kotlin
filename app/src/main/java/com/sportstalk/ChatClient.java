@@ -295,7 +295,7 @@ public class ChatClient implements IChatClient {
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
     public RoomUserResult exitRoom() throws SettingsException {
-        if (eventManager.getCurrentRoom() != null)
+        if (eventManager.getCurrentRoom() == null)
             throw new SettingsException(Messages.CAN_NOT_EXIT_ROOM);
         return this.roomManager.exitRoom(this.user, this.currentRom);
     }
