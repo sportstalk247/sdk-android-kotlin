@@ -609,7 +609,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-1) Execute Chat Room - Speech`() {
+    fun `J-1) Execute Chat Command - Speech`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -677,7 +677,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Room - Speech`() -> testActualResult = " +
+                "`Execute Chat Command - Speech`() -> testActualResult = " +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -704,7 +704,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-2) Execute Chat Room - Action`() {
+    fun `J-2) Execute Chat Command - Action`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -774,7 +774,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Room - Action`() -> testActualResult = " +
+                "`Execute Chat Command - Action`() -> testActualResult = " +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -801,7 +801,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-3) Execute Chat Room - Reply to a Message`() {
+    fun `J-3) Execute Chat Command - Reply to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -882,7 +882,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Room - Reply to a Message`() -> testActualResult = " +
+                "`Execute Chat Command - Reply to a Message`() -> testActualResult = " +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -911,7 +911,12 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-4) Execute Chat Room - Purge User Messages`() {
+    fun `J-4) Execute Chat Command - Purge User Messages`() {
+        // TODO:: Admin password is hardcoded as "zola".
+    }
+
+    @Test
+    fun `J-5) Execute Chat Command - Admin Command`() {
         // TODO:: Admin password is hardcoded as "zola".
     }
 
