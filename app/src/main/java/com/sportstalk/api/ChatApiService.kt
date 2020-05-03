@@ -111,12 +111,23 @@ interface ChatApiService {
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/report
      * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
-     * - Removes a message from a room
+     * - REPORTS a message to the moderation
      */
     fun reportMessage(
             chatRoomId: String,
             eventId: String,
             request: ReportMessageRequest
+    ): CompletableFuture<ApiResponse<ChatEvent>>
+
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/react
+     * - https://apiref.sportstalk247.com/?version=latest#977044d8-9133-4185-ac1f-4d96a40aa60b
+     * - Adds or removes a reaction to an existing event
+     */
+    fun reactToAMessage(
+            chatRoomId: String,
+            eventId: String,
+            request: ReactToAMessageRequest
     ): CompletableFuture<ApiResponse<ChatEvent>>
 
 }

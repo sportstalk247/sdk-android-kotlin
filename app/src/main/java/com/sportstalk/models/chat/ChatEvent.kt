@@ -11,17 +11,24 @@ data class ChatEvent(
         val body: String? = null,
         val added: Long? = null,
         val ts: Long? = null,
-        val eventtype: String? = null /* "speech"|"action" */,
+        val eventtype: String? = null /* "speech"|"action"|"reaction" */,
         val userid: String? = null,
         val user: User? = null,
         val customtype: String? = null,
         val customid: String? = null,
         val custompayload: String? = null,
         val replyto: ChatEvent? = null,
-        val reactions: List<String> = listOf(),
+        val reactions: List<ChatEventReaction> = listOf(),
         val moderation: String? = null /* "na" */,
         val active: Boolean? = null,
         val reports: List<ChatEventReport> = listOf()
+)
+
+@Serializable
+data class ChatEventReaction(
+        val type: String? = null,
+        val count: Long? = null,
+        val users: List<User> = listOf()
 )
 
 @Serializable

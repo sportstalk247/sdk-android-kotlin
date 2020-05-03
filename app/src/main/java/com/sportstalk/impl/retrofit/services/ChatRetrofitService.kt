@@ -86,4 +86,12 @@ interface ChatRetrofitService {
             @Body request: ReportMessageRequest
     ): CompletableFuture<ApiResponse<ChatEvent>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/events/{eventid}/react")
+    fun reactMessage(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("eventid") eventId: String,
+            @Body request: ReactToAMessageRequest
+    ): CompletableFuture<ApiResponse<ChatEvent>>
+
 }

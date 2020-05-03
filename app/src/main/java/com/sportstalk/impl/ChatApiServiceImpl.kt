@@ -103,4 +103,16 @@ class ChatApiServiceImpl(
                     eventId = eventId,
                     request = request
             )
+
+    override fun reactToAMessage(
+            chatRoomId: String,
+            eventId: String,
+            request: ReactToAMessageRequest
+    ): CompletableFuture<ApiResponse<ChatEvent>> =
+            service.reactMessage(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    request = request
+            )
 }
