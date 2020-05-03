@@ -605,7 +605,92 @@ class ChatApiServiceTest {
 
     @Test
     fun `I) Get Updates`() {
-        // TODO::
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = testUserData.handle,
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+
+        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                slug = testChatRoomData.slug,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                roomid = testCreatedChatRoomData.id!!,
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+
+        val testSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send an initial message to the created chat room
+        val testSendMessageData = chatApiService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testSendMessageInputRequest
+        ).get().data?.speech!!
+
+        val testExpectedResult = ApiResponse<GetUpdatesResponse>(
+                kind = "api.result",
+                /*message = "",*/
+                code = 200,
+                data = GetUpdatesResponse(
+                        kind = "list.chatevents",
+                        /*cursor = "",*/
+                        more = false,
+                        itemcount = 1,
+                        room = testCreatedChatRoomData,
+                        events = listOf(testSendMessageData)
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.getUpdates(
+                chatRoomId = testCreatedChatRoomData.id!!/*,
+                cursor = null*/
+        ).get()
+
+        // THEN
+        println(
+                "`Get Updates`() -> testActualResult = " +
+                        json.stringify(
+                                ApiResponse.serializer(GetUpdatesResponse.serializer() ),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.itemcount!! >= testExpectedResult.data?.itemcount!! }
+        assertTrue { testActualResult.data?.more == testExpectedResult.data?.more }
+        assertTrue { testActualResult.data?.room?.id == testExpectedResult.data?.room?.id }
+        assertTrue { testActualResult.data?.events!!.contains(testSendMessageData) }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
     }
 
     @Test

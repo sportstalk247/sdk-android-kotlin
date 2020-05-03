@@ -115,4 +115,14 @@ class ChatApiServiceImpl(
                     eventId = eventId,
                     request = request
             )
+
+    override fun getUpdates(
+            chatRoomId: String,
+            cursor: String?
+    ): CompletableFuture<ApiResponse<GetUpdatesResponse>> =
+            service.getUpdates(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    cursor = cursor
+            )
 }

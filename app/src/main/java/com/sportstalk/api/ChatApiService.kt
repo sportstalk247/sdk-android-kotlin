@@ -66,7 +66,15 @@ interface ChatApiService {
      */
     fun exitRoom(chatRoomId: String, userId: String): CompletableFuture<ApiResponse<ExitChatRoomResponse>>
 
-    // fun getUpdates(chatRoomId: String): CompletableFuture<ApiResponse<???>>
+    /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/updates
+     * - https://apiref.sportstalk247.com/?version=latest#be93067d-562e-41b2-97b2-b2bf177f1282
+     * - Get the Recent Updates to a Room
+     */
+    fun getUpdates(
+            chatRoomId: String,
+            cursor: String? = null /* eventId */
+    ): CompletableFuture<ApiResponse<GetUpdatesResponse>>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
