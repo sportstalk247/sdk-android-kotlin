@@ -5,7 +5,7 @@ New repo
 # How to use
 
  You can download the latest SportsTalk Android SDK from the following location:
- https://gitlab.com/sportstalk247/sdk-android.git
+ https://gitlab.com/sportstalk247/sdk-android-kotlin
 
  You need to register SportsTalk API with 'Appkey' and 'Token'.
 
@@ -30,16 +30,15 @@ New repo
      ...
      maven {
              url "https://jitpack.io"
-         }
+     }
    }
  }
-
  ```
 
  2. Add the following lines in your module **build.gradle** file, under dependencies section
 
  ```
- implementation 'com.gitlab.sportstalk247:sdk-android:master'
+ implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:master'
  ```
 
  3. Add the following token into the **local.properties** file
