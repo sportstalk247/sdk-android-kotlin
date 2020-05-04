@@ -343,7 +343,7 @@ class ChatApiServiceTest {
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = testUserData.handle,
+                handle = "${testUserData.handle}_${RandomString.make(6)}",
                 displayname = testUserData.displayname,
                 pictureurl = testUserData.pictureurl,
                 profileurl = testUserData.profileurl
@@ -413,6 +413,22 @@ class ChatApiServiceTest {
     @Test
     fun `F) Join Room - Anonymous User`() {
         // GIVEN
+        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                slug = testChatRoomData.slug,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+
         val testExpectedResult = ApiResponse<JoinChatRoomResponse>(
                 kind = "api.result",
                 message = "Successfully joined as anonymous user",
@@ -424,11 +440,9 @@ class ChatApiServiceTest {
                 )
         )
 
-        val testInputChatRoomIdOrLabel = "random_join_chat_room_label"
-
         // WHEN
         val testActualResult = chatApiService.joinRoom(
-                chatRoomIdOrLabel = testInputChatRoomIdOrLabel
+                chatRoomIdOrLabel = testCreatedChatRoomData.id!!
         ).get()
 
         // THEN
@@ -444,7 +458,7 @@ class ChatApiServiceTest {
         assertTrue { testActualResult.message == testExpectedResult.message }
         assertTrue { testActualResult.code == testExpectedResult.code }
         assertTrue { testActualResult.data?.user == null }
-        assertTrue { testActualResult.data?.room == null }
+        assertTrue { testActualResult.data?.room == testCreatedChatRoomData }
     }
 
     @Test
@@ -453,7 +467,7 @@ class ChatApiServiceTest {
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "${testUserData.handle}-${System.currentTimeMillis()}",
+                handle = "${testUserData.handle}_${RandomString.make(6)}",
                 displayname = testUserData.displayname,
                 pictureurl = testUserData.pictureurl,
                 profileurl = testUserData.profileurl
