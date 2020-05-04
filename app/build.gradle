@@ -1,0 +1,127 @@
+//apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlinx-serialization'
+
+android {
+
+    buildToolsVersion = rootProject.ext.buildToolsVersion
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    /* Load local.properties to read API AUTH TOKEN and APP ID */
+    Properties locProp = new Properties()
+    File propFile = project.rootProject.file('local.properties')
+    if (propFile.exists()) {
+        locProp.load(propFile.newDataInputStream())
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        /**
+         * Read API AUTH TOKEN and APP ID from local.properties, then set it to
+         * AndroidManifest.xml as a metadata.
+         */
+        manifestPlaceholders = [
+                "apiAuthToken": locProp['sportstalk.api.auth_token'],
+                "apiAppId": locProp['sportstalk.api.app_id'],
+        ]
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+
+            manifestPlaceholders = [
+                    // TODO:: When multiple environments are setup(i.e. DEV Environment), change this value accordingly
+                    "apiUrlEndpoint": "https://api.sportstalk247.com/api/v3/"
+            ]
+        }
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            manifestPlaceholders = [
+                    // TODO:: When multiple environments are setup(i.e. PROD Environment), change this value accordingly
+                    "apiUrlEndpoint": "https://api.sportstalk247.com/api/v3/"
+            ]
+        }
+    }
+
+    kapt {
+        generateStubs = true
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+
+    // https://stackoverflow.com/a/48988779/11419056
+    // * Go to Build, Execution, Deployment > Compiler > Kotlin Compiler BUT Other Settings > Kotlin compiler
+    // * Change the Target JVM version to 1.8, then Apply
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/main.kotlin_module'
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = true
+        }
+
+    }
+}
+
+dependencies {
+  implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    testImplementation "org.robolectric:robolectric:$rootProject.roboelectric"
+
+    // Backport to pre-JDK8 CompletableFuture support
+    implementation "net.sourceforge.streamsupport:android-retrofuture:$rootProject.retrofutureVersion"
+
+    // Jetbrains Kotlin Dependencies
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinx_serialization_version"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$rootProject.retrofitKotlinxSerializationConverterVersion")
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
+
+    // Coroutine
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
+    testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
+
+    androidTestImplementation "androidx.test:runner:$rootProject.androidXTest"
+    androidTestImplementation "androidx.test:rules:$rootProject.androidXTest"
+    androidTestImplementation "junit:junit:$rootProject.ext.junitVersion"
+    androidTestImplementation "org.mockito:mockito-android:$rootProject.ext.mockitoVersion"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.androidXTestExt"
+}
+
