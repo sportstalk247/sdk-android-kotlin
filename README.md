@@ -41,11 +41,16 @@ New repo
  implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:master'
  ```
 
- 3. Add the following token into the **local.properties** file
+ 3. Add the following entries into the **AndroidManifest.xml** file, within `<application/>` tag:
 
  ```
- sportstalk.api.auth_token=<Your API TOKEN>
- sportstalk.api.app_id=<Your API APP ID>
+ <meta-data
+     android:name="sportstalk.api.auth_token"
+     android:value="{YOU_API_AUTH_TOKEN}"/>
+
+ <meta-data
+     android:name="sportstalk.api.app_id"
+     android:value="{YOU_API_APP_ID}"/>
  ```
 
  Then sync again. That is all.

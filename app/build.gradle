@@ -11,13 +11,6 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    /* Load local.properties to read API AUTH TOKEN and APP ID */
-    Properties locProp = new Properties()
-    File propFile = project.rootProject.file('local.properties')
-    if (propFile.exists()) {
-        locProp.load(propFile.newDataInputStream())
-    }
-
     lintOptions {
         abortOnError false
     }
@@ -27,15 +20,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        /**
-         * Read API AUTH TOKEN and APP ID from local.properties, then set it to
-         * AndroidManifest.xml as a metadata.
-         */
-        manifestPlaceholders = [
-                "apiAuthToken": locProp['sportstalk.api.auth_token'],
-                "apiAppId": locProp['sportstalk.api.app_id'],
-        ]
     }
 
     buildTypes {
