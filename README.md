@@ -38,7 +38,7 @@ New repo
  2. Add the following lines in your module **build.gradle** file, under dependencies section
 
  ```
- implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:master'
+ implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:master-SNAPSHOT'
  ```
 
  3. Add the following entries into the **AndroidManifest.xml** file, within `<application/>` tag:
