@@ -1,21 +1,17 @@
 //apply plugin: 'com.android.application'
 apply plugin: 'com.android.library'
-
 apply plugin: 'kotlin-android'
-
 apply plugin: 'kotlin-android-extensions'
-
 apply plugin: 'kotlin-kapt'
-
 apply plugin: 'kotlinx-serialization'
 
 android {
 
-    buildToolsVersion '29.0.0'
+    buildToolsVersion = rootProject.ext.buildToolsVersion
 
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
-    /* Prepare signing config credentials */
+    /* Load local.properties to read API AUTH TOKEN and APP ID */
     Properties locProp = new Properties()
     File propFile = project.rootProject.file('local.properties')
     if (propFile.exists()) {
@@ -27,13 +23,15 @@ android {
     }
 
     defaultConfig {
-//        applicationId "com.sportstalk.myapplication"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
+        /**
+         * Read API AUTH TOKEN and APP ID from local.properties, then set it to
+         * AndroidManifest.xml as a metadata.
+         */
         manifestPlaceholders = [
                 "apiAuthToken": locProp['sportstalk.api.auth_token'],
                 "apiAppId": locProp['sportstalk.api.app_id'],
@@ -91,11 +89,8 @@ android {
 
 dependencies {
   implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'com.android.volley:volley:1.1.1'
-    testImplementation 'org.apache.httpcomponents:httpclient:4.5'
 
     testImplementation "org.robolectric:robolectric:$rootProject.roboelectric"
-    // testImplementation 'org.mockito:mockito-all:1.10.19'
 
     // Backport to pre-JDK8 CompletableFuture support
     implementation "net.sourceforge.streamsupport:android-retrofuture:$rootProject.retrofutureVersion"
@@ -109,19 +104,9 @@ dependencies {
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$rootProject.retrofitKotlinxSerializationConverterVersion")
-    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofitVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
     testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
-
-    // RxAndroid
-    implementation "io.reactivex.rxjava2:rxandroid:$rootProject.rxAndroidVersion"
-    implementation "io.reactivex.rxjava2:rxkotlin:$rootProject.rxkotlinVersion"
-
-    // AndroidX Lifecycle
-    implementation "androidx.lifecycle:lifecycle-extensions:$androidXLifecycleVersion"
-    kapt "androidx.lifecycle:lifecycle-compiler:$androidXLifecycleVersion"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidXLifecycleVersion"
 
     // Coroutine
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
