@@ -3,7 +3,7 @@ package com.sportstalk.api
 import android.app.Activity
 import android.content.Context
 import android.os.Build
-import com.sportstalk.Dependencies
+import com.sportstalk.SportsTalkManager
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse
@@ -12,9 +12,7 @@ import com.sportstalk.models.users.User
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonBuilder
 import net.bytebuddy.utility.RandomString
-import okhttp3.OkHttpClient
 import org.junit.After
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -24,7 +22,6 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import retrofit2.Retrofit
 import kotlin.test.assertTrue
 
 @UnstableDefault
@@ -35,32 +32,15 @@ import kotlin.test.assertTrue
 class UsersApiServiceTest {
 
     private lateinit var context: Context
-    private lateinit var okHttpClient: OkHttpClient
-    private lateinit var retrofit: Retrofit
     private lateinit var usersApiService: UsersApiService
     private lateinit var json: Json
 
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
-        val apiUrlEndpoint = Dependencies.ApiEndpoint.getInstance(context)!!
-        val authToken = Dependencies.AuthToken.getInstance(context)!!
-        val appId = Dependencies.AppId.getInstance(context)!!
-        okHttpClient = Dependencies._OkHttpClient.getInstance(authToken)
-        json = Json(
-                JsonBuilder()
-                        .apply {
-                            prettyPrint = false
-                            isLenient = true
-                            ignoreUnknownKeys = true
-                        }
-                        .buildConfiguration()
-        )
-        retrofit = Dependencies._Retrofit.getInstance(apiUrlEndpoint, okHttpClient, json)
-        usersApiService = Dependencies.ApiServices.Users.getInstance(
-                appId = appId,
-                retrofit = retrofit
-        )
+        val sportsTalkManager = SportsTalkManager.init(context)
+        json = sportsTalkManager.json
+        usersApiService = sportsTalkManager.usersApiService
     }
 
     @After

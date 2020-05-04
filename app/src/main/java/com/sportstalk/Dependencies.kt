@@ -19,7 +19,7 @@ object Dependencies {
 
     object ApiEndpoint {
         @JvmStatic
-        private var mInstance: String? = null
+        var mInstance: String? = null
 
         @JvmStatic
         fun getInstance(context: Context): String? {
@@ -41,7 +41,7 @@ object Dependencies {
 
     object AuthToken {
         @JvmStatic
-        private var mInstance: String? = null
+        var mInstance: String? = null
 
         @JvmStatic
         fun getInstance(context: Context): String? {
@@ -63,7 +63,7 @@ object Dependencies {
 
     object AppId {
         @JvmStatic
-        private var mInstance: String? = null
+        var mInstance: String? = null
 
         @JvmStatic
         fun getInstance(context: Context): String? {
@@ -85,7 +85,7 @@ object Dependencies {
 
     object _OkHttpClient {
         @JvmStatic
-        private var mInstance: OkHttpClient? = null
+        var mInstance: OkHttpClient? = null
 
         @JvmStatic
         fun getInstance(
@@ -115,7 +115,7 @@ object Dependencies {
 
     object _Json {
         @JvmStatic
-        private var mInstance: Json? = null
+        var mInstance: Json? = null
 
         @JvmStatic
         fun getInstance(): Json =
@@ -137,7 +137,7 @@ object Dependencies {
     @UnstableDefault
     object _Retrofit {
         @JvmStatic
-        private var mInstance: Retrofit? = null
+        var mInstance: Retrofit? = null
 
         @JvmStatic
         fun getInstance(
@@ -167,7 +167,7 @@ object Dependencies {
 
         object Users {
             @JvmStatic
-            private var mInstance: UsersApiService? = null
+            var mInstance: UsersApiService? = null
 
             @JvmStatic
             fun getInstance(
@@ -187,7 +187,7 @@ object Dependencies {
 
         object Chat {
             @JvmStatic
-            private var mInstance: ChatApiService? = null
+            var mInstance: ChatApiService? = null
 
             @JvmStatic
             fun getInstance(
