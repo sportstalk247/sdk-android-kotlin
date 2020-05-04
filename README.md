@@ -23,12 +23,10 @@
  This SDK contains the following modules:
  
  ```
-  - users
-  - Chats ( Room and Moderation)
-  - Comments(Conversation and Moderation)  
+  - Users
+  - Chats (Rooms and Moderation)
+  - Comments (Conversation and Moderation)
  ```
- 
- These are the important modules.
  
  # Using the SDK
  
@@ -62,7 +60,7 @@ RoomResult roomResult = chatClient.createRoom(room);
 RoomUserResult roomUserResult = chatClient.joinRoom(roomResult);
 
 // register for updates
-chatClient.startTalk();
+chatClient.startChat();
 
 // send command
 CommandOptions options = new CommandOptions();
@@ -138,9 +136,9 @@ public void onAdminCommand(Event event)
 
 # How to download the SDK from public repository
 
-The SpprtsTalk SDK has been published into **jitpack.io**.
+The Android SportsTalk SDK has been published into **jitpack.io**.
 
-In order to use it in your application, just do the following:
+In order to use it in your application, do the following:
 
 1. Add the following in root  **build.gradle** file
 ```
