@@ -1,6 +1,6 @@
 
  # Sportstalk Android SDK
- ###: Status: BETA.
+ ### Status: BETA.
  This SDK is under active development and improvement. We are also very open to feedback if you experience pain points while using the SDK.
 
  # How to use
