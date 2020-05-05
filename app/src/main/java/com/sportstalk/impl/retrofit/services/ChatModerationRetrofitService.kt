@@ -1,9 +1,13 @@
 package com.sportstalk.impl.retrofit.services
 
 import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.chat.*
+import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.moderation.ApproveMessageRequest
-import retrofit2.http.*
+import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Path
 import java.util.concurrent.CompletableFuture
 
 interface ChatModerationRetrofitService {
@@ -14,5 +18,10 @@ interface ChatModerationRetrofitService {
             @Path("eventid") eventId: String,
             @Body request: ApproveMessageRequest
     ): CompletableFuture<ApiResponse<ChatEvent>>
+
+    @GET("{appId}/chat/moderation/queues/events")
+    fun listMessagesNeedingModeration(
+            @Path("appId") appId: String
+    ): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>>
 
 }

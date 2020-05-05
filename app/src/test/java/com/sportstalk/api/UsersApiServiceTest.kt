@@ -82,7 +82,7 @@ class UsersApiServiceTest {
 
         // THEN
         println(
-                "`Create or Update User`() -> testActualResult = " +
+                "`Create or Update User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(User.serializer()),
                                 testActualResult
@@ -131,7 +131,7 @@ class UsersApiServiceTest {
 
         // THEN
         println(
-                "`Delete User`() -> testActualResult = " +
+                "`Delete User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(DeleteUserResponse.serializer()),
                                 testActualResult
@@ -180,7 +180,7 @@ class UsersApiServiceTest {
 
         // THEN
         println(
-                "`Get User Details`() -> testActualResult = " +
+                "`Get User Details`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(User.serializer()),
                                 testActualResult
@@ -308,7 +308,7 @@ class UsersApiServiceTest {
 
         // THEN
         println(
-                "`Ban User`() -> testActualResult = " +
+                "`Ban User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(User.serializer()),
                                 testActualResult
@@ -370,7 +370,7 @@ class UsersApiServiceTest {
 
         // THEN
         println(
-                "`Restore User`() -> testActualResult = " +
+                "`Restore User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(User.serializer()),
                                 testActualResult

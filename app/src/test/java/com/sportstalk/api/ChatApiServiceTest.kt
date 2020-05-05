@@ -116,7 +116,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Create Room`() -> testActualResult = " +
+                "`Create Room`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatRoom.serializer()),
                                 testActualResult
@@ -177,7 +177,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Get Room Details`() -> testActualResult = " +
+                "`Get Room Details`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatRoom.serializer()),
                                 testActualResult
@@ -230,7 +230,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Delete Room`() -> testActualResult = " +
+                "`Delete Room`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(DeleteChatRoomResponse.serializer()),
                                 testActualResult
@@ -295,7 +295,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Update Room`() -> testActualResult = " +
+                "`Update Room`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatRoom.serializer()),
                                 testActualResult
@@ -370,7 +370,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Join Room - Authenticated User`() -> testActualResult = " +
+                "`Join Room - Authenticated User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(JoinChatRoomResponse.serializer()),
                                 testActualResult
@@ -427,7 +427,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Join Room - Anonymous User`() -> testActualResult = " +
+                "`Join Room - Anonymous User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(JoinChatRoomResponse.serializer()),
                                 testActualResult
@@ -505,7 +505,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`List Room Participants`() -> testActualResult = " +
+                "`List Room Participants`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ListChatRoomParticipantsResponse.serializer()),
                                 testActualResult
@@ -579,7 +579,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Exit a Room`() -> testActualResult = " +
+                "`Exit a Room`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExitChatRoomResponse.serializer() ),
                                 testActualResult
@@ -666,7 +666,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Get Updates`() -> testActualResult = " +
+                "`Get Updates`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(GetUpdatesResponse.serializer() ),
                                 testActualResult
@@ -756,7 +756,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Command - Speech`() -> testActualResult = " +
+                "`Execute Chat Command - Speech`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -853,7 +853,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Command - Action`() -> testActualResult = " +
+                "`Execute Chat Command - Action`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -961,7 +961,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Command - Reply to a Message`() -> testActualResult = " +
+                "`Execute Chat Command - Reply to a Message`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -1061,7 +1061,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Command - Admin - Delete All Events`() -> testActualResult = " +
+                "`Execute Chat Command - Admin - Delete All Events`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -1148,7 +1148,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`List Messages By User`() -> testActualResult = " +
+                "`List Messages By User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ListMessagesByUser.serializer() ),
                                 testActualResult
@@ -1247,7 +1247,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Report a Message`() -> testActualResult = " +
+                "`Report a Message`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatEvent.serializer() ),
                                 testActualResult
@@ -1356,7 +1356,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`React to a Message`() -> testActualResult = " +
+                "`React to a Message`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatEvent.serializer() ),
                                 testActualResult

@@ -2,6 +2,7 @@ package com.sportstalk.api
 
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent
+import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
 import java.util.concurrent.CompletableFuture
 
 interface ChatModerationApiService {
@@ -12,5 +13,12 @@ interface ChatModerationApiService {
      * - APPROVES a message in the moderation queue.
      */
     fun approveMessage(eventId: String, approve: Boolean): CompletableFuture<ApiResponse<ChatEvent>>
+
+    /**
+     * [POST] /{{api_appid}}/chat/moderation/queues/events
+     * - https://apiref.sportstalk247.com/?version=latest#bcdbda1b-e495-46c9-8fe9-c5dc6a4c1756
+     * - List all the messages in the moderation queue
+     */
+    fun listMessagesNeedingModeration(): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>>
 
 }

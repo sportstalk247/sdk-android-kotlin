@@ -7,6 +7,7 @@ import com.sportstalk.SportsTalkManager
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.chat.moderation.ApproveMessageRequest
+import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.User
 import kotlinx.serialization.ImplicitReflectionSerializer
@@ -87,7 +88,9 @@ class ChatModerationApiServiceTest {
         // Should create a test user first
         val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first().copy(moderation = "pre")
+        val testChatRoomData = TestData.chatRooms(appId).first()
+                // Moderation MUST BE SET to "pre"
+                .copy(moderation = "pre")
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -140,7 +143,7 @@ class ChatModerationApiServiceTest {
 
         // THEN
         println(
-                "`Approve Message`() -> testActualResult = " +
+                "`Approve Message`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatEvent.serializer()),
                                 testActualResult
@@ -154,6 +157,91 @@ class ChatModerationApiServiceTest {
         assertTrue { testActualResult.data?.eventtype == testExpectedResult.data?.eventtype }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
         assertTrue { testActualResult.data?.moderation == testExpectedResult.data?.moderation }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `B) List Messages Needing Moderation`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = testUserData.handle,
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+
+        val testChatRoomData = TestData.chatRooms(appId).first()
+                // Moderation MUST BE SET to "pre"
+                .copy(moderation = "pre")
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                slug = testChatRoomData.slug,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                roomid = testCreatedChatRoomData.id!!,
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send a message to the created chat room
+        val testSendMessageData = chatApiService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        ).get().data?.speech!!
+
+        val testInputRequest = ApproveMessageRequest(
+                approve = true
+        )
+        val testExpectedResult = ApiResponse<ListMessagesNeedingModerationResponse>(
+                kind = "api.result",
+                message = "",
+                code = 200,
+                data = ListMessagesNeedingModerationResponse(
+                        kind = "list.events",
+                        events = listOf(testSendMessageData)
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatModerationApiService.listMessagesNeedingModeration().get()
+
+        // THEN
+        println(
+                "`Approve Message`() -> testActualResult = \n" +
+                        json.stringify(
+                                ApiResponse.serializer(ListMessagesNeedingModerationResponse.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.events!!.contains(testSendMessageData) }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)
