@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.sportstalk.api.ChatApiService
+import com.sportstalk.api.ChatModerationApiService
 import com.sportstalk.api.UsersApiService
 import com.sportstalk.impl.ChatApiServiceImpl
+import com.sportstalk.impl.ChatModerationApiServiceImpl
 import com.sportstalk.impl.UsersApiServiceImpl
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
@@ -196,6 +198,26 @@ object Dependencies {
             ): ChatApiService =
                     if(mInstance != null) mInstance!!
                     else ChatApiServiceImpl(
+                            appId = appId,
+                            mRetrofit = retrofit
+                    )
+                            .also {
+                                // Assign to static mInstance
+                                mInstance = it
+                            }
+        }
+
+        object ChatModeration {
+            @JvmStatic
+            var mInstance: ChatModerationApiService? = null
+
+            @JvmStatic
+            fun getInstance(
+                    appId: String,
+                    retrofit: retrofit2.Retrofit
+            ): ChatModerationApiService =
+                    if(mInstance != null) mInstance!!
+                    else ChatModerationApiServiceImpl(
                             appId = appId,
                             mRetrofit = retrofit
                     )
