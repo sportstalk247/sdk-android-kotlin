@@ -231,7 +231,7 @@ class ChatModerationApiServiceTest {
 
         // THEN
         println(
-                "`Approve Message`() -> testActualResult = \n" +
+                "`List Messages Needing Moderation`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ListMessagesNeedingModerationResponse.serializer()),
                                 testActualResult
