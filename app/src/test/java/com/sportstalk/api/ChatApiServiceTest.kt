@@ -58,7 +58,9 @@ class ChatApiServiceTest {
     private fun deleteTestUsers(vararg userIds: String?) {
         for(id in userIds) {
             id ?: continue
-            usersApiService.deleteUser(userId = id).get()
+            try {
+                usersApiService.deleteUser(userId = id).get()
+            } catch (err: Throwable) {}
         }
     }
 
@@ -68,7 +70,9 @@ class ChatApiServiceTest {
     private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
         for(id in chatRoomIds) {
             id ?: continue
-            chatApiService.deleteRoom(chatRoomId = id).get()
+            try {
+                chatApiService.deleteRoom(chatRoomId = id).get()
+            } catch (err: Throwable) {}
         }
     }
 
@@ -318,7 +322,60 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `E) Join Room - Authenticated User`() {
+    fun `E) List Rooms`() {
+        // GIVEN
+        val testData = TestData.chatRooms(appId).first()
+        val testInputRequest = CreateChatRoomRequest(
+                name = testData.name!!,
+                slug = testData.slug,
+                description = testData.description,
+                moderation = testData.moderation,
+                enableactions = testData.enableactions,
+                enableenterandexit = testData.enableenterandexit,
+                enableprofanityfilter = testData.enableprofanityfilter,
+                delaymessageseconds = testData.delaymessageseconds,
+                roomisopen = testData.open,
+                maxreports = testData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testInputRequest).get().data!!
+
+        val testExpectedResult = ApiResponse<ListRoomsResponse>(
+                kind = "api.result",
+                message = "Success",
+                code = 200,
+                data = ListRoomsResponse(
+                        kind = "list.chatrooms",
+                        rooms = listOf(testCreatedChatRoomData)
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.listRooms(
+                limit = 10
+        ).get()
+
+        // THEN
+        println(
+                "`List Rooms`() -> testActualResult = \n" +
+                        json.stringify(
+                                ApiResponse.serializer(ListRoomsResponse.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.message == testExpectedResult.message }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.rooms!!.containsAll(testExpectedResult.data?.rooms!!) }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+    }
+
+    @Test
+    fun `F) Join Room - Authenticated User`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -391,7 +448,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `F) Join Room - Anonymous User`() {
+    fun `G) Join Room - Anonymous User`() {
         // GIVEN
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -442,7 +499,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `G) List Room Participants`() {
+    fun `H) List Room Participants`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -526,7 +583,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `H) Exit a Room`() {
+    fun `I) Exit a Room`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -598,7 +655,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `I) Get Updates`() {
+    fun `J) Get Updates`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -688,7 +745,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-1) Execute Chat Command - Speech`() {
+    fun `K-1) Execute Chat Command - Speech`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -783,7 +840,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-2) Execute Chat Command - Action`() {
+    fun `K-2) Execute Chat Command - Action`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -880,7 +937,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-3) Execute Chat Command - Reply to a Message`() {
+    fun `K-3) Execute Chat Command - Reply to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -990,17 +1047,17 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-4) Execute Chat Command - Purge User Messages`() {
+    fun `K-4) Execute Chat Command - Purge User Messages`() {
         // TODO:: Admin password is hardcoded as "zola".
     }
 
     @Test
-    fun `J-5) Execute Chat Command - Admin Command`() {
+    fun `K-5) Execute Chat Command - Admin Command`() {
         // TODO:: Admin password is hardcoded as "zola".
     }
 
     @Test
-    fun `J-6) Execute Chat Command - Admin - Delete All Events`() {
+    fun `K-6) Execute Chat Command - Admin - Delete All Events`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1080,7 +1137,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `K) List Messages By User`() {
+    fun `L) List Messages By User`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1167,12 +1224,12 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `L) Remove a Message`() {
+    fun `M) Remove a Message`() {
         // TODO:: `Removes a message` API is broken at the moment
     }
 
     @Test
-    fun `M) Report a Message`() {
+    fun `N) Report a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1268,7 +1325,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `N) React to a Message`() {
+    fun `O) React to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(

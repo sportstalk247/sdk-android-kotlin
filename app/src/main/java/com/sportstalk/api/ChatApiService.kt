@@ -35,6 +35,16 @@ interface ChatApiService {
     fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
 
     /**
+     * [GET] /{{api_appid}}/chat/rooms/
+     * - https://apiref.sportstalk247.com/?version=latest#0580f06e-a58e-447a-aa1c-6071f3cfe1cf
+     * - List all the available public chat rooms
+     */
+    fun listRooms(
+            limit: Int? = null /* Defaults to 200 on backend API server */,
+            cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListRoomsResponse>>
+
+    /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/join
      * - https://apiref.sportstalk247.com/?version=latest#eb3f78c3-a8bb-4390-ab25-77ce7072ddda
      * - Join A Room(Authenticated User)

@@ -40,6 +40,13 @@ class ChatApiServiceImpl(
                     request = request
             )
 
+    override fun listRooms(limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListRoomsResponse>> =
+            service.listRooms(
+                    appId = appId,
+                    limit = limit,
+                    cursor = cursor
+            )
+
     override fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
             service.joinRoom(
                     appId = appId,
