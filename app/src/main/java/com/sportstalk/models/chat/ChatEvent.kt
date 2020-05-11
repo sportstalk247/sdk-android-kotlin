@@ -1,8 +1,11 @@
 package com.sportstalk.models.chat
 
+import android.os.Parcelable
 import com.sportstalk.models.users.User
+import kotlinx.android.parcel.Parcelize
 import kotlinx.serialization.Serializable
 
+@Parcelize
 @Serializable
 data class ChatEvent(
         val kind: String? = null /* "chat.event" */,
@@ -22,17 +25,19 @@ data class ChatEvent(
         val moderation: String? = null /* "na" */,
         val active: Boolean? = null,
         val reports: List<ChatEventReport> = listOf()
-)
+): Parcelable
 
+@Parcelize
 @Serializable
 data class ChatEventReaction(
         val type: String? = null,
         val count: Long? = null,
         val users: List<User> = listOf()
-)
+): Parcelable
 
+@Parcelize
 @Serializable
 data class ChatEventReport(
         val userid: String? = null,
         val reason: String? = null
-)
+): Parcelable

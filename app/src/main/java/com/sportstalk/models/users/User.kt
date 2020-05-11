@@ -1,7 +1,10 @@
 package com.sportstalk.models.users
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import kotlinx.serialization.Serializable
 
+@Parcelize
 @Serializable
 data class User(
         val kind: String? = null /* "app.user" */,
@@ -12,4 +15,4 @@ data class User(
         val pictureurl: String? = null,
         val profileurl: String? = null,
         val banned: Boolean? = null
-)
+): Parcelable
