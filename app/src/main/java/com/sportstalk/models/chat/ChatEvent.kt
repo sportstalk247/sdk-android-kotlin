@@ -14,7 +14,8 @@ data class ChatEvent(
         val body: String? = null,
         val added: Long? = null,
         val ts: Long? = null,
-        val eventtype: String? = null /* "speech"|"action"|"reaction" */,
+        /** [EventType] */
+        val eventtype: String? = null,
         val userid: String? = null,
         val user: User? = null,
         val customtype: String? = null,
@@ -25,7 +26,7 @@ data class ChatEvent(
         val moderation: String? = null /* "na" */,
         val active: Boolean? = null,
         val reports: List<ChatEventReport> = listOf()
-): Parcelable
+) : Parcelable
 
 @Parcelize
 @Serializable
@@ -33,11 +34,23 @@ data class ChatEventReaction(
         val type: String? = null,
         val count: Long? = null,
         val users: List<User> = listOf()
-): Parcelable
+) : Parcelable
 
 @Parcelize
 @Serializable
 data class ChatEventReport(
         val userid: String? = null,
         val reason: String? = null
-): Parcelable
+) : Parcelable
+
+object EventType {
+    const val SPEECH = "speech"
+    const val PURGE = "purge"
+    const val REACTION = "reaction"
+    const val ROOM_CLOSED = "roomClosed"
+    const val ROOM_OPEN = "roomopen"
+    const val ACTION = "action"
+    const val REPLY = "reply"
+    const val GOAL = "goal" // custom type
+    const val ADVERTISEMENT = "advertisement" // custom type
+}
