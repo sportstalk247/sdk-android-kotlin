@@ -16,7 +16,9 @@ import org.reactivestreams.Publisher
 fun ChatApiService.allEventUpdatesPublisher(
         chatRoomId: String,
         eventTypeFilter: String? = null /* [EventType] */,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         /*LiveDataReactiveStreams.toPublisher(
                 lifecycleOwner,
@@ -53,7 +55,8 @@ fun ChatApiService.allEventUpdatesPublisher(
             lifecycleOwner.lifecycle.addObserver(
                     GetUpdatesObserver(
                             chatApiService = this@allEventUpdatesPublisher,
-                            getUpdateAction = getUpdateAction
+                            getUpdateAction = getUpdateAction,
+                            frequency = frequency
                     )
             )
 
@@ -80,99 +83,126 @@ fun ChatApiService.allEventUpdatesPublisher(
 // "speech" Event Updates
 fun ChatApiService.speechEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.SPEECH,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
 // "purge" Event Updates
 fun ChatApiService.purgeEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.PURGE,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
 // "reaction" Event Updates
 fun ChatApiService.reactionEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.REACTION,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
 // "roomClosed" Event Updates
 fun ChatApiService.roomClosedEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ROOM_CLOSED,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
 // "roomopen" Event Updates
 fun ChatApiService.roomOpenEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ROOM_OPEN,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
 // "action" Event Updates
 fun ChatApiService.actionEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ACTION,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
 // "reply" Event Updates
 fun ChatApiService.replyEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.REPLY,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
 // "goal" Event Updates
 fun ChatApiService.goalEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.GOAL,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
 // "advertisement" Event Updates
 fun ChatApiService.advertisementEventsPublisher(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner
+        lifecycleOwner: LifecycleOwner,
+        /* Polling Frequency */
+        frequency: Long = 500L
 ): Publisher<List<ChatEvent>> =
         allEventUpdatesPublisher(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ADVERTISEMENT,
-                lifecycleOwner = lifecycleOwner
+                lifecycleOwner = lifecycleOwner,
+                frequency = frequency
         )
 
