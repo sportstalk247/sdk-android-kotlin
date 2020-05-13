@@ -1,53 +1,44 @@
-package com.sportstalk.api.polling
+@file:Suppress("EXPERIMENTAL_API_USAGE")
 
-import androidx.lifecycle.*
+package com.sportstalk.api.polling.coroutines
+
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.coroutineScope
 import com.sportstalk.api.ChatApiService
+import com.sportstalk.api.polling.GetUpdatesObserver
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.withContext
 
-/**
-    export enum EventType {
-        speech = "speech",
-        purge = "purge",
-        reaction = "reaction",
-        roomClosed = "roomclosed",
-        roomOpen = "roomopen",
-        action = "action",
-        reply = "reply",
-        goal = "goal", // custom type
-        advertisement = "advertisement" // custom type
-    }
- */
-
-fun ChatApiService.allEventUpdatesLiveData(
+fun ChatApiService.allEventUpdates(
         chatRoomId: String,
-        eventTypeFilter: String? = null /** [EventType] */,
+        eventTypeFilter: String? = null /* [EventType] */,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> = liveData {
-    val emitter = MutableLiveData<ApiResponse<GetUpdatesResponse>>()
+): Flow<List<ChatEvent>> = flow {
+    val emitter = ConflatedBroadcastChannel<ApiResponse<GetUpdatesResponse>>()
 
     val scope = lifecycleOwner.lifecycle.coroutineScope
     // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
-    val getUpdateAction = action@ {
+    val getUpdateAction = action@{
         // Execute block from within coroutine scope
         scope.launchWhenStarted {
             try {
                 // Perform GET UPDATES operation
-                val response = withContext(Dispatchers.IO) {
+                val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
                     getUpdates(chatRoomId = chatRoomId)
                             // Awaits for completion of the completion stage without blocking a thread
                             .await()
                 }
 
                 // Emit response value
-                emitter.postValue(response)
+                emitter.send(response)
             } catch (err: Throwable) {
                 err.printStackTrace()
             }
@@ -61,33 +52,29 @@ fun ChatApiService.allEventUpdatesLiveData(
      */
     lifecycleOwner.lifecycle.addObserver(
             GetUpdatesObserver(
-                    chatApiService = this@allEventUpdatesLiveData,
+                    chatApiService = this@allEventUpdates,
                     getUpdateAction = getUpdateAction,
                     frequency = frequency
             )
     )
 
     // Emit Response
-    emitSource(
-            emitter.switchMap { response ->
-                liveData<List<ChatEvent>> {
-                    // Emit transform into List<ChatEvent>
-                    emit(
-                            response.data
-                                    ?.events
-                                    // Apply filter not-null provided
-                                    ?.filter { _chatevent ->
-                                        // Apply filter if
-                                        return@filter if(eventTypeFilter != null && eventTypeFilter.isNotEmpty()) {
-                                            _chatevent.eventtype == eventTypeFilter
-                                        } else {
-                                            true
-                                        }
+    emitAll(
+            emitter.asFlow()
+                    .map { response ->
+                        response.data
+                                ?.events
+                                // Apply filter not-null provided
+                                ?.filter { _chatevent ->
+                                    // Apply filter if
+                                    return@filter if (eventTypeFilter != null && eventTypeFilter.isNotEmpty()) {
+                                        _chatevent.eventtype == eventTypeFilter
+                                    } else {
+                                        true
                                     }
-                                    ?: listOf<ChatEvent>()
-                    )
-                }
-            }
+                                }
+                                ?: listOf()
+                    }
     )
 }
 
@@ -96,13 +83,13 @@ fun ChatApiService.allEventUpdatesLiveData(
 //////////////////////////////
 
 // "speech" Event Updates
-fun ChatApiService.speechEventsLiveData(
+fun ChatApiService.speechEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.SPEECH,
                 lifecycleOwner = lifecycleOwner,
@@ -110,13 +97,13 @@ fun ChatApiService.speechEventsLiveData(
         )
 
 // "purge" Event Updates
-fun ChatApiService.purgeEventsLiveData(
+fun ChatApiService.purgeEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.PURGE,
                 lifecycleOwner = lifecycleOwner,
@@ -124,13 +111,13 @@ fun ChatApiService.purgeEventsLiveData(
         )
 
 // "reaction" Event Updates
-fun ChatApiService.reactionEventsLiveData(
+fun ChatApiService.reactionEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.REACTION,
                 lifecycleOwner = lifecycleOwner,
@@ -138,13 +125,13 @@ fun ChatApiService.reactionEventsLiveData(
         )
 
 // "roomClosed" Event Updates
-fun ChatApiService.roomClosedEventsLiveData(
+fun ChatApiService.roomClosedEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ROOM_CLOSED,
                 lifecycleOwner = lifecycleOwner,
@@ -152,13 +139,13 @@ fun ChatApiService.roomClosedEventsLiveData(
         )
 
 // "roomopen" Event Updates
-fun ChatApiService.roomOpenEventsLiveData(
+fun ChatApiService.roomOpenEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ROOM_OPEN,
                 lifecycleOwner = lifecycleOwner,
@@ -166,13 +153,13 @@ fun ChatApiService.roomOpenEventsLiveData(
         )
 
 // "action" Event Updates
-fun ChatApiService.actionEventsLiveData(
+fun ChatApiService.actionEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ACTION,
                 lifecycleOwner = lifecycleOwner,
@@ -180,13 +167,13 @@ fun ChatApiService.actionEventsLiveData(
         )
 
 // "reply" Event Updates
-fun ChatApiService.replyEventsLiveData(
+fun ChatApiService.replyEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.REPLY,
                 lifecycleOwner = lifecycleOwner,
@@ -194,13 +181,13 @@ fun ChatApiService.replyEventsLiveData(
         )
 
 // "goal" Event Updates
-fun ChatApiService.goalEventsLiveData(
+fun ChatApiService.goalEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.GOAL,
                 lifecycleOwner = lifecycleOwner,
@@ -208,15 +195,16 @@ fun ChatApiService.goalEventsLiveData(
         )
 
 // "advertisement" Event Updates
-fun ChatApiService.advertisementEventsLiveData(
+fun ChatApiService.advertisementEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): LiveData<List<ChatEvent>> =
-        allEventUpdatesLiveData(
+): Flow<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ADVERTISEMENT,
                 lifecycleOwner = lifecycleOwner,
                 frequency = frequency
         )
+

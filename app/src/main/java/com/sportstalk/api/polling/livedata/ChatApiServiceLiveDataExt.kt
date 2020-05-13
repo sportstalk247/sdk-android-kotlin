@@ -1,93 +1,109 @@
-package com.sportstalk.api.polling
+package com.sportstalk.api.polling.livedata
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.*
 import com.sportstalk.api.ChatApiService
+import com.sportstalk.api.polling.GetUpdatesObserver
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Flowable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
-import org.reactivestreams.Publisher
+import kotlinx.coroutines.withContext
 
-fun ChatApiService.allEventUpdatesPublisher(
+/**
+    export enum EventType {
+        speech = "speech",
+        purge = "purge",
+        reaction = "reaction",
+        roomClosed = "roomclosed",
+        roomOpen = "roomopen",
+        action = "action",
+        reply = "reply",
+        goal = "goal", // custom type
+        advertisement = "advertisement" // custom type
+    }
+ */
+
+fun ChatApiService.allEventUpdates(
         chatRoomId: String,
-        eventTypeFilter: String? = null /* [EventType] */,
+        eventTypeFilter: String? = null /** [EventType] */,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        /*LiveDataReactiveStreams.toPublisher(
-                lifecycleOwner,
-                allEventUpdatesLiveData(chatRoomId, eventTypeFilter, lifecycleOwner)
-        )*/
-        Flowable.create<ApiResponse<GetUpdatesResponse>>({ emitter ->
+): LiveData<List<ChatEvent>> = liveData {
+    val emitter = MutableLiveData<ApiResponse<GetUpdatesResponse>>()
 
-            val scope = lifecycleOwner.lifecycle.coroutineScope
-            // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
-            val getUpdateAction = action@{
-                // Execute block from within coroutine scope
-                scope.launchWhenStarted {
-                    try {
-                        // Perform GET UPDATES operation
-                        val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                            getUpdates(chatRoomId = chatRoomId)
-                                    // Awaits for completion of the completion stage without blocking a thread
-                                    .await()
-                        }
-
-                        // Emit response value
-                        emitter.onNext(response)
-                    } catch (err: Throwable) {
-                        err.printStackTrace()
-                    }
+    val scope = lifecycleOwner.lifecycle.coroutineScope
+    // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
+    val getUpdateAction = action@ {
+        // Execute block from within coroutine scope
+        scope.launchWhenStarted {
+            try {
+                // Perform GET UPDATES operation
+                val response = withContext(Dispatchers.IO) {
+                    getUpdates(chatRoomId = chatRoomId)
+                            // Awaits for completion of the completion stage without blocking a thread
+                            .await()
                 }
 
-                return@action
+                // Emit response value
+                emitter.postValue(response)
+            } catch (err: Throwable) {
+                err.printStackTrace()
             }
+        }
 
-            /**
-             * Add GetUpdates Lifecycle Observer Implementation to this lifecycle owner's set of observers
-             */
-            lifecycleOwner.lifecycle.addObserver(
-                    GetUpdatesObserver(
-                            chatApiService = this@allEventUpdatesPublisher,
-                            getUpdateAction = getUpdateAction,
-                            frequency = frequency
-                    )
+        return@action
+    }
+
+    /**
+     * Add GetUpdates Lifecycle Observer Implementation to this lifecycle owner's set of observers
+     */
+    lifecycleOwner.lifecycle.addObserver(
+            GetUpdatesObserver(
+                    chatApiService = this@allEventUpdates,
+                    getUpdateAction = getUpdateAction,
+                    frequency = frequency
             )
+    )
 
-        }, BackpressureStrategy.LATEST)
-                .map { response ->
-                    response.data
-                            ?.events
-                            // Apply filter not-null provided
-                            ?.filter { _chatevent ->
-                                // Apply filter if
-                                return@filter if (eventTypeFilter != null && eventTypeFilter.isNotEmpty()) {
-                                    _chatevent.eventtype == eventTypeFilter
-                                } else {
-                                    true
-                                }
-                            }
-                            ?: listOf()
+    // Emit Response
+    emitSource(
+            emitter.switchMap { response ->
+                liveData<List<ChatEvent>> {
+                    // Emit transform into List<ChatEvent>
+                    emit(
+                            response.data
+                                    ?.events
+                                    // Apply filter not-null provided
+                                    ?.filter { _chatevent ->
+                                        // Apply filter if
+                                        return@filter if(eventTypeFilter != null && eventTypeFilter.isNotEmpty()) {
+                                            _chatevent.eventtype == eventTypeFilter
+                                        } else {
+                                            true
+                                        }
+                                    }
+                                    ?: listOf<ChatEvent>()
+                    )
                 }
+            }
+    )
+}
 
 //////////////////////////////
 // Convenience Functions
 //////////////////////////////
 
 // "speech" Event Updates
-fun ChatApiService.speechEventsPublisher(
+fun ChatApiService.speechEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.SPEECH,
                 lifecycleOwner = lifecycleOwner,
@@ -95,13 +111,13 @@ fun ChatApiService.speechEventsPublisher(
         )
 
 // "purge" Event Updates
-fun ChatApiService.purgeEventsPublisher(
+fun ChatApiService.purgeEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.PURGE,
                 lifecycleOwner = lifecycleOwner,
@@ -109,13 +125,13 @@ fun ChatApiService.purgeEventsPublisher(
         )
 
 // "reaction" Event Updates
-fun ChatApiService.reactionEventsPublisher(
+fun ChatApiService.reactionEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.REACTION,
                 lifecycleOwner = lifecycleOwner,
@@ -123,13 +139,13 @@ fun ChatApiService.reactionEventsPublisher(
         )
 
 // "roomClosed" Event Updates
-fun ChatApiService.roomClosedEventsPublisher(
+fun ChatApiService.roomClosedEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ROOM_CLOSED,
                 lifecycleOwner = lifecycleOwner,
@@ -137,13 +153,13 @@ fun ChatApiService.roomClosedEventsPublisher(
         )
 
 // "roomopen" Event Updates
-fun ChatApiService.roomOpenEventsPublisher(
+fun ChatApiService.roomOpenEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ROOM_OPEN,
                 lifecycleOwner = lifecycleOwner,
@@ -151,13 +167,13 @@ fun ChatApiService.roomOpenEventsPublisher(
         )
 
 // "action" Event Updates
-fun ChatApiService.actionEventsPublisher(
+fun ChatApiService.actionEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ACTION,
                 lifecycleOwner = lifecycleOwner,
@@ -165,13 +181,13 @@ fun ChatApiService.actionEventsPublisher(
         )
 
 // "reply" Event Updates
-fun ChatApiService.replyEventsPublisher(
+fun ChatApiService.replyEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.REPLY,
                 lifecycleOwner = lifecycleOwner,
@@ -179,13 +195,13 @@ fun ChatApiService.replyEventsPublisher(
         )
 
 // "goal" Event Updates
-fun ChatApiService.goalEventsPublisher(
+fun ChatApiService.goalEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.GOAL,
                 lifecycleOwner = lifecycleOwner,
@@ -193,16 +209,15 @@ fun ChatApiService.goalEventsPublisher(
         )
 
 // "advertisement" Event Updates
-fun ChatApiService.advertisementEventsPublisher(
+fun ChatApiService.advertisementEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L
-): Publisher<List<ChatEvent>> =
-        allEventUpdatesPublisher(
+): LiveData<List<ChatEvent>> =
+        allEventUpdates(
                 chatRoomId = chatRoomId,
                 eventTypeFilter = EventType.ADVERTISEMENT,
                 lifecycleOwner = lifecycleOwner,
                 frequency = frequency
         )
-

@@ -1,5 +1,6 @@
 package com.sportstalk.impl
 
+import androidx.annotation.RestrictTo
 import com.sportstalk.api.ChatApiService
 import com.sportstalk.impl.retrofit.services.ChatRetrofitService
 import com.sportstalk.models.ApiResponse
@@ -8,7 +9,9 @@ import retrofit2.Retrofit
 import retrofit2.create
 import java.util.concurrent.CompletableFuture
 
-class ChatApiServiceImpl(
+class ChatApiServiceImpl
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
         private val appId: String,
         mRetrofit: Retrofit
 ): ChatApiService {

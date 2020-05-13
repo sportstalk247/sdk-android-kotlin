@@ -1,5 +1,6 @@
 package com.sportstalk.api
 
+import androidx.annotation.RestrictTo
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import java.util.concurrent.CompletableFuture
@@ -81,6 +82,7 @@ interface ChatApiService {
      * - https://apiref.sportstalk247.com/?version=latest#be93067d-562e-41b2-97b2-b2bf177f1282
      * - Get the Recent Updates to a Room
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun getUpdates(
             chatRoomId: String,
             cursor: String? = null /* eventId */
