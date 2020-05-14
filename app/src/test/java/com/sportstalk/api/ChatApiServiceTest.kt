@@ -3,7 +3,7 @@ package com.sportstalk.api
 import android.app.Activity
 import android.content.Context
 import android.os.Build
-import com.sportstalk.Dependencies
+import com.sportstalk.SportsTalkManager
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.users.CreateUpdateUserRequest
@@ -11,7 +11,6 @@ import com.sportstalk.models.users.User
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonBuilder
 import net.bytebuddy.utility.RandomString
 import okhttp3.OkHttpClient
 import org.junit.After
@@ -34,38 +33,19 @@ import kotlin.test.assertTrue
 class ChatApiServiceTest {
 
     private lateinit var context: Context
-    private lateinit var okHttpClient: OkHttpClient
-    private lateinit var retrofit: Retrofit
+    private lateinit var json: Json
     private lateinit var usersApiService: UsersApiService
     private lateinit var chatApiService: ChatApiService
-    private lateinit var json: Json
     private lateinit var appId: String
 
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
-        val apiUrlEndpoint = Dependencies.ApiEndpoint.getInstance(context)!!
-        val authToken = Dependencies.AuthToken.getInstance(context)!!
-        appId = Dependencies.AppId.getInstance(context)!!
-        okHttpClient = Dependencies._OkHttpClient.getInstance(authToken)
-        json = Json(
-                JsonBuilder()
-                        .apply {
-                            prettyPrint = false
-                            isLenient = true
-                            ignoreUnknownKeys = true
-                        }
-                        .buildConfiguration()
-        )
-        retrofit = Dependencies._Retrofit.getInstance(apiUrlEndpoint, okHttpClient, json)
-        usersApiService = Dependencies.ApiServices.Users.getInstance(
-                appId = appId,
-                retrofit = retrofit
-        )
-        chatApiService = Dependencies.ApiServices.Chat.getInstance(
-                appId = appId,
-                retrofit = retrofit
-        )
+        val sportsTalkManager = SportsTalkManager.init(context)
+        json = sportsTalkManager.json
+        appId = sportsTalkManager.appId
+        usersApiService = sportsTalkManager.usersApiService
+        chatApiService = sportsTalkManager.chatApiService
     }
 
     @After
@@ -78,7 +58,9 @@ class ChatApiServiceTest {
     private fun deleteTestUsers(vararg userIds: String?) {
         for(id in userIds) {
             id ?: continue
-            usersApiService.deleteUser(userId = id).get()
+            try {
+                usersApiService.deleteUser(userId = id).get()
+            } catch (err: Throwable) {}
         }
     }
 
@@ -88,7 +70,9 @@ class ChatApiServiceTest {
     private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
         for(id in chatRoomIds) {
             id ?: continue
-            chatApiService.deleteRoom(chatRoomId = id).get()
+            try {
+                chatApiService.deleteRoom(chatRoomId = id).get()
+            } catch (err: Throwable) {}
         }
     }
 
@@ -136,7 +120,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Create Room`() -> testActualResult = " +
+                "`Create Room`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatRoom.serializer()),
                                 testActualResult
@@ -197,7 +181,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Get Room Details`() -> testActualResult = " +
+                "`Get Room Details`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatRoom.serializer()),
                                 testActualResult
@@ -250,7 +234,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Delete Room`() -> testActualResult = " +
+                "`Delete Room`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(DeleteChatRoomResponse.serializer()),
                                 testActualResult
@@ -315,7 +299,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Update Room`() -> testActualResult = " +
+                "`Update Room`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatRoom.serializer()),
                                 testActualResult
@@ -338,7 +322,60 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `E) Join Room - Authenticated User`() {
+    fun `E) List Rooms`() {
+        // GIVEN
+        val testData = TestData.chatRooms(appId).first()
+        val testInputRequest = CreateChatRoomRequest(
+                name = testData.name!!,
+                slug = testData.slug,
+                description = testData.description,
+                moderation = testData.moderation,
+                enableactions = testData.enableactions,
+                enableenterandexit = testData.enableenterandexit,
+                enableprofanityfilter = testData.enableprofanityfilter,
+                delaymessageseconds = testData.delaymessageseconds,
+                roomisopen = testData.open,
+                maxreports = testData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatApiService.createRoom(testInputRequest).get().data!!
+
+        val testExpectedResult = ApiResponse<ListRoomsResponse>(
+                kind = "api.result",
+                message = "Success",
+                code = 200,
+                data = ListRoomsResponse(
+                        kind = "list.chatrooms",
+                        rooms = listOf(testCreatedChatRoomData)
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.listRooms(
+                limit = 10
+        ).get()
+
+        // THEN
+        println(
+                "`List Rooms`() -> testActualResult = \n" +
+                        json.stringify(
+                                ApiResponse.serializer(ListRoomsResponse.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.message == testExpectedResult.message }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
+        assertTrue { testActualResult.data?.rooms!!.containsAll(testExpectedResult.data?.rooms!!) }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+    }
+
+    @Test
+    fun `F) Join Room - Authenticated User`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -390,7 +427,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Join Room - Authenticated User`() -> testActualResult = " +
+                "`Join Room - Authenticated User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(JoinChatRoomResponse.serializer()),
                                 testActualResult
@@ -411,7 +448,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `F) Join Room - Anonymous User`() {
+    fun `G) Join Room - Anonymous User`() {
         // GIVEN
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -447,7 +484,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Join Room - Anonymous User`() -> testActualResult = " +
+                "`Join Room - Anonymous User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(JoinChatRoomResponse.serializer()),
                                 testActualResult
@@ -462,7 +499,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `G) List Room Participants`() {
+    fun `H) List Room Participants`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -525,7 +562,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`List Room Participants`() -> testActualResult = " +
+                "`List Room Participants`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ListChatRoomParticipantsResponse.serializer()),
                                 testActualResult
@@ -546,7 +583,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `H) Exit a Room`() {
+    fun `I) Exit a Room`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -599,7 +636,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Exit a Room`() -> testActualResult = " +
+                "`Exit a Room`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExitChatRoomResponse.serializer() ),
                                 testActualResult
@@ -618,7 +655,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `I) Get Updates`() {
+    fun `J) Get Updates`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -686,7 +723,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Get Updates`() -> testActualResult = " +
+                "`Get Updates`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(GetUpdatesResponse.serializer() ),
                                 testActualResult
@@ -708,7 +745,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-1) Execute Chat Command - Speech`() {
+    fun `K-1) Execute Chat Command - Speech`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -776,7 +813,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Command - Speech`() -> testActualResult = " +
+                "`Execute Chat Command - Speech`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -803,7 +840,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-2) Execute Chat Command - Action`() {
+    fun `K-2) Execute Chat Command - Action`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -873,7 +910,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Command - Action`() -> testActualResult = " +
+                "`Execute Chat Command - Action`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -900,7 +937,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-3) Execute Chat Command - Reply to a Message`() {
+    fun `K-3) Execute Chat Command - Reply to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -981,7 +1018,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Command - Reply to a Message`() -> testActualResult = " +
+                "`Execute Chat Command - Reply to a Message`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -1010,17 +1047,17 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J-4) Execute Chat Command - Purge User Messages`() {
+    fun `K-4) Execute Chat Command - Purge User Messages`() {
         // TODO:: Admin password is hardcoded as "zola".
     }
 
     @Test
-    fun `J-5) Execute Chat Command - Admin Command`() {
+    fun `K-5) Execute Chat Command - Admin Command`() {
         // TODO:: Admin password is hardcoded as "zola".
     }
 
     @Test
-    fun `J-6) Execute Chat Command - Admin - Delete All Events`() {
+    fun `K-6) Execute Chat Command - Admin - Delete All Events`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1081,7 +1118,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Execute Chat Command - Admin - Delete All Events`() -> testActualResult = " +
+                "`Execute Chat Command - Admin - Delete All Events`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
                                 testActualResult
@@ -1100,7 +1137,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `K) List Messages By User`() {
+    fun `L) List Messages By User`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1168,7 +1205,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`List Messages By User`() -> testActualResult = " +
+                "`List Messages By User`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ListMessagesByUser.serializer() ),
                                 testActualResult
@@ -1187,12 +1224,12 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `L) Remove a Message`() {
+    fun `M) Remove a Message`() {
         // TODO:: `Removes a message` API is broken at the moment
     }
 
     @Test
-    fun `M) Report a Message`() {
+    fun `N) Report a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1267,7 +1304,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`Report a Message`() -> testActualResult = " +
+                "`Report a Message`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatEvent.serializer() ),
                                 testActualResult
@@ -1288,7 +1325,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `N) React to a Message`() {
+    fun `O) React to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1376,7 +1413,7 @@ class ChatApiServiceTest {
 
         // THEN
         println(
-                "`React to a Message`() -> testActualResult = " +
+                "`React to a Message`() -> testActualResult = \n" +
                         json.stringify(
                                 ApiResponse.serializer(ChatEvent.serializer() ),
                                 testActualResult

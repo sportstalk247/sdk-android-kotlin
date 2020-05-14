@@ -1,7 +1,10 @@
 package com.sportstalk.models.chat
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import kotlinx.serialization.Serializable
 
+@Parcelize
 @Serializable
 data class ChatRoom(
         val kind: String? = null /* "chat.room" */,
@@ -22,4 +25,4 @@ data class ChatRoom(
         val maxreports: Long? = null,
         val enableprofanityfilter: Boolean? = null,
         val delaymessageseconds: Long? = null
-)
+): Parcelable

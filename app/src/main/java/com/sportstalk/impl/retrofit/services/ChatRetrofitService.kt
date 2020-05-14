@@ -32,6 +32,13 @@ interface ChatRetrofitService {
             @Body request: UpdateChatRoomRequest
     ): CompletableFuture<ApiResponse<ChatRoom>>
 
+    @GET("{appId}/chat/rooms/")
+    fun listRooms(
+            @Path("appId") appId: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListRoomsResponse>>
+
     @POST("{appId}/chat/rooms/{chatroomid}/join")
     fun joinRoom(
             @Path("appId") appId: String,
