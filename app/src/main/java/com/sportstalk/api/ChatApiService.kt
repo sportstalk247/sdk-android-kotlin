@@ -1,5 +1,6 @@
 package com.sportstalk.api
 
+import androidx.annotation.RestrictTo
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import java.util.concurrent.CompletableFuture
@@ -33,6 +34,16 @@ interface ChatApiService {
      * - Updates an existing room
      */
     fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
+
+    /**
+     * [GET] /{{api_appid}}/chat/rooms/
+     * - https://apiref.sportstalk247.com/?version=latest#0580f06e-a58e-447a-aa1c-6071f3cfe1cf
+     * - List all the available public chat rooms
+     */
+    fun listRooms(
+            limit: Int? = null /* Defaults to 200 on backend API server */,
+            cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListRoomsResponse>>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/join
@@ -71,6 +82,7 @@ interface ChatApiService {
      * - https://apiref.sportstalk247.com/?version=latest#be93067d-562e-41b2-97b2-b2bf177f1282
      * - Get the Recent Updates to a Room
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun getUpdates(
             chatRoomId: String,
             cursor: String? = null /* eventId */

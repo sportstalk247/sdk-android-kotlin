@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.sportstalk.api.ChatApiService
+import com.sportstalk.api.ChatModerationApiService
 import com.sportstalk.api.UsersApiService
 import com.sportstalk.impl.ChatApiServiceImpl
+import com.sportstalk.impl.ChatModerationApiServiceImpl
 import com.sportstalk.impl.UsersApiServiceImpl
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
@@ -19,7 +21,7 @@ object Dependencies {
 
     object ApiEndpoint {
         @JvmStatic
-        private var mInstance: String? = null
+        var mInstance: String? = null
 
         @JvmStatic
         fun getInstance(context: Context): String? {
@@ -41,7 +43,7 @@ object Dependencies {
 
     object AuthToken {
         @JvmStatic
-        private var mInstance: String? = null
+        var mInstance: String? = null
 
         @JvmStatic
         fun getInstance(context: Context): String? {
@@ -63,7 +65,7 @@ object Dependencies {
 
     object AppId {
         @JvmStatic
-        private var mInstance: String? = null
+        var mInstance: String? = null
 
         @JvmStatic
         fun getInstance(context: Context): String? {
@@ -85,7 +87,7 @@ object Dependencies {
 
     object _OkHttpClient {
         @JvmStatic
-        private var mInstance: OkHttpClient? = null
+        var mInstance: OkHttpClient? = null
 
         @JvmStatic
         fun getInstance(
@@ -115,7 +117,7 @@ object Dependencies {
 
     object _Json {
         @JvmStatic
-        private var mInstance: Json? = null
+        var mInstance: Json? = null
 
         @JvmStatic
         fun getInstance(): Json =
@@ -137,7 +139,7 @@ object Dependencies {
     @UnstableDefault
     object _Retrofit {
         @JvmStatic
-        private var mInstance: Retrofit? = null
+        var mInstance: Retrofit? = null
 
         @JvmStatic
         fun getInstance(
@@ -167,7 +169,7 @@ object Dependencies {
 
         object Users {
             @JvmStatic
-            private var mInstance: UsersApiService? = null
+            var mInstance: UsersApiService? = null
 
             @JvmStatic
             fun getInstance(
@@ -187,7 +189,7 @@ object Dependencies {
 
         object Chat {
             @JvmStatic
-            private var mInstance: ChatApiService? = null
+            var mInstance: ChatApiService? = null
 
             @JvmStatic
             fun getInstance(
@@ -196,6 +198,26 @@ object Dependencies {
             ): ChatApiService =
                     if(mInstance != null) mInstance!!
                     else ChatApiServiceImpl(
+                            appId = appId,
+                            mRetrofit = retrofit
+                    )
+                            .also {
+                                // Assign to static mInstance
+                                mInstance = it
+                            }
+        }
+
+        object ChatModeration {
+            @JvmStatic
+            var mInstance: ChatModerationApiService? = null
+
+            @JvmStatic
+            fun getInstance(
+                    appId: String,
+                    retrofit: retrofit2.Retrofit
+            ): ChatModerationApiService =
+                    if(mInstance != null) mInstance!!
+                    else ChatModerationApiServiceImpl(
                             appId = appId,
                             mRetrofit = retrofit
                     )

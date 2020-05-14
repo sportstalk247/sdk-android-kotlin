@@ -11,13 +11,6 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    /* Load local.properties to read API AUTH TOKEN and APP ID */
-    Properties locProp = new Properties()
-    File propFile = project.rootProject.file('local.properties')
-    if (propFile.exists()) {
-        locProp.load(propFile.newDataInputStream())
-    }
-
     lintOptions {
         abortOnError false
     }
@@ -27,15 +20,6 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-
-        /**
-         * Read API AUTH TOKEN and APP ID from local.properties, then set it to
-         * AndroidManifest.xml as a metadata.
-         */
-        manifestPlaceholders = [
-                "apiAuthToken": locProp['sportstalk.api.auth_token'],
-                "apiAppId": locProp['sportstalk.api.app_id'],
-        ]
     }
 
     buildTypes {
@@ -112,6 +96,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:$coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:$coroutinesVersion"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
@@ -123,5 +108,12 @@ dependencies {
     androidTestImplementation "junit:junit:$rootProject.ext.junitVersion"
     androidTestImplementation "org.mockito:mockito-android:$rootProject.ext.mockitoVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.androidXTestExt"
+
+    // AndroidX Lifecycle
+    implementation "androidx.lifecycle:lifecycle-extensions:$androidXLifecycleVersion"
+    kapt "androidx.lifecycle:lifecycle-common-java8:$androidXLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidXLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidXLifecycleVersion"
+    implementation "androidx.lifecycle:lifecycle-reactivestreams:$androidXLifecycleVersion"
 }
 
