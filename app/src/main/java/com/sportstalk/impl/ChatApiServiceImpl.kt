@@ -30,6 +30,12 @@ constructor(
                     chatRoomId = chatRoomId
             )
 
+    override fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ApiResponse<ChatRoom>> =
+            service.getRoomDetailsByCustomId(
+                    appId = appId,
+                    chatRoomCustomId = chatRoomCustomId
+            )
+
     override fun deleteRoom(chatRoomId: String): CompletableFuture<ApiResponse<DeleteChatRoomResponse>> =
             service.deleteRoom(
                     appId = appId,

@@ -150,7 +150,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `B) Get Room Details`() {
+    fun `B - 1) Get Room Details`() {
         // GIVEN
         val testData = TestData.chatRooms(appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -196,6 +196,52 @@ class ChatApiServiceTest {
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testActualResult.data?.id)
+    }
+
+    @Test
+    fun `B - 2) Get Room Details - By Custom ID`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${RandomString.make(6)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+
+        val testInputChatRoomCustomId = "custom-room-id-${Random.nextInt(1_000, 9_999)}"
+        val testInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle
+        )
+
+        val testCreatedJoinRoomByCustomId = chatApiService.joinRoomByCustomId(
+                chatRoomCustomId = testInputChatRoomCustomId,
+                request = testInputRequest
+        ).get()
+        val testExpectedResult = ApiResponse<ChatRoom>(
+                kind = "api.result",
+                message = "Success",
+                code = 200,
+                data = testCreatedJoinRoomByCustomId.data?.room
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.getRoomDetailsByCustomId(
+                chatRoomCustomId = testCreatedJoinRoomByCustomId.data?.room?.id!!
+        ).get()
+
+        // THEN
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.message == testExpectedResult.message }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data == testExpectedResult.data }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedJoinRoomByCustomId.data?.room?.id)
     }
 
     @Test

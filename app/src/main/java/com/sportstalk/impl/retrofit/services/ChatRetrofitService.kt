@@ -19,6 +19,12 @@ interface ChatRetrofitService {
             @Path("chatroomid") chatRoomId: String
     ): CompletableFuture<ApiResponse<ChatRoom>>
 
+    @GET("{appId}/chat/roomsbycustomid/{chatroom_customid}")
+    fun getRoomDetailsByCustomId(
+            @Path("appId") appId: String,
+            @Path("chatroom_customid") chatRoomCustomId: String
+    ): CompletableFuture<ApiResponse<ChatRoom>>
+
     @DELETE("{appId}/chat/rooms/{chatroomid}")
     fun deleteRoom(
             @Path("appId") appId: String,

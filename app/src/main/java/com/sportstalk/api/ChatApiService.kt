@@ -22,6 +22,13 @@ interface ChatApiService {
     fun getRoomDetails(chatRoomId: String): CompletableFuture<ApiResponse<ChatRoom>>
 
     /**
+     * [GET] /{{api_appid}}/chat/roomsbycustomid/{{chat_create_room_customid}}
+     * - https://apiref.sportstalk247.com/?version=latest#0fd07be5-f8d5-43d9-bf0f-8fb9829c172c
+     * - Get the details for a room
+     */
+    fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ApiResponse<ChatRoom>>
+
+    /**
      * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}
      * - https://apiref.sportstalk247.com/?version=latest#c5ae345d-004d-478a-b543-5abaf691000d
      * - Deletes the specified room and all events contained therein) by ID
