@@ -7,6 +7,7 @@ import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import retrofit2.Retrofit
 import retrofit2.create
+import java.lang.ref.WeakReference
 import java.util.concurrent.CompletableFuture
 
 class ChatApiServiceImpl
@@ -17,6 +18,16 @@ constructor(
 ): ChatApiService {
 
     private val service: ChatRetrofitService = mRetrofit.create()
+
+    override val roomSubscriptions: MutableSet<String> = mutableSetOf()
+
+    override fun startEventUpdates(forRoomId: String) {
+        roomSubscriptions.add(forRoomId)
+    }
+
+    override fun stopEventUpdates(forRoomId: String) {
+        roomSubscriptions.remove(forRoomId)
+    }
 
     override fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
             service.createRoom(

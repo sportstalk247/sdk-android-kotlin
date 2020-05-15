@@ -29,25 +29,27 @@ fun ChatApiService.allEventUpdates(
 
             val scope = lifecycleOwner.lifecycle.coroutineScope
             // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
-            val getUpdateAction = action@{
+            val getUpdateAction = Runnable {
                 // Execute block from within coroutine scope
                 scope.launchWhenStarted {
                     try {
-                        // Perform GET UPDATES operation
-                        val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                            getUpdates(chatRoomId = chatRoomId)
-                                    // Awaits for completion of the completion stage without blocking a thread
-                                    .await()
-                        }
+                        // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
+                        if(roomSubscriptions.contains(chatRoomId)) {
+                            // Perform GET UPDATES operation
+                            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                                getUpdates(chatRoomId = chatRoomId)
+                                        // Awaits for completion of the completion stage without blocking a thread
+                                        .await()
+                            }
 
-                        // Emit response value
-                        emitter.onNext(response)
+                            // Emit response value
+                            emitter.onNext(response)
+                        }
+                        // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
                     } catch (err: Throwable) {
                         err.printStackTrace()
                     }
                 }
-
-                return@action
             }
 
             /**
@@ -55,7 +57,6 @@ fun ChatApiService.allEventUpdates(
              */
             lifecycleOwner.lifecycle.addObserver(
                     GetUpdatesObserver(
-                            chatApiService = this@allEventUpdates,
                             getUpdateAction = getUpdateAction,
                             frequency = frequency
                     )

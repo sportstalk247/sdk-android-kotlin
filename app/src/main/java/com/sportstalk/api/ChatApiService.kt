@@ -8,6 +8,20 @@ import java.util.concurrent.CompletableFuture
 interface ChatApiService {
 
     /**
+    * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates
+    */
+    val roomSubscriptions: MutableSet<String>
+
+    /**
+     * Signals the START of event updates being emitted
+     */
+    fun startEventUpdates(forRoomId: String)
+    /**
+     * Signals the END of event updates being emitted
+     */
+    fun stopEventUpdates(forRoomId: String)
+
+    /**
      * [POST] /{{api_appid}}/chat/rooms
      * - https://apiref.sportstalk247.com/?version=latest#8b2eea78-82bc-4cae-9cfa-175a00a9e15b
      * - Creates a new chat room
