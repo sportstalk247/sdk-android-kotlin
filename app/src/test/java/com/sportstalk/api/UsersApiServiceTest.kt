@@ -3,6 +3,7 @@ package com.sportstalk.api
 import android.app.Activity
 import android.content.Context
 import android.os.Build
+import com.sportstalk.Dependencies
 import com.sportstalk.SportsTalkManager
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
@@ -39,7 +40,7 @@ class UsersApiServiceTest {
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
         val sportsTalkManager = SportsTalkManager.init(context)
-        json = sportsTalkManager.json
+        json = Dependencies._Json.getInstance()
         usersApiService = sportsTalkManager.usersApiService
     }
 

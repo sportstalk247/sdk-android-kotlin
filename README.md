@@ -54,3 +54,14 @@ New repo
  ```
 
  Then sync again. That is all.
+ 
+ # How to Use
+ ## Instantiate SportsTalkManager
+ Within your  custom`Application` class, under `onCreate()`, include the following code snippet:
+ ```
+ SportsTalkManager.init(applicationContext)
+ // Alternatively, developers can explicitly indicate their AppID/AuthToken/URLEndpoint on init()
+ // SportsTalkManager.init(applicationContext, "c84cb9c852932a6b0411e75e", "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", "http://127.0.0.1")
+
+ ```
+ This will instantiate the singleton instance of the SDK.
