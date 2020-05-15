@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class JoinChatRoomRequest(
         @Transient
-        val roomid: String,
+        val roomid: String? = null,
         val userid: String,
         val handle: String? = null,
         val displayname: String? = null,

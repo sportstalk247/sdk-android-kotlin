@@ -52,6 +52,13 @@ interface ChatRetrofitService {
             @Path("chatRoomIdOrLabel") chatRoomId: String
     ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
+    @POST("{appId}/chat/roomsbycustomid/{chatroom_customid}/join")
+    fun joinRoomByCustomId(
+            @Path("appId") appId: String,
+            @Path("chatroom_customid") chatRoomCustomId: String,
+            @Body request: JoinChatRoomRequest
+    ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+
     @GET("{appId}/chat/rooms/{chatroomid}/participants")
     fun listRoomParticipants(
             @Path("appId") appId: String,

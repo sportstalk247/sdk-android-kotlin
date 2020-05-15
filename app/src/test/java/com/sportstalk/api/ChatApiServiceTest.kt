@@ -23,6 +23,7 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import retrofit2.Retrofit
+import kotlin.random.Random
 import kotlin.test.assertTrue
 
 @UnstableDefault
@@ -499,7 +500,66 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `H) List Room Participants`() {
+    fun `H) Join Room - By Custom ID`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${RandomString.make(6)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+
+        val testExpectedResult = ApiResponse<JoinChatRoomResponse>(
+                kind = "api.result",
+                message = "Success",
+                code = 200,
+                data = JoinChatRoomResponse(
+                        kind = "chat.joinroom",
+                        user = testCreatedUserData/*,
+                        room = null*/
+                )
+        )
+
+        val testInputChatRoomCustomId = "custom-room-id-${Random.nextInt(1_000, 9_999)}"
+        val testInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle
+        )
+
+        // WHEN
+        val testActualResult = chatApiService.joinRoomByCustomId(
+                chatRoomCustomId = testInputChatRoomCustomId,
+                request = testInputRequest
+        ).get()
+
+        // THEN
+        println(
+                "`Join Room - By Custom ID`() -> testActualResult = \n" +
+                        json.stringify(
+                                ApiResponse.serializer(JoinChatRoomResponse.serializer()),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.message == testExpectedResult.message }
+        assertTrue { testActualResult.code == testExpectedResult.code }
+        assertTrue { testActualResult.data?.user?.userid == testExpectedResult.data?.user?.userid }
+        assertTrue { testActualResult.data?.user == testExpectedResult.data?.user }
+        assertTrue { testActualResult.data?.room?.customid == testInputChatRoomCustomId }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testActualResult.data?.room?.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `I) List Room Participants`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -583,7 +643,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `I) Exit a Room`() {
+    fun `J) Exit a Room`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -655,7 +715,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `J) Get Updates`() {
+    fun `K) Get Updates`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -745,7 +805,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `K-1) Execute Chat Command - Speech`() {
+    fun `L-1) Execute Chat Command - Speech`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -840,7 +900,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `K-2) Execute Chat Command - Action`() {
+    fun `L-2) Execute Chat Command - Action`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -937,7 +997,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `K-3) Execute Chat Command - Reply to a Message`() {
+    fun `L-3) Execute Chat Command - Reply to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1047,17 +1107,17 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `K-4) Execute Chat Command - Purge User Messages`() {
+    fun `L-4) Execute Chat Command - Purge User Messages`() {
         // TODO:: Admin password is hardcoded as "zola".
     }
 
     @Test
-    fun `K-5) Execute Chat Command - Admin Command`() {
+    fun `L-5) Execute Chat Command - Admin Command`() {
         // TODO:: Admin password is hardcoded as "zola".
     }
 
     @Test
-    fun `K-6) Execute Chat Command - Admin - Delete All Events`() {
+    fun `L-6) Execute Chat Command - Admin - Delete All Events`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1137,7 +1197,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `L) List Messages By User`() {
+    fun `O) List Messages By User`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1224,12 +1284,12 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `M) Remove a Message`() {
+    fun `P) Remove a Message`() {
         // TODO:: `Removes a message` API is broken at the moment
     }
 
     @Test
-    fun `N) Report a Message`() {
+    fun `Q) Report a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1325,7 +1385,7 @@ class ChatApiServiceTest {
     }
 
     @Test
-    fun `O) React to a Message`() {
+    fun `R) React to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(

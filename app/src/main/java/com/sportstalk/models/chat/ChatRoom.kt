@@ -13,8 +13,18 @@ data class ChatRoom(
         val ownerid: String? = null,
         val name: String? = null,
         val description: String? = null,
+
         val iframeurl: String? = null,
+
+        val customtype: String? = null,
+        val customid: String? = null,
+        val custompayload: String? = null,
+        val customtags: List<String> = listOf(),
+        val customfield1: String? = null,
+        val customfield2: String? = null,
+
         val slug: String? = null,
+
         val enableactions: Boolean? = null,
         val enableenterandexit: Boolean? = null,
         val open: Boolean? = null,

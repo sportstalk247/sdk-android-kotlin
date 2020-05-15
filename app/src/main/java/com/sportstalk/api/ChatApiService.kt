@@ -60,6 +60,16 @@ interface ChatApiService {
     fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
     /**
+     * [POST] /{{api_appid}}/chat/roomsbycustomid/{{chat_create_room_customid}}/join
+     * - https://apiref.sportstalk247.com/?version=latest#a64f2c32-6167-4639-9c32-413edded2c18
+     * - This method is the same as Join Room, except you can use your customid
+     */
+    fun joinRoomByCustomId(
+            chatRoomCustomId: String,
+            request: JoinChatRoomRequest
+    ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+
+    /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/participants?cursor&limit=200
      * - https://apiref.sportstalk247.com/?version=latest#1b1b82a9-2b2f-4785-993b-baed6e7eba7b
      * - List all the participants in the specified room

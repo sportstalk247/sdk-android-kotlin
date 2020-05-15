@@ -53,7 +53,7 @@ constructor(
     override fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
             service.joinRoom(
                     appId = appId,
-                    chatRoomId = request.roomid,
+                    chatRoomId = request.roomid!!,
                     request = request
             )
 
@@ -61,6 +61,13 @@ constructor(
             service.joinRoom(
                     appId = appId,
                     chatRoomId = chatRoomIdOrLabel
+            )
+
+    override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
+            service.joinRoomByCustomId(
+                    appId = appId,
+                    chatRoomCustomId = chatRoomCustomId,
+                    request = request
             )
 
     override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>> =
