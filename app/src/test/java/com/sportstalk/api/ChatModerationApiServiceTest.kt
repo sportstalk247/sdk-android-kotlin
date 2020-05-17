@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build
 import com.sportstalk.Dependencies
-import com.sportstalk.SportsTalkManager
+import com.sportstalk.SportsTalk247
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.chat.moderation.ApproveMessageRequest
@@ -43,7 +43,7 @@ class ChatModerationApiServiceTest {
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
-        val sportsTalkManager = SportsTalkManager.init(context)
+        val sportsTalkManager = SportsTalk247.init(context)
         json = Dependencies._Json.getInstance()
         appId = Dependencies.AppId.getInstance(context)!!
         usersApiService = sportsTalkManager.usersApiService

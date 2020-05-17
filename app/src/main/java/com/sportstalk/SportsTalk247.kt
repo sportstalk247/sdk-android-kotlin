@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 
-class SportsTalkManager private constructor(
+class SportsTalk247 private constructor(
         context: Context,
         apiUrlEndpoint: String? = null,
         authToken: String? = null,
@@ -67,7 +67,7 @@ class SportsTalkManager private constructor(
 
     companion object {
         @JvmStatic
-        lateinit var instance: SportsTalkManager
+        lateinit var instance: SportsTalk247
 
         /**
          * Called at the beginning of Application app-start.
@@ -78,8 +78,8 @@ class SportsTalkManager private constructor(
                 appId: String? = null,
                 authToken: String? = null,
                 apiUrlEndpoint: String? = null
-        ): SportsTalkManager {
-            instance = SportsTalkManager(context, appId, authToken, apiUrlEndpoint)
+        ): SportsTalk247 {
+            instance = SportsTalk247(context, appId, authToken, apiUrlEndpoint)
             return instance
         }
 
