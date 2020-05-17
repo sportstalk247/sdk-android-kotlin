@@ -10,6 +10,7 @@ import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
+import io.reactivex.subjects.BehaviorSubject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import org.reactivestreams.Publisher
@@ -28,61 +29,74 @@ fun ChatApiService.allEventUpdates(
         onReply: OnReply? = null,
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
-): Publisher<List<ChatEvent>> =
-        /*LiveDataReactiveStreams.toPublisher(
+): Publisher<List<ChatEvent>> {
+    val lastEventTs = BehaviorSubject.createDefault(-1L)
+    /*LiveDataReactiveStreams.toPublisher(
                 lifecycleOwner,
                 allEventUpdatesLiveData(chatRoomId, eventTypeFilter, lifecycleOwner)
         )*/
-        Flowable.create<ApiResponse<GetUpdatesResponse>>({ emitter ->
+    return Flowable.create<ApiResponse<GetUpdatesResponse>>({ emitter ->
 
-            val scope = lifecycleOwner.lifecycle.coroutineScope
-            // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
-            val getUpdateAction = Runnable {
-                // Execute block from within coroutine scope
-                scope.launchWhenStarted {
-                    try {
-                        // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
-                        if (roomSubscriptions.contains(chatRoomId)) {
-                            // Perform GET UPDATES operation
-                            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                                getUpdates(chatRoomId = chatRoomId)
-                                        // Awaits for completion of the completion stage without blocking a thread
-                                        .await()
-                            }
-
-                            // Emit response value
-                            emitter.onNext(response)
+        val scope = lifecycleOwner.lifecycle.coroutineScope
+        // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
+        val getUpdateAction = Runnable {
+            // Execute block from within coroutine scope
+            scope.launchWhenStarted {
+                try {
+                    // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
+                    if (roomSubscriptions.contains(chatRoomId)) {
+                        // Perform GET UPDATES operation
+                        val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                            getUpdates(chatRoomId = chatRoomId)
+                                    // Awaits for completion of the completion stage without blocking a thread
+                                    .await()
                         }
-                        // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-                    } catch (err: Throwable) {
-                        err.printStackTrace()
+
+                        // Emit response value
+                        emitter.onNext(response)
+                    }
+                    // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
+                } catch (err: Throwable) {
+                    err.printStackTrace()
+                }
+            }
+        }
+
+        /**
+         * Add GetUpdates Lifecycle Observer Implementation to this lifecycle owner's set of observers
+         */
+        lifecycleOwner.lifecycle.addObserver(
+                GetUpdatesObserver(
+                        getUpdateAction = getUpdateAction,
+                        frequency = frequency
+                )
+        )
+
+    }, BackpressureStrategy.LATEST)
+            .map { response ->
+                (response.data
+                        ?.events
+                        // Filter out redundant events that were already emitted prior
+                        ?.filter { event ->
+                            (event.ts ?: 0L) > lastEventTs.value!!
+                        }
+                        ?: listOf()
+                        )
+                        .also { events ->
+                            // Update lastEventTs with the latest ts
+                            lastEventTs.onNext(events.maxBy { it.ts ?: 0L }?.ts ?: 0L)
+                        }
+            }
+            .doOnNext { events ->
+                events.forEach { chatEvent ->
+                    when (chatEvent.eventtype) {
+                        EventType.GOAL -> onGoalEvent?.invoke(chatEvent)
+                        EventType.ADVERTISEMENT -> onAdEvent?.invoke(chatEvent)
+                        EventType.REPLY -> onReply?.invoke(chatEvent)
+                        EventType.REACTION -> onReaction?.invoke(chatEvent)
+                        EventType.PURGE -> onPurgeEvent?.invoke(chatEvent)
+                        else -> onChatEvent?.invoke(chatEvent)
                     }
                 }
             }
-
-            /**
-             * Add GetUpdates Lifecycle Observer Implementation to this lifecycle owner's set of observers
-             */
-            lifecycleOwner.lifecycle.addObserver(
-                    GetUpdatesObserver(
-                            getUpdateAction = getUpdateAction,
-                            frequency = frequency
-                    )
-            )
-
-        }, BackpressureStrategy.LATEST)
-                .map { response ->
-                    response.data?.events ?: listOf()
-                }
-                .doOnNext { events ->
-                    events.forEach { chatEvent ->
-                        when (chatEvent.eventtype) {
-                            EventType.GOAL -> onGoalEvent?.invoke(chatEvent)
-                            EventType.ADVERTISEMENT -> onAdEvent?.invoke(chatEvent)
-                            EventType.REPLY -> onReply?.invoke(chatEvent)
-                            EventType.REACTION -> onReaction?.invoke(chatEvent)
-                            EventType.PURGE -> onPurgeEvent?.invoke(chatEvent)
-                            else -> onChatEvent?.invoke(chatEvent)
-                        }
-                    }
-                }
+}

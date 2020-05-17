@@ -12,6 +12,7 @@ import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.await
 
@@ -29,8 +30,9 @@ fun ChatApiService.allEventUpdates(
         onReply: OnReply? = null,
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
-): Flow<List<ChatEvent>> = flow {
+): Flow<List<ChatEvent>> = flow<List<ChatEvent>> {
     val emitter = ConflatedBroadcastChannel<ApiResponse<GetUpdatesResponse>>()
+    val lastEventTs = ConflatedBroadcastChannel<Long>(-1L)
 
     val scope = lifecycleOwner.lifecycle.coroutineScope
     // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
@@ -71,7 +73,18 @@ fun ChatApiService.allEventUpdates(
     emitAll(
             emitter.asFlow()
                     .map { response ->
-                        response.data?.events ?: listOf()
+                        (response.data
+                                ?.events
+                                // Filter out redundant events that were already emitted prior
+                                ?.filter { event ->
+                                    (event.ts ?: 0L) > lastEventTs.value
+                                }
+                                ?: listOf()
+                                )
+                                .also { events ->
+                                    // Update lastEventTs with the latest ts
+                                    lastEventTs.sendBlocking(events.maxBy { it.ts ?: 0L }?.ts ?: 0L)
+                                }
                     }
     )
 

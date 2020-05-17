@@ -25,8 +25,9 @@ fun ChatApiService.allEventUpdates(
         onReply: OnReply? = null,
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
-): LiveData<List<ChatEvent>> = liveData {
+): LiveData<List<ChatEvent>> = liveData<List<ChatEvent>> {
     val emitter = MutableLiveData<ApiResponse<GetUpdatesResponse>>()
+    val lastEventTs = MutableLiveData<Long>(-1L)
 
     val scope = lifecycleOwner.lifecycle.coroutineScope
     // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
@@ -68,7 +69,18 @@ fun ChatApiService.allEventUpdates(
             emitter.switchMap { response ->
                 liveData<List<ChatEvent>> {
                     // Emit transform into List<ChatEvent>
-                    val events = response.data?.events ?: listOf<ChatEvent>()
+                    val events = (
+                            response.data
+                                    ?.events
+                                    // Filter out redundant events that were already emitted prior
+                                    ?.filter { event ->
+                                        (event.ts ?: 0L) > lastEventTs.value!!
+                                    }
+                                    ?: listOf<ChatEvent>()
+                            ).also { events ->
+                                // Update lastEventTs with the latest ts
+                                lastEventTs.postValue(events.maxBy { it.ts ?: 0L }?.ts ?: 0L)
+                            }
                     emit(events)
 
                     // Trigger callbacks based on event type
