@@ -4,7 +4,7 @@ package com.sportstalk.api.polling.coroutines
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
-import com.sportstalk.api.service.ChatService
+import com.sportstalk.api.ChatClient
 import com.sportstalk.api.polling.*
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent
@@ -16,13 +16,18 @@ import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.future.await
 
-fun ChatService.allEventUpdates(
+/**
+ * Returns an instance of reactive coroutine Flow which emits Event Updates received at
+ * a certain frequency. This will stop emitting when `chatClient.stopEventUpdates()` has been invoked
+ * OR if the underlying lifecycleOwner reaches STOP state.
+ */
+fun ChatClient.allEventUpdates(
         chatRoomId: String,
         /* Polling Frequency */
         frequency: Long = 500L,
         lifecycleOwner: LifecycleOwner,
         /*
-        * The following are placeholder functions should they opt to provide custom callbacks
+        * The following are placeholder/convenience functions should they opt to provide custom callbacks
         */
         onChatEvent: OnChatEvent? = null,
         onGoalEvent: OnGoalEvent? = null,

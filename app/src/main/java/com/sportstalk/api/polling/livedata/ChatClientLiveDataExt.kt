@@ -1,7 +1,7 @@
 package com.sportstalk.api.polling.livedata
 
 import androidx.lifecycle.*
-import com.sportstalk.api.service.ChatService
+import com.sportstalk.api.ChatClient
 import com.sportstalk.api.polling.*
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent
@@ -11,13 +11,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 
-fun ChatService.allEventUpdates(
+/**
+ * Returns an instance of reactive LiveData which emits Event Updates received at
+ * a certain frequency. This will stop emitting when `chatClient.stopEventUpdates()` has been invoked
+ * OR if the underlying lifecycleOwner reaches STOP state.
+ */
+fun ChatClient.allEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L,
         /*
-        * The following are placeholder functions should they opt to provide custom callbacks
+        * The following are placeholder/convenience functions should they opt to provide custom callbacks
         */
         onChatEvent: OnChatEvent? = null,
         onGoalEvent: OnGoalEvent? = null,
