@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 @Parcelize
 @Serializable
 data class ChatRoom(
+        /** [Kind] */
         val kind: String? = null /* "chat.room" */,
         val id: String? = null,
         val appid: String? = null,
@@ -31,6 +32,7 @@ data class ChatRoom(
         val inroom: Long? = null,
         val added: Long? = null,
         val whenmodified: Long? = null,
+        /** [ModerationType] */
         val moderation: String? = null /* "pre"/"post" */,
         val maxreports: Long? = null,
         val enableprofanityfilter: Boolean? = null,

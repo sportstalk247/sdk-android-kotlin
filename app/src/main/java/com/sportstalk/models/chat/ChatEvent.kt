@@ -1,6 +1,7 @@
 package com.sportstalk.models.chat
 
 import android.os.Parcelable
+import com.sportstalk.models.Kind
 import com.sportstalk.models.users.User
 import kotlinx.android.parcel.Parcelize
 import kotlinx.serialization.Serializable
@@ -8,6 +9,7 @@ import kotlinx.serialization.Serializable
 @Parcelize
 @Serializable
 data class ChatEvent(
+        /** [Kind] */
         val kind: String? = null /* "chat.event" */,
         val id: String? = null,
         val roomid: String? = null,
@@ -23,6 +25,7 @@ data class ChatEvent(
         val custompayload: String? = null,
         val replyto: ChatEvent? = null,
         val reactions: List<ChatEventReaction> = listOf(),
+        /** [ModerationType] */
         val moderation: String? = null /* "na" */,
         val active: Boolean? = null,
         val reports: List<ChatEventReport> = listOf()
@@ -31,6 +34,7 @@ data class ChatEvent(
 @Parcelize
 @Serializable
 data class ChatEventReaction(
+        /** [Reaction] */
         val type: String? = null,
         val count: Long? = null,
         val users: List<User> = listOf()
@@ -40,6 +44,7 @@ data class ChatEventReaction(
 @Serializable
 data class ChatEventReport(
         val userid: String? = null,
+        /** [ReportType] */
         val reason: String? = null
 ) : Parcelable
 
@@ -53,4 +58,8 @@ object EventType {
     const val REPLY = "reply"
     const val GOAL = "goal" // custom type
     const val ADVERTISEMENT = "advertisement" // custom type
+}
+
+object Reaction {
+    const val LIKE = "like"
 }

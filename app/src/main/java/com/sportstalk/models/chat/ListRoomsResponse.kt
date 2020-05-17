@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ListRoomsResponse(
+        /** [Kind] */
         val kind: String? = null /* "list.chatrooms" */,
         val cursor: String? = null,
         val more: Boolean? = null,

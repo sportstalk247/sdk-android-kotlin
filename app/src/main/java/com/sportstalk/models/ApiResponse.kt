@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ApiResponse<T>(
+        /** [Kind] */
         val kind: String? = null,
         val message: String? = null,
         val code: Int? = null,

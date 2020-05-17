@@ -28,8 +28,8 @@ android {
 
             manifestPlaceholders = [
                     // TODO:: When multiple environments are setup(i.e. DEV Environment), change this value accordingly
-                    /*"apiUrlEndpoint": "https://qa-talkapi.sportstalk247.com/api/v3/"*/
-                    "apiUrlEndpoint": "https://api.sportstalk247.com/api/v3/"
+                    "apiUrlEndpoint": "https://qa-talkapi.sportstalk247.com/api/v3/"
+                    /*"apiUrlEndpoint": "https://api.sportstalk247.com/api/v3/"*/
             ]
         }
 
