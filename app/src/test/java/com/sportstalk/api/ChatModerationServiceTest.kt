@@ -35,7 +35,7 @@ class ChatModerationServiceTest {
 
     private lateinit var context: Context
     private lateinit var json: Json
-    private lateinit var usersService: UsersService
+    private lateinit var userService: UserService
     private lateinit var chatService: ChatService
     private lateinit var chatModerationService: ChatModerationService
     private lateinit var appId: String
@@ -46,7 +46,7 @@ class ChatModerationServiceTest {
         val sportsTalkManager = SportsTalk247.init(context)
         json = Dependencies._Json.getInstance()
         appId = Dependencies.AppId.getInstance(context)!!
-        usersService = sportsTalkManager.usersService
+        userService = sportsTalkManager.userService
         chatService = sportsTalkManager.chatService
         chatModerationService = sportsTalkManager.chatModerationService
     }
@@ -61,7 +61,7 @@ class ChatModerationServiceTest {
     private fun deleteTestUsers(vararg userIds: String?) {
         for (id in userIds) {
             id ?: continue
-            usersService.deleteUser(userId = id).get()
+            userService.deleteUser(userId = id).get()
         }
     }
 
@@ -87,7 +87,7 @@ class ChatModerationServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
                 // Moderation MUST BE SET to "pre"
@@ -177,7 +177,7 @@ class ChatModerationServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
                 // Moderation MUST BE SET to "pre"

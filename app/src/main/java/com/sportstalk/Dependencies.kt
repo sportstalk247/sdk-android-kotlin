@@ -3,12 +3,12 @@ package com.sportstalk
 import android.content.Context
 import android.content.pm.PackageManager
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.sportstalk.api.ChatService
 import com.sportstalk.api.ChatModerationService
-import com.sportstalk.api.UsersService
-import com.sportstalk.impl.restapi.ChatRestApiServiceImpl
+import com.sportstalk.api.ChatService
+import com.sportstalk.api.UserService
 import com.sportstalk.impl.restapi.ChatModerationRestApiServiceImpl
-import com.sportstalk.impl.restapi.UsersRestApiServiceImpl
+import com.sportstalk.impl.restapi.ChatRestApiServiceImpl
+import com.sportstalk.impl.restapi.UserRestApiServiceImpl
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
@@ -169,15 +169,15 @@ object Dependencies {
 
         object Users {
             @JvmStatic
-            var mInstance: UsersService? = null
+            var mInstance: UserService? = null
 
             @JvmStatic
             fun getInstance(
                     appId: String,
                     retrofit: retrofit2.Retrofit
-            ): UsersService =
+            ): UserService =
                     if(mInstance != null) mInstance!!
-                    else UsersRestApiServiceImpl(
+                    else UserRestApiServiceImpl(
                             appId = appId,
                             mRetrofit = retrofit
                     )

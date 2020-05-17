@@ -3,7 +3,7 @@ package com.sportstalk
 import android.content.Context
 import com.sportstalk.api.ChatService
 import com.sportstalk.api.ChatModerationService
-import com.sportstalk.api.UsersService
+import com.sportstalk.api.UserService
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -39,7 +39,7 @@ class SportsTalk247 private constructor(
         get() = Dependencies._Retrofit.mInstance!!
         private set(_) {}
 
-    var usersService: UsersService
+    var userService: UserService
         get() = Dependencies.ApiServices.Users.mInstance!!
         private set(_) {}
 
@@ -60,7 +60,7 @@ class SportsTalk247 private constructor(
         json = Dependencies._Json.getInstance()
         @Suppress("EXPERIMENTAL_API_USAGE")
         retrofit = Dependencies._Retrofit.getInstance(urlEndpoint = this.apiUrlEndpoint, okHttpClient = okHttpClient, json = json)
-        usersService = Dependencies.ApiServices.Users.getInstance(appId = this.appId, retrofit = retrofit)
+        userService = Dependencies.ApiServices.Users.getInstance(appId = this.appId, retrofit = retrofit)
         chatService = Dependencies.ApiServices.Chat.getInstance(appId = this.appId, retrofit = retrofit)
         chatModerationService = Dependencies.ApiServices.ChatModeration.getInstance(appId = this.appId, retrofit = retrofit)
     }
