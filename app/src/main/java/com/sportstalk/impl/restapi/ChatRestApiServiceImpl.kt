@@ -101,6 +101,16 @@ constructor(
                     request = ExitChatRoomRequest(userid = userId)
             )
 
+    override fun getUpdates(
+            chatRoomId: String,
+            cursor: String?
+    ): CompletableFuture<ApiResponse<GetUpdatesResponse>> =
+            service.getUpdates(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    cursor = cursor
+            )
+
     override fun executeChatCommand(
             chatRoomId: String,
             request: ExecuteChatCommandRequest
@@ -147,15 +157,5 @@ constructor(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
-            )
-
-    override fun getUpdates(
-            chatRoomId: String,
-            cursor: String?
-    ): CompletableFuture<ApiResponse<GetUpdatesResponse>> =
-            service.getUpdates(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    cursor = cursor
             )
 }

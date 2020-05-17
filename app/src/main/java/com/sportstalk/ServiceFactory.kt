@@ -2,7 +2,9 @@ package com.sportstalk
 
 import androidx.annotation.RestrictTo
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.sportstalk.api.ChatService
 import com.sportstalk.api.UserService
+import com.sportstalk.impl.restapi.ChatRestApiServiceImpl
 import com.sportstalk.impl.restapi.UserRestApiServiceImpl
 import com.sportstalk.models.ClientConfig
 import kotlinx.serialization.json.Json
@@ -86,6 +88,28 @@ object ServiceFactory {
                         val retrofit = getRetrofitInstance(config, okHttpClient, json)
                         // REST API Implementation
                         UserRestApiServiceImpl(
+                                appId = config.appId,
+                                mRetrofit = retrofit
+                        ).also {
+                            instances[config] = it
+                        }
+                    }
+        }
+
+        object Chat {
+            @JvmStatic
+            private val instances: HashMap<ClientConfig, ChatService> = hashMapOf()
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @JvmStatic
+            fun get(config: ClientConfig): ChatService =
+                    if (instances.containsKey(config)) {
+                        instances[config]!!
+                    } else {
+                        val okHttpClient = getOkHttpInstance(config)
+                        val retrofit = getRetrofitInstance(config, okHttpClient, json)
+                        // REST API Implementation
+                        ChatRestApiServiceImpl(
                                 appId = config.appId,
                                 mRetrofit = retrofit
                         ).also {

@@ -2,10 +2,13 @@ package com.sportstalk.api
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.Dependencies
+import com.sportstalk.ServiceFactory
 import com.sportstalk.SportsTalk247
 import com.sportstalk.models.ApiResponse
+import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.User
@@ -33,19 +36,36 @@ import kotlin.test.assertTrue
 class ChatServiceTest {
 
     private lateinit var context: Context
-    private lateinit var json: Json
+    private lateinit var config: ClientConfig
     private lateinit var userService: UserService
     private lateinit var chatService: ChatService
-    private lateinit var appId: String
+    private lateinit var json: Json
 
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
-        val sportsTalkManager = SportsTalk247.init(context)
-        json = Dependencies._Json.getInstance()
-        appId = Dependencies.AppId.getInstance(context)!!
-        userService = sportsTalkManager.userService
-        chatService = sportsTalkManager.chatService
+        val appInfo =
+                try {
+                    context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+                } catch (err: Throwable) {
+                    err.printStackTrace()
+                    null
+                }
+
+        config = ClientConfig(
+                appId = appInfo?.metaData?.getString("sportstalk.api.app_id")!!,
+                apiToken = appInfo.metaData?.getString("sportstalk.api.auth_token")!!,
+                endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
+        )
+        json = ServiceFactory.RestApi.json
+        userService = ServiceFactory.RestApi.User.get(config)
+        chatService = ServiceFactory.RestApi.Chat.get(config)
+
+//        val sportsTalkManager = SportsTalk247.init(context)
+//        json = Dependencies._Json.getInstance()
+//        appId = Dependencies.AppId.getInstance(context)!!
+//        userService = sportsTalkManager.userService
+//        chatService = sportsTalkManager.chatService
     }
 
     @After
@@ -79,7 +99,7 @@ class ChatServiceTest {
     @Test
     fun `A) Create Room`() {
         // GIVEN
-        val testExpectedData = TestData.chatRooms(appId).first()
+        val testExpectedData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
                 name = testExpectedData.name!!,
                 slug = testExpectedData.slug,
@@ -151,7 +171,7 @@ class ChatServiceTest {
     @Test
     fun `B - 1) Get Room Details`() {
         // GIVEN
-        val testData = TestData.chatRooms(appId).first()
+        val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
                 name = testData.name!!,
                 slug = testData.slug,
@@ -246,7 +266,7 @@ class ChatServiceTest {
     @Test
     fun `C) Delete Room`() {
         // GIVEN
-        val testData = TestData.chatRooms(appId).first()
+        val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
                 name = testData.name!!,
                 slug = testData.slug,
@@ -297,7 +317,7 @@ class ChatServiceTest {
     @Test
     fun `D) Update Room`() {
         // GIVEN
-        val testData = TestData.chatRooms(appId).first()
+        val testData = TestData.chatRooms(config.appId).first()
         // Should create a test chat room first
         val testCreatedChatRoomData = chatService.createRoom(
                 request = CreateChatRoomRequest(
@@ -370,7 +390,7 @@ class ChatServiceTest {
     @Test
     fun `E) List Rooms`() {
         // GIVEN
-        val testData = TestData.chatRooms(appId).first()
+        val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
                 name = testData.name!!,
                 slug = testData.slug,
@@ -434,7 +454,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -496,7 +516,7 @@ class ChatServiceTest {
     @Test
     fun `G) Join Room - Anonymous User`() {
         // GIVEN
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -617,7 +637,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -701,7 +721,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -773,7 +793,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -863,7 +883,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -958,7 +978,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -1055,7 +1075,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -1175,7 +1195,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -1255,7 +1275,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -1347,7 +1367,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
@@ -1443,7 +1463,7 @@ class ChatServiceTest {
         // Should create a test user first
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
                 slug = testChatRoomData.slug,
