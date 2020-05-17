@@ -5,7 +5,7 @@ import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import java.util.concurrent.CompletableFuture
 
-interface ChatApiService {
+interface ChatService {
 
     /**
     * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates

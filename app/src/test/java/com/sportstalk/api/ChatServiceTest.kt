@@ -30,12 +30,12 @@ import kotlin.test.assertTrue
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-class ChatApiServiceTest {
+class ChatServiceTest {
 
     private lateinit var context: Context
     private lateinit var json: Json
-    private lateinit var usersApiService: UsersApiService
-    private lateinit var chatApiService: ChatApiService
+    private lateinit var usersService: UsersService
+    private lateinit var chatService: ChatService
     private lateinit var appId: String
 
     @Before
@@ -44,8 +44,8 @@ class ChatApiServiceTest {
         val sportsTalkManager = SportsTalk247.init(context)
         json = Dependencies._Json.getInstance()
         appId = Dependencies.AppId.getInstance(context)!!
-        usersApiService = sportsTalkManager.usersApiService
-        chatApiService = sportsTalkManager.chatApiService
+        usersService = sportsTalkManager.usersService
+        chatService = sportsTalkManager.chatService
     }
 
     @After
@@ -59,7 +59,7 @@ class ChatApiServiceTest {
         for(id in userIds) {
             id ?: continue
             try {
-                usersApiService.deleteUser(userId = id).get()
+                usersService.deleteUser(userId = id).get()
             } catch (err: Throwable) {}
         }
     }
@@ -71,7 +71,7 @@ class ChatApiServiceTest {
         for(id in chatRoomIds) {
             id ?: continue
             try {
-                chatApiService.deleteRoom(chatRoomId = id).get()
+                chatService.deleteRoom(chatRoomId = id).get()
             } catch (err: Throwable) {}
         }
     }
@@ -114,7 +114,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.createRoom(
+        val testActualResult = chatService.createRoom(
                 request = testInputRequest
         ).get()
 
@@ -165,7 +165,7 @@ class ChatApiServiceTest {
                 maxreports = testData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testInputRequest).get().data!!
 
         val testExpectedResult = ApiResponse<ChatRoom>(
                 kind = "api.result",
@@ -175,7 +175,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.getRoomDetails(
+        val testActualResult = chatService.getRoomDetails(
                 chatRoomId = testCreatedChatRoomData.id!!
         ).get()
 
@@ -209,7 +209,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testInputChatRoomCustomId = "custom-room-id-${Random.nextInt(1_000, 9_999)}"
         val testInputRequest = JoinChatRoomRequest(
@@ -217,7 +217,7 @@ class ChatApiServiceTest {
                 handle = testCreatedUserData.handle
         )
 
-        val testCreatedJoinRoomByCustomId = chatApiService.joinRoomByCustomId(
+        val testCreatedJoinRoomByCustomId = chatService.joinRoomByCustomId(
                 chatRoomCustomId = testInputChatRoomCustomId,
                 request = testInputRequest
         ).get()
@@ -229,7 +229,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.getRoomDetailsByCustomId(
+        val testActualResult = chatService.getRoomDetailsByCustomId(
                 chatRoomCustomId = testCreatedJoinRoomByCustomId.data?.room?.id!!
         ).get()
 
@@ -260,7 +260,7 @@ class ChatApiServiceTest {
                 maxreports = testData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testInputRequest).get().data!!
 
         val testExpectedResult = ApiResponse<DeleteChatRoomResponse>(
                 kind = "api.result",
@@ -274,7 +274,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.deleteRoom(
+        val testActualResult = chatService.deleteRoom(
                 chatRoomId = testCreatedChatRoomData.id!!
         ).get()
 
@@ -299,7 +299,7 @@ class ChatApiServiceTest {
         // GIVEN
         val testData = TestData.chatRooms(appId).first()
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(
+        val testCreatedChatRoomData = chatService.createRoom(
                 request = CreateChatRoomRequest(
                         name = testData.name!!,
                         slug = testData.slug,
@@ -339,7 +339,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.updateRoom(
+        val testActualResult = chatService.updateRoom(
                 request = testInputRequest
         ).get()
 
@@ -384,7 +384,7 @@ class ChatApiServiceTest {
                 maxreports = testData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testInputRequest).get().data!!
 
         val testExpectedResult = ApiResponse<ListRoomsResponse>(
                 kind = "api.result",
@@ -397,7 +397,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.listRooms(
+        val testActualResult = chatService.listRooms(
                 limit = 10
         ).get()
 
@@ -432,7 +432,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -448,7 +448,7 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testExpectedResult = ApiResponse<JoinChatRoomResponse>(
                 kind = "api.result",
@@ -467,7 +467,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.joinRoom(
+        val testActualResult = chatService.joinRoom(
                 request = testInputRequest
         ).get()
 
@@ -510,7 +510,7 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testExpectedResult = ApiResponse<JoinChatRoomResponse>(
                 kind = "api.result",
@@ -524,7 +524,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.joinRoom(
+        val testActualResult = chatService.joinRoom(
                 chatRoomIdOrLabel = testCreatedChatRoomData.id!!
         ).get()
 
@@ -556,7 +556,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testExpectedResult = ApiResponse<JoinChatRoomResponse>(
                 kind = "api.result",
@@ -576,7 +576,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.joinRoomByCustomId(
+        val testActualResult = chatService.joinRoomByCustomId(
                 chatRoomCustomId = testInputChatRoomCustomId,
                 request = testInputRequest
         ).get()
@@ -615,7 +615,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -631,7 +631,7 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testInputJoinRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
@@ -639,7 +639,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testJoinChatRoomData = chatApiService.joinRoom(request = testInputJoinRequest).get().data!!
+        val testJoinChatRoomData = chatService.joinRoom(request = testInputJoinRequest).get().data!!
 
         val testExpectedResult = ApiResponse<ListChatRoomParticipantsResponse>(
                 kind = "api.result",
@@ -660,7 +660,7 @@ class ChatApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult = chatApiService.listRoomParticipants(
+        val testActualResult = chatService.listRoomParticipants(
                 chatRoomId = testInputChatRoomId,
                 limit = testInputLimit
         ).get()
@@ -699,7 +699,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -715,14 +715,14 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get().data!!
+        chatService.joinRoom(request = testJoinRoomInputRequest).get().data!!
 
         val testExpectedResult = ApiResponse<Any>(
                 kind = "api.result",
@@ -734,7 +734,7 @@ class ChatApiServiceTest {
         val testInputUserId = testCreatedUserData.userid!!
 
         // WHEN
-        val testActualResult = chatApiService.exitRoom(
+        val testActualResult = chatService.exitRoom(
                 chatRoomId = testInputChatRoomId,
                 userId = testInputUserId
         ).get()
@@ -771,7 +771,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -787,21 +787,21 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send an initial message to the created chat room
-        val testSendMessageData = chatApiService.executeChatCommand(
+        val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testSendMessageInputRequest
         ).get().data?.speech!!
@@ -821,7 +821,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.getUpdates(
+        val testActualResult = chatService.getUpdates(
                 chatRoomId = testCreatedChatRoomData.id!!/*,
                 cursor = null*/
         ).get()
@@ -861,7 +861,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -877,14 +877,14 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -911,7 +911,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.executeChatCommand(
+        val testActualResult = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
         ).get()
@@ -956,7 +956,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -972,14 +972,14 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 // "/high5 {{handle}}"
@@ -1008,7 +1008,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.executeChatCommand(
+        val testActualResult = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
         ).get()
@@ -1053,7 +1053,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1069,21 +1069,21 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send an initial message to the created chat room
-        val testInitialSendMessage = chatApiService.executeChatCommand(
+        val testInitialSendMessage = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
         ).get().data?.speech!!
@@ -1116,7 +1116,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.executeChatCommand(
+        val testActualResult = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
         ).get()
@@ -1173,7 +1173,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1189,14 +1189,14 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 command = "*deleteallevents ${TestData.ADMIN_PASSWORD}",
@@ -1216,7 +1216,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.executeChatCommand(
+        val testActualResult = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
         ).get()
@@ -1253,7 +1253,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1269,21 +1269,21 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send a message to the created chat room
-        val testSendMessageData = chatApiService.executeChatCommand(
+        val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
         ).get().data?.speech!!
@@ -1302,7 +1302,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.listMessagesByUser(
+        val testActualResult = chatService.listMessagesByUser(
                 chatRoomId = testInputChatRoomId,
                 userId = testInputUserId,
                 limit = testInputLimit
@@ -1345,7 +1345,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1361,21 +1361,21 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send a message to the created chat room
-        val testSendMessageData = chatApiService.executeChatCommand(
+        val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
         ).get().data?.speech!!
@@ -1401,7 +1401,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.reportMessage(
+        val testActualResult = chatService.reportMessage(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 eventId = testSendMessageData.id!!,
                 request = testInputRequest
@@ -1441,7 +1441,7 @@ class ChatApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1457,21 +1457,21 @@ class ChatApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send a message to the created chat room
-        val testSendMessageData = chatApiService.executeChatCommand(
+        val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
         ).get().data?.speech!!
@@ -1510,7 +1510,7 @@ class ChatApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatApiService.reactToAMessage(
+        val testActualResult = chatService.reactToAMessage(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 eventId = testSendMessageData.id!!,
                 request = testInputRequest

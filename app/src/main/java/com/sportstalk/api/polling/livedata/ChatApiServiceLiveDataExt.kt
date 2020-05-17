@@ -1,7 +1,7 @@
 package com.sportstalk.api.polling.livedata
 
 import androidx.lifecycle.*
-import com.sportstalk.api.ChatApiService
+import com.sportstalk.api.ChatService
 import com.sportstalk.api.polling.*
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent
@@ -11,7 +11,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 
-fun ChatApiService.allEventUpdates(
+fun ChatService.allEventUpdates(
         chatRoomId: String,
         lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */

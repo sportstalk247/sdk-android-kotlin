@@ -30,10 +30,10 @@ import kotlin.test.assertTrue
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-class UsersApiServiceTest {
+class UsersServiceTest {
 
     private lateinit var context: Context
-    private lateinit var usersApiService: UsersApiService
+    private lateinit var usersService: UsersService
     private lateinit var json: Json
 
     @Before
@@ -41,7 +41,7 @@ class UsersApiServiceTest {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
         val sportsTalkManager = SportsTalk247.init(context)
         json = Dependencies._Json.getInstance()
-        usersApiService = sportsTalkManager.usersApiService
+        usersService = sportsTalkManager.usersService
     }
 
     @After
@@ -54,7 +54,7 @@ class UsersApiServiceTest {
     private fun deleteTestUsers(vararg userIds: String?) {
         for(id in userIds) {
             id ?: continue
-            usersApiService.deleteUser(userId = id).get()
+            usersService.deleteUser(userId = id).get()
         }
     }
 
@@ -79,7 +79,7 @@ class UsersApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testActualResult = usersService.createUpdateUser(request = testInputRequest).get()
 
         // THEN
         println(
@@ -113,7 +113,7 @@ class UsersApiServiceTest {
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = usersService.createUpdateUser(request = testInputRequest).get()
 
         val testExpectedResult = ApiResponse<DeleteUserResponse>(
                 kind = "api.result",
@@ -126,7 +126,7 @@ class UsersApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = usersApiService.deleteUser(
+        val testActualResult = usersService.deleteUser(
                 userId = testCreatedUser.data?.userid ?: testInputRequest.userid
         ).get()
 
@@ -160,7 +160,7 @@ class UsersApiServiceTest {
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = usersService.createUpdateUser(request = testInputRequest).get()
 
         val testExpectedResult = ApiResponse<User>(
                 kind = "api.result",
@@ -175,7 +175,7 @@ class UsersApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = usersApiService.getUserDetails(
+        val testActualResult = usersService.getUserDetails(
                 userId = testCreatedUser.data?.userid ?: testInputRequest.userid
         ).get()
 
@@ -216,8 +216,8 @@ class UsersApiServiceTest {
                 displayname = "Test List Users 2"
         )
         // Should create a test user first
-        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
-        val testCreatedUser2 = usersApiService.createUpdateUser(request = testInputRequest2).get().data!!
+        val testCreatedUser1 = usersService.createUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser2 = usersService.createUpdateUser(request = testInputRequest2).get().data!!
 
         val testExpectedResult = ApiResponse<ListUsersResponse>(
                 kind = "api.result",
@@ -232,11 +232,11 @@ class UsersApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult1 = usersApiService.listUsers(
+        val testActualResult1 = usersService.listUsers(
                 limit = testInputLimit,
                 cursor = testCreatedUser1.userid
         ).get()
-        val testActualResult2 = usersApiService.listUsers(
+        val testActualResult2 = usersService.listUsers(
                 limit = testInputLimit,
                 cursor = testCreatedUser2.userid
         ).get()
@@ -286,7 +286,7 @@ class UsersApiServiceTest {
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = usersService.createUpdateUser(request = testInputRequest).get()
 
         val testExpectedResult = ApiResponse<User>(
                 kind = "api.result",
@@ -302,7 +302,7 @@ class UsersApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = usersApiService.banUser(
+        val testActualResult = usersService.banUser(
                 userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
                 banned = true
         ).get()
@@ -342,10 +342,10 @@ class UsersApiServiceTest {
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = usersService.createUpdateUser(request = testInputRequest).get()
 
         // The test user should be BANNED first
-        usersApiService.banUser(
+        usersService.banUser(
                 userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
                 banned = true
         ).get()
@@ -364,7 +364,7 @@ class UsersApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = usersApiService.banUser(
+        val testActualResult = usersService.banUser(
                 userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
                 banned = false
         ).get()
@@ -404,7 +404,7 @@ class UsersApiServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = usersService.createUpdateUser(request = testInputRequest1).get().data!!
 
         val testExpectedResult = ApiResponse<ListUsersResponse>(
                 kind = "api.result",
@@ -418,7 +418,7 @@ class UsersApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult1 = usersApiService.searchUsers(
+        val testActualResult1 = usersService.searchUsers(
                 handle = testCreatedUser1.handle!!,
                 limit = testInputLimit
         ).get()
@@ -452,7 +452,7 @@ class UsersApiServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = usersService.createUpdateUser(request = testInputRequest1).get().data!!
 
         val testExpectedResult = ApiResponse<ListUsersResponse>(
                 kind = "api.result",
@@ -466,7 +466,7 @@ class UsersApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult1 = usersApiService.searchUsers(
+        val testActualResult1 = usersService.searchUsers(
                 name = testCreatedUser1.displayname,
                 limit = testInputLimit
         ).get()
@@ -500,7 +500,7 @@ class UsersApiServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = usersService.createUpdateUser(request = testInputRequest1).get().data!!
 
         val testExpectedResult = ApiResponse<ListUsersResponse>(
                 kind = "api.result",
@@ -514,7 +514,7 @@ class UsersApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult1 = usersApiService.searchUsers(
+        val testActualResult1 = usersService.searchUsers(
                 userid = testCreatedUser1.userid!!,
                 limit = testInputLimit
         ).get()

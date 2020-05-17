@@ -1,20 +1,20 @@
-package com.sportstalk.impl
+package com.sportstalk.impl.restapi
 
 import androidx.annotation.RestrictTo
-import com.sportstalk.api.UsersApiService
-import com.sportstalk.impl.retrofit.services.UsersRetrofitService
+import com.sportstalk.api.UsersService
+import com.sportstalk.impl.restapi.retrofit.services.UsersRetrofitService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.*
 import retrofit2.Retrofit
 import retrofit2.create
 import java.util.concurrent.CompletableFuture
 
-class UsersApiServiceImpl
+class UsersRestApiServiceImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
         private val appId: String,
         mRetrofit: Retrofit
-) : UsersApiService {
+) : UsersService {
 
     private val service: UsersRetrofitService = mRetrofit.create()
 

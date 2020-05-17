@@ -31,13 +31,13 @@ import kotlin.test.assertTrue
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-class ChatModerationApiServiceTest {
+class ChatModerationServiceTest {
 
     private lateinit var context: Context
     private lateinit var json: Json
-    private lateinit var usersApiService: UsersApiService
-    private lateinit var chatApiService: ChatApiService
-    private lateinit var chatModerationApiService: ChatModerationApiService
+    private lateinit var usersService: UsersService
+    private lateinit var chatService: ChatService
+    private lateinit var chatModerationService: ChatModerationService
     private lateinit var appId: String
 
     @Before
@@ -46,9 +46,9 @@ class ChatModerationApiServiceTest {
         val sportsTalkManager = SportsTalk247.init(context)
         json = Dependencies._Json.getInstance()
         appId = Dependencies.AppId.getInstance(context)!!
-        usersApiService = sportsTalkManager.usersApiService
-        chatApiService = sportsTalkManager.chatApiService
-        chatModerationApiService = sportsTalkManager.chatModerationApiService
+        usersService = sportsTalkManager.usersService
+        chatService = sportsTalkManager.chatService
+        chatModerationService = sportsTalkManager.chatModerationService
     }
 
     @After
@@ -61,7 +61,7 @@ class ChatModerationApiServiceTest {
     private fun deleteTestUsers(vararg userIds: String?) {
         for (id in userIds) {
             id ?: continue
-            usersApiService.deleteUser(userId = id).get()
+            usersService.deleteUser(userId = id).get()
         }
     }
 
@@ -71,7 +71,7 @@ class ChatModerationApiServiceTest {
     private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
         for (id in chatRoomIds) {
             id ?: continue
-            chatApiService.deleteRoom(chatRoomId = id).get()
+            chatService.deleteRoom(chatRoomId = id).get()
         }
     }
 
@@ -87,7 +87,7 @@ class ChatModerationApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
                 // Moderation MUST BE SET to "pre"
@@ -105,21 +105,21 @@ class ChatModerationApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send a message to the created chat room
-        val testSendMessageData = chatApiService.executeChatCommand(
+        val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
         ).get().data?.speech!!
@@ -137,7 +137,7 @@ class ChatModerationApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatModerationApiService.approveMessage(
+        val testActualResult = chatModerationService.approveMessage(
                 eventId = testSendMessageData.id!!,
                 approve = testInputRequest.approve
         ).get()
@@ -177,7 +177,7 @@ class ChatModerationApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = usersService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
 
         val testChatRoomData = TestData.chatRooms(appId).first()
                 // Moderation MUST BE SET to "pre"
@@ -195,21 +195,21 @@ class ChatModerationApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(request = testJoinRoomInputRequest).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send a message to the created chat room
-        val testSendMessageData = chatApiService.executeChatCommand(
+        val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
         ).get().data?.speech!!
@@ -228,7 +228,7 @@ class ChatModerationApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatModerationApiService.listMessagesNeedingModeration().get()
+        val testActualResult = chatModerationService.listMessagesNeedingModeration().get()
 
         // THEN
         println(

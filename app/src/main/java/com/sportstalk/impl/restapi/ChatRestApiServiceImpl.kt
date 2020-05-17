@@ -1,21 +1,20 @@
-package com.sportstalk.impl
+package com.sportstalk.impl.restapi
 
 import androidx.annotation.RestrictTo
-import com.sportstalk.api.ChatApiService
-import com.sportstalk.impl.retrofit.services.ChatRetrofitService
+import com.sportstalk.api.ChatService
+import com.sportstalk.impl.restapi.retrofit.services.ChatRetrofitService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import retrofit2.Retrofit
 import retrofit2.create
-import java.lang.ref.WeakReference
 import java.util.concurrent.CompletableFuture
 
-class ChatApiServiceImpl
+class ChatRestApiServiceImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
         private val appId: String,
         mRetrofit: Retrofit
-): ChatApiService {
+): ChatService {
 
     private val service: ChatRetrofitService = mRetrofit.create()
 

@@ -1,9 +1,9 @@
 package com.sportstalk
 
 import android.content.Context
-import com.sportstalk.api.ChatApiService
-import com.sportstalk.api.ChatModerationApiService
-import com.sportstalk.api.UsersApiService
+import com.sportstalk.api.ChatService
+import com.sportstalk.api.ChatModerationService
+import com.sportstalk.api.UsersService
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -39,15 +39,15 @@ class SportsTalk247 private constructor(
         get() = Dependencies._Retrofit.mInstance!!
         private set(_) {}
 
-    var usersApiService: UsersApiService
+    var usersService: UsersService
         get() = Dependencies.ApiServices.Users.mInstance!!
         private set(_) {}
 
-    var chatApiService: ChatApiService
+    var chatService: ChatService
         get() = Dependencies.ApiServices.Chat.mInstance!!
         private set(_) {}
 
-    var chatModerationApiService: ChatModerationApiService
+    var chatModerationService: ChatModerationService
         get() = Dependencies.ApiServices.ChatModeration.mInstance!!
         private set(_) {}
 
@@ -60,9 +60,9 @@ class SportsTalk247 private constructor(
         json = Dependencies._Json.getInstance()
         @Suppress("EXPERIMENTAL_API_USAGE")
         retrofit = Dependencies._Retrofit.getInstance(urlEndpoint = this.apiUrlEndpoint, okHttpClient = okHttpClient, json = json)
-        usersApiService = Dependencies.ApiServices.Users.getInstance(appId = this.appId, retrofit = retrofit)
-        chatApiService = Dependencies.ApiServices.Chat.getInstance(appId = this.appId, retrofit = retrofit)
-        chatModerationApiService = Dependencies.ApiServices.ChatModeration.getInstance(appId = this.appId, retrofit = retrofit)
+        usersService = Dependencies.ApiServices.Users.getInstance(appId = this.appId, retrofit = retrofit)
+        chatService = Dependencies.ApiServices.Chat.getInstance(appId = this.appId, retrofit = retrofit)
+        chatModerationService = Dependencies.ApiServices.ChatModeration.getInstance(appId = this.appId, retrofit = retrofit)
     }
 
     companion object {

@@ -8,7 +8,7 @@ import com.sportstalk.models.users.User
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 
-interface UsersApiService {
+interface UsersService {
 
     /**
      * [POST] /{{api_appid}}/user/users/{{userId}}

@@ -3,12 +3,12 @@ package com.sportstalk
 import android.content.Context
 import android.content.pm.PackageManager
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.sportstalk.api.ChatApiService
-import com.sportstalk.api.ChatModerationApiService
-import com.sportstalk.api.UsersApiService
-import com.sportstalk.impl.ChatApiServiceImpl
-import com.sportstalk.impl.ChatModerationApiServiceImpl
-import com.sportstalk.impl.UsersApiServiceImpl
+import com.sportstalk.api.ChatService
+import com.sportstalk.api.ChatModerationService
+import com.sportstalk.api.UsersService
+import com.sportstalk.impl.restapi.ChatRestApiServiceImpl
+import com.sportstalk.impl.restapi.ChatModerationRestApiServiceImpl
+import com.sportstalk.impl.restapi.UsersRestApiServiceImpl
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
@@ -169,15 +169,15 @@ object Dependencies {
 
         object Users {
             @JvmStatic
-            var mInstance: UsersApiService? = null
+            var mInstance: UsersService? = null
 
             @JvmStatic
             fun getInstance(
                     appId: String,
                     retrofit: retrofit2.Retrofit
-            ): UsersApiService =
+            ): UsersService =
                     if(mInstance != null) mInstance!!
-                    else UsersApiServiceImpl(
+                    else UsersRestApiServiceImpl(
                             appId = appId,
                             mRetrofit = retrofit
                     )
@@ -189,15 +189,15 @@ object Dependencies {
 
         object Chat {
             @JvmStatic
-            var mInstance: ChatApiService? = null
+            var mInstance: ChatService? = null
 
             @JvmStatic
             fun getInstance(
                     appId: String,
                     retrofit: retrofit2.Retrofit
-            ): ChatApiService =
+            ): ChatService =
                     if(mInstance != null) mInstance!!
-                    else ChatApiServiceImpl(
+                    else ChatRestApiServiceImpl(
                             appId = appId,
                             mRetrofit = retrofit
                     )
@@ -209,15 +209,15 @@ object Dependencies {
 
         object ChatModeration {
             @JvmStatic
-            var mInstance: ChatModerationApiService? = null
+            var mInstance: ChatModerationService? = null
 
             @JvmStatic
             fun getInstance(
                     appId: String,
                     retrofit: retrofit2.Retrofit
-            ): ChatModerationApiService =
+            ): ChatModerationService =
                     if(mInstance != null) mInstance!!
-                    else ChatModerationApiServiceImpl(
+                    else ChatModerationRestApiServiceImpl(
                             appId = appId,
                             mRetrofit = retrofit
                     )
