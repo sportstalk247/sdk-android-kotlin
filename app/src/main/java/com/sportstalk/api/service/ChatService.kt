@@ -1,4 +1,4 @@
-package com.sportstalk.api
+package com.sportstalk.api.service
 
 import androidx.annotation.RestrictTo
 import com.sportstalk.models.ApiResponse

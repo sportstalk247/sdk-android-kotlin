@@ -1,7 +1,8 @@
 package com.sportstalk.impl
 
+import androidx.annotation.RestrictTo
 import com.sportstalk.ServiceFactory
-import com.sportstalk.api.UserService
+import com.sportstalk.api.UserClient
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.users.CreateUpdateUserRequest
@@ -10,9 +11,11 @@ import com.sportstalk.models.users.ListUsersResponse
 import com.sportstalk.models.users.User
 import java.util.concurrent.CompletableFuture
 
-class UserClient(
+class UserClientImpl
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
         private val config: ClientConfig
-) : UserService {
+) : UserClient {
 
     private val userService = ServiceFactory.RestApi.User.get(config)
 

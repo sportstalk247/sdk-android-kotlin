@@ -1,7 +1,7 @@
 package com.sportstalk.impl.restapi
 
 import androidx.annotation.RestrictTo
-import com.sportstalk.api.ChatService
+import com.sportstalk.api.service.ChatService
 import com.sportstalk.impl.restapi.retrofit.services.ChatRetrofitService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*

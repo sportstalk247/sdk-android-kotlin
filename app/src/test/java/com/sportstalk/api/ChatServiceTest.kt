@@ -4,9 +4,9 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import com.sportstalk.Dependencies
 import com.sportstalk.ServiceFactory
-import com.sportstalk.SportsTalk247
+import com.sportstalk.api.service.ChatService
+import com.sportstalk.api.service.UserService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.chat.*
@@ -60,12 +60,6 @@ class ChatServiceTest {
         json = ServiceFactory.RestApi.json
         userService = ServiceFactory.RestApi.User.get(config)
         chatService = ServiceFactory.RestApi.Chat.get(config)
-
-//        val sportsTalkManager = SportsTalk247.init(context)
-//        json = Dependencies._Json.getInstance()
-//        appId = Dependencies.AppId.getInstance(context)!!
-//        userService = sportsTalkManager.userService
-//        chatService = sportsTalkManager.chatService
     }
 
     @After
@@ -76,11 +70,12 @@ class ChatServiceTest {
      * Helper function to clean up Test Users from the Backend Server
      */
     private fun deleteTestUsers(vararg userIds: String?) {
-        for(id in userIds) {
+        for (id in userIds) {
             id ?: continue
             try {
                 userService.deleteUser(userId = id).get()
-            } catch (err: Throwable) {}
+            } catch (err: Throwable) {
+            }
         }
     }
 
@@ -88,11 +83,12 @@ class ChatServiceTest {
      * Helper function to clean up Test Users from the Backend Server
      */
     private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
-        for(id in chatRoomIds) {
+        for (id in chatRoomIds) {
             id ?: continue
             try {
                 chatService.deleteRoom(chatRoomId = id).get()
-            } catch (err: Throwable) {}
+            } catch (err: Throwable) {
+            }
         }
     }
 
@@ -763,7 +759,7 @@ class ChatServiceTest {
         println(
                 "`Exit a Room`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ExitChatRoomResponse.serializer() ),
+                                ApiResponse.serializer(ExitChatRoomResponse.serializer()),
                                 testActualResult
                         )
         )
@@ -850,7 +846,7 @@ class ChatServiceTest {
         println(
                 "`Get Updates`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(GetUpdatesResponse.serializer() ),
+                                ApiResponse.serializer(GetUpdatesResponse.serializer()),
                                 testActualResult
                         )
         )
@@ -940,7 +936,7 @@ class ChatServiceTest {
         println(
                 "`Execute Chat Command - Speech`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
+                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer()),
                                 testActualResult
                         )
         )
@@ -1037,7 +1033,7 @@ class ChatServiceTest {
         println(
                 "`Execute Chat Command - Action`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
+                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer()),
                                 testActualResult
                         )
         )
@@ -1145,7 +1141,7 @@ class ChatServiceTest {
         println(
                 "`Execute Chat Command - Reply to a Message`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
+                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer()),
                                 testActualResult
                         )
         )
@@ -1245,7 +1241,7 @@ class ChatServiceTest {
         println(
                 "`Execute Chat Command - Admin - Delete All Events`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer() ),
+                                ApiResponse.serializer(ExecuteChatCommandResponse.serializer()),
                                 testActualResult
                         )
         )
@@ -1332,7 +1328,7 @@ class ChatServiceTest {
         println(
                 "`List Messages By User`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ListMessagesByUser.serializer() ),
+                                ApiResponse.serializer(ListMessagesByUser.serializer()),
                                 testActualResult
                         )
         )
@@ -1431,7 +1427,7 @@ class ChatServiceTest {
         println(
                 "`Report a Message`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ChatEvent.serializer() ),
+                                ApiResponse.serializer(ChatEvent.serializer()),
                                 testActualResult
                         )
         )
@@ -1540,7 +1536,7 @@ class ChatServiceTest {
         println(
                 "`React to a Message`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ChatEvent.serializer() ),
+                                ApiResponse.serializer(ChatEvent.serializer()),
                                 testActualResult
                         )
         )
@@ -1600,7 +1596,7 @@ class ChatServiceTest {
 
         var _chatRooms: List<ChatRoom>? = null
         fun chatRooms(appId: String): List<ChatRoom> =
-                if(_chatRooms != null) _chatRooms!!
+                if (_chatRooms != null) _chatRooms!!
                 else listOf(
                         ChatRoom(
                                 kind = "chat.room",

@@ -2,7 +2,7 @@ package com.sportstalk.api.polling.rxjava
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
-import com.sportstalk.api.ChatService
+import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.polling.*
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent

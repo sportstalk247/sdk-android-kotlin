@@ -1,19 +1,25 @@
 package com.sportstalk.impl
 
+import androidx.annotation.RestrictTo
 import com.sportstalk.ServiceFactory
-import com.sportstalk.api.ChatService
-import com.sportstalk.api.IChatClient
+import com.sportstalk.api.service.ChatService
+import com.sportstalk.api.ChatClient
+import com.sportstalk.api.service.ChatModerationService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.chat.*
-import com.sportstalk.models.users.User
+import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
 import java.util.concurrent.CompletableFuture
 
-class ChatClient(
-        private val config: ClientConfig
-) : IChatClient {
 
-    private val service: ChatService = ServiceFactory.RestApi.Chat.get(config)
+class ChatClientImpl
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
+        private val config: ClientConfig
+) : ChatClient {
+
+    private val chatService: ChatService = ServiceFactory.RestApi.Chat.get(config)
+    private val moderationService: ChatModerationService = ServiceFactory.RestApi.ChatModeration.get(config)
 
     // Room state tracking
     private var _currentRoom: ChatRoom? = null
@@ -32,78 +38,78 @@ class ChatClient(
         }
 
     override val roomSubscriptions: MutableSet<String>
-        get() = service.roomSubscriptions
+        get() = chatService.roomSubscriptions
 
     override fun startEventUpdates(forRoomId: String) =
-            service.startEventUpdates(forRoomId)
+            chatService.startEventUpdates(forRoomId)
 
     override fun stopEventUpdates(forRoomId: String) =
-            service.stopEventUpdates(forRoomId)
+            chatService.stopEventUpdates(forRoomId)
 
     override fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
-            service.createRoom(request = request)
+            chatService.createRoom(request = request)
 
     override fun getRoomDetails(chatRoomId: String): CompletableFuture<ApiResponse<ChatRoom>> =
-            service.getRoomDetails(chatRoomId = chatRoomId)
+            chatService.getRoomDetails(chatRoomId = chatRoomId)
 
     override fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ApiResponse<ChatRoom>> =
-            service.getRoomDetailsByCustomId(chatRoomCustomId = chatRoomCustomId)
+            chatService.getRoomDetailsByCustomId(chatRoomCustomId = chatRoomCustomId)
 
     override fun deleteRoom(chatRoomId: String): CompletableFuture<ApiResponse<DeleteChatRoomResponse>> =
-            service.deleteRoom(chatRoomId = chatRoomId)
+            chatService.deleteRoom(chatRoomId = chatRoomId)
 
     override fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
-            service.updateRoom(request = request)
+            chatService.updateRoom(request = request)
 
     override fun listRooms(limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListRoomsResponse>> =
-            service.listRooms(
+            chatService.listRooms(
                     limit = limit,
                     cursor = cursor
             )
 
     override fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
-            service.joinRoom(
+            chatService.joinRoom(
                     request = request
             )
 
     override fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
-            service.joinRoom(
+            chatService.joinRoom(
                     chatRoomIdOrLabel = chatRoomIdOrLabel
             )
 
     override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
-            service.joinRoomByCustomId(
+            chatService.joinRoomByCustomId(
                     chatRoomCustomId = chatRoomCustomId,
                     request = request
             )
 
     override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>> =
-            service.listRoomParticipants(
+            chatService.listRoomParticipants(
                     chatRoomId = chatRoomId,
                     limit = limit,
                     cursor = cursor
             )
 
     override fun exitRoom(chatRoomId: String, userId: String): CompletableFuture<ApiResponse<ExitChatRoomResponse>> =
-            service.exitRoom(
+            chatService.exitRoom(
                     chatRoomId = chatRoomId,
                     userId = userId
             )
 
     override fun getUpdates(chatRoomId: String, cursor: String?): CompletableFuture<ApiResponse<GetUpdatesResponse>> =
-            service.getUpdates(
+            chatService.getUpdates(
                     chatRoomId = chatRoomId,
                     cursor = cursor
             )
 
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>> =
-            service.executeChatCommand(
+            chatService.executeChatCommand(
                     chatRoomId = chatRoomId,
                     request = request
             )
 
     override fun listMessagesByUser(chatRoomId: String, userId: String, limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListMessagesByUser>> =
-            service.listMessagesByUser(
+            chatService.listMessagesByUser(
                     chatRoomId = chatRoomId,
                     userId = userId,
                     limit = limit,
@@ -111,16 +117,25 @@ class ChatClient(
             )
 
     override fun reportMessage(chatRoomId: String, eventId: String, request: ReportMessageRequest): CompletableFuture<ApiResponse<ChatEvent>> =
-            service.reportMessage(
+            chatService.reportMessage(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
             )
 
     override fun reactToAMessage(chatRoomId: String, eventId: String, request: ReactToAMessageRequest): CompletableFuture<ApiResponse<ChatEvent>> =
-            service.reactToAMessage(
+            chatService.reactToAMessage(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
             )
+
+    override fun approveMessage(eventId: String, approve: Boolean): CompletableFuture<ApiResponse<ChatEvent>> =
+            moderationService.approveMessage(
+                    eventId = eventId,
+                    approve = approve
+            )
+
+    override fun listMessagesNeedingModeration(): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>> =
+            moderationService.listMessagesNeedingModeration()
 }

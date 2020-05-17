@@ -4,9 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import com.sportstalk.Dependencies
 import com.sportstalk.ServiceFactory
-import com.sportstalk.SportsTalk247
+import com.sportstalk.api.service.UserService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.users.CreateUpdateUserRequest
@@ -68,7 +67,7 @@ class UserServiceTest {
      * Helper function to clean up Test Users from the Backend Server
      */
     private fun deleteTestUsers(vararg userIds: String?) {
-        for(id in userIds) {
+        for (id in userIds) {
             id ?: continue
             userService.deleteUser(userId = id).get()
         }
