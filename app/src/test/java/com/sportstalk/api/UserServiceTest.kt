@@ -25,6 +25,7 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.random.Random
 import kotlin.test.assertTrue
 
 @UnstableDefault
@@ -78,7 +79,7 @@ class UserServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         val testExpectedResult = ApiResponse<User>(
@@ -89,6 +90,7 @@ class UserServiceTest {
                         kind = "app.user",
                         userid = testInputRequest.userid,
                         handle = testInputRequest.handle,
+                        handlelowercase = testInputRequest.handle!!.toLowerCase(),
                         displayname = testInputRequest.displayname
                 )
         )
@@ -111,8 +113,8 @@ class UserServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
-        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle }
+        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
 
         // Perform Delete Test User
@@ -124,7 +126,7 @@ class UserServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         // Should create a test user first
@@ -160,8 +162,8 @@ class UserServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.user?.userid == testExpectedResult.data?.user?.userid }
-        assertTrue { testActualResult.data?.user?.handle?.contains(testExpectedResult.data?.user?.handle!!) == true }
-        assertTrue { testActualResult.data?.user?.handlelowercase?.contains(testExpectedResult.data?.user?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.user?.handle == testExpectedResult.data?.user?.handle!! }
+        assertTrue { testActualResult.data?.user?.handlelowercase == testExpectedResult.data?.user?.handlelowercase!! }
         assertTrue { testActualResult.data?.user?.displayname == testExpectedResult.data?.user?.displayname }
 
     }
@@ -171,7 +173,7 @@ class UserServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         // Should create a test user first
@@ -181,17 +183,12 @@ class UserServiceTest {
                 kind = "api.result",
                 message = "Success",
                 code = 200,
-                data = User(
-                        kind = "app.user",
-                        userid = testInputRequest.userid,
-                        handle = testInputRequest.handle,
-                        displayname = testInputRequest.displayname
-                )
+                data = testCreatedUser.data
         )
 
         // WHEN
         val testActualResult = userService.getUserDetails(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid
+                userId = testCreatedUser.data?.userid!!
         ).get()
 
         // THEN
@@ -209,8 +206,8 @@ class UserServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
-        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
+        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
 
         // Perform Delete Test User
@@ -297,7 +294,7 @@ class UserServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         // Should create a test user first
@@ -307,18 +304,12 @@ class UserServiceTest {
                 kind = "api.result",
                 /*message = "@handle_test1 was banned",*/
                 code = 200,
-                data = User(
-                        kind = "app.user",
-                        userid = testInputRequest.userid,
-                        handle = testInputRequest.handle,
-                        displayname = testInputRequest.displayname,
-                        banned = true
-                )
+                data = testCreatedUser.data
         )
 
         // WHEN
         val testActualResult = userService.setBanStatus(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+                userId = testCreatedUser.data?.userid!!,
                 banned = true
         ).get()
 
@@ -339,8 +330,8 @@ class UserServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
-        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
+        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
         assertTrue { testActualResult.data?.banned == true }
 
@@ -353,7 +344,7 @@ class UserServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         // Should create a test user first
@@ -361,7 +352,7 @@ class UserServiceTest {
 
         // The test user should be BANNED first
         userService.setBanStatus(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+                userId = testCreatedUser.data?.userid!!,
                 banned = true
         ).get()
 
@@ -369,18 +360,12 @@ class UserServiceTest {
                 kind = "api.result",
                 /*message = "@handle_test1 was banned",*/
                 code = 200,
-                data = User(
-                        kind = "app.user",
-                        userid = testInputRequest.userid,
-                        handle = testInputRequest.handle,
-                        displayname = testInputRequest.displayname,
-                        banned = false
-                )
+                data = testCreatedUser.data
         )
 
         // WHEN
         val testActualResult = userService.setBanStatus(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+                userId = testCreatedUser.data?.userid!!,
                 banned = false
         ).get()
 
@@ -401,8 +386,8 @@ class UserServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
-        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
+        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
         assertTrue { testActualResult.data?.banned == false }
 

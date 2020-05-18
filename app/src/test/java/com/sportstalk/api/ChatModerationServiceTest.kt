@@ -29,6 +29,7 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.random.Random
 import kotlin.test.assertTrue
 
 @UnstableDefault
@@ -97,7 +98,7 @@ class ChatModerationServiceTest {
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = testUserData.handle,
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
                 displayname = testUserData.displayname,
                 pictureurl = testUserData.pictureurl,
                 profileurl = testUserData.profileurl
@@ -123,12 +124,16 @@ class ChatModerationServiceTest {
         // Should create a test chat room first
         val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
-                roomid = testCreatedChatRoomData.id!!,
-                userid = testCreatedUserData.userid!!
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle!!
         )
         // Test Created User Should join test created chat room
-        chatService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(
+                chatRoomId = testInputChatRoomId,
+                request = testJoinRoomInputRequest
+        ).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -213,12 +218,15 @@ class ChatModerationServiceTest {
         // Should create a test chat room first
         val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
-                roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(
+                chatRoomId = testInputChatRoomId,
+                request = testJoinRoomInputRequest
+        ).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -258,7 +266,14 @@ class ChatModerationServiceTest {
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.code == testExpectedResult.code }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult.data?.events!!.contains(testSendMessageData) }
+        assertTrue {
+            testActualResult.data?.events!!.any { ev ->
+                ev.id == testSendMessageData.id
+                        && ev.userid == testSendMessageData.userid
+                        && ev.body == testSendMessageData.body
+                        && ev.eventtype == testSendMessageData.eventtype
+            }
+        }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)

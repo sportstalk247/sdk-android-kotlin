@@ -71,7 +71,7 @@ interface ChatService {
      * - https://apiref.sportstalk247.com/?version=latest#eb3f78c3-a8bb-4390-ab25-77ce7072ddda
      * - Join A Room(Authenticated User)
      */
-    fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+    fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/join

@@ -70,8 +70,9 @@ constructor(
                     cursor = cursor
             )
 
-    override fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
+    override fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
             chatService.joinRoom(
+                    chatRoomId = chatRoomId,
                     request = request
             )
 

@@ -22,7 +22,7 @@ interface ChatRetrofitService {
     @GET("{appId}/chat/roomsbycustomid/{chatroom_customid}")
     fun getRoomDetailsByCustomId(
             @Path("appId") appId: String,
-            @Path("chatroom_customid") chatRoomCustomId: String
+            @Path(value = "chatroom_customid", encoded = true) chatRoomCustomId: String
     ): CompletableFuture<ApiResponse<ChatRoom>>
 
     @DELETE("{appId}/chat/rooms/{chatroomid}")
@@ -61,7 +61,7 @@ interface ChatRetrofitService {
     @POST("{appId}/chat/roomsbycustomid/{chatroom_customid}/join")
     fun joinRoomByCustomId(
             @Path("appId") appId: String,
-            @Path("chatroom_customid") chatRoomCustomId: String,
+            @Path(value = "chatroom_customid", encoded = true) chatRoomCustomId: String,
             @Body request: JoinChatRoomRequest
     ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 

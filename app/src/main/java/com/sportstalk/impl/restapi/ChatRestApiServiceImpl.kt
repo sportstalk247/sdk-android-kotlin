@@ -7,6 +7,7 @@ import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import retrofit2.Retrofit
 import retrofit2.create
+import java.net.URLEncoder
 import java.util.concurrent.CompletableFuture
 
 class ChatRestApiServiceImpl
@@ -43,7 +44,7 @@ constructor(
     override fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ApiResponse<ChatRoom>> =
             service.getRoomDetailsByCustomId(
                     appId = appId,
-                    chatRoomCustomId = chatRoomCustomId
+                    chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name())
             )
 
     override fun deleteRoom(chatRoomId: String): CompletableFuture<ApiResponse<DeleteChatRoomResponse>> =
@@ -66,10 +67,10 @@ constructor(
                     cursor = cursor
             )
 
-    override fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
+    override fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
             service.joinRoom(
                     appId = appId,
-                    chatRoomId = request.roomid!!,
+                    chatRoomId = chatRoomId,
                     request = request
             )
 
@@ -82,7 +83,7 @@ constructor(
     override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
             service.joinRoomByCustomId(
                     appId = appId,
-                    chatRoomCustomId = chatRoomCustomId,
+                    chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name()),
                     request = request
             )
 

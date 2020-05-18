@@ -14,7 +14,7 @@ data class ChatEvent(
         val id: String? = null,
         val roomid: String? = null,
         val body: String? = null,
-        val added: Long? = null,
+        val added: String? = null, /* ISODateTime Format */
         val ts: Long? = null,
         /** [EventType] */
         val eventtype: String? = null,
@@ -23,18 +23,30 @@ data class ChatEvent(
         val customtype: String? = null,
         val customid: String? = null,
         val custompayload: String? = null,
+        val customtags: List<String> = listOf(),
+        val customfield1: String? = null,
+        val customfield2: String? = null,
         val replyto: ChatEvent? = null,
+        val parentid: String? = null,
+        /*val hierarchy: List<String> = listOf(),*/
+        val edited: Boolean? = null,
+        val deleted: Boolean? = null,
+        val active: Boolean? = null,
+        /*val mutedby: List<String> = listOf(),*/
+        val shadowban: Boolean? = null,
+        /*val hashtags: List<String> = listOf(),*/
+        val likecount: Long? = null,
+        val replycount: Long? = null,
         val reactions: List<ChatEventReaction> = listOf(),
         /** [ModerationType] */
         val moderation: String? = null /* "na" */,
-        val active: Boolean? = null,
         val reports: List<ChatEventReport> = listOf()
 ) : Parcelable
 
 @Parcelize
 @Serializable
 data class ChatEventReaction(
-        /** [Reaction] */
+        /** [EventReaction] */
         val type: String? = null,
         val count: Long? = null,
         val users: List<User> = listOf()
@@ -60,6 +72,6 @@ object EventType {
     const val ADVERTISEMENT = "advertisement" // custom type
 }
 
-object Reaction {
+object EventReaction {
     const val LIKE = "like"
 }
