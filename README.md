@@ -100,7 +100,7 @@ implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0"
 ```
 ...
 ...
-## Chat
+## How to use Chat Client
 
 ```kotlin
 import com.sportstalk.api.polling.coroutines.allEventUpdates
@@ -164,6 +164,12 @@ lifecycleScope.launch {
 
 	}
 	.launchIn(lifecycleScope /* Already provided by androidx.Fragment */)
+	
+	// Then, perform start listening to event updates
+	chatClient.startEventUpdates(forRoomId = testChatRoom.id!!)
+	
+	// At some point in time, the developer might want to explicitly stop listening to event updates
+	chatClient.stopEventUpdates(forRoomId = testChatRoom.id!!)
 	
 	// To Send a Chat Message
 	val executeChatResponse = withContext(Dispatchers.IO) {
