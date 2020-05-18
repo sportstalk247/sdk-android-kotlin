@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ExecuteChatCommandResponse(
+        /** [Kind] */
         val kind: String? = null /* "chat.executecommand" */,
         val op: String? = null /* "speech"|"action" */,
         val room: ChatRoom? = null,

@@ -1,22 +1,33 @@
-package com.sportstalk.impl
+package com.sportstalk.impl.restapi
 
 import androidx.annotation.RestrictTo
-import com.sportstalk.api.ChatApiService
-import com.sportstalk.impl.retrofit.services.ChatRetrofitService
+import com.sportstalk.api.service.ChatService
+import com.sportstalk.impl.restapi.retrofit.services.ChatRetrofitService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import retrofit2.Retrofit
 import retrofit2.create
+import java.net.URLEncoder
 import java.util.concurrent.CompletableFuture
 
-class ChatApiServiceImpl
+class ChatRestApiServiceImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
         private val appId: String,
         mRetrofit: Retrofit
-): ChatApiService {
+): ChatService {
 
     private val service: ChatRetrofitService = mRetrofit.create()
+
+    override val roomSubscriptions: MutableSet<String> = mutableSetOf()
+
+    override fun startEventUpdates(forRoomId: String) {
+        roomSubscriptions.add(forRoomId)
+    }
+
+    override fun stopEventUpdates(forRoomId: String) {
+        roomSubscriptions.remove(forRoomId)
+    }
 
     override fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
             service.createRoom(
@@ -30,16 +41,22 @@ constructor(
                     chatRoomId = chatRoomId
             )
 
+    override fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ApiResponse<ChatRoom>> =
+            service.getRoomDetailsByCustomId(
+                    appId = appId,
+                    chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name())
+            )
+
     override fun deleteRoom(chatRoomId: String): CompletableFuture<ApiResponse<DeleteChatRoomResponse>> =
             service.deleteRoom(
                     appId = appId,
                     chatRoomId = chatRoomId
             )
 
-    override fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
+    override fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
             service.updateRoom(
                     appId = appId,
-                    chatRoomId = request.roomid,
+                    chatRoomId = chatRoomId,
                     request = request
             )
 
@@ -50,10 +67,10 @@ constructor(
                     cursor = cursor
             )
 
-    override fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
+    override fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
             service.joinRoom(
                     appId = appId,
-                    chatRoomId = request.roomid,
+                    chatRoomId = chatRoomId,
                     request = request
             )
 
@@ -61,6 +78,13 @@ constructor(
             service.joinRoom(
                     appId = appId,
                     chatRoomId = chatRoomIdOrLabel
+            )
+
+    override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>> =
+            service.joinRoomByCustomId(
+                    appId = appId,
+                    chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name()),
+                    request = request
             )
 
     override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>> =
@@ -76,6 +100,16 @@ constructor(
                     appId = appId,
                     chatRoomId = chatRoomId,
                     request = ExitChatRoomRequest(userid = userId)
+            )
+
+    override fun getUpdates(
+            chatRoomId: String,
+            cursor: String?
+    ): CompletableFuture<ApiResponse<GetUpdatesResponse>> =
+            service.getUpdates(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    cursor = cursor
             )
 
     override fun executeChatCommand(
@@ -124,15 +158,5 @@ constructor(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
-            )
-
-    override fun getUpdates(
-            chatRoomId: String,
-            cursor: String?
-    ): CompletableFuture<ApiResponse<GetUpdatesResponse>> =
-            service.getUpdates(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    cursor = cursor
             )
 }

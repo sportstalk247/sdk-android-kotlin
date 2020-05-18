@@ -1,11 +1,25 @@
-package com.sportstalk.api
+package com.sportstalk.api.service
 
 import androidx.annotation.RestrictTo
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import java.util.concurrent.CompletableFuture
 
-interface ChatApiService {
+interface ChatService {
+
+    /**
+    * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates
+    */
+    val roomSubscriptions: MutableSet<String>
+
+    /**
+     * Signals the START of event updates being emitted
+     */
+    fun startEventUpdates(forRoomId: String)
+    /**
+     * Signals the END of event updates being emitted
+     */
+    fun stopEventUpdates(forRoomId: String)
 
     /**
      * [POST] /{{api_appid}}/chat/rooms
@@ -22,6 +36,13 @@ interface ChatApiService {
     fun getRoomDetails(chatRoomId: String): CompletableFuture<ApiResponse<ChatRoom>>
 
     /**
+     * [GET] /{{api_appid}}/chat/roomsbycustomid/{{chat_create_room_customid}}
+     * - https://apiref.sportstalk247.com/?version=latest#0fd07be5-f8d5-43d9-bf0f-8fb9829c172c
+     * - Get the details for a room
+     */
+    fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ApiResponse<ChatRoom>>
+
+    /**
      * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}
      * - https://apiref.sportstalk247.com/?version=latest#c5ae345d-004d-478a-b543-5abaf691000d
      * - Deletes the specified room and all events contained therein) by ID
@@ -33,7 +54,7 @@ interface ChatApiService {
      * - https://apiref.sportstalk247.com/?version=latest#96ef3138-4820-459b-b400-e9f25d5ddb00
      * - Updates an existing room
      */
-    fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
+    fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/
@@ -50,7 +71,7 @@ interface ChatApiService {
      * - https://apiref.sportstalk247.com/?version=latest#eb3f78c3-a8bb-4390-ab25-77ce7072ddda
      * - Join A Room(Authenticated User)
      */
-    fun joinRoom(request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+    fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/join
@@ -58,6 +79,16 @@ interface ChatApiService {
      * - Join A Room(Anonymous User)
      */
     fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+
+    /**
+     * [POST] /{{api_appid}}/chat/roomsbycustomid/{{chat_create_room_customid}}/join
+     * - https://apiref.sportstalk247.com/?version=latest#a64f2c32-6167-4639-9c32-413edded2c18
+     * - This method is the same as Join Room, except you can use your customid
+     */
+    fun joinRoomByCustomId(
+            chatRoomCustomId: String,
+            request: JoinChatRoomRequest
+    ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/participants?cursor&limit=200

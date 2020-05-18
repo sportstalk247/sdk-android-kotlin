@@ -2,9 +2,12 @@ package com.sportstalk.api
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
-import com.sportstalk.SportsTalkManager
+import com.sportstalk.ServiceFactory
+import com.sportstalk.api.service.UserService
 import com.sportstalk.models.ApiResponse
+import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse
 import com.sportstalk.models.users.ListUsersResponse
@@ -22,6 +25,7 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.random.Random
 import kotlin.test.assertTrue
 
 @UnstableDefault
@@ -29,18 +33,31 @@ import kotlin.test.assertTrue
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-class UsersApiServiceTest {
+class UserServiceTest {
 
     private lateinit var context: Context
-    private lateinit var usersApiService: UsersApiService
+    private lateinit var config: ClientConfig
+    private lateinit var userService: UserService
     private lateinit var json: Json
 
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
-        val sportsTalkManager = SportsTalkManager.init(context)
-        json = sportsTalkManager.json
-        usersApiService = sportsTalkManager.usersApiService
+        val appInfo =
+                try {
+                    context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+                } catch (err: Throwable) {
+                    err.printStackTrace()
+                    null
+                }
+
+        config = ClientConfig(
+                appId = appInfo?.metaData?.getString("sportstalk.api.app_id")!!,
+                apiToken = appInfo.metaData?.getString("sportstalk.api.auth_token")!!,
+                endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
+        )
+        json = ServiceFactory.RestApi.json
+        userService = ServiceFactory.RestApi.User.get(config)
     }
 
     @After
@@ -51,9 +68,9 @@ class UsersApiServiceTest {
      * Helper function to clean up Test Users from the Backend Server
      */
     private fun deleteTestUsers(vararg userIds: String?) {
-        for(id in userIds) {
+        for (id in userIds) {
             id ?: continue
-            usersApiService.deleteUser(userId = id).get()
+            userService.deleteUser(userId = id).get()
         }
     }
 
@@ -62,7 +79,7 @@ class UsersApiServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         val testExpectedResult = ApiResponse<User>(
@@ -73,12 +90,13 @@ class UsersApiServiceTest {
                         kind = "app.user",
                         userid = testInputRequest.userid,
                         handle = testInputRequest.handle,
+                        handlelowercase = testInputRequest.handle!!.toLowerCase(),
                         displayname = testInputRequest.displayname
                 )
         )
 
         // WHEN
-        val testActualResult = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testActualResult = userService.createOrUpdateUser(request = testInputRequest).get()
 
         // THEN
         println(
@@ -95,8 +113,8 @@ class UsersApiServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
-        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle }
+        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
 
         // Perform Delete Test User
@@ -108,11 +126,11 @@ class UsersApiServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
 
         val testExpectedResult = ApiResponse<DeleteUserResponse>(
                 kind = "api.result",
@@ -125,7 +143,7 @@ class UsersApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = usersApiService.deleteUser(
+        val testActualResult = userService.deleteUser(
                 userId = testCreatedUser.data?.userid ?: testInputRequest.userid
         ).get()
 
@@ -144,8 +162,8 @@ class UsersApiServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.user?.userid == testExpectedResult.data?.user?.userid }
-        assertTrue { testActualResult.data?.user?.handle?.contains(testExpectedResult.data?.user?.handle!!) == true }
-        assertTrue { testActualResult.data?.user?.handlelowercase?.contains(testExpectedResult.data?.user?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.user?.handle == testExpectedResult.data?.user?.handle!! }
+        assertTrue { testActualResult.data?.user?.handlelowercase == testExpectedResult.data?.user?.handlelowercase!! }
         assertTrue { testActualResult.data?.user?.displayname == testExpectedResult.data?.user?.displayname }
 
     }
@@ -155,27 +173,22 @@ class UsersApiServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
 
         val testExpectedResult = ApiResponse<User>(
                 kind = "api.result",
                 message = "Success",
                 code = 200,
-                data = User(
-                        kind = "app.user",
-                        userid = testInputRequest.userid,
-                        handle = testInputRequest.handle,
-                        displayname = testInputRequest.displayname
-                )
+                data = testCreatedUser.data
         )
 
         // WHEN
-        val testActualResult = usersApiService.getUserDetails(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid
+        val testActualResult = userService.getUserDetails(
+                userId = testCreatedUser.data?.userid!!
         ).get()
 
         // THEN
@@ -193,8 +206,8 @@ class UsersApiServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
-        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
+        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
 
         // Perform Delete Test User
@@ -215,8 +228,8 @@ class UsersApiServiceTest {
                 displayname = "Test List Users 2"
         )
         // Should create a test user first
-        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
-        val testCreatedUser2 = usersApiService.createUpdateUser(request = testInputRequest2).get().data!!
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser2 = userService.createOrUpdateUser(request = testInputRequest2).get().data!!
 
         val testExpectedResult = ApiResponse<ListUsersResponse>(
                 kind = "api.result",
@@ -231,11 +244,11 @@ class UsersApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult1 = usersApiService.listUsers(
+        val testActualResult1 = userService.listUsers(
                 limit = testInputLimit,
                 cursor = testCreatedUser1.userid
         ).get()
-        val testActualResult2 = usersApiService.listUsers(
+        val testActualResult2 = userService.listUsers(
                 limit = testInputLimit,
                 cursor = testCreatedUser2.userid
         ).get()
@@ -281,28 +294,22 @@ class UsersApiServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
 
         val testExpectedResult = ApiResponse<User>(
                 kind = "api.result",
                 /*message = "@handle_test1 was banned",*/
                 code = 200,
-                data = User(
-                        kind = "app.user",
-                        userid = testInputRequest.userid,
-                        handle = testInputRequest.handle,
-                        displayname = testInputRequest.displayname,
-                        banned = true
-                )
+                data = testCreatedUser.data
         )
 
         // WHEN
-        val testActualResult = usersApiService.banUser(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+        val testActualResult = userService.setBanStatus(
+                userId = testCreatedUser.data?.userid!!,
                 banned = true
         ).get()
 
@@ -323,8 +330,8 @@ class UsersApiServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
-        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
+        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
         assertTrue { testActualResult.data?.banned == true }
 
@@ -337,15 +344,15 @@ class UsersApiServiceTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = "handle_test1",
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = usersApiService.createUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
 
         // The test user should be BANNED first
-        usersApiService.banUser(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+        userService.setBanStatus(
+                userId = testCreatedUser.data?.userid!!,
                 banned = true
         ).get()
 
@@ -353,18 +360,12 @@ class UsersApiServiceTest {
                 kind = "api.result",
                 /*message = "@handle_test1 was banned",*/
                 code = 200,
-                data = User(
-                        kind = "app.user",
-                        userid = testInputRequest.userid,
-                        handle = testInputRequest.handle,
-                        displayname = testInputRequest.displayname,
-                        banned = false
-                )
+                data = testCreatedUser.data
         )
 
         // WHEN
-        val testActualResult = usersApiService.banUser(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid,
+        val testActualResult = userService.setBanStatus(
+                userId = testCreatedUser.data?.userid!!,
                 banned = false
         ).get()
 
@@ -385,8 +386,8 @@ class UsersApiServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle?.contains(testExpectedResult.data?.handle!!) == true }
-        assertTrue { testActualResult.data?.handlelowercase?.contains(testExpectedResult.data?.handle!!.toLowerCase()) == true }
+        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
+        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
         assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
         assertTrue { testActualResult.data?.banned == false }
 
@@ -403,7 +404,7 @@ class UsersApiServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get().data!!
 
         val testExpectedResult = ApiResponse<ListUsersResponse>(
                 kind = "api.result",
@@ -417,7 +418,7 @@ class UsersApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult1 = usersApiService.searchUsers(
+        val testActualResult1 = userService.searchUsers(
                 handle = testCreatedUser1.handle!!,
                 limit = testInputLimit
         ).get()
@@ -451,7 +452,7 @@ class UsersApiServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get().data!!
 
         val testExpectedResult = ApiResponse<ListUsersResponse>(
                 kind = "api.result",
@@ -465,7 +466,7 @@ class UsersApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult1 = usersApiService.searchUsers(
+        val testActualResult1 = userService.searchUsers(
                 name = testCreatedUser1.displayname,
                 limit = testInputLimit
         ).get()
@@ -499,7 +500,7 @@ class UsersApiServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = usersApiService.createUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get().data!!
 
         val testExpectedResult = ApiResponse<ListUsersResponse>(
                 kind = "api.result",
@@ -513,7 +514,7 @@ class UsersApiServiceTest {
         val testInputLimit = 10
 
         // WHEN
-        val testActualResult1 = usersApiService.searchUsers(
+        val testActualResult1 = userService.searchUsers(
                 userid = testCreatedUser1.userid!!,
                 limit = testInputLimit
         ).get()

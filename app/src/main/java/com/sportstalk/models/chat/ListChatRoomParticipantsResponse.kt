@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ListChatRoomParticipantsResponse(
+        /** [Kind] */
         val kind: String? = null /* "list.chatparticipants" */,
         val cursor: String? = null,
         val participants: List<ChatRoomParticipant> = listOf()
@@ -12,6 +13,7 @@ data class ListChatRoomParticipantsResponse(
 
 @Serializable
 data class ChatRoomParticipant(
+        /** [Kind] */
         val kind: String? = null /* "chat.participant" */,
         val user: User? = null
 )

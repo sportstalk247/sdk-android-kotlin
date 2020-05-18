@@ -5,7 +5,9 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class JoinChatRoomResponse(
+        /** [Kind] */
         val kind: String? = null /* "chat.joinroom" */,
         val user: User? = null,
-        val room: ChatRoom? = null
+        val room: ChatRoom? = null,
+        val eventscursor: GetUpdatesResponse? = null
 )

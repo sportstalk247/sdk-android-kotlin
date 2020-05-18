@@ -1,4 +1,4 @@
-package com.sportstalk.impl.retrofit.services
+package com.sportstalk.impl.restapi.retrofit.services
 
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent

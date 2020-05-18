@@ -1,11 +1,11 @@
-package com.sportstalk.api
+package com.sportstalk.api.service
 
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
 import java.util.concurrent.CompletableFuture
 
-interface ChatModerationApiService {
+interface ChatModerationService {
 
     /**
      * [POST] /{{api_appid}}/chat/moderation/queues/events/{{eventId}}/applydecision

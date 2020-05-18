@@ -1,4 +1,4 @@
-package com.sportstalk.api
+package com.sportstalk.api.service
 
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
@@ -8,14 +8,14 @@ import com.sportstalk.models.users.User
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Future
 
-interface UsersApiService {
+interface UserService {
 
     /**
      * [POST] /{{api_appid}}/user/users/{{userId}}
      * - https://apiref.sportstalk247.com/?version=latest#8cc680a6-6ce8-4af7-ab1e-e793a7f0e7d2
      * - Invoke this API method if you want to create a user or update an existing user.
      */
-    fun createUpdateUser(request: CreateUpdateUserRequest): CompletableFuture<ApiResponse<User>>
+    fun createOrUpdateUser(request: CreateUpdateUserRequest): CompletableFuture<ApiResponse<User>>
 
     /**
      * [DEL] /{{api_appid}}/user/users/{{userId}}
@@ -46,7 +46,7 @@ interface UsersApiService {
      * - https://apiref.sportstalk247.com/?version=latest#211d5614-b251-4815-bf76-d8f6f66f97ab
      * - Will toggle the user's banned flag
      */
-    fun banUser(userId: String, banned: Boolean): CompletableFuture<ApiResponse<User>>
+    fun setBanStatus(userId: String, banned: Boolean): CompletableFuture<ApiResponse<User>>
 
     /**
      * [POST] /{{api_appid}}/user/search

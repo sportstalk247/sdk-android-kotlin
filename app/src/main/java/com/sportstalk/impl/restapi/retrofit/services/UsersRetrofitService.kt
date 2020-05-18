@@ -1,4 +1,4 @@
-package com.sportstalk.impl.retrofit.services
+package com.sportstalk.impl.restapi.retrofit.services
 
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.*
@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture
 interface UsersRetrofitService {
 
     @POST("{appId}/user/users/{userId}")
-    fun createUpdateUser(
+    fun createOrUpdateUser(
             @Path("appId") appId: String,
             @Path("userId") userId: String,
             @Body request: CreateUpdateUserRequest
@@ -34,7 +34,7 @@ interface UsersRetrofitService {
     ): CompletableFuture<ApiResponse<ListUsersResponse>>
 
     @POST("{appId}/user/users/{userId}/ban")
-    fun banUser(
+    fun setBanStatus(
             @Path("appId") appId: String,
             @Path("userId") userId: String,
             @Body request: BanUserRequest

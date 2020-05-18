@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GetUpdatesResponse(
+        /** [Kind] */
         val kind: String? = null /* "list.chatevents" */,
         val cursor: String? = null,
         val more: Boolean? = null,

@@ -1,4 +1,4 @@
-package com.sportstalk.impl.retrofit.services
+package com.sportstalk.impl.restapi.retrofit.services
 
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
@@ -17,6 +17,12 @@ interface ChatRetrofitService {
     fun getRoomDetails(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String
+    ): CompletableFuture<ApiResponse<ChatRoom>>
+
+    @GET("{appId}/chat/roomsbycustomid/{chatroom_customid}")
+    fun getRoomDetailsByCustomId(
+            @Path("appId") appId: String,
+            @Path(value = "chatroom_customid", encoded = true) chatRoomCustomId: String
     ): CompletableFuture<ApiResponse<ChatRoom>>
 
     @DELETE("{appId}/chat/rooms/{chatroomid}")
@@ -50,6 +56,13 @@ interface ChatRetrofitService {
     fun joinRoom(
             @Path("appId") appId: String,
             @Path("chatRoomIdOrLabel") chatRoomId: String
+    ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+
+    @POST("{appId}/chat/roomsbycustomid/{chatroom_customid}/join")
+    fun joinRoomByCustomId(
+            @Path("appId") appId: String,
+            @Path(value = "chatroom_customid", encoded = true) chatRoomCustomId: String,
+            @Body request: JoinChatRoomRequest
     ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
 
     @GET("{appId}/chat/rooms/{chatroomid}/participants")

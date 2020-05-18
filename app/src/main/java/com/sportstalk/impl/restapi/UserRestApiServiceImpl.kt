@@ -1,25 +1,25 @@
-package com.sportstalk.impl
+package com.sportstalk.impl.restapi
 
 import androidx.annotation.RestrictTo
-import com.sportstalk.api.UsersApiService
-import com.sportstalk.impl.retrofit.services.UsersRetrofitService
+import com.sportstalk.api.service.UserService
+import com.sportstalk.impl.restapi.retrofit.services.UsersRetrofitService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.*
 import retrofit2.Retrofit
 import retrofit2.create
 import java.util.concurrent.CompletableFuture
 
-class UsersApiServiceImpl
+class UserRestApiServiceImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
         private val appId: String,
         mRetrofit: Retrofit
-) : UsersApiService {
+) : UserService {
 
     private val service: UsersRetrofitService = mRetrofit.create()
 
-    override fun createUpdateUser(request: CreateUpdateUserRequest): CompletableFuture<ApiResponse<User>> =
-            service.createUpdateUser(
+    override fun createOrUpdateUser(request: CreateUpdateUserRequest): CompletableFuture<ApiResponse<User>> =
+            service.createOrUpdateUser(
                     appId = appId,
                     userId = request.userid,
                     request = request
@@ -44,8 +44,8 @@ constructor(
                     limit = limit
             )
 
-    override fun banUser(userId: String, banned: Boolean): CompletableFuture<ApiResponse<User>> =
-            service.banUser(
+    override fun setBanStatus(userId: String, banned: Boolean): CompletableFuture<ApiResponse<User>> =
+            service.setBanStatus(
                     appId = appId,
                     userId = userId,
                     request = BanUserRequest(banned)

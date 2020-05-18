@@ -2,9 +2,15 @@ package com.sportstalk.api
 
 import android.app.Activity
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
-import com.sportstalk.SportsTalkManager
+import com.sportstalk.DateUtils
+import com.sportstalk.ServiceFactory
+import com.sportstalk.api.service.ChatModerationService
+import com.sportstalk.api.service.ChatService
+import com.sportstalk.api.service.UserService
 import com.sportstalk.models.ApiResponse
+import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.chat.moderation.ApproveMessageRequest
 import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
@@ -23,6 +29,7 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.random.Random
 import kotlin.test.assertTrue
 
 @UnstableDefault
@@ -30,24 +37,35 @@ import kotlin.test.assertTrue
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-class ChatModerationApiServiceTest {
+class ChatModerationServiceTest {
 
     private lateinit var context: Context
+    private lateinit var config: ClientConfig
+    private lateinit var userService: UserService
+    private lateinit var chatService: ChatService
+    private lateinit var chatModerationService: ChatModerationService
     private lateinit var json: Json
-    private lateinit var usersApiService: UsersApiService
-    private lateinit var chatApiService: ChatApiService
-    private lateinit var chatModerationApiService: ChatModerationApiService
-    private lateinit var appId: String
 
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
-        val sportsTalkManager = SportsTalkManager.init(context)
-        json = sportsTalkManager.json
-        appId = sportsTalkManager.appId
-        usersApiService = sportsTalkManager.usersApiService
-        chatApiService = sportsTalkManager.chatApiService
-        chatModerationApiService = sportsTalkManager.chatModerationApiService
+        val appInfo =
+                try {
+                    context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+                } catch (err: Throwable) {
+                    err.printStackTrace()
+                    null
+                }
+
+        config = ClientConfig(
+                appId = appInfo?.metaData?.getString("sportstalk.api.app_id")!!,
+                apiToken = appInfo.metaData?.getString("sportstalk.api.auth_token")!!,
+                endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
+        )
+        json = ServiceFactory.RestApi.json
+        userService = ServiceFactory.RestApi.User.get(config)
+        chatService = ServiceFactory.RestApi.Chat.get(config)
+        chatModerationService = ServiceFactory.RestApi.ChatModeration.get(config)
     }
 
     @After
@@ -60,7 +78,7 @@ class ChatModerationApiServiceTest {
     private fun deleteTestUsers(vararg userIds: String?) {
         for (id in userIds) {
             id ?: continue
-            usersApiService.deleteUser(userId = id).get()
+            userService.deleteUser(userId = id).get()
         }
     }
 
@@ -70,7 +88,7 @@ class ChatModerationApiServiceTest {
     private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
         for (id in chatRoomIds) {
             id ?: continue
-            chatApiService.deleteRoom(chatRoomId = id).get()
+            chatService.deleteRoom(chatRoomId = id).get()
         }
     }
 
@@ -80,20 +98,20 @@ class ChatModerationApiServiceTest {
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
-                handle = testUserData.handle,
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
                 displayname = testUserData.displayname,
                 pictureurl = testUserData.pictureurl,
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
                 // Moderation MUST BE SET to "pre"
                 .copy(moderation = "pre")
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -104,21 +122,25 @@ class ChatModerationApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
-                roomid = testCreatedChatRoomData.id!!,
-                userid = testCreatedUserData.userid!!
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(
+                chatRoomId = testInputChatRoomId,
+                request = testJoinRoomInputRequest
+        ).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send a message to the created chat room
-        val testSendMessageData = chatApiService.executeChatCommand(
+        val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
         ).get().data?.speech!!
@@ -136,7 +158,7 @@ class ChatModerationApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatModerationApiService.approveMessage(
+        val testActualResult = chatModerationService.approveMessage(
                 eventId = testSendMessageData.id!!,
                 approve = testInputRequest.approve
         ).get()
@@ -176,14 +198,14 @@ class ChatModerationApiServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = usersApiService.createUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
 
-        val testChatRoomData = TestData.chatRooms(appId).first()
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
                 // Moderation MUST BE SET to "pre"
                 .copy(moderation = "pre")
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -194,21 +216,24 @@ class ChatModerationApiServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatApiService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
 
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
-                roomid = testCreatedChatRoomData.id!!,
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatApiService.joinRoom(request = testJoinRoomInputRequest).get()
+        chatService.joinRoom(
+                chatRoomId = testInputChatRoomId,
+                request = testJoinRoomInputRequest
+        ).get()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should send a message to the created chat room
-        val testSendMessageData = chatApiService.executeChatCommand(
+        val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
         ).get().data?.speech!!
@@ -227,7 +252,7 @@ class ChatModerationApiServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatModerationApiService.listMessagesNeedingModeration().get()
+        val testActualResult = chatModerationService.listMessagesNeedingModeration().get()
 
         // THEN
         println(
@@ -241,7 +266,14 @@ class ChatModerationApiServiceTest {
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.code == testExpectedResult.code }
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult.data?.events!!.contains(testSendMessageData) }
+        assertTrue {
+            testActualResult.data?.events!!.any { ev ->
+                ev.id == testSendMessageData.id
+                        && ev.userid == testSendMessageData.userid
+                        && ev.body == testSendMessageData.body
+                        && ev.eventtype == testSendMessageData.eventtype
+            }
+        }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)
@@ -298,14 +330,18 @@ class ChatModerationApiServiceTest {
                                 ownerid = null,
                                 name = "Test Chat Room 1",
                                 description = "This is a test chat room 1.",
-                                iframeurl = null,
-                                slug = "test-room-1",
+                                customtype = null,
+                                customid = "test-room-1",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
                                 enableactions = true,
                                 enableenterandexit = true,
                                 open = true,
                                 inroom = 1,
-                                added = System.currentTimeMillis(),
-                                whenmodified = System.currentTimeMillis(),
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableprofanityfilter = true,
@@ -318,14 +354,18 @@ class ChatModerationApiServiceTest {
                                 ownerid = null,
                                 name = "Test Chat Room 2",
                                 description = "This is a test chat room 2.",
-                                iframeurl = null,
-                                slug = "test-room-2",
+                                customtype = null,
+                                customid = "test-room-2",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
                                 enableactions = false,
                                 enableenterandexit = false,
                                 open = false,
                                 inroom = 1,
-                                added = System.currentTimeMillis(),
-                                whenmodified = System.currentTimeMillis(),
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableprofanityfilter = false,
@@ -338,14 +378,18 @@ class ChatModerationApiServiceTest {
                                 ownerid = null,
                                 name = "Test Chat Room 3",
                                 description = "This is a test chat room 3.",
-                                iframeurl = null,
-                                slug = "test-room-3",
+                                customtype = null,
+                                customid = "test-room-3",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
                                 enableactions = true,
                                 enableenterandexit = true,
                                 open = false,
                                 inroom = 1,
-                                added = System.currentTimeMillis(),
-                                whenmodified = System.currentTimeMillis(),
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableprofanityfilter = false,
@@ -358,14 +402,18 @@ class ChatModerationApiServiceTest {
                                 ownerid = null,
                                 name = "Test Chat Room 4",
                                 description = "This is a test chat room 4.",
-                                iframeurl = null,
-                                slug = "test-room-4",
+                                customtype = null,
+                                customid = "test-room-4",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
                                 enableactions = false,
                                 enableenterandexit = false,
                                 open = true,
                                 inroom = 1,
-                                added = System.currentTimeMillis(),
-                                whenmodified = System.currentTimeMillis(),
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableprofanityfilter = true,

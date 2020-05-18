@@ -3,7 +3,6 @@ package com.sportstalk.api.polling
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
-import com.sportstalk.api.ChatApiService
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
@@ -15,8 +14,7 @@ import java.util.concurrent.TimeUnit
  * when reaching [Lifecycle.Event.ON_STOP] state.
  */
 class GetUpdatesObserver(
-        private val chatApiService: ChatApiService,
-        private val getUpdateAction: (() -> Unit),
+        private val getUpdateAction: Runnable,
         /* Polling Frequency */
         private val frequency: Long = 500L
 ) : LifecycleObserver {
@@ -28,7 +26,7 @@ class GetUpdatesObserver(
     fun onSubscribeStart() {
         scheduler = Executors.newScheduledThreadPool(1)
         schedule = scheduler.scheduleAtFixedRate(
-                { getUpdateAction() },
+                getUpdateAction,
                 0L,
                 frequency,
                 TimeUnit.MILLISECONDS
