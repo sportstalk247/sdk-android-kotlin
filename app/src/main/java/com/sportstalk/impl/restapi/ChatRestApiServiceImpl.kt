@@ -52,10 +52,10 @@ constructor(
                     chatRoomId = chatRoomId
             )
 
-    override fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
+    override fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
             service.updateRoom(
                     appId = appId,
-                    chatRoomId = request.roomid,
+                    chatRoomId = chatRoomId,
                     request = request
             )
 

@@ -58,8 +58,11 @@ constructor(
     override fun deleteRoom(chatRoomId: String): CompletableFuture<ApiResponse<DeleteChatRoomResponse>> =
             chatService.deleteRoom(chatRoomId = chatRoomId)
 
-    override fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
-            chatService.updateRoom(request = request)
+    override fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>> =
+            chatService.updateRoom(
+                    chatRoomId = chatRoomId,
+                    request = request
+            )
 
     override fun listRooms(limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListRoomsResponse>> =
             chatService.listRooms(

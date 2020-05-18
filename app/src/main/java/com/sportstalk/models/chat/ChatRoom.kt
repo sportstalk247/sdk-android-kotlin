@@ -15,8 +15,6 @@ data class ChatRoom(
         val name: String? = null,
         val description: String? = null,
 
-        val iframeurl: String? = null,
-
         val customtype: String? = null,
         val customid: String? = null,
         val custompayload: String? = null,
@@ -24,14 +22,12 @@ data class ChatRoom(
         val customfield1: String? = null,
         val customfield2: String? = null,
 
-        val slug: String? = null,
-
         val enableactions: Boolean? = null,
         val enableenterandexit: Boolean? = null,
         val open: Boolean? = null,
         val inroom: Long? = null,
-        val added: Long? = null,
-        val whenmodified: Long? = null,
+        val added: String? = null, /* ISODateTime Format */
+        val whenmodified: String? = null, /* ISODateTime Format */
         /** [ModerationType] */
         val moderation: String? = null /* "pre"/"post" */,
         val maxreports: Long? = null,

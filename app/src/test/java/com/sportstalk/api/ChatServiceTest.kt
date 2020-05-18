@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import com.sportstalk.DateUtils
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.service.UserService
@@ -98,7 +99,7 @@ class ChatServiceTest {
         val testExpectedData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
                 name = testExpectedData.name!!,
-                slug = testExpectedData.slug,
+                customid = testExpectedData.customid,
                 description = testExpectedData.description,
                 moderation = testExpectedData.moderation,
                 enableactions = testExpectedData.enableactions,
@@ -117,7 +118,7 @@ class ChatServiceTest {
                         kind = "chat.room",
                         appid = testExpectedData.appid,
                         name = testExpectedData.name,
-                        slug = testExpectedData.slug,
+                        customid = testExpectedData.customid,
                         description = testExpectedData.description,
                         moderation = testExpectedData.moderation,
                         enableactions = testExpectedData.enableactions,
@@ -150,7 +151,7 @@ class ChatServiceTest {
         assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue { testActualResult.data?.appid == testExpectedResult.data?.appid }
         assertTrue { testActualResult.data?.name == testExpectedResult.data?.name }
-        assertTrue { testActualResult.data?.slug == testExpectedResult.data?.slug }
+        assertTrue { testActualResult.data?.customid == testExpectedResult.data?.customid }
         assertTrue { testActualResult.data?.description == testExpectedResult.data?.description }
         assertTrue { testActualResult.data?.moderation == testExpectedResult.data?.moderation }
         assertTrue { testActualResult.data?.enableactions == testExpectedResult.data?.enableactions }
@@ -170,7 +171,7 @@ class ChatServiceTest {
         val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
                 name = testData.name!!,
-                slug = testData.slug,
+                customid = testData.customid,
                 description = testData.description,
                 moderation = testData.moderation,
                 enableactions = testData.enableactions,
@@ -265,7 +266,7 @@ class ChatServiceTest {
         val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
                 name = testData.name!!,
-                slug = testData.slug,
+                customid = testData.customid,
                 description = testData.description,
                 moderation = testData.moderation,
                 enableactions = testData.enableactions,
@@ -318,7 +319,7 @@ class ChatServiceTest {
         val testCreatedChatRoomData = chatService.createRoom(
                 request = CreateChatRoomRequest(
                         name = testData.name!!,
-                        slug = testData.slug,
+                        customid = testData.customid,
                         description = testData.description,
                         moderation = testData.moderation,
                         enableactions = testData.enableactions,
@@ -330,14 +331,14 @@ class ChatServiceTest {
                 )
         ).get().data!!
 
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputRequest = UpdateChatRoomRequest(
-                roomid = testCreatedChatRoomData.id!!,
                 name = "${testData.name!!}-updated",
-                slug = "${testData.slug}-updated(${System.currentTimeMillis()})",
+                customid = "${testData.customid}-updated(${System.currentTimeMillis()})",
                 description = "${testData.description}-updated",
                 enableactions = !testData.enableactions!!,
                 enableenterandexit = !testData.enableenterandexit!!,
-                throttle = 1_000L
+                maxreports = 30L
         )
 
         val testExpectedResult = ApiResponse<ChatRoom>(
@@ -345,17 +346,18 @@ class ChatServiceTest {
                 message = "Success",
                 code = 200,
                 data = testCreatedChatRoomData.copy(
-                        id = testInputRequest.roomid,
                         name = testInputRequest.name,
-                        slug = testInputRequest.slug,
+                        customid = testInputRequest.customid,
                         description = testInputRequest.description,
                         enableactions = testInputRequest.enableactions,
-                        enableenterandexit = testInputRequest.enableenterandexit
+                        enableenterandexit = testInputRequest.enableenterandexit,
+                        maxreports = testInputRequest.maxreports
                 )
         )
 
         // WHEN
         val testActualResult = chatService.updateRoom(
+                chatRoomId = testInputChatRoomId,
                 request = testInputRequest
         ).get()
 
@@ -374,10 +376,11 @@ class ChatServiceTest {
         assertTrue { testActualResult.data != null }
         assertTrue { testActualResult.data?.id == testExpectedResult.data?.id }
         assertTrue { testActualResult.data?.name == testExpectedResult.data?.name }
-        assertTrue { testActualResult.data?.slug == testExpectedResult.data?.slug }
+        assertTrue { testActualResult.data?.customid == testExpectedResult.data?.customid }
         assertTrue { testActualResult.data?.description == testExpectedResult.data?.description }
         assertTrue { testActualResult.data?.enableactions == testExpectedResult.data?.enableactions }
         assertTrue { testActualResult.data?.enableenterandexit == testExpectedResult.data?.enableenterandexit }
+        assertTrue { testActualResult.data?.maxreports == testExpectedResult.data?.maxreports }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testActualResult.data?.id)
@@ -389,7 +392,7 @@ class ChatServiceTest {
         val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
                 name = testData.name!!,
-                slug = testData.slug,
+                customid = testData.customid,
                 description = testData.description,
                 moderation = testData.moderation,
                 enableactions = testData.enableactions,
@@ -453,7 +456,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -515,7 +518,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -636,7 +639,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -720,7 +723,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -792,7 +795,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -882,7 +885,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -977,7 +980,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -1074,7 +1077,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -1194,7 +1197,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -1274,7 +1277,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -1366,7 +1369,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -1462,7 +1465,7 @@ class ChatServiceTest {
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
-                slug = testChatRoomData.slug,
+                customid = testChatRoomData.customid,
                 description = testChatRoomData.description,
                 moderation = testChatRoomData.moderation,
                 enableactions = testChatRoomData.enableactions,
@@ -1605,14 +1608,18 @@ class ChatServiceTest {
                                 ownerid = null,
                                 name = "Test Chat Room 1",
                                 description = "This is a test chat room 1.",
-                                iframeurl = null,
-                                slug = "test-room-1",
+                                customtype = null,
+                                customid = "test-room-1",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
                                 enableactions = true,
                                 enableenterandexit = true,
                                 open = true,
                                 inroom = 1,
-                                added = System.currentTimeMillis(),
-                                whenmodified = System.currentTimeMillis(),
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableprofanityfilter = true,
@@ -1625,14 +1632,18 @@ class ChatServiceTest {
                                 ownerid = null,
                                 name = "Test Chat Room 2",
                                 description = "This is a test chat room 2.",
-                                iframeurl = null,
-                                slug = "test-room-2",
+                                customtype = null,
+                                customid = "test-room-2",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
                                 enableactions = false,
                                 enableenterandexit = false,
                                 open = false,
                                 inroom = 1,
-                                added = System.currentTimeMillis(),
-                                whenmodified = System.currentTimeMillis(),
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableprofanityfilter = false,
@@ -1645,14 +1656,18 @@ class ChatServiceTest {
                                 ownerid = null,
                                 name = "Test Chat Room 3",
                                 description = "This is a test chat room 3.",
-                                iframeurl = null,
-                                slug = "test-room-3",
+                                customtype = null,
+                                customid = "test-room-3",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
                                 enableactions = true,
                                 enableenterandexit = true,
                                 open = false,
                                 inroom = 1,
-                                added = System.currentTimeMillis(),
-                                whenmodified = System.currentTimeMillis(),
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableprofanityfilter = false,
@@ -1665,14 +1680,18 @@ class ChatServiceTest {
                                 ownerid = null,
                                 name = "Test Chat Room 4",
                                 description = "This is a test chat room 4.",
-                                iframeurl = null,
-                                slug = "test-room-4",
+                                customtype = null,
+                                customid = "test-room-4",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
                                 enableactions = false,
                                 enableenterandexit = false,
                                 open = true,
                                 inroom = 1,
-                                added = System.currentTimeMillis(),
-                                whenmodified = System.currentTimeMillis(),
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableprofanityfilter = true,

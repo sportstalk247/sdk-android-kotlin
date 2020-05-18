@@ -54,7 +54,7 @@ interface ChatService {
      * - https://apiref.sportstalk247.com/?version=latest#96ef3138-4820-459b-b400-e9f25d5ddb00
      * - Updates an existing room
      */
-    fun updateRoom(request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
+    fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/
