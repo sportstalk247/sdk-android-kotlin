@@ -196,9 +196,14 @@ lifecycleScope.launch {
             handle = testUser.handle!!  
          )  
       ).await()  
-   }  
+   }
+	
+	// Once joined, the developer may immediately access the join response's `eventscursor.events` field, which contains an initial list of messages of the chat room
+	val initialMessages: List<ChatEvent> = joinResponse.eventscursor?.events ?: listOf()
+	// ex. display in UI the initial chat messages/events
+
      
-   // Now that the test user has joined the room, setup reactive subscription to event updates  
+   // Now that the test user has joined the room, setup reactive subscription to event updates
    // Below returns a Flow<List<ChatEvent>>  
    chatClient.allEventUpdates(    
      chatRoomId = testChatRoom.id!!,    
@@ -250,10 +255,9 @@ lifecycleScope.launch {
          .await()  
       )  
    }  
-   // Resolve `response` (ex. Update UI)  
-}  
-  
-  
+   // Resolve `executeChatResponse` (ex. Display prompt OR Update UI)  
+}
+
 ```  
 ### Set Message/Event as Deleted
 ```kotlin
