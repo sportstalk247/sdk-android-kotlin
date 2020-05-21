@@ -1,4 +1,3 @@
-
   
 # sdk-android-kotlin  
   
@@ -122,13 +121,13 @@ Single.fromFuture(
 		pictureurl = "<Image URL>", // OPTIONAL
 		profileurl = "<Image URL>" // OPTIONAL 
 		)
-		// CompletableFuture -> Await Deferred  
-		.await()  
 	), 
 	// Indicate which Rx Scheduler will the CompletableFuture be executed(use IO(non-UI) scheduler)
 	Schedulers.IO
 )
-.subscribe()
+.subscribeOn(Schedulers.IO)
+.observeOn(AndroidSchedulers.mainThread())
+.subscribe { response -> /* Handle response from here... */ }
 // Although Rx Single is already disposes itself, it is still a good practice to explicitly manage this disposable
 .addTo(rxDisposeBag)
 ```
