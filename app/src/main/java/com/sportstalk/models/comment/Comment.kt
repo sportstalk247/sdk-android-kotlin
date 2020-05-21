@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Comment(
         val kind: String? = null, // "comment.comment"
+        val id: String? = null,
         val appid: String? = null,
         val conversationid: String? = null,
         val commenttype: String? = null, // [CommentType]
