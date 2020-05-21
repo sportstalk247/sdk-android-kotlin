@@ -148,16 +148,20 @@ interface ChatService {
             cursor: String? = null
     ): CompletableFuture<ApiResponse<ListMessagesByUser>>
 
-//    TODO:: `Removes a message` API is broken at the moment
-//    /**
-//     * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}
-//     * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
-//     * - Removes a message from a room
-//     */
-//    fun removeMessage(
-//            chatRoomId: String,
-//            eventId: String
-//    ): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>>
+    // TODO:: `Removes a message` API is broken at the moment
+    /**
+     * Flag Message Event As Deleted
+     * [PUT] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/setdeleted?userid=&deleted=true&permanentifnoreplies
+     * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
+     * - Removes a message from a room
+     */
+    fun setMessageAsDeleted(
+            chatRoomId: String,
+            eventId: String,
+            userid: String,
+            deleted: Boolean,
+            permanentifnoreplies: Boolean? = null
+    ): CompletableFuture<ApiResponse<ChatEvent>>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/report

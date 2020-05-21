@@ -120,6 +120,15 @@ constructor(
                     cursor = cursor
             )
 
+    override fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): CompletableFuture<ApiResponse<ChatEvent>> =
+            chatService.setMessageAsDeleted(
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    deleted = deleted,
+                    userid = userid,
+                    permanentifnoreplies = permanentifnoreplies
+            )
+
     override fun reportMessage(chatRoomId: String, eventId: String, request: ReportMessageRequest): CompletableFuture<ApiResponse<ChatEvent>> =
             chatService.reportMessage(
                     chatRoomId = chatRoomId,
@@ -140,6 +149,10 @@ constructor(
                     approve = approve
             )
 
-    override fun listMessagesNeedingModeration(): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>> =
-            moderationService.listMessagesNeedingModeration()
+    override fun listMessagesNeedingModeration(roomId: String?, limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>> =
+            moderationService.listMessagesNeedingModeration(
+                    roomId = roomId,
+                    limit = limit,
+                    cursor = cursor
+            )
 }

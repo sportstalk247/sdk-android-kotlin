@@ -103,6 +103,16 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null
     ): CompletableFuture<ApiResponse<ListMessagesByUser>>
 
+    @PUT("{appId}/chat/rooms/{chatroomid}/events/{eventid}/setdeleted")
+    fun setMessageAsDeleted(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("eventid") eventId: String,
+            @Query("userid") userid: String,
+            @Query("deleted") deleted: Boolean,
+            @Query("permanentifnoreplies") permanentifnoreplies: Boolean? = null
+    ): CompletableFuture<ApiResponse<ChatEvent>>
+
     @POST("{appId}/chat/rooms/{chatroomid}/events/{eventid}/report")
     fun reportMessage(
             @Path("appId") appId: String,

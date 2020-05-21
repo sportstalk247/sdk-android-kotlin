@@ -136,6 +136,22 @@ constructor(
                     cursor = cursor
             )
 
+    override fun setMessageAsDeleted(
+            chatRoomId: String,
+            eventId: String,
+            userid: String,
+            deleted: Boolean,
+            permanentifnoreplies: Boolean?
+    ): CompletableFuture<ApiResponse<ChatEvent>> =
+            service.setMessageAsDeleted(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    userid = userid,
+                    deleted = deleted,
+                    permanentifnoreplies = permanentifnoreplies
+            )
+
     override fun reportMessage(
             chatRoomId: String,
             eventId: String,
