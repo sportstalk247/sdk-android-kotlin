@@ -77,7 +77,7 @@ class MyFragment: Fragment() {
 ```  
   
   
-## How to bridge Reactive Frameworks 
+## How to Integrate Reactive Frameworks 
 ### Using Coroutine Flow  
 Below are the following dependencies in order to make the SDK compatible to Coroutines:  
 ```gradle  
@@ -169,11 +169,8 @@ lifecycleScope.launch {
 ```
  
 ## How to use Chat Client  
-
-```kotlin  
-import com.sportstalk.api.polling.coroutines.allEventUpdates  
-  
-// Under Fragment  
+```kotlin
+// Under Fragment class
 val chatClient = SportsTalk247.ChatClient(  
    config = ClientConfig(  
       appId = "c84cb9c852932a6b0411e75e",  
@@ -181,7 +178,10 @@ val chatClient = SportsTalk247.ChatClient(
       endpoint = "http://api.custom.endpoint/v1/"  
    )  
 )  
-  
+```
+### Join Chat Room
+```kotlin
+// Under Fragment class
 lifecycleScope.launch {  
    // Assuming that there is already an existing User instance  
    val testUser = User(...)  
@@ -201,8 +201,14 @@ lifecycleScope.launch {
 	// Once joined, the developer may immediately access the join response's `eventscursor.events` field, which contains an initial list of messages of the chat room
 	val initialMessages: List<ChatEvent> = joinResponse.eventscursor?.events ?: listOf()
 	// ex. display in UI the initial chat messages/events
+}
+```
+### Listen to Event Updates
+```kotlin
+import com.sportstalk.api.polling.coroutines.allEventUpdates  
 
-     
+// Under Fragment class
+lifecycleScope.launch {
    // Now that the test user has joined the room, setup reactive subscription to event updates
    // Below returns a Flow<List<ChatEvent>>  
    chatClient.allEventUpdates(    
@@ -211,7 +217,7 @@ lifecycleScope.launch {
      frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,  
      /*    
      * The following are placeholder/convenience functions should the developers want to implement it   
-     * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, it is done via .doOnNext { ... })  
+     * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }. In coroutine flow, these are invoked via .onEach { ... })  
      */  
      onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL  
      onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL  
@@ -243,7 +249,9 @@ lifecycleScope.launch {
      
    // At some point in time, the developer might want to explicitly stop listening to event updates  
    chatClient.stopEventUpdates(forRoomId = testChatRoom.id!!)  
-     
+```
+### Send a Chat Message
+```kotlin
    // To Send a Chat Message  
    val executeChatResponse = withContext(Dispatchers.IO) {  
       chatApi.executeChatCommand(  
@@ -257,7 +265,6 @@ lifecycleScope.launch {
    }  
    // Resolve `executeChatResponse` (ex. Display prompt OR Update UI)  
 }
-
 ```  
 ### Set Message/Event as Deleted
 ```kotlin
@@ -280,6 +287,153 @@ lifecycleScope.launch {
 	}
 	
 	// Resolve `removeMessageResponse`, ex. update UI or display a prompt
+}
+```
+
+## How to use Comment Client
+```kotlin
+// Under Fragment class
+val commentClient = SportsTalk247.CommentClient(  
+   config = ClientConfig(  
+      appId = "c84cb9c852932a6b0411e75e",  
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA",  
+      endpoint = "http://api.custom.endpoint/v1/"  
+   )  
+)  
+```
+### Create a Conversation
+```kotlin
+// Under Fragment class
+// Execute within coroutine scope
+lifecycleScope.launch {
+	val createConversationResponse = withContext(Dispatchers.IO) {
+		commentClient.createOrUpdateConversation(
+			request = CreateOrUpdateConversationRequest(
+				conversationid = "api-comment-demo1",
+				property = "sportstalk247.com/apidemo",
+				moderation = "post",
+				maxreports = 0,
+				title = "Sample Conversation",
+				maxcommentlen = 512,
+				open = true,
+				customid = "/articles/2020-03-01/article1/something-very-important-happened",
+				customfield1 = "/sample/userdefined1/emojis/😂🤣❤😍😒",
+				customfield2 = "/sample/userdefined2/intl/characters/äöüÄÖÜß",
+				customtags = listOf("taga", "tagb"),
+				custompayload = "{ num : 0 }"
+			)
+			// CompletableFuture -> Await Deferred
+			.await()
+		)
+	}
+	
+	// Resolve `createConversationResponse` from HERE(ex. Display Prompt, update UI)
+}
+```
+### Create/Publish a comment against a Conversation
+```kotlin
+// Under Fragment class
+// Execute within coroutine scope
+lifecycleScope.launch {
+	// Assuming that there is already a created conversation
+	val testConversation = Conversation(conversationid = "1234567890",...)
+	
+	val publishCommentResponse = withContext(Dispatchers.IO) {
+		commentClient.publishComment(
+			conversationid = testConversation.conversationid!!,
+			request = PublishCommentRequest(
+				userid = "<USER-ID>",
+				body = "This is a comment",
+				added = "2020-05-02T08:51:53.8140055Z"
+			)
+		)
+		// CompletableFuture -> Await Deferred
+		.await()
+	}
+	
+	// Resolve `publishCommentResponse` from HERE(ex. Display Prompt, update UI)
+}
+```
+### Reply to a comment
+```kotlin
+// Under Fragment class
+// Execute within coroutine scope
+lifecycleScope.launch {
+	// Assuming that there is already a created conversation
+	val testConversation = Conversation(conversationid = "1234567890",...)
+	// Assuming that there is already atleast 1 comment under the conversation
+	val testComment = Comment(id = "0987654321",...)
+	
+	val replyToCommentResponse = withContext(Dispatchers.IO) {
+		commentClient.replyToComment(
+			conversationid = testConversation.conversationid!!,
+			replyto = testComment.id!!,
+			request = PublishCommentRequest(
+				userid = "<USER-ID>",
+				body = "This is a reply...",
+				added = "2020-05-21T07:14:19.2424561Z"
+			)
+		)
+		// CompletableFuture -> Await Deferred
+		.await()
+	}
+	
+	// Resolve `replyToCommentResponse` from HERE(ex. Display Prompt, update UI)
+}
+```
+### Flag comment logically deleted / Permanently Delete Comment
+```kotlin
+// Under Fragment class
+// Execute within coroutine scope
+lifecycleScope.launch {
+	// Assuming that there is already a created conversation
+	val testConversation = Conversation(conversationid = "1234567890",...)
+	// Assuming that there is already atleast 1 comment under the conversation
+	val testComment = Comment(id = "0987654321",...)
+	
+	val setCommentDeletedResponse = withContext(Dispatchers.IO) {
+		commentClient.permanentlyDeleteComment(
+			conversationid = testConversation.conversationid!!,
+			commentid = testComment.id!!
+		)
+		// CompletableFuture -> Await Deferred
+		.await()
+	}
+	
+	// Resolve `setCommentDeletedResponse` from HERE(ex. Display Prompt, update UI)
+}
+```
+
+## Handling SDK Exception
+If any client operations receive an error response, whether it be Network, Server, or Validation Error, these functions will throw an instance of `SportsTalkException`.
+```kotlin
+data class SportsTalkException<T>(
+	val kind: String? = null, // "api.result"
+	val message: String? = null, // ex. "The specified comment was not found."
+	val errors: List<String> = listOf(),
+	val code: Int? = null // ex. 404,
+	val data: T? = null // May contain additional error info
+)
+
+// Under Fragment class
+// Execute within coroutine scope
+lifecycleScope.launch {
+	val testComment = Comment(id = "0987654321",...)
+	
+	val setCommentDeletedResponse = try {
+		withContext(Dispatchers.IO) {
+			// These should throw Error 404 - "The specified conversation was not found and was not deleted.".
+			commentClient.permanentlyDeleteComment(
+				conversationid = "Non-existent-Conversation-ID",
+				commentid = testComment.id!!
+			)
+			// CompletableFuture -> Await Deferred
+			.await()
+		}
+	} catch(err: SportsTalkException) {
+		// Resolve ERROR from HERE.
+		return
+	}
 }
 ```
 
