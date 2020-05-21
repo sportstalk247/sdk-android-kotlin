@@ -4,10 +4,7 @@ import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.moderation.ApproveMessageRequest
 import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.Path
+import retrofit2.http.*
 import java.util.concurrent.CompletableFuture
 
 interface ChatModerationRetrofitService {
@@ -21,7 +18,10 @@ interface ChatModerationRetrofitService {
 
     @GET("{appId}/chat/moderation/queues/events")
     fun listMessagesNeedingModeration(
-            @Path("appId") appId: String
+            @Path("appId") appId: String,
+            @Query("roomId") roomId: String? = null,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null
     ): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>>
 
 }

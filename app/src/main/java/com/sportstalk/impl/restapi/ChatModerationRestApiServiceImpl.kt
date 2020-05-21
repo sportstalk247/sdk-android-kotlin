@@ -30,8 +30,11 @@ constructor(
                     request = ApproveMessageRequest(approve = approve)
             )
 
-    override fun listMessagesNeedingModeration(): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>> =
+    override fun listMessagesNeedingModeration(roomId: String?, limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>> =
             service.listMessagesNeedingModeration(
-                    appId = appId
+                    appId = appId,
+                    roomId = roomId,
+                    limit = limit,
+                    cursor = cursor
             )
 }

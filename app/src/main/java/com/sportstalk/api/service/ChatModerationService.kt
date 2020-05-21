@@ -19,6 +19,10 @@ interface ChatModerationService {
      * - https://apiref.sportstalk247.com/?version=latest#bcdbda1b-e495-46c9-8fe9-c5dc6a4c1756
      * - List all the messages in the moderation queue
      */
-    fun listMessagesNeedingModeration(): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>>
+    fun listMessagesNeedingModeration(
+            roomId: String? = null /* Filter to which specific roomId to fetch event(s) from */,
+            limit: Int? = null /* Defaults to 200 on backend API server */,
+            cursor: String? = null
+    ): CompletableFuture<ApiResponse<ListMessagesNeedingModerationResponse>>
 
 }
