@@ -19,21 +19,21 @@ constructor(
 
     private val userService = ServiceFactory.RestApi.User.get(config)
 
-    override fun createOrUpdateUser(request: CreateUpdateUserRequest): CompletableFuture<ApiResponse<User>> =
+    override fun createOrUpdateUser(request: CreateUpdateUserRequest): CompletableFuture<User> =
             userService.createOrUpdateUser(request)
 
-    override fun deleteUser(userId: String): CompletableFuture<ApiResponse<DeleteUserResponse>> =
+    override fun deleteUser(userId: String): CompletableFuture<DeleteUserResponse> =
             userService.deleteUser(userId)
 
-    override fun getUserDetails(userId: String): CompletableFuture<ApiResponse<User>> =
+    override fun getUserDetails(userId: String): CompletableFuture<User> =
             userService.getUserDetails(userId)
 
-    override fun listUsers(limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListUsersResponse>> =
+    override fun listUsers(limit: Int?, cursor: String?): CompletableFuture<ListUsersResponse> =
             userService.listUsers(limit)
 
-    override fun setBanStatus(userId: String, banned: Boolean): CompletableFuture<ApiResponse<User>> =
+    override fun setBanStatus(userId: String, banned: Boolean): CompletableFuture<User> =
             userService.setBanStatus(userId, banned)
 
-    override fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): CompletableFuture<ApiResponse<ListUsersResponse>> =
+    override fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): CompletableFuture<ListUsersResponse> =
             userService.searchUsers(handle, name, userid, limit, cursor)
 }

@@ -6,20 +6,26 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.UserService
-import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
+import com.sportstalk.models.Kind
+import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse
 import com.sportstalk.models.users.ListUsersResponse
 import com.sportstalk.models.users.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
-import org.junit.After
-import org.junit.Before
-import org.junit.FixMethodOrder
-import org.junit.Test
+import org.junit.*
+import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
@@ -28,6 +34,8 @@ import org.robolectric.annotation.Config
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
+
+@Suppress("MainFunctionReturnUnit")
 @UnstableDefault
 @ImplicitReflectionSerializer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -39,6 +47,11 @@ class UserServiceTest {
     private lateinit var config: ClientConfig
     private lateinit var userService: UserService
     private lateinit var json: Json
+
+    private val testDispatcher = TestCoroutineDispatcher()
+
+    @get:Rule
+    val thrown = ExpectedException.none()
 
     @Before
     fun setup() {
@@ -58,10 +71,14 @@ class UserServiceTest {
         )
         json = ServiceFactory.RestApi.json
         userService = ServiceFactory.RestApi.User.get(config)
+
+        Dispatchers.setMain(testDispatcher)
     }
 
     @After
     fun cleanUp() {
+        testDispatcher.cleanupTestCoroutines()
+        Dispatchers.resetMain()
     }
 
     /**
@@ -75,6 +92,48 @@ class UserServiceTest {
     }
 
     @Test
+    fun `0-ERROR-403) Request is not authorized with a token`() = runBlocking {
+        val userCaseUserService = ServiceFactory.RestApi.User.get(
+                config.copy(
+                        apiToken = "not-a-valid-auth-api-token"
+                )
+        )
+
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_${Random.nextInt(100, 999)}-1234",
+                displayname = "Test 1"
+        )
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userCaseUserService.createOrUpdateUser(request = testInputRequest)
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "Request is not authorized with a token." }
+            assertTrue { err.code == 403 }
+
+            throw err
+        }
+
+        return@runBlocking
+    }
+
+    @Test
     fun `1) Create or Update User`() {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
@@ -82,17 +141,12 @@ class UserServiceTest {
                 handle = "handle_test1_${Random.nextInt(100, 999)}",
                 displayname = "Test 1"
         )
-        val testExpectedResult = ApiResponse<User>(
-                kind = "api.result",
-                message = "Success",
-                code = 200,
-                data = User(
-                        kind = "app.user",
-                        userid = testInputRequest.userid,
-                        handle = testInputRequest.handle,
-                        handlelowercase = testInputRequest.handle!!.toLowerCase(),
-                        displayname = testInputRequest.displayname
-                )
+        val testExpectedResult = User(
+                kind = "app.user",
+                userid = testInputRequest.userid,
+                handle = testInputRequest.handle,
+                handlelowercase = testInputRequest.handle!!.toLowerCase(),
+                displayname = testInputRequest.displayname
         )
 
         // WHEN
@@ -102,23 +156,55 @@ class UserServiceTest {
         println(
                 "`Create or Update User`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(User.serializer()),
+                                User.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.message == testExpectedResult.message }
-        assertTrue { testActualResult.code == testExpectedResult.code }
-        assertTrue { testActualResult.data != null }
-        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle }
-        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase }
-        assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.handle == testExpectedResult.handle }
+        assertTrue { testActualResult.handlelowercase == testExpectedResult.handlelowercase }
+        assertTrue { testActualResult.displayname == testExpectedResult.displayname }
 
         // Perform Delete Test User
-        deleteTestUsers(testActualResult.data?.userid)
+        deleteTestUsers(testActualResult.userid)
+    }
+
+    @Test
+    fun `1-ERROR-400) Create or Update User`() = runBlocking {
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_${Random.nextInt(100, 999)}-1234",
+                displayname = "Test 1"
+        )
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userService.createOrUpdateUser(request = testInputRequest)
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-400 - Create or Update User`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The handle requested (\"${testInputRequest.handle!!}\") contains characters that are not allowed.  Use only [abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_]" }
+            assertTrue { err.code == 400 }
+
+            throw err
+        }
+
+        return@runBlocking
     }
 
     @Test
@@ -132,40 +218,65 @@ class UserServiceTest {
         // Should create a test user first
         val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
 
-        val testExpectedResult = ApiResponse<DeleteUserResponse>(
-                kind = "api.result",
-                message = "User deleted successfully.",
-                code = 200,
-                data = DeleteUserResponse(
-                        kind = "deleted.appuser",
-                        user = testCreatedUser.data
-                )
+        val testExpectedResult = DeleteUserResponse(
+                kind = "deleted.appuser",
+                user = testCreatedUser
         )
 
         // WHEN
         val testActualResult = userService.deleteUser(
-                userId = testCreatedUser.data?.userid ?: testInputRequest.userid
+                userId = testCreatedUser.userid!!
         ).get()
 
         // THEN
         println(
                 "`Delete User`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(DeleteUserResponse.serializer()),
+                                DeleteUserResponse.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.message == testExpectedResult.message }
-        assertTrue { testActualResult.code == testExpectedResult.code }
-        assertTrue { testActualResult.data != null }
-        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult.data?.user?.userid == testExpectedResult.data?.user?.userid }
-        assertTrue { testActualResult.data?.user?.handle == testExpectedResult.data?.user?.handle!! }
-        assertTrue { testActualResult.data?.user?.handlelowercase == testExpectedResult.data?.user?.handlelowercase!! }
-        assertTrue { testActualResult.data?.user?.displayname == testExpectedResult.data?.user?.displayname }
+        assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
+        assertTrue { testActualResult.user?.handle == testExpectedResult.user?.handle!! }
+        assertTrue { testActualResult.user?.handlelowercase == testExpectedResult.user?.handlelowercase!! }
+        assertTrue { testActualResult.user?.displayname == testExpectedResult.user?.displayname }
 
+    }
+
+    @Test
+    fun `2-ERROR-404) Delete User`() = runBlocking {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userService.deleteUser(
+                        userId = testInputUserId
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-404 - Delete User`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specifed user $testInputUserId does not exist." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
+
+        return@runBlocking
     }
 
     @Test
@@ -179,39 +290,64 @@ class UserServiceTest {
         // Should create a test user first
         val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
 
-        val testExpectedResult = ApiResponse<User>(
-                kind = "api.result",
-                message = "Success",
-                code = 200,
-                data = testCreatedUser.data
-        )
+        val testExpectedResult = testCreatedUser.copy()
 
         // WHEN
         val testActualResult = userService.getUserDetails(
-                userId = testCreatedUser.data?.userid!!
+                userId = testCreatedUser.userid!!
         ).get()
 
         // THEN
         println(
                 "`Get User Details`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(User.serializer()),
+                                User.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.message == testExpectedResult.message }
-        assertTrue { testActualResult.code == testExpectedResult.code }
-        assertTrue { testActualResult.data != null }
-        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
-        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
-        assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.handle == testExpectedResult.handle!! }
+        assertTrue { testActualResult.handlelowercase == testExpectedResult.handlelowercase!! }
+        assertTrue { testActualResult.displayname == testExpectedResult.displayname }
 
         // Perform Delete Test User
-        deleteTestUsers(testActualResult.data?.userid)
+        deleteTestUsers(testActualResult.userid)
+    }
+
+    @Test
+    fun `3-ERROR-404) Get User Details`() = runBlocking {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userService.getUserDetails(
+                        userId = testInputUserId
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-404 - Get User Details`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specified UserID was not found." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
+
+        return@runBlocking
     }
 
     @Test
@@ -228,17 +364,12 @@ class UserServiceTest {
                 displayname = "Test List Users 2"
         )
         // Should create a test user first
-        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get().data!!
-        val testCreatedUser2 = userService.createOrUpdateUser(request = testInputRequest2).get().data!!
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get()
+        val testCreatedUser2 = userService.createOrUpdateUser(request = testInputRequest2).get()
 
-        val testExpectedResult = ApiResponse<ListUsersResponse>(
-                kind = "api.result",
-                message = "Success",
-                code = 200,
-                data = ListUsersResponse(
-                        kind = "list.users",
-                        users = listOf(testCreatedUser1, testCreatedUser2)
-                )
+        val testExpectedResult = ListUsersResponse(
+                kind = "list.users",
+                users = listOf(testCreatedUser1, testCreatedUser2)
         )
 
         val testInputLimit = 10
@@ -257,33 +388,25 @@ class UserServiceTest {
         println(
                 "`List Users`() -> testActualResult1 = " +
                         json.stringify(
-                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                ListUsersResponse.serializer(),
                                 testActualResult1
                         )
         )
         println(
                 "`List Users`() -> testActualResult2 = " +
                         json.stringify(
-                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                ListUsersResponse.serializer(),
                                 testActualResult2
                         )
         )
 
         assertTrue { testActualResult1.kind == testExpectedResult.kind }
-        assertTrue { testActualResult1.message == testExpectedResult.message }
-        assertTrue { testActualResult1.code == testExpectedResult.code }
-        assertTrue { testActualResult1.data != null }
-        assertTrue { testActualResult1.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult1.data?.users?.isNotEmpty() == true }
-        assertTrue { testActualResult1.data?.users?.any { it.userid == testCreatedUser1.userid } == true }
+        assertTrue { testActualResult1.users.isNotEmpty() }
+        assertTrue { testActualResult1.users.any { it.userid == testCreatedUser1.userid } }
 
         assertTrue { testActualResult2.kind == testExpectedResult.kind }
-        assertTrue { testActualResult2.message == testExpectedResult.message }
-        assertTrue { testActualResult2.code == testExpectedResult.code }
-        assertTrue { testActualResult2.data != null }
-        assertTrue { testActualResult2.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult2.data?.users?.isNotEmpty() == true }
-        assertTrue { testActualResult2.data?.users?.any { it.userid == testCreatedUser2.userid } == true }
+        assertTrue { testActualResult2.users.isNotEmpty() }
+        assertTrue { testActualResult2.users.any { it.userid == testCreatedUser2.userid } }
 
         // Perform Delete Test User
         deleteTestUsers(testCreatedUser1.userid, testCreatedUser2.userid)
@@ -300,16 +423,11 @@ class UserServiceTest {
         // Should create a test user first
         val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
 
-        val testExpectedResult = ApiResponse<User>(
-                kind = "api.result",
-                /*message = "@handle_test1 was banned",*/
-                code = 200,
-                data = testCreatedUser.data
-        )
+        val testExpectedResult = testCreatedUser.copy()
 
         // WHEN
         val testActualResult = userService.setBanStatus(
-                userId = testCreatedUser.data?.userid!!,
+                userId = testCreatedUser.userid!!,
                 banned = true
         ).get()
 
@@ -317,26 +435,56 @@ class UserServiceTest {
         println(
                 "`Ban User`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(User.serializer()),
+                                User.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         // "@handle_test1 was banned"
-        assertTrue { testActualResult.message?.contains(testCreatedUser.data?.handle!!) == true }
-        assertTrue { testActualResult.message?.contains("was banned") == true }
-        assertTrue { testActualResult.code == testExpectedResult.code }
-        assertTrue { testActualResult.data != null }
-        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
-        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
-        assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
-        assertTrue { testActualResult.data?.banned == true }
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.handle == testExpectedResult.handle!! }
+        assertTrue { testActualResult.handlelowercase == testExpectedResult.handlelowercase!! }
+        assertTrue { testActualResult.displayname == testExpectedResult.displayname }
+        assertTrue { testActualResult.banned == true }
 
         // Perform Delete Test User
-        deleteTestUsers(testActualResult.data?.userid)
+        deleteTestUsers(testActualResult.userid)
+    }
+
+    @Test
+    fun `5-ERROR-404) Ban User`() = runBlocking {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userService.setBanStatus(
+                        userId = testInputUserId,
+                        banned = true
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-404 - Ban User`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specified user is not found." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
+
+        return@runBlocking
     }
 
     @Test
@@ -352,20 +500,15 @@ class UserServiceTest {
 
         // The test user should be BANNED first
         userService.setBanStatus(
-                userId = testCreatedUser.data?.userid!!,
+                userId = testCreatedUser.userid!!,
                 banned = true
         ).get()
 
-        val testExpectedResult = ApiResponse<User>(
-                kind = "api.result",
-                /*message = "@handle_test1 was banned",*/
-                code = 200,
-                data = testCreatedUser.data
-        )
+        val testExpectedResult = testCreatedUser.copy()
 
         // WHEN
         val testActualResult = userService.setBanStatus(
-                userId = testCreatedUser.data?.userid!!,
+                userId = testCreatedUser.userid!!,
                 banned = false
         ).get()
 
@@ -373,30 +516,60 @@ class UserServiceTest {
         println(
                 "`Restore User`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(User.serializer()),
+                                User.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         // "@handle_test1 was restored"
-        assertTrue { testActualResult.message?.contains(testCreatedUser.data?.handle!!) == true }
-        assertTrue { testActualResult.message?.contains("was restored") == true }
-        assertTrue { testActualResult.code == testExpectedResult.code }
-        assertTrue { testActualResult.data != null }
-        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.handle == testExpectedResult.data?.handle!! }
-        assertTrue { testActualResult.data?.handlelowercase == testExpectedResult.data?.handlelowercase!! }
-        assertTrue { testActualResult.data?.displayname == testExpectedResult.data?.displayname }
-        assertTrue { testActualResult.data?.banned == false }
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.handle == testExpectedResult.handle!! }
+        assertTrue { testActualResult.handlelowercase == testExpectedResult.handlelowercase!! }
+        assertTrue { testActualResult.displayname == testExpectedResult.displayname }
+        assertTrue { testActualResult.banned == false }
 
         // Perform Delete Test User
-        deleteTestUsers(testActualResult.data?.userid)
+        deleteTestUsers(testActualResult.userid)
     }
 
     @Test
-    fun `7) Search Users - By Handle`() {
+    fun `6-ERROR-404) Restore User`() = runBlocking {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userService.setBanStatus(
+                        userId = testInputUserId,
+                        banned = false
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-404 - Restore User`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specified user is not found." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
+
+        return@runBlocking
+    }
+
+    @Test
+    fun `7A) Search Users - By Handle`() {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -404,15 +577,11 @@ class UserServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get()
 
-        val testExpectedResult = ApiResponse<ListUsersResponse>(
-                kind = "api.result",
-                code = 200,
-                data = ListUsersResponse(
-                        kind = "list.users",
-                        users = listOf(testCreatedUser1)
-                )
+        val testExpectedResult = ListUsersResponse(
+                kind = "list.users",
+                users = listOf(testCreatedUser1)
         )
 
         val testInputLimit = 10
@@ -427,24 +596,21 @@ class UserServiceTest {
         println(
                 "`Search Users`() -> testActualResult1 = " +
                         json.stringify(
-                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                ListUsersResponse.serializer(),
                                 testActualResult1
                         )
         )
 
         assertTrue { testActualResult1.kind == testExpectedResult.kind }
-        assertTrue { testActualResult1.code == testExpectedResult.code }
-        assertTrue { testActualResult1.data != null }
-        assertTrue { testActualResult1.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult1.data?.users?.isNotEmpty() == true }
-        assertTrue { testActualResult1.data?.users?.any { it.handle == testCreatedUser1.handle } == true }
+        assertTrue { testActualResult1.users.isNotEmpty() }
+        assertTrue { testActualResult1.users.any { it.handle == testCreatedUser1.handle } }
 
         // Perform Delete Test User
         deleteTestUsers(testCreatedUser1.userid)
     }
 
     @Test
-    fun `8) Search Users - By Name`() {
+    fun `7B) Search Users - By Name`() {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -452,15 +618,11 @@ class UserServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get()
 
-        val testExpectedResult = ApiResponse<ListUsersResponse>(
-                kind = "api.result",
-                code = 200,
-                data = ListUsersResponse(
-                        kind = "list.users",
-                        users = listOf(testCreatedUser1)
-                )
+        val testExpectedResult = ListUsersResponse(
+                kind = "list.users",
+                users = listOf(testCreatedUser1)
         )
 
         val testInputLimit = 10
@@ -475,24 +637,21 @@ class UserServiceTest {
         println(
                 "`Search Users`() -> testActualResult1 = " +
                         json.stringify(
-                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                ListUsersResponse.serializer(),
                                 testActualResult1
                         )
         )
 
         assertTrue { testActualResult1.kind == testExpectedResult.kind }
-        assertTrue { testActualResult1.code == testExpectedResult.code }
-        assertTrue { testActualResult1.data != null }
-        assertTrue { testActualResult1.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult1.data?.users?.isNotEmpty() == true }
-        assertTrue { testActualResult1.data?.users?.any { it.displayname == testCreatedUser1.displayname } == true }
+        assertTrue { testActualResult1.users.isNotEmpty() }
+        assertTrue { testActualResult1.users.any { it.displayname == testCreatedUser1.displayname } }
 
         // Perform Delete Test User
         deleteTestUsers(testCreatedUser1.userid)
     }
 
     @Test
-    fun `9) Search Users - By UserId`() {
+    fun `7C) Search Users - By UserId`() {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -500,15 +659,11 @@ class UserServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get().data!!
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get()
 
-        val testExpectedResult = ApiResponse<ListUsersResponse>(
-                kind = "api.result",
-                code = 200,
-                data = ListUsersResponse(
-                        kind = "list.users",
-                        users = listOf(testCreatedUser1)
-                )
+        val testExpectedResult = ListUsersResponse(
+                kind = "list.users",
+                users = listOf(testCreatedUser1)
         )
 
         val testInputLimit = 10
@@ -523,20 +678,51 @@ class UserServiceTest {
         println(
                 "`Search Users`() -> testActualResult1 = " +
                         json.stringify(
-                                ApiResponse.serializer(ListUsersResponse.serializer()),
+                                ListUsersResponse.serializer(),
                                 testActualResult1
                         )
         )
 
         assertTrue { testActualResult1.kind == testExpectedResult.kind }
-        assertTrue { testActualResult1.code == testExpectedResult.code }
-        assertTrue { testActualResult1.data != null }
-        assertTrue { testActualResult1.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult1.data?.users?.isNotEmpty() == true }
-        assertTrue { testActualResult1.data?.users?.any { it.userid == testCreatedUser1.userid } == true }
+        assertTrue { testActualResult1.users.isNotEmpty() }
+        assertTrue { testActualResult1.users.any { it.userid == testCreatedUser1.userid } }
 
         // Perform Delete Test User
         deleteTestUsers(testCreatedUser1.userid)
+    }
+
+    @Test
+    fun `7-ERROR-400) Search Users`() = runBlocking {
+        // GIVEN
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userService.searchUsers(
+                        // No search criteria provided
+                        limit = 100
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-400 - Search Users`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "Search requires either a userid, handle or name parameter." }
+            assertTrue { err.code == 400 }
+
+            throw err
+        }
+
+        return@runBlocking
     }
 
 }

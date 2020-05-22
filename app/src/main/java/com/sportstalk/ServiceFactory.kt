@@ -91,6 +91,7 @@ object ServiceFactory {
                         // REST API Implementation
                         UserRestApiServiceImpl(
                                 appId = config.appId,
+                                json = json,
                                 mRetrofit = retrofit
                         ).also {
                             instances[config] = it
