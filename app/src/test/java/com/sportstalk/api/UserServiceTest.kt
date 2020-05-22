@@ -13,6 +13,13 @@ import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.DeleteUserResponse
 import com.sportstalk.models.users.ListUsersResponse
 import com.sportstalk.models.users.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
@@ -24,11 +31,11 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.util.concurrent.ExecutionException
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
 
+@Suppress("MainFunctionReturnUnit")
 @UnstableDefault
 @ImplicitReflectionSerializer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -40,6 +47,8 @@ class UserServiceTest {
     private lateinit var config: ClientConfig
     private lateinit var userService: UserService
     private lateinit var json: Json
+
+    private val testDispatcher = TestCoroutineDispatcher()
 
     @get:Rule
     val thrown = ExpectedException.none()
@@ -62,10 +71,14 @@ class UserServiceTest {
         )
         json = ServiceFactory.RestApi.json
         userService = ServiceFactory.RestApi.User.get(config)
+
+        Dispatchers.setMain(testDispatcher)
     }
 
     @After
     fun cleanUp() {
+        testDispatcher.cleanupTestCoroutines()
+        Dispatchers.resetMain()
     }
 
     /**
@@ -79,7 +92,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `0-ERROR-403) Request is not authorized with a token`() {
+    fun `0-ERROR-403) Request is not authorized with a token`() = runBlocking {
         val userCaseUserService = ServiceFactory.RestApi.User.get(
                 config.copy(
                         apiToken = "not-a-valid-auth-api-token"
@@ -98,9 +111,11 @@ class UserServiceTest {
 
         // WHEN
         try {
-            userCaseUserService.createOrUpdateUser(request = testInputRequest).get()
-        } catch (ex: ExecutionException) {
-            val err =  ex.cause as SportsTalkException
+            withContext(Dispatchers.IO) {
+                userCaseUserService.createOrUpdateUser(request = testInputRequest)
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
             println(
                     "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
                             json.stringify(
@@ -114,6 +129,8 @@ class UserServiceTest {
 
             throw err
         }
+
+        return@runBlocking
     }
 
     @Test
@@ -155,7 +172,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `1-ERROR-400) Create or Update User`() {
+    fun `1-ERROR-400) Create or Update User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -168,9 +185,11 @@ class UserServiceTest {
 
         // WHEN
         try {
-            userService.createOrUpdateUser(request = testInputRequest).get()
-        } catch (ex: ExecutionException) {
-            val err =  ex.cause as SportsTalkException
+            withContext(Dispatchers.IO) {
+                userService.createOrUpdateUser(request = testInputRequest)
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
             println(
                     "`ERROR-400 - Create or Update User`() -> testActualResult = \n" +
                             json.stringify(
@@ -184,6 +203,8 @@ class UserServiceTest {
 
             throw err
         }
+
+        return@runBlocking
     }
 
     @Test
@@ -225,7 +246,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `2-ERROR-404) Delete User`() {
+    fun `2-ERROR-404) Delete User`() = runBlocking {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -234,11 +255,13 @@ class UserServiceTest {
 
         // WHEN
         try {
-            userService.deleteUser(
-                    userId = testInputUserId
-            ).get()
-        } catch (ex: ExecutionException) {
-            val err =  ex.cause as SportsTalkException
+            withContext(Dispatchers.IO) {
+                userService.deleteUser(
+                        userId = testInputUserId
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Delete User`() -> testActualResult = \n" +
                             json.stringify(
@@ -252,6 +275,8 @@ class UserServiceTest {
 
             throw err
         }
+
+        return@runBlocking
     }
 
     @Test
@@ -292,7 +317,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `3-ERROR-404) Get User Details`() {
+    fun `3-ERROR-404) Get User Details`() = runBlocking {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -301,11 +326,13 @@ class UserServiceTest {
 
         // WHEN
         try {
-            userService.getUserDetails(
-                    userId = testInputUserId
-            ).get()
-        } catch (ex: ExecutionException) {
-            val err =  ex.cause as SportsTalkException
+            withContext(Dispatchers.IO) {
+                userService.getUserDetails(
+                        userId = testInputUserId
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Get User Details`() -> testActualResult = \n" +
                             json.stringify(
@@ -319,6 +346,8 @@ class UserServiceTest {
 
             throw err
         }
+
+        return@runBlocking
     }
 
     @Test
@@ -424,7 +453,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `5-ERROR-404) Ban User`() {
+    fun `5-ERROR-404) Ban User`() = runBlocking {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -433,12 +462,14 @@ class UserServiceTest {
 
         // WHEN
         try {
-            userService.setBanStatus(
-                    userId = testInputUserId,
-                    banned = true
-            ).get()
-        } catch (ex: ExecutionException) {
-            val err =  ex.cause as SportsTalkException
+            withContext(Dispatchers.IO) {
+                userService.setBanStatus(
+                        userId = testInputUserId,
+                        banned = true
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Ban User`() -> testActualResult = \n" +
                             json.stringify(
@@ -452,6 +483,8 @@ class UserServiceTest {
 
             throw err
         }
+
+        return@runBlocking
     }
 
     @Test
@@ -501,7 +534,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `6-ERROR-404) Restore User`() {
+    fun `6-ERROR-404) Restore User`() = runBlocking {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -510,12 +543,14 @@ class UserServiceTest {
 
         // WHEN
         try {
-            userService.setBanStatus(
-                    userId = testInputUserId,
-                    banned = false
-            ).get()
-        } catch (ex: ExecutionException) {
-            val err =  ex.cause as SportsTalkException
+            withContext(Dispatchers.IO) {
+                userService.setBanStatus(
+                        userId = testInputUserId,
+                        banned = false
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Restore User`() -> testActualResult = \n" +
                             json.stringify(
@@ -529,6 +564,8 @@ class UserServiceTest {
 
             throw err
         }
+
+        return@runBlocking
     }
 
     @Test
@@ -655,7 +692,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7-ERROR-400) Search Users`() {
+    fun `7-ERROR-400) Search Users`() = runBlocking {
         // GIVEN
 
         // EXPECT
@@ -663,12 +700,14 @@ class UserServiceTest {
 
         // WHEN
         try {
-            userService.searchUsers(
-                    // No search criteria provided
-                    limit = 100
-            ).get()
-        } catch (ex: ExecutionException) {
-            val err =  ex.cause as SportsTalkException
+            withContext(Dispatchers.IO) {
+                userService.searchUsers(
+                        // No search criteria provided
+                        limit = 100
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
             println(
                     "`ERROR-400 - Search Users`() -> testActualResult = \n" +
                             json.stringify(
@@ -682,6 +721,8 @@ class UserServiceTest {
 
             throw err
         }
+
+        return@runBlocking
     }
 
 }
