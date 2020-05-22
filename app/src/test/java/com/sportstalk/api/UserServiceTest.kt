@@ -532,7 +532,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7) Search Users - By Handle`() {
+    fun `7A) Search Users - By Handle`() {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -573,7 +573,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `8) Search Users - By Name`() {
+    fun `7B) Search Users - By Name`() {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -614,7 +614,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `9) Search Users - By UserId`() {
+    fun `7C) Search Users - By UserId`() {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -652,6 +652,36 @@ class UserServiceTest {
 
         // Perform Delete Test User
         deleteTestUsers(testCreatedUser1.userid)
+    }
+
+    @Test
+    fun `7-ERROR-400) Search Users`() {
+        // GIVEN
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            userService.searchUsers(
+                    // No search criteria provided
+                    limit = 100
+            ).get()
+        } catch (ex: ExecutionException) {
+            val err =  ex.cause as SportsTalkException
+            println(
+                    "`ERROR-400 - Search Users`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "Search requires either a userid, handle or name parameter." }
+            assertTrue { err.code == 400 }
+
+            throw err
+        }
     }
 
 }
