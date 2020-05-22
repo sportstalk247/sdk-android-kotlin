@@ -58,15 +58,15 @@ class MyFragment: Fragment() {
 	   val response = withContext(Dispatchers.IO) {  
 	      userClient.createOrUpdateUser(  
 	         request = CreateUpdateUserRequest(  
-	            userid = "<USERID>",  
-	            handle = "sample_handle_123",  
-	            displayname = "Test Name 123", // OPTIONAL  
-	            pictureurl = "<Image URL>", // OPTIONAL  
-	            profileurl = "<Image URL>" // OPTIONAL  
-	         )  
-	         // CompletableFuture -> Await Deferred  
-	         .await()  
-	      )  
+                        userid = "<USERID>",  
+                        handle = "sample_handle_123",  
+                        displayname = "Test Name 123", // OPTIONAL  
+                        pictureurl = "<Image URL>", // OPTIONAL  
+                        profileurl = "<Image URL>" // OPTIONAL  
+                    ) 
+	      )
+            // CompletableFuture -> Await Deferred  
+            .await()  
 	   }  
 	     
 	   // Resolve response from HERE onwards(ex. update UI displaying the response data)...  
@@ -91,15 +91,15 @@ Java 8's CompletableFuture can be turned into Deferred action by using coroutine
 lifecycleScope.launch {
 	userClient.createOrUpdateUser(
 		request = CreateUpdateUserRequest(
-		userid = "<USERID>",
-		handle = "sample_handle_123",
-		displayname = "Test Name 123", // OPTIONAL
-		pictureurl = "<Image URL>", // OPTIONAL
-		profileurl = "<Image URL>" // OPTIONAL 
+    		userid = "<USERID>",
+    		handle = "sample_handle_123",
+    		displayname = "Test Name 123", // OPTIONAL
+    		pictureurl = "<Image URL>", // OPTIONAL
+    		profileurl = "<Image URL>" // OPTIONAL 
 		)
-		// CompletableFuture -> Await Deferred  
-		.await()  
 	)
+        // CompletableFuture -> Await Deferred  
+		.await()
 }
 ```
 
@@ -194,7 +194,8 @@ lifecycleScope.launch {
             userid = testUser.userid!!,  
             handle = testUser.handle!!  
          )  
-      ).await()  
+      )
+      .await()  
    }
 	
 	// Once joined, the developer may immediately access the join response's `eventscursor.events` field, which contains an initial list of messages of the chat room
@@ -259,8 +260,8 @@ lifecycleScope.launch {
            command = "Yow Jessy, how are you doin'?",    
            userid = testUser.userid!!   
          )  
-         .await()  
-      )  
+      )
+      .await()  
    }  
    // Resolve `executeChatResponse` (ex. Display prompt OR Update UI)  
 }
@@ -321,9 +322,9 @@ lifecycleScope.launch {
 				customtags = listOf("taga", "tagb"),
 				custompayload = "{ num : 0 }"
 			)
-			// CompletableFuture -> Await Deferred
-			.await()
 		)
+		    // CompletableFuture -> Await Deferred
+			.await()
 	}
 	
 	// Resolve `createConversationResponse` from HERE(ex. Display Prompt, update UI)
