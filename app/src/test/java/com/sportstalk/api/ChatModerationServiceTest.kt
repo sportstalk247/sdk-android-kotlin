@@ -104,7 +104,7 @@ class ChatModerationServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
                 // Moderation MUST BE SET to "pre"
@@ -198,7 +198,7 @@ class ChatModerationServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
                 // Moderation MUST BE SET to "pre"

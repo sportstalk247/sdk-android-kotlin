@@ -451,7 +451,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -579,7 +579,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testExpectedResult = ApiResponse<JoinChatRoomResponse>(
                 kind = "api.result",
@@ -654,7 +654,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -741,7 +741,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -816,7 +816,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -916,7 +916,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1014,7 +1014,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1114,7 +1114,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1237,7 +1237,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1320,7 +1320,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1421,7 +1421,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1520,7 +1520,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get().data!!
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(

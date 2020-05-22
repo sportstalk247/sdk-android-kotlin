@@ -83,9 +83,6 @@ dependencies {
 
     testImplementation "org.robolectric:robolectric:$rootProject.roboelectric"
 
-    // Backport to pre-JDK8 CompletableFuture support
-    implementation "net.sourceforge.streamsupport:android-retrofuture:$rootProject.retrofutureVersion"
-
     // Jetbrains Kotlin Dependencies
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
