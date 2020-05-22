@@ -38,7 +38,7 @@ interface UsersRetrofitService {
     @POST("{appId}/user/users/{userId}/ban")
     fun setBanStatus(
             @Path("appId") appId: String,
-            @Path("userId") userId: String,
+            @Path(value = "userId", encoded = true) userId: String,
             @Body request: BanUserRequest
     ): CompletableFuture<Response<ApiResponse<User>>>
 

@@ -54,7 +54,7 @@ constructor(
     override fun setBanStatus(userId: String, banned: Boolean): CompletableFuture<User> =
             service.setBanStatus(
                     appId = appId,
-                    userId = userId,
+                    userId = URLEncoder.encode(userId, Charsets.UTF_8.name()),
                     request = BanUserRequest(banned)
             )
                     .handleSdkResponse(json)

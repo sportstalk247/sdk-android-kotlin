@@ -79,6 +79,44 @@ class UserServiceTest {
     }
 
     @Test
+    fun `0-ERROR-403) Request is not authorized with a token`() {
+        val userCaseUserService = ServiceFactory.RestApi.User.get(
+                config.copy(
+                        apiToken = "not-a-valid-auth-api-token"
+                )
+        )
+
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_${Random.nextInt(100, 999)}-1234",
+                displayname = "Test 1"
+        )
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            userCaseUserService.createOrUpdateUser(request = testInputRequest).get()
+        } catch (ex: ExecutionException) {
+            val err =  ex.cause as SportsTalkException
+            println(
+                    "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "Request is not authorized with a token." }
+            assertTrue { err.code == 403 }
+
+            throw err
+        }
+    }
+
+    @Test
     fun `1) Create or Update User`() {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
@@ -386,6 +424,37 @@ class UserServiceTest {
     }
 
     @Test
+    fun `5-ERROR-404) Ban User`() {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            userService.setBanStatus(
+                    userId = testInputUserId,
+                    banned = true
+            ).get()
+        } catch (ex: ExecutionException) {
+            val err =  ex.cause as SportsTalkException
+            println(
+                    "`ERROR-404 - Ban User`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specified user is not found." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
+    }
+
+    @Test
     fun `6) Restore User`() {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
@@ -429,6 +498,37 @@ class UserServiceTest {
 
         // Perform Delete Test User
         deleteTestUsers(testActualResult.userid)
+    }
+
+    @Test
+    fun `6-ERROR-404) Restore User`() {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            userService.setBanStatus(
+                    userId = testInputUserId,
+                    banned = false
+            ).get()
+        } catch (ex: ExecutionException) {
+            val err =  ex.cause as SportsTalkException
+            println(
+                    "`ERROR-404 - Restore User`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specified user is not found." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
     }
 
     @Test
