@@ -8,6 +8,7 @@ import com.sportstalk.models.users.*
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.create
+import java.net.URLEncoder
 import java.util.concurrent.CompletableFuture
 
 class UserRestApiServiceImpl
@@ -31,7 +32,7 @@ constructor(
     override fun deleteUser(userId: String): CompletableFuture<DeleteUserResponse> =
             service.deleteUser(
                     appId = appId,
-                    userId = userId
+                    userId = URLEncoder.encode(userId, Charsets.UTF_8.name())
             )
                     .handleSdkResponse(json)
 

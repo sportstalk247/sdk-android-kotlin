@@ -134,13 +134,14 @@ class UserServiceTest {
         } catch (ex: ExecutionException) {
             val err =  ex.cause as SportsTalkException
             println(
-                    "`ERROR - Create or Update User`() -> testActualResult = \n" +
+                    "`ERROR-400 - Create or Update User`() -> testActualResult = \n" +
                             json.stringify(
                                     SportsTalkException.serializer(),
                                     err
                             )
             )
             assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The handle requested (\"${testInputRequest.handle!!}\") contains characters that are not allowed.  Use only [abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_]" }
             assertTrue { err.code == 400 }
 
             throw err
@@ -186,6 +187,36 @@ class UserServiceTest {
     }
 
     @Test
+    fun `2-ERROR-404) Delete User`() {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            userService.deleteUser(
+                    userId = testInputUserId
+            ).get()
+        } catch (ex: ExecutionException) {
+            val err =  ex.cause as SportsTalkException
+            println(
+                    "`ERROR-404 - Delete User`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specifed user $testInputUserId does not exist." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
+    }
+
+    @Test
     fun `3) Get User Details`() {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
@@ -220,6 +251,36 @@ class UserServiceTest {
 
         // Perform Delete Test User
         deleteTestUsers(testActualResult.userid)
+    }
+
+    @Test
+    fun `3-ERROR-404) Get User Details`() {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            userService.getUserDetails(
+                    userId = testInputUserId
+            ).get()
+        } catch (ex: ExecutionException) {
+            val err =  ex.cause as SportsTalkException
+            println(
+                    "`ERROR-404 - Get User Details`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specified UserID was not found." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
     }
 
     @Test

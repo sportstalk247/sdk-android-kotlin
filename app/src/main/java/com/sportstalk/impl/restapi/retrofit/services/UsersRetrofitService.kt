@@ -19,7 +19,7 @@ interface UsersRetrofitService {
     @DELETE("{appId}/user/users/{userId}")
     fun deleteUser(
             @Path("appId") appId: String,
-            @Path("userId") userId: String
+            @Path(value = "userId", encoded = true) userId: String
     ): CompletableFuture<Response<ApiResponse<DeleteUserResponse>>>
 
     @GET("{appId}/user/users/{userId}")
