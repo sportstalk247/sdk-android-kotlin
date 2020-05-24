@@ -122,7 +122,7 @@ class ChatModerationServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get()
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -143,18 +143,13 @@ class ChatModerationServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).get().data?.speech!!
+        ).get().speech!!
 
         val testInputRequest = ApproveMessageRequest(
                 approve = true
         )
-        val testExpectedResult = ApiResponse<ChatEvent>(
-                kind = "api.result",
-                /*message = "",*/
-                code = 200,
-                data = testSendMessageData.copy(
-                        moderation = "approved"
-                )
+        val testExpectedResult = testSendMessageData.copy(
+                moderation = "approved"
         )
 
         // WHEN
@@ -167,18 +162,17 @@ class ChatModerationServiceTest {
         println(
                 "`Approve Message`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ChatEvent.serializer()),
+                                ChatEvent.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.code == testExpectedResult.code }
-        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
-        assertTrue { testActualResult.data?.body == testExpectedResult.data?.body }
-        assertTrue { testActualResult.data?.eventtype == testExpectedResult.data?.eventtype }
-        assertTrue { testActualResult.data?.userid == testExpectedResult.data?.userid }
-        assertTrue { testActualResult.data?.moderation == testExpectedResult.data?.moderation }
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.body == testExpectedResult.body }
+        assertTrue { testActualResult.eventtype == testExpectedResult.eventtype }
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.moderation == testExpectedResult.moderation }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)
@@ -216,7 +210,7 @@ class ChatModerationServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get().data!!
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get()
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -236,19 +230,14 @@ class ChatModerationServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).get().data?.speech!!
+        ).get().speech!!
 
         val testInputRequest = ApproveMessageRequest(
                 approve = true
         )
-        val testExpectedResult = ApiResponse<ListMessagesNeedingModerationResponse>(
-                kind = "api.result",
-                message = "",
-                code = 200,
-                data = ListMessagesNeedingModerationResponse(
-                        kind = "list.events",
-                        events = listOf(testSendMessageData)
-                )
+        val testExpectedResult = ListMessagesNeedingModerationResponse(
+                kind = "list.events",
+                events = listOf(testSendMessageData)
         )
 
         // WHEN
@@ -258,16 +247,14 @@ class ChatModerationServiceTest {
         println(
                 "`List Messages Needing Moderation`() -> testActualResult = \n" +
                         json.stringify(
-                                ApiResponse.serializer(ListMessagesNeedingModerationResponse.serializer()),
+                                ListMessagesNeedingModerationResponse.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.code == testExpectedResult.code }
-        assertTrue { testActualResult.data?.kind == testExpectedResult.data?.kind }
         assertTrue {
-            testActualResult.data?.events!!.any { ev ->
+            testActualResult.events.any { ev ->
                 ev.id == testSendMessageData.id
                         && ev.userid == testSendMessageData.userid
                         && ev.body == testSendMessageData.body
@@ -282,8 +269,6 @@ class ChatModerationServiceTest {
     }
 
     object TestData {
-        val ADMIN_PASSWORD = "zola"
-
         val users = listOf(
                 User(
                         kind = "app.user",
