@@ -135,6 +135,14 @@ interface ChatService {
             chatRoomId: String,
             request: ExecuteChatCommandRequest
     ): CompletableFuture<ExecuteChatCommandResponse>
+    /**
+     * Convenience Function to Reply Chat feature
+     */
+    fun sendQuotedReply(
+            chatRoomId: String,
+            replyTo: String,
+            request: ExecuteChatCommandRequest
+    ): CompletableFuture<ExecuteChatCommandResponse>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/messagesbyuser/{{userid}}?cursor&limit=200
@@ -155,12 +163,28 @@ interface ChatService {
      * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
      * - Removes a message from a room
      */
-    fun setMessageAsDeleted(
+    fun removeEvent(
             chatRoomId: String,
             eventId: String,
             userid: String,
             deleted: Boolean,
             permanentifnoreplies: Boolean? = null
+    ): CompletableFuture<ChatEvent>
+    /**
+     * Convenience Function to Remove Message where `deleted` = true and `permanentifnoreplies` = true
+     */
+    fun permanentlyDeleteEvent(
+            chatRoomId: String,
+            eventId: String,
+            userid: String
+    ): CompletableFuture<ChatEvent>
+    /**
+     * Convenience Function to Remove Message where `deleted` = false and `permanentifnoreplies` = false
+     */
+    fun flagEventLogicallyDeleted(
+            chatRoomId: String,
+            eventId: String,
+            userid: String
     ): CompletableFuture<ChatEvent>
 
     /**
@@ -179,7 +203,7 @@ interface ChatService {
      * - https://apiref.sportstalk247.com/?version=latest#977044d8-9133-4185-ac1f-4d96a40aa60b
      * - Adds or removes a reaction to an existing event
      */
-    fun reactToAMessage(
+    fun reactToEvent(
             chatRoomId: String,
             eventId: String,
             request: ReactToAMessageRequest

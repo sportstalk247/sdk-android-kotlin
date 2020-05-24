@@ -5,7 +5,6 @@ import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.ChatClient
 import com.sportstalk.api.service.ChatModerationService
-import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
@@ -112,6 +111,13 @@ constructor(
                     request = request
             )
 
+    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
+            chatService.sendQuotedReply(
+                    chatRoomId = chatRoomId,
+                    replyTo = replyTo,
+                    request = request
+            )
+
     override fun listMessagesByUser(chatRoomId: String, userId: String, limit: Int?, cursor: String?): CompletableFuture<ListMessagesByUser> =
             chatService.listMessagesByUser(
                     chatRoomId = chatRoomId,
@@ -120,13 +126,27 @@ constructor(
                     cursor = cursor
             )
 
-    override fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
-            chatService.setMessageAsDeleted(
+    override fun removeEvent(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
+            chatService.removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     deleted = deleted,
                     userid = userid,
                     permanentifnoreplies = permanentifnoreplies
+            )
+
+    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String): CompletableFuture<ChatEvent> =
+            chatService.permanentlyDeleteEvent(
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    userid = userid
+            )
+
+    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String): CompletableFuture<ChatEvent> =
+            chatService.flagEventLogicallyDeleted(
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    userid = userid
             )
 
     override fun reportMessage(chatRoomId: String, eventId: String, request: ReportMessageRequest): CompletableFuture<ChatEvent> =
@@ -136,8 +156,8 @@ constructor(
                     request = request
             )
 
-    override fun reactToAMessage(chatRoomId: String, eventId: String, request: ReactToAMessageRequest): CompletableFuture<ChatEvent> =
-            chatService.reactToAMessage(
+    override fun reactToEvent(chatRoomId: String, eventId: String, request: ReactToAMessageRequest): CompletableFuture<ChatEvent> =
+            chatService.reactToEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
