@@ -8,7 +8,6 @@ import com.sportstalk.DateUtils
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.service.UserService
-import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.Kind
 import com.sportstalk.models.SportsTalkException
@@ -2141,7 +2140,7 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.reactToAMessage(
+        val testActualResult = chatService.reactToEvent(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 eventId = testSendMessageData.id!!,
                 request = testInputRequest
@@ -2232,7 +2231,7 @@ class ChatServiceTest {
         // WHEN
         try {
             withContext(Dispatchers.IO) {
-                chatService.reactToAMessage(
+                chatService.reactToEvent(
                         chatRoomId = testCreatedChatRoomData.id!!,
                         eventId = testChatIdNonExisting,
                         request = testInputRequest

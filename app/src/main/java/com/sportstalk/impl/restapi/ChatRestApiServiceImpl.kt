@@ -175,6 +175,12 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
+            executeChatCommand(
+                    chatRoomId = chatRoomId,
+                    request = request.copy(replyto = replyTo)
+            )
+
     override fun listMessagesByUser(
             chatRoomId: String,
             userId: String,
@@ -190,7 +196,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun setMessageAsDeleted(
+    override fun removeEvent(
             chatRoomId: String,
             eventId: String,
             userid: String,
@@ -207,6 +213,24 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String): CompletableFuture<ChatEvent> =
+            removeEvent(
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    userid = userid,
+                    deleted = true,
+                    permanentifnoreplies = true
+            )
+
+    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String): CompletableFuture<ChatEvent> =
+            removeEvent(
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    userid = userid,
+                    deleted = false,
+                    permanentifnoreplies = false
+            )
+
     override fun reportMessage(
             chatRoomId: String,
             eventId: String,
@@ -220,7 +244,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun reactToAMessage(
+    override fun reactToEvent(
             chatRoomId: String,
             eventId: String,
             request: ReactToAMessageRequest
