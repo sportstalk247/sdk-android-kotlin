@@ -114,6 +114,7 @@ object ServiceFactory {
                         // REST API Implementation
                         ChatRestApiServiceImpl(
                                 appId = config.appId,
+                                json = json,
                                 mRetrofit = retrofit
                         ).also {
                             instances[config] = it
@@ -136,6 +137,7 @@ object ServiceFactory {
                         // REST API Implementation
                         ChatModerationRestApiServiceImpl(
                                 appId = config.appId,
+                                json = json,
                                 mRetrofit = retrofit
                         ).also {
                             instances[config] = it

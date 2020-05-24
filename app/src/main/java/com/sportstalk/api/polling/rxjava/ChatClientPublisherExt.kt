@@ -3,9 +3,8 @@ package com.sportstalk.api.polling.rxjava
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
 import com.sportstalk.api.ChatClient
-import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.polling.*
-import com.sportstalk.models.ApiResponse
+import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
@@ -41,7 +40,7 @@ fun ChatClient.allEventUpdates(
                 lifecycleOwner,
                 allEventUpdatesLiveData(chatRoomId, eventTypeFilter, lifecycleOwner)
         )*/
-    return Flowable.create<ApiResponse<GetUpdatesResponse>>({ emitter ->
+    return Flowable.create<GetUpdatesResponse>({ emitter ->
 
         val scope = lifecycleOwner.lifecycle.coroutineScope
         // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
@@ -62,8 +61,8 @@ fun ChatClient.allEventUpdates(
                         emitter.onNext(response)
                     }
                     // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-                } catch (err: Throwable) {
-                    err.printStackTrace()
+                } catch (err: SportsTalkException) {
+                    emitter.onError(err)
                 }
             }
         }
@@ -80,14 +79,11 @@ fun ChatClient.allEventUpdates(
 
     }, BackpressureStrategy.LATEST)
             .map { response ->
-                (response.data
-                        ?.events
+                response.events
                         // Filter out redundant events that were already emitted prior
-                        ?.filter { event ->
+                        .filter { event ->
                             (event.ts ?: 0L) > lastEventTs.value!!
                         }
-                        ?: listOf()
-                        )
                         .also { events ->
                             // Update lastEventTs with the latest ts
                             lastEventTs.onNext(events.maxBy { it.ts ?: 0L }?.ts ?: 0L)

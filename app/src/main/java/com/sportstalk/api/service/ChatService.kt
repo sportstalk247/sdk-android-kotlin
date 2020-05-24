@@ -26,35 +26,35 @@ interface ChatService {
      * - https://apiref.sportstalk247.com/?version=latest#8b2eea78-82bc-4cae-9cfa-175a00a9e15b
      * - Creates a new chat room
      */
-    fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
+    fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ChatRoom>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}
      * - https://apiref.sportstalk247.com/?version=latest#9bac9724-7505-4e3e-966f-08cfebbca88d
      * - Get the details for a room
      */
-    fun getRoomDetails(chatRoomId: String): CompletableFuture<ApiResponse<ChatRoom>>
+    fun getRoomDetails(chatRoomId: String): CompletableFuture<ChatRoom>
 
     /**
      * [GET] /{{api_appid}}/chat/roomsbycustomid/{{chat_create_room_customid}}
      * - https://apiref.sportstalk247.com/?version=latest#0fd07be5-f8d5-43d9-bf0f-8fb9829c172c
      * - Get the details for a room
      */
-    fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ApiResponse<ChatRoom>>
+    fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ChatRoom>
 
     /**
      * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}
      * - https://apiref.sportstalk247.com/?version=latest#c5ae345d-004d-478a-b543-5abaf691000d
      * - Deletes the specified room and all events contained therein) by ID
      */
-    fun deleteRoom(chatRoomId: String): CompletableFuture<ApiResponse<DeleteChatRoomResponse>>
+    fun deleteRoom(chatRoomId: String): CompletableFuture<DeleteChatRoomResponse>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}
      * - https://apiref.sportstalk247.com/?version=latest#96ef3138-4820-459b-b400-e9f25d5ddb00
      * - Updates an existing room
      */
-    fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ApiResponse<ChatRoom>>
+    fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ChatRoom>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/
@@ -64,21 +64,21 @@ interface ChatService {
     fun listRooms(
             limit: Int? = null /* Defaults to 200 on backend API server */,
             cursor: String? = null
-    ): CompletableFuture<ApiResponse<ListRoomsResponse>>
+    ): CompletableFuture<ListRoomsResponse>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/join
      * - https://apiref.sportstalk247.com/?version=latest#eb3f78c3-a8bb-4390-ab25-77ce7072ddda
      * - Join A Room(Authenticated User)
      */
-    fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+    fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<JoinChatRoomResponse>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/join
      * - https://apiref.sportstalk247.com/?version=latest#eb3f78c3-a8bb-4390-ab25-77ce7072ddda
      * - Join A Room(Anonymous User)
      */
-    fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+    fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<JoinChatRoomResponse>
 
     /**
      * [POST] /{{api_appid}}/chat/roomsbycustomid/{{chat_create_room_customid}}/join
@@ -88,7 +88,7 @@ interface ChatService {
     fun joinRoomByCustomId(
             chatRoomCustomId: String,
             request: JoinChatRoomRequest
-    ): CompletableFuture<ApiResponse<JoinChatRoomResponse>>
+    ): CompletableFuture<JoinChatRoomResponse>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/participants?cursor&limit=200
@@ -99,14 +99,14 @@ interface ChatService {
             chatRoomId: String,
             limit: Int? = null /* Defaults to 200 on backend API server */,
             cursor: String? = null
-    ): CompletableFuture<ApiResponse<ListChatRoomParticipantsResponse>>
+    ): CompletableFuture<ListChatRoomParticipantsResponse>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/exit
      * - https://apiref.sportstalk247.com/?version=latest#408b43ca-fca9-4f2d-8883-f6f725d140f2
      * - Exit a Room
      */
-    fun exitRoom(chatRoomId: String, userId: String): CompletableFuture<ApiResponse<ExitChatRoomResponse>>
+    fun exitRoom(chatRoomId: String, userId: String): CompletableFuture<Any>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/updates
@@ -117,7 +117,7 @@ interface ChatService {
     fun getUpdates(
             chatRoomId: String,
             cursor: String? = null /* eventId */
-    ): CompletableFuture<ApiResponse<GetUpdatesResponse>>
+    ): CompletableFuture<GetUpdatesResponse>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
@@ -134,7 +134,7 @@ interface ChatService {
     fun executeChatCommand(
             chatRoomId: String,
             request: ExecuteChatCommandRequest
-    ): CompletableFuture<ApiResponse<ExecuteChatCommandResponse>>
+    ): CompletableFuture<ExecuteChatCommandResponse>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/messagesbyuser/{{userid}}?cursor&limit=200
@@ -146,7 +146,7 @@ interface ChatService {
             userId: String,
             limit: Int? = null /* Defaults to 200 on backend API server */,
             cursor: String? = null
-    ): CompletableFuture<ApiResponse<ListMessagesByUser>>
+    ): CompletableFuture<ListMessagesByUser>
 
     // TODO:: `Removes a message` API is broken at the moment
     /**
@@ -161,7 +161,7 @@ interface ChatService {
             userid: String,
             deleted: Boolean,
             permanentifnoreplies: Boolean? = null
-    ): CompletableFuture<ApiResponse<ChatEvent>>
+    ): CompletableFuture<ChatEvent>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/report
@@ -172,7 +172,7 @@ interface ChatService {
             chatRoomId: String,
             eventId: String,
             request: ReportMessageRequest
-    ): CompletableFuture<ApiResponse<ChatEvent>>
+    ): CompletableFuture<ChatEvent>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/react
@@ -183,6 +183,6 @@ interface ChatService {
             chatRoomId: String,
             eventId: String,
             request: ReactToAMessageRequest
-    ): CompletableFuture<ApiResponse<ChatEvent>>
+    ): CompletableFuture<ChatEvent>
 
 }

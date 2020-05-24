@@ -31,7 +31,7 @@ fun ChatClient.allEventUpdates(
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
 ): LiveData<List<ChatEvent>> = liveData<List<ChatEvent>> {
-    val emitter = MutableLiveData<ApiResponse<GetUpdatesResponse>>()
+    val emitter = MutableLiveData<GetUpdatesResponse>()
     val lastEventTs = MutableLiveData<Long>(-1L)
 
     val scope = lifecycleOwner.lifecycle.coroutineScope
@@ -39,23 +39,19 @@ fun ChatClient.allEventUpdates(
     val getUpdateAction = Runnable {
         // Execute block from within coroutine scope
         scope.launchWhenStarted {
-            try {
-                // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
-                if (roomSubscriptions.contains(chatRoomId)) {
-                    // Perform GET UPDATES operation
-                    val response = withContext(Dispatchers.IO) {
-                        getUpdates(chatRoomId = chatRoomId)
-                                // Awaits for completion of the completion stage without blocking a thread
-                                .await()
-                    }
-
-                    // Emit response value
-                    emitter.postValue(response)
+            // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
+            if (roomSubscriptions.contains(chatRoomId)) {
+                // Perform GET UPDATES operation
+                val response = withContext(Dispatchers.IO) {
+                    getUpdates(chatRoomId = chatRoomId)
+                            // Awaits for completion of the completion stage without blocking a thread
+                            .await()
                 }
-                // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-            } catch (err: Throwable) {
-                err.printStackTrace()
+
+                // Emit response value
+                emitter.postValue(response)
             }
+            // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
         }
     }
 
@@ -74,15 +70,11 @@ fun ChatClient.allEventUpdates(
             emitter.switchMap { response ->
                 liveData<List<ChatEvent>> {
                     // Emit transform into List<ChatEvent>
-                    val events = (
-                            response.data
-                                    ?.events
-                                    // Filter out redundant events that were already emitted prior
-                                    ?.filter { event ->
-                                        (event.ts ?: 0L) > lastEventTs.value!!
-                                    }
-                                    ?: listOf<ChatEvent>()
-                            ).also { events ->
+                    val events = response.events
+                            // Filter out redundant events that were already emitted prior
+                            .filter { event ->
+                                (event.ts ?: 0L) > lastEventTs.value!!
+                            }.also { events ->
                                 // Update lastEventTs with the latest ts
                                 lastEventTs.postValue(events.maxBy { it.ts ?: 0L }?.ts ?: 0L)
                             }

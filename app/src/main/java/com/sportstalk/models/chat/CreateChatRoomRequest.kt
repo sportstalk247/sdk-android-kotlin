@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class CreateChatRoomRequest(
         val customid: String? = null,
         val userid: String? = null,
-        val name: String,
+        val name: String? = null,
         val description: String? = null,
         val moderation: String? = null /* "pre"/"post" */,
         val enableactions: Boolean? = null,

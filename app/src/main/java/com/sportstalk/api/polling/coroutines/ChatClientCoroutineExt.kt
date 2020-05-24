@@ -36,7 +36,7 @@ fun ChatClient.allEventUpdates(
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
 ): Flow<List<ChatEvent>> = flow<List<ChatEvent>> {
-    val emitter = ConflatedBroadcastChannel<ApiResponse<GetUpdatesResponse>>()
+    val emitter = ConflatedBroadcastChannel<GetUpdatesResponse>()
     val lastEventTs = ConflatedBroadcastChannel<Long>(-1L)
 
     val scope = lifecycleOwner.lifecycle.coroutineScope
@@ -44,23 +44,19 @@ fun ChatClient.allEventUpdates(
     val getUpdateAction = Runnable {
         // Execute block from within coroutine scope
         scope.launchWhenStarted {
-            try {
-                // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
-                if (roomSubscriptions.contains(chatRoomId)) {
-                    // Perform GET UPDATES operation
-                    val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                        getUpdates(chatRoomId = chatRoomId)
-                                // Awaits for completion of the completion stage without blocking a thread
-                                .await()
-                    }
-
-                    // Emit response value
-                    emitter.send(response)
+            // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
+            if (roomSubscriptions.contains(chatRoomId)) {
+                // Perform GET UPDATES operation
+                val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                    getUpdates(chatRoomId = chatRoomId)
+                            // Awaits for completion of the completion stage without blocking a thread
+                            .await()
                 }
-                // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-            } catch (err: Throwable) {
-                err.printStackTrace()
+
+                // Emit response value
+                emitter.send(response)
             }
+            // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
         }
     }
 
@@ -78,14 +74,11 @@ fun ChatClient.allEventUpdates(
     emitAll(
             emitter.asFlow()
                     .map { response ->
-                        (response.data
-                                ?.events
+                        response.events
                                 // Filter out redundant events that were already emitted prior
-                                ?.filter { event ->
+                                .filter { event ->
                                     (event.ts ?: 0L) > lastEventTs.value
                                 }
-                                ?: listOf()
-                                )
                                 .also { events ->
                                     // Update lastEventTs with the latest ts
                                     lastEventTs.sendBlocking(events.maxBy { it.ts ?: 0L }?.ts ?: 0L)
