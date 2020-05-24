@@ -58,7 +58,7 @@ constructor(
     override fun deleteRoom(chatRoomId: String): CompletableFuture<DeleteChatRoomResponse> =
             service.deleteRoom(
                     appId = appId,
-                    chatRoomId = chatRoomId
+                    chatRoomId = URLEncoder.encode(chatRoomId, Charsets.UTF_8.name())
             )
                     .handleSdkResponse(json)
 
@@ -144,7 +144,25 @@ constructor(
                     chatRoomId = chatRoomId,
                     cursor = cursor
             )
-                    .handleSdkResponse(json)
+                    .handle { resp, err ->
+                        if (err != null) {
+                            throw SportsTalkException(message = err.message, err = err)
+                        } else {
+                            val respBody = resp.body()
+                            if (resp.isSuccessful && respBody?.data != null) {
+                                respBody.data
+                            } else {
+                                throw resp.errorBody()?.string()?.let { errBodyStr ->
+                                    json.parse(SportsTalkException.serializer(), errBodyStr)
+                                }
+                                        ?: SportsTalkException(
+                                                kind = respBody?.kind ?: Kind.API,
+                                                message = respBody?.message ?: resp.message(),
+                                                code = respBody?.code ?: resp.code()
+                                        )
+                            }
+                        }
+                    }
 
     override fun executeChatCommand(
             chatRoomId: String,

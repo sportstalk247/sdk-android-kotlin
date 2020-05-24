@@ -11,19 +11,26 @@ import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.service.UserService
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
+import com.sportstalk.models.Kind
+import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.chat.moderation.ApproveMessageRequest
 import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
-import org.junit.After
-import org.junit.Before
-import org.junit.FixMethodOrder
-import org.junit.Test
+import org.junit.*
+import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
@@ -46,6 +53,11 @@ class ChatModerationServiceTest {
     private lateinit var chatModerationService: ChatModerationService
     private lateinit var json: Json
 
+    private val testDispatcher = TestCoroutineDispatcher()
+
+    @get:Rule
+    val thrown = ExpectedException.none()
+
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
@@ -66,10 +78,14 @@ class ChatModerationServiceTest {
         userService = ServiceFactory.RestApi.User.get(config)
         chatService = ServiceFactory.RestApi.Chat.get(config)
         chatModerationService = ServiceFactory.RestApi.ChatModeration.get(config)
+
+        Dispatchers.setMain(testDispatcher)
     }
 
     @After
     fun cleanUp() {
+        testDispatcher.cleanupTestCoroutines()
+        Dispatchers.resetMain()
     }
 
     /**
@@ -90,6 +106,49 @@ class ChatModerationServiceTest {
             id ?: continue
             chatService.deleteRoom(chatRoomId = id).get()
         }
+    }
+
+    @Test
+    fun `0-ERROR-403) Request is not authorized with a token`() = runBlocking {
+        val userCaseChatModService = ServiceFactory.RestApi.ChatModeration.get(
+                config.copy(
+                        apiToken = "not-a-valid-auth-api-token"
+                )
+        )
+
+        // GIVEN
+        val testInputRequest = CreateChatRoomRequest(
+                /*userid = "NON-Existing-User-ID"*/
+        )
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userCaseChatModService.approveMessage(
+                        eventId = "non-existing-event-id",
+                        approve = true
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "Request is not authorized with a token." }
+            assertTrue { err.code == 403 }
+
+            throw err
+        }
+
+        return@runBlocking
     }
 
     @Test
@@ -178,6 +237,42 @@ class ChatModerationServiceTest {
         deleteTestChatRooms(testCreatedChatRoomData.id)
         // Perform Delete Test User
         deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `A-ERROR-404) Approve Message`() = runBlocking {
+
+        // GIVEN
+        val testInputNonExistingEventId = "non-existing-event-id"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                chatModerationService.approveMessage(
+                        eventId = testInputNonExistingEventId,
+                        approve = true
+                )
+                        .await()
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-404 - Approve Message`() -> testActualResult = \n" +
+                            json.stringify(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specified event was not found." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
+
+        return@runBlocking
     }
 
     @Test
