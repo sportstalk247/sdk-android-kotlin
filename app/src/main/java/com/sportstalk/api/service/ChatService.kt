@@ -176,7 +176,8 @@ interface ChatService {
     fun permanentlyDeleteEvent(
             chatRoomId: String,
             eventId: String,
-            userid: String
+            userid: String,
+            permanentifnoreplies: Boolean? = null
     ): CompletableFuture<ChatEvent>
     /**
      * Convenience Function to Remove Message where `deleted` = false and `permanentifnoreplies` = false
@@ -184,7 +185,8 @@ interface ChatService {
     fun flagEventLogicallyDeleted(
             chatRoomId: String,
             eventId: String,
-            userid: String
+            userid: String,
+            permanentifnoreplies: Boolean? = null
     ): CompletableFuture<ChatEvent>
 
     /**

@@ -213,22 +213,22 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String): CompletableFuture<ChatEvent> =
+    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
             removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     userid = userid,
                     deleted = true,
-                    permanentifnoreplies = true
+                    permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String): CompletableFuture<ChatEvent> =
+    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
             removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     userid = userid,
                     deleted = false,
-                    permanentifnoreplies = false
+                    permanentifnoreplies = permanentifnoreplies
             )
 
     override fun reportMessage(
