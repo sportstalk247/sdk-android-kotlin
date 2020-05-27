@@ -48,7 +48,7 @@ fun ChatClient.allEventUpdates(
             // Execute block from within coroutine scope
             scope.launchWhenStarted {
                 try {
-                    // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
+                    // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
                     if (roomSubscriptions.contains(chatRoomId)) {
                         // Perform GET UPDATES operation
                         val response = kotlinx.coroutines.withContext(Dispatchers.IO) {

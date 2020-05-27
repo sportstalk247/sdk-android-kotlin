@@ -15,11 +15,11 @@ interface ChatService {
     /**
      * Signals the START of event updates being emitted
      */
-    fun startEventUpdates(forRoomId: String)
+    fun startListeningToChatUpdates(forRoomId: String)
     /**
      * Signals the END of event updates being emitted
      */
-    fun stopEventUpdates(forRoomId: String)
+    fun stopListeningToChatUpdates(forRoomId: String)
 
     /**
      * [POST] /{{api_appid}}/chat/rooms
@@ -176,7 +176,8 @@ interface ChatService {
     fun permanentlyDeleteEvent(
             chatRoomId: String,
             eventId: String,
-            userid: String
+            userid: String,
+            permanentifnoreplies: Boolean? = null
     ): CompletableFuture<ChatEvent>
     /**
      * Convenience Function to Remove Message where `deleted` = false and `permanentifnoreplies` = false
@@ -184,7 +185,8 @@ interface ChatService {
     fun flagEventLogicallyDeleted(
             chatRoomId: String,
             eventId: String,
-            userid: String
+            userid: String,
+            permanentifnoreplies: Boolean? = null
     ): CompletableFuture<ChatEvent>
 
     /**

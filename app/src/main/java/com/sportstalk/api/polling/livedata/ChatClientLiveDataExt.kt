@@ -39,7 +39,7 @@ fun ChatClient.allEventUpdates(
     val getUpdateAction = Runnable {
         // Execute block from within coroutine scope
         scope.launchWhenStarted {
-            // Attempt operation call ONLY IF `startEventUpdates(roomId)` is called.
+            // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
             if (roomSubscriptions.contains(chatRoomId)) {
                 // Perform GET UPDATES operation
                 val response = withContext(Dispatchers.IO) {
