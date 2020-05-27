@@ -15,11 +15,11 @@ interface ChatService {
     /**
      * Signals the START of event updates being emitted
      */
-    fun startEventUpdates(forRoomId: String)
+    fun startListeningToChatUpdates(forRoomId: String)
     /**
      * Signals the END of event updates being emitted
      */
-    fun stopEventUpdates(forRoomId: String)
+    fun stopListeningToChatUpdates(forRoomId: String)
 
     /**
      * [POST] /{{api_appid}}/chat/rooms

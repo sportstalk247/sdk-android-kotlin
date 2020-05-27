@@ -244,10 +244,10 @@ lifecycleScope.launch {
    .launchIn(lifecycleScope /* Already provided by androidx.Fragment */)    
        
    // Then, perform start listening to event updates    
-   chatClient.startEventUpdates(forRoomId = testChatRoom.id!!)    
+   chatClient.startListeningToChatUpdates(forRoomId = testChatRoom.id!!)    
        
    // At some point in time, the developer might want to explicitly stop listening to event updates    
-   chatClient.stopEventUpdates(forRoomId = testChatRoom.id!!)    
+   chatClient.stopListeningToChatUpdates(forRoomId = testChatRoom.id!!)    
 ```  
 ### Send a Chat Message  
 ```kotlin  

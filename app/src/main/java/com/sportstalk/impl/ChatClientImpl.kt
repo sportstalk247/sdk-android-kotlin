@@ -39,11 +39,11 @@ constructor(
     override val roomSubscriptions: MutableSet<String>
         get() = chatService.roomSubscriptions
 
-    override fun startEventUpdates(forRoomId: String) =
-            chatService.startEventUpdates(forRoomId)
+    override fun startListeningToChatUpdates(forRoomId: String) =
+            chatService.startListeningToChatUpdates(forRoomId)
 
-    override fun stopEventUpdates(forRoomId: String) =
-            chatService.stopEventUpdates(forRoomId)
+    override fun stopListeningToChatUpdates(forRoomId: String) =
+            chatService.stopListeningToChatUpdates(forRoomId)
 
     override fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ChatRoom> =
             chatService.createRoom(request = request)

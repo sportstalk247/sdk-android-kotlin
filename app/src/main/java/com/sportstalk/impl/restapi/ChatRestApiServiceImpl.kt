@@ -26,11 +26,11 @@ constructor(
 
     override val roomSubscriptions: MutableSet<String> = mutableSetOf()
 
-    override fun startEventUpdates(forRoomId: String) {
+    override fun startListeningToChatUpdates(forRoomId: String) {
         roomSubscriptions.add(forRoomId)
     }
 
-    override fun stopEventUpdates(forRoomId: String) {
+    override fun stopListeningToChatUpdates(forRoomId: String) {
         roomSubscriptions.remove(forRoomId)
     }
 
