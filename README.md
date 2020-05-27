@@ -278,7 +278,8 @@ lifecycleScope.launch {
       chatClient.flagEventLogicallyDeleted(    
                   chatRoomId = testChatRoom.id!!,    
                   eventId = testEvent.id!!,  
-                  userid = testUser.userid!!
+                  userid = testUser.userid!!,
+                  permanentifnoreplies = false // OPTIONAL
       )
       .await()  
    }  
