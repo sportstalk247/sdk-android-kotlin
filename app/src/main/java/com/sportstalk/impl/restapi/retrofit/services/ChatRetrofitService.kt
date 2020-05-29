@@ -88,6 +88,14 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null /* eventId */
     ): CompletableFuture<Response<ApiResponse<GetUpdatesResponse>>>
 
+    @GET("{appId}/chat/rooms/{chatroomid}/listpreviousevents")
+    fun listPreviousEvents(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null /* eventId */
+    ): CompletableFuture<Response<ApiResponse<ListEvents>>>
+
     @POST("{appId}/chat/rooms/{chatroomid}/command")
     fun executeChatCommand(
             @Path("appId") appId: String,

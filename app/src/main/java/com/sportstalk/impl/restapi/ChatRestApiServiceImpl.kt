@@ -164,6 +164,15 @@ constructor(
                         }
                     }
 
+    override fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+            service.listPreviousEvents(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    limit = limit,
+                    cursor = cursor
+            )
+                    .handleSdkResponse(json)
+
     override fun executeChatCommand(
             chatRoomId: String,
             request: ExecuteChatCommandRequest
