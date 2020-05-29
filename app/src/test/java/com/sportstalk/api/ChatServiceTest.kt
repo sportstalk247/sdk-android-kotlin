@@ -1288,6 +1288,95 @@ class ChatServiceTest {
     }
 
     @Test
+    fun `M) List Events History`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get()
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        ).get()
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send a message to the created chat room
+        val testSendMessageData = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        ).get().speech!!
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputLimit = 10
+        val testExpectedResult = ListEvents(
+                kind = Kind.CHAT_LIST,
+                events = listOf(testSendMessageData)
+        )
+
+        // WHEN
+        val testActualResult = chatService.listEventsHistory(
+                chatRoomId = testInputChatRoomId,
+                limit = testInputLimit
+        ).get()
+
+        // THEN
+        println(
+                "`List Events History`() -> testActualResult = \n" +
+                        json.stringify(
+                                ListEvents.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue {
+            testActualResult.events.any { ev ->
+                ev.id == testSendMessageData.id
+                        && ev.kind == testSendMessageData.kind
+                        && ev.roomid == testSendMessageData.roomid
+                        && ev.eventtype == testSendMessageData.eventtype
+                        && ev.body == testSendMessageData.body
+            }
+        }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
     fun `M-1) Execute Chat Command - Speech`() {
         // GIVEN
         val testUserData = TestData.users.first()

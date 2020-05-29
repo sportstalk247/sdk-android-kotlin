@@ -112,6 +112,13 @@ constructor(
                     cursor = cursor
             )
 
+    override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+            chatService.listEventsHistory(
+                    chatRoomId = chatRoomId,
+                    limit = limit,
+                    cursor = cursor
+            )
+
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
             chatService.executeChatCommand(
                     chatRoomId = chatRoomId,

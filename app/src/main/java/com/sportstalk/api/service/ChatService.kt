@@ -131,6 +131,17 @@ interface ChatService {
     ): CompletableFuture<ListEvents>
 
     /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/listeventshistory
+     * - https://apiref.sportstalk247.com/?version=latest#b8ca9766-ab07-4c8c-8e25-002a24a8feaa
+     * - LIST EVENTS HISTORY
+     */
+    fun listEventsHistory(
+            chatRoomId: String,
+            limit: Int? = null,
+            cursor: String? = null
+    ): CompletableFuture<ListEvents>
+
+    /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
      * - https://apiref.sportstalk247.com/?version=latest#c81e90fc-1a54-40bb-a75b-2fc935c12b59
      * - Executes a command in a chat room
