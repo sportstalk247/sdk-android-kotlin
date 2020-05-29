@@ -164,6 +164,24 @@ constructor(
                         }
                     }
 
+    override fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+            service.listPreviousEvents(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    limit = limit,
+                    cursor = cursor
+            )
+                    .handleSdkResponse(json)
+
+    override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+            service.listEventsHistory(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    limit = limit,
+                    cursor = cursor
+            )
+                    .handleSdkResponse(json)
+
     override fun executeChatCommand(
             chatRoomId: String,
             request: ExecuteChatCommandRequest
@@ -175,11 +193,29 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
-            executeChatCommand(
+    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): CompletableFuture<ExecuteChatCommandResponse> =
+            service.executeChatCommand(
+                    appId = appId,
                     chatRoomId = chatRoomId,
-                    request = request.copy(replyto = replyTo)
+                    request = ExecuteChatCommandRequest(
+                            command = request.command,
+                            userid = request.userid,
+                            customtype = request.customtype,
+                            customid = request.customid,
+                            custompayload = request.custompayload,
+                            replyto = request.replyto
+                    )
             )
+                    .handleSdkResponse(json)
+
+    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): CompletableFuture<ChatEvent> =
+            service.sendQuotedReply(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    replyto = replyTo,
+                    request = request
+            )
+                    .handleSdkResponse(json)
 
     override fun listMessagesByUser(
             chatRoomId: String,

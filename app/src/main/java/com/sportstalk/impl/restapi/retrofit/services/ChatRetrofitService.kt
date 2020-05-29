@@ -88,12 +88,36 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null /* eventId */
     ): CompletableFuture<Response<ApiResponse<GetUpdatesResponse>>>
 
+    @GET("{appId}/chat/rooms/{chatroomid}/listpreviousevents")
+    fun listPreviousEvents(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null /* eventId */
+    ): CompletableFuture<Response<ApiResponse<ListEvents>>>
+
+    @GET("{appId}/chat/rooms/{chatroomid}/listeventshistory")
+    fun listEventsHistory(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null /* eventId */
+    ): CompletableFuture<Response<ApiResponse<ListEvents>>>
+
     @POST("{appId}/chat/rooms/{chatroomid}/command")
     fun executeChatCommand(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Body request: ExecuteChatCommandRequest
     ): CompletableFuture<Response<ApiResponse<ExecuteChatCommandResponse>>>
+
+    @POST("{appId}/chat/rooms/{chatroomid}/events/{replyto}/quote")
+    fun sendQuotedReply(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("replyto") replyto: String,
+            @Body request: SendQuotedReplyRequest
+    ): CompletableFuture<Response<ApiResponse<ChatEvent>>>
 
     @GET("{appId}/chat/rooms/{chatroomid}/messagesbyuser/{userid}")
     fun listMessagesByUser(

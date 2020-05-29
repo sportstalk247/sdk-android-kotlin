@@ -105,13 +105,34 @@ constructor(
                     cursor = cursor
             )
 
+    override fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+            chatService.listPreviousEvents(
+                    chatRoomId = chatRoomId,
+                    limit = limit,
+                    cursor = cursor
+            )
+
+    override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+            chatService.listEventsHistory(
+                    chatRoomId = chatRoomId,
+                    limit = limit,
+                    cursor = cursor
+            )
+
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
             chatService.executeChatCommand(
                     chatRoomId = chatRoomId,
                     request = request
             )
 
-    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
+    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): CompletableFuture<ExecuteChatCommandResponse> =
+            chatService.sendThreadedReply(
+                    chatRoomId = chatRoomId,
+                    replyTo = replyTo,
+                    request = request
+            )
+
+    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): CompletableFuture<ChatEvent> =
             chatService.sendQuotedReply(
                     chatRoomId = chatRoomId,
                     replyTo = replyTo,

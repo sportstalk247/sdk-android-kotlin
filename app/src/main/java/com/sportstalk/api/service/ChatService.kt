@@ -120,6 +120,28 @@ interface ChatService {
     ): CompletableFuture<GetUpdatesResponse>
 
     /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/listpreviousevents
+     * - https://apiref.sportstalk247.com/?version=latest#f750f610-5db8-46ca-b9f7-a800c2e9c94a
+     * - LIST PREVIOUS EVENTS
+     */
+    fun listPreviousEvents(
+            chatRoomId: String,
+            limit: Int? = null,
+            cursor: String? = null
+    ): CompletableFuture<ListEvents>
+
+    /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/listeventshistory
+     * - https://apiref.sportstalk247.com/?version=latest#b8ca9766-ab07-4c8c-8e25-002a24a8feaa
+     * - LIST EVENTS HISTORY
+     */
+    fun listEventsHistory(
+            chatRoomId: String,
+            limit: Int? = null,
+            cursor: String? = null
+    ): CompletableFuture<ListEvents>
+
+    /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
      * - https://apiref.sportstalk247.com/?version=latest#c81e90fc-1a54-40bb-a75b-2fc935c12b59
      * - Executes a command in a chat room
@@ -135,14 +157,29 @@ interface ChatService {
             chatRoomId: String,
             request: ExecuteChatCommandRequest
     ): CompletableFuture<ExecuteChatCommandResponse>
+
     /**
-     * Convenience Function to Reply Chat feature
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
+     * - https://apiref.sportstalk247.com/?version=latest#d54ce72a-1a8a-4230-b950-0d1b345c20c6
+     * - Reply to a Message (Threaded)
+     *
+     */
+    fun sendThreadedReply(
+            chatRoomId: String,
+            replyTo: String,
+            request: SendThreadedReplyRequest
+    ): CompletableFuture<ExecuteChatCommandResponse>
+
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{chatEventId}}/quote
+     * - https://apiref.sportstalk247.com/?version=latest#c463cddd-c247-4e7c-8280-2d4880813149
+     * - Quotes an existing message and republishes it with a new message
      */
     fun sendQuotedReply(
             chatRoomId: String,
             replyTo: String,
-            request: ExecuteChatCommandRequest
-    ): CompletableFuture<ExecuteChatCommandResponse>
+            request: SendQuotedReplyRequest
+    ): CompletableFuture<ChatEvent>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/messagesbyuser/{{userid}}?cursor&limit=200

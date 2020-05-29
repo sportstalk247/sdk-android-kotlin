@@ -68,6 +68,7 @@ object EventType {
     const val ROOM_OPEN = "roomopen"
     const val ACTION = "action"
     const val REPLY = "reply"
+    const val QUOTE = "quote"
     const val GOAL = "goal" // custom type
     const val ADVERTISEMENT = "advertisement" // custom type
 }
