@@ -111,6 +111,13 @@ constructor(
                     request = request
             )
 
+    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): CompletableFuture<ExecuteChatCommandResponse> =
+            chatService.sendThreadedReply(
+                    chatRoomId = chatRoomId,
+                    replyTo = replyTo,
+                    request = request
+            )
+
     override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): CompletableFuture<ChatEvent> =
             chatService.sendQuotedReply(
                     chatRoomId = chatRoomId,

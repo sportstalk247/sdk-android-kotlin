@@ -135,8 +135,23 @@ interface ChatService {
             chatRoomId: String,
             request: ExecuteChatCommandRequest
     ): CompletableFuture<ExecuteChatCommandResponse>
+
     /**
-     * Convenience Function to Reply Chat feature
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
+     * - https://apiref.sportstalk247.com/?version=latest#d54ce72a-1a8a-4230-b950-0d1b345c20c6
+     * - Reply to a Message (Threaded)
+     *
+     */
+    fun sendThreadedReply(
+            chatRoomId: String,
+            replyTo: String,
+            request: SendThreadedReplyRequest
+    ): CompletableFuture<ExecuteChatCommandResponse>
+
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{chatEventId}}/quote
+     * - https://apiref.sportstalk247.com/?version=latest#c463cddd-c247-4e7c-8280-2d4880813149
+     * - Quotes an existing message and republishes it with a new message
      */
     fun sendQuotedReply(
             chatRoomId: String,

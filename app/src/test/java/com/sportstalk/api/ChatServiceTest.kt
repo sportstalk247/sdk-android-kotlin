@@ -1383,7 +1383,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `L-3) Execute Chat Command - Reply to a Message`() {
+    fun `L-3) Execute Chat Command - Reply to a Message - Threaded`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1433,7 +1433,7 @@ class ChatServiceTest {
         ).get().speech!!
 
 
-        val testInputRequest = ExecuteChatCommandRequest(
+        val testInputRequest = SendThreadedReplyRequest(
                 command = "This is Jessy, replying to your greetings yow!!!",
                 userid = testCreatedUserData.userid!!,
                 replyto = testInitialSendMessage.id!!
@@ -1441,7 +1441,6 @@ class ChatServiceTest {
         val testExpectedResult = ExecuteChatCommandResponse(
                 kind = "chat.executecommand",
                 op = "speech",
-                room = testCreatedChatRoomData,
                 speech = ChatEvent(
                         kind = "chat.event",
                         roomid = testCreatedChatRoomData.id,
@@ -1455,14 +1454,15 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.executeChatCommand(
+        val testActualResult = chatService.sendThreadedReply(
                 chatRoomId = testCreatedChatRoomData.id!!,
+                replyTo = testInitialSendMessage.id!!,
                 request = testInputRequest
         ).get()
 
         // THEN
         println(
-                "`Execute Chat Command - Reply to a Message`() -> testActualResult = \n" +
+                "`Execute Chat Command - Reply to a Message - Threaded`() -> testActualResult = \n" +
                         json.stringify(
                                 ExecuteChatCommandResponse.serializer(),
                                 testActualResult

@@ -175,6 +175,21 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): CompletableFuture<ExecuteChatCommandResponse> =
+            service.executeChatCommand(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    request = ExecuteChatCommandRequest(
+                            command = request.command,
+                            userid = request.userid,
+                            customtype = request.customtype,
+                            customid = request.customid,
+                            custompayload = request.custompayload,
+                            replyto = request.replyto
+                    )
+            )
+                    .handleSdkResponse(json)
+
     override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): CompletableFuture<ChatEvent> =
             service.sendQuotedReply(
                     appId = appId,
