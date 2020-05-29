@@ -175,11 +175,14 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
-            executeChatCommand(
+    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): CompletableFuture<ChatEvent> =
+            service.sendQuotedReply(
+                    appId = appId,
                     chatRoomId = chatRoomId,
-                    request = request.copy(replyto = replyTo)
+                    replyto = replyTo,
+                    request = request
             )
+                    .handleSdkResponse(json)
 
     override fun listMessagesByUser(
             chatRoomId: String,

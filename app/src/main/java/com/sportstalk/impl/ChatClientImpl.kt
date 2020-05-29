@@ -111,7 +111,7 @@ constructor(
                     request = request
             )
 
-    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
+    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): CompletableFuture<ChatEvent> =
             chatService.sendQuotedReply(
                     chatRoomId = chatRoomId,
                     replyTo = replyTo,

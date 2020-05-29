@@ -141,8 +141,8 @@ interface ChatService {
     fun sendQuotedReply(
             chatRoomId: String,
             replyTo: String,
-            request: ExecuteChatCommandRequest
-    ): CompletableFuture<ExecuteChatCommandResponse>
+            request: SendQuotedReplyRequest
+    ): CompletableFuture<ChatEvent>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/messagesbyuser/{{userid}}?cursor&limit=200

@@ -1575,6 +1575,103 @@ class ChatServiceTest {
     }
 
     @Test
+    fun `L-7) Send Quoted Reply`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get()
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        ).get()
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send an initial message to the created chat room
+        val testInitialSendMessage = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        ).get().speech!!
+
+
+        val testInputRequest = SendQuotedReplyRequest(
+                userid = testCreatedUserData.userid!!,
+                body = "This is Jessy, replying to your greetings yow!!!"
+        )
+        val testExpectedResult = ChatEvent(
+                kind = /*"chat.event"*/Kind.CHAT,
+                roomid = testCreatedChatRoomData.id,
+                body = testInputRequest.body,
+                eventtype = EventType.QUOTE,
+                userid = testCreatedUserData.userid,
+                user = testCreatedUserData,
+                replyto = testInitialSendMessage
+        )
+
+        // WHEN
+        val testActualResult = chatService.sendQuotedReply(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                replyTo = testInitialSendMessage.id!!,
+                request = testInputRequest
+        ).get()
+
+        // THEN
+        println(
+                "`Send Quoted Reply`() -> testActualResult = \n" +
+                        json.stringify(
+                                ChatEvent.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.roomid == testExpectedResult.roomid }
+        assertTrue { testActualResult.body == testExpectedResult.body }
+        assertTrue { testActualResult.eventtype == testExpectedResult.eventtype }
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
+        assertTrue { testActualResult.replyto?.id == testExpectedResult.replyto?.id }
+        assertTrue { testActualResult.replyto?.kind == testExpectedResult.replyto?.kind }
+        assertTrue { testActualResult.replyto?.body == testExpectedResult.replyto?.body }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
     fun `L-ERROR-400-User-NOT-found) Execute Chat Command`() = runBlocking {
         // GIVEN
         // GIVEN
