@@ -1612,8 +1612,7 @@ class ChatServiceTest {
 
         val testInputRequest = SendThreadedReplyRequest(
                 command = "This is Jessy, replying to your greetings yow!!!",
-                userid = testCreatedUserData.userid!!,
-                replyto = testInitialSendMessage.id!!
+                userid = testCreatedUserData.userid!!
         )
         val testExpectedResult = ExecuteChatCommandResponse(
                 kind = "chat.executecommand",

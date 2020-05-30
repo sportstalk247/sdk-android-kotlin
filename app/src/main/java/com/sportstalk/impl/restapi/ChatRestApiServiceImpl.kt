@@ -194,17 +194,11 @@ constructor(
                     .handleSdkResponse(json)
 
     override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): CompletableFuture<ExecuteChatCommandResponse> =
-            service.executeChatCommand(
+            service.sendThreadedReply(
                     appId = appId,
                     chatRoomId = chatRoomId,
-                    request = ExecuteChatCommandRequest(
-                            command = request.command,
-                            userid = request.userid,
-                            customtype = request.customtype,
-                            customid = request.customid,
-                            custompayload = request.custompayload,
-                            replyto = request.replyto
-                    )
+                    replyto = replyTo,
+                    request = request
             )
                     .handleSdkResponse(json)
 
