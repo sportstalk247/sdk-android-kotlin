@@ -111,6 +111,14 @@ interface ChatRetrofitService {
             @Body request: ExecuteChatCommandRequest
     ): CompletableFuture<Response<ApiResponse<ExecuteChatCommandResponse>>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/events/{replyto}/reply")
+    fun sendThreadedReply(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("replyto") replyto: String,
+            @Body request: SendThreadedReplyRequest
+    ): CompletableFuture<Response<ApiResponse<ExecuteChatCommandResponse>>>
+
     @POST("{appId}/chat/rooms/{chatroomid}/events/{replyto}/quote")
     fun sendQuotedReply(
             @Path("appId") appId: String,
