@@ -232,7 +232,7 @@ constructor(
             userid: String,
             deleted: Boolean,
             permanentifnoreplies: Boolean?
-    ): CompletableFuture<ChatEvent> =
+    ): CompletableFuture<DeleteEventResponse> =
             service.setMessageAsDeleted(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -243,7 +243,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
+    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
             removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -252,7 +252,7 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
+    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
             removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,

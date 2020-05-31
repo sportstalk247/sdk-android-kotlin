@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SendThreadedReplyRequest(
-        val command: String,
+        val body: String,
         val userid: String,
         val customtype: String? = null,
         val customid: String? = null,

@@ -144,7 +144,7 @@ interface ChatRetrofitService {
             @Query("userid") userid: String,
             @Query("deleted") deleted: Boolean,
             @Query("permanentifnoreplies") permanentifnoreplies: Boolean? = null
-    ): CompletableFuture<Response<ApiResponse<ChatEvent>>>
+    ): CompletableFuture<Response<ApiResponse<DeleteEventResponse>>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/events/{eventid}/report")
     fun reportMessage(

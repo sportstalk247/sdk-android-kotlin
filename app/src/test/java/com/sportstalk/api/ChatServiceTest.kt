@@ -1611,21 +1611,22 @@ class ChatServiceTest {
 
 
         val testInputRequest = SendThreadedReplyRequest(
-                command = "This is Jessy, replying to your greetings yow!!!",
+                body = "This is Jessy, replying to your greetings yow!!!",
                 userid = testCreatedUserData.userid!!
         )
         val testExpectedResult = ExecuteChatCommandResponse(
-                kind = "chat.executecommand",
-                op = "speech",
-                speech = ChatEvent(
+                kind = Kind.CHAT/*"chat.executecommand"*/,
+                op = null/*"speech"*/,
+                room = null,
+                speech = null/*ChatEvent(
                         kind = "chat.event",
                         roomid = testCreatedChatRoomData.id,
-                        body = testInputRequest.command,
+                        body = testInputRequest.body,
                         eventtype = "reply",
                         userid = testCreatedUserData.userid,
                         user = testCreatedUserData,
                         replyto = testInitialSendMessage
-                ),
+                )*/,
                 action = null
         )
 
@@ -2154,8 +2155,183 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `O) Remove a Message`() {
-        // TODO:: `Removes a message` API is broken at the moment
+    fun `O) Remove a Message - Permanently Delete`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = testUserData.handle,
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get()
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        ).get()
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send a message to the created chat room
+        val testSendMessageData = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        ).get().speech!!
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputEventId = testSendMessageData.id!!
+        val testInputUserId = testCreatedUserData.userid!!
+        val testInputPermanentIfNoReplies = true
+        val testExpectedResult = DeleteEventResponse(
+                kind = Kind.DELETED_COMMENT,
+                permanentdelete = true,
+                event = testSendMessageData.copy(
+                        deleted = true
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatService.permanentlyDeleteEvent(
+                chatRoomId = testInputChatRoomId,
+                eventId = testInputEventId,
+                userid = testInputUserId,
+                permanentifnoreplies = testInputPermanentIfNoReplies
+        ).get()
+
+        // THEN
+        println(
+                "`Remove a Message - Permanently Delete`() -> testActualResult = \n" +
+                        json.stringify(
+                                DeleteEventResponse.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.event?.id == testExpectedResult.event?.id }
+        assertTrue { testActualResult.event?.deleted == testExpectedResult.event?.deleted }
+        assertTrue { testActualResult.event?.userid == testExpectedResult.event?.userid }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `O) Remove a Message - Logically Delete`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = testUserData.handle,
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get()
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        ).get()
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send a message to the created chat room
+        val testSendMessageData = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        ).get().speech!!
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputEventId = testSendMessageData.id!!
+        val testInputUserId = testCreatedUserData.userid!!
+        val testInputPermanentIfNoReplies = false
+        val testExpectedResult = DeleteEventResponse(
+                kind = Kind.DELETED_COMMENT,
+                permanentdelete = false,
+                event = testSendMessageData.copy(
+                        deleted = false
+                )
+        )
+
+        // WHEN
+        val testActualResult = chatService.flagEventLogicallyDeleted(
+                chatRoomId = testInputChatRoomId,
+                eventId = testInputEventId,
+                userid = testInputUserId,
+                permanentifnoreplies = testInputPermanentIfNoReplies
+        ).get()
+
+        // THEN
+        println(
+                "`Remove a Message - Logically Delete`() -> testActualResult = \n" +
+                        json.stringify(
+                                DeleteEventResponse.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.event?.id == testExpectedResult.event?.id }
+        assertTrue { testActualResult.event?.deleted == testExpectedResult.event?.deleted }
+        assertTrue { testActualResult.event?.userid == testExpectedResult.event?.userid }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
     }
 
     @Test

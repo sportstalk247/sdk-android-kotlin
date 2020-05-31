@@ -37,8 +37,13 @@ data class ChatEvent(
         val customfield2: String? = null,
         val replyto: ChatEvent? = null,
         val parentid: String? = null,
-        /*val hierarchy: List<String> = listOf(),*/
+        val hierarchy: List<String> = listOf(),
+        val depth: Int? = null,
         val edited: Boolean? = null,
+        /*
+        * If a moderator changes the contents of the event, this is set to true.
+        */
+        val editedbymoderator: Boolean? = null,
         val deleted: Boolean? = null,
         val active: Boolean? = null,
         /*val mutedby: List<String> = listOf(),*/
@@ -48,10 +53,6 @@ data class ChatEvent(
         * If internal censor modifies the body this flag is set to true.
         */
         val censored: Boolean? = null,
-        /*
-        * If a moderator changes the contents of the event, this is set to true.
-        */
-        val editedbymoderator: Boolean? = null,
         val likecount: Long? = null,
         val replycount: Long? = null,
         val reactions: List<ChatEventReaction> = listOf(),
