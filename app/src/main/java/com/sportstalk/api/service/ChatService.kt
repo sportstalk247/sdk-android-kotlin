@@ -206,7 +206,7 @@ interface ChatService {
             userid: String,
             deleted: Boolean,
             permanentifnoreplies: Boolean? = null
-    ): CompletableFuture<ChatEvent>
+    ): CompletableFuture<DeleteEventResponse>
     /**
      * Convenience Function to Remove Message where `deleted` = true and `permanentifnoreplies` = true
      */
@@ -215,7 +215,7 @@ interface ChatService {
             eventId: String,
             userid: String,
             permanentifnoreplies: Boolean? = null
-    ): CompletableFuture<ChatEvent>
+    ): CompletableFuture<DeleteEventResponse>
     /**
      * Convenience Function to Remove Message where `deleted` = false and `permanentifnoreplies` = false
      */
@@ -224,7 +224,7 @@ interface ChatService {
             eventId: String,
             userid: String,
             permanentifnoreplies: Boolean? = null
-    ): CompletableFuture<ChatEvent>
+    ): CompletableFuture<DeleteEventResponse>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/report

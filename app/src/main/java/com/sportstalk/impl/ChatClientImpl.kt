@@ -147,7 +147,7 @@ constructor(
                     cursor = cursor
             )
 
-    override fun removeEvent(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
+    override fun removeEvent(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
             chatService.removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -156,7 +156,7 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
+    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
             chatService.permanentlyDeleteEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -164,7 +164,7 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<ChatEvent> =
+    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
             chatService.flagEventLogicallyDeleted(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
