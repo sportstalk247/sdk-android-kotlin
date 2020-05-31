@@ -14,7 +14,16 @@ data class ChatEvent(
         val id: String? = null,
         val roomid: String? = null,
         val body: String? = null,
+        /*
+        * If event is modified, the original body value will be saved here. Empty if unmodified.
+        */
+        val originalbody: String? = null,
         val added: String? = null, /* ISODateTime Format */
+        /*
+        * Updates when event changes.
+        * - ISODateTime Format
+        */
+        val whenmodified: String? = null,
         val ts: Long? = null,
         /** [EventType] */
         val eventtype: String? = null,
@@ -35,6 +44,14 @@ data class ChatEvent(
         /*val mutedby: List<String> = listOf(),*/
         val shadowban: Boolean? = null,
         /*val hashtags: List<String> = listOf(),*/
+        /*
+        * If internal censor modifies the body this flag is set to true.
+        */
+        val censored: Boolean? = null,
+        /*
+        * If a moderator changes the contents of the event, this is set to true.
+        */
+        val editedbymoderator: Boolean? = null,
         val likecount: Long? = null,
         val replycount: Long? = null,
         val reactions: List<ChatEventReaction> = listOf(),
