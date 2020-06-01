@@ -14,7 +14,7 @@ import java.util.concurrent.CompletableFuture
 class ChatClientImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
-        private val config: ClientConfig
+        config: ClientConfig
 ) : ChatClient {
 
     private val chatService: ChatService = ServiceFactory.RestApi.Chat.get(config)
@@ -38,6 +38,9 @@ constructor(
 
     override val roomSubscriptions: MutableSet<String>
         get() = chatService.roomSubscriptions
+
+    override val chatRoomEventCursor: HashMap<String, String>
+        get() = chatService.chatRoomEventCursor
 
     override fun startListeningToChatUpdates(forRoomId: String) =
             chatService.startListeningToChatUpdates(forRoomId)
@@ -74,17 +77,35 @@ constructor(
                     chatRoomId = chatRoomId,
                     request = request
             )
+                    .handle { response, err ->
+                        if(err != null) throw err
+                        // Set current chat room
+                        _currentRoom = response.room
+                        return@handle response
+                    }
 
     override fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<JoinChatRoomResponse> =
             chatService.joinRoom(
                     chatRoomIdOrLabel = chatRoomIdOrLabel
             )
+                    .handle { response, err ->
+                        if(err != null) throw err
+                        // Set current chat room
+                        _currentRoom = response.room
+                        return@handle response
+                    }
 
     override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): CompletableFuture<JoinChatRoomResponse> =
             chatService.joinRoomByCustomId(
                     chatRoomCustomId = chatRoomCustomId,
                     request = request
             )
+                    .handle { response, err ->
+                        if(err != null) throw err
+                        // Set current chat room
+                        _currentRoom = response.room
+                        return@handle response
+                    }
 
     override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListChatRoomParticipantsResponse> =
             chatService.listRoomParticipants(
@@ -98,6 +119,12 @@ constructor(
                     chatRoomId = chatRoomId,
                     userId = userId
             )
+                    .handle { response, err ->
+                        if(err != null) throw err
+                        // Unset currently active chat room
+                        _currentRoom = null
+                        return@handle response
+                    }
 
     override fun getUpdates(chatRoomId: String, cursor: String?): CompletableFuture<GetUpdatesResponse> =
             chatService.getUpdates(

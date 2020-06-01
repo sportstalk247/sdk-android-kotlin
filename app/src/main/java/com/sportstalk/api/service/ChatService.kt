@@ -13,6 +13,11 @@ interface ChatService {
     val roomSubscriptions: MutableSet<String>
 
     /**
+     * Chatroom ID paired with current event cursor
+     */
+    val chatRoomEventCursor: HashMap<String, String>
+
+    /**
      * Signals the START of event updates being emitted
      */
     fun startListeningToChatUpdates(forRoomId: String)

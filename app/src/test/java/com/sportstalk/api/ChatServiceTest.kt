@@ -695,6 +695,9 @@ class ChatServiceTest {
         assertTrue { testActualResult.room?.name == testExpectedResult.room?.name }
         assertTrue { testActualResult.room?.description == testExpectedResult.room?.description }
 
+        // Also, assert that ChatRoomEventCursor is currently stored
+        assertTrue { testActualResult.eventscursor?.cursor == chatService.chatRoomEventCursor[testInputChatRoomId] }
+
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)
         // Perform Delete Test User
@@ -742,6 +745,12 @@ class ChatServiceTest {
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.user == null }
         assertTrue { testActualResult.room == testCreatedChatRoomData }
+
+        // Also, assert that ChatRoomEventCursor is currently stored
+        assertTrue { testActualResult.eventscursor?.cursor == chatService.chatRoomEventCursor[testCreatedChatRoomData.id!!] }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
     }
 
     @Test
@@ -843,6 +852,9 @@ class ChatServiceTest {
         assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
         assertTrue { testActualResult.user == testExpectedResult.user }
         assertTrue { testActualResult.room?.customid == testCreatedChatRoomData.customid }
+
+        // Also, assert that ChatRoomEventCursor is currently stored
+        assertTrue { testActualResult.eventscursor?.cursor?.takeIf { it.isNotEmpty() } == chatService.chatRoomEventCursor[testCreatedChatRoomData.id!!] }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testActualResult.room?.id)
