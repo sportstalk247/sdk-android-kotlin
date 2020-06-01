@@ -26,6 +26,8 @@ constructor(
 
     override val roomSubscriptions: MutableSet<String> = mutableSetOf()
 
+    override val chatRoomEventCursor: HashMap<String, String> = hashMapOf()
+
     override fun startListeningToChatUpdates(forRoomId: String) {
         roomSubscriptions.add(forRoomId)
     }
@@ -85,6 +87,15 @@ constructor(
                     request = request
             )
                     .handleSdkResponse(json)
+                    .handle { response, err ->
+                        if(err != null) throw err
+
+                        // Internally store chatroom event cursor
+                        val cursor = response.eventscursor?.cursor ?: ""
+                        chatRoomEventCursor[chatRoomId] = cursor
+
+                        return@handle response
+                    }
 
     override fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<JoinChatRoomResponse> =
             service.joinRoom(
@@ -92,6 +103,16 @@ constructor(
                     chatRoomId = chatRoomIdOrLabel
             )
                     .handleSdkResponse(json)
+                    .handle { response, err ->
+                        if(err != null) throw err
+
+                        // Internally store chatroom event cursor
+                        val roomId = response.room?.id ?: return@handle response
+                        val cursor = response.eventscursor?.cursor ?: ""
+                        chatRoomEventCursor[roomId] = cursor
+
+                        return@handle response
+                    }
 
     override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): CompletableFuture<JoinChatRoomResponse> =
             service.joinRoomByCustomId(
@@ -100,6 +121,15 @@ constructor(
                     request = request
             )
                     .handleSdkResponse(json)
+                    .handle { response, err ->
+                        if(err != null) throw err
+
+                        // Internally store chatroom event cursor
+                        val cursor = response.eventscursor?.cursor ?: ""
+                        chatRoomEventCursor[chatRoomCustomId] = cursor
+
+                        return@handle response
+                    }
 
     override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListChatRoomParticipantsResponse> =
             service.listRoomParticipants(
@@ -121,6 +151,8 @@ constructor(
                             throw SportsTalkException(message = err.message, err = err)
                         } else {
                             if (resp.isSuccessful) {
+                                // Remove internally stored event cursor
+                                chatRoomEventCursor.remove(chatRoomId)
                                 Any()
                             } else {
                                 throw resp.errorBody()?.string()?.let { errBodyStr ->

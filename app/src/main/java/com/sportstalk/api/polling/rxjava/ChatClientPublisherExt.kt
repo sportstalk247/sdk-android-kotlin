@@ -13,7 +13,6 @@ import io.reactivex.Flowable
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.future.await
-import org.reactivestreams.Publisher
 
 /**
  * Returns an instance of reactive RxJava Publisher which emits Event Updates received at
@@ -34,14 +33,12 @@ fun ChatClient.allEventUpdates(
         onReply: OnReply? = null,
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
-): Publisher<List<ChatEvent>> {
-    val lastEventTs = BehaviorSubject.createDefault(-1L)
+): Flowable<List<ChatEvent>> {
     /*LiveDataReactiveStreams.toPublisher(
                 lifecycleOwner,
                 allEventUpdatesLiveData(chatRoomId, eventTypeFilter, lifecycleOwner)
         )*/
     return Flowable.create<GetUpdatesResponse>({ emitter ->
-
         val scope = lifecycleOwner.lifecycle.coroutineScope
         // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
         val getUpdateAction = Runnable {
@@ -52,7 +49,11 @@ fun ChatClient.allEventUpdates(
                     if (roomSubscriptions.contains(chatRoomId)) {
                         // Perform GET UPDATES operation
                         val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                            getUpdates(chatRoomId = chatRoomId)
+                            getUpdates(
+                                    chatRoomId = chatRoomId,
+                                    // Apply event cursor
+                                    cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                            )
                                     // Awaits for completion of the completion stage without blocking a thread
                                     .await()
                         }
@@ -78,17 +79,13 @@ fun ChatClient.allEventUpdates(
         )
 
     }, BackpressureStrategy.LATEST)
-            .map { response ->
-                response.events
-                        // Filter out redundant events that were already emitted prior
-                        .filter { event ->
-                            (event.ts ?: 0L) > lastEventTs.value!!
-                        }
-                        .also { events ->
-                            // Update lastEventTs with the latest ts
-                            lastEventTs.onNext(events.maxBy { it.ts ?: 0L }?.ts ?: 0L)
-                        }
+            .doOnNext { response ->
+                // Update internally stored chatroom event cursor
+                response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
+                    chatRoomEventCursor[chatRoomId] = cursor
+                }
             }
+            .map { it.events }
             .doOnNext { events ->
                 events.forEach { chatEvent ->
                     when (chatEvent.eventtype) {

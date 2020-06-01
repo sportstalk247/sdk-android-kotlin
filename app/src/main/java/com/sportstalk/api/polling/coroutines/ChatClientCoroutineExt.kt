@@ -37,7 +37,6 @@ fun ChatClient.allEventUpdates(
         onPurgeEvent: OnPurgeEvent? = null
 ): Flow<List<ChatEvent>> = flow<List<ChatEvent>> {
     val emitter = ConflatedBroadcastChannel<GetUpdatesResponse>()
-    val lastEventTs = ConflatedBroadcastChannel<Long>(-1L)
 
     val scope = lifecycleOwner.lifecycle.coroutineScope
     // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
@@ -48,7 +47,11 @@ fun ChatClient.allEventUpdates(
             if (roomSubscriptions.contains(chatRoomId)) {
                 // Perform GET UPDATES operation
                 val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                    getUpdates(chatRoomId = chatRoomId)
+                    getUpdates(
+                            chatRoomId = chatRoomId,
+                            // Apply event cursor
+                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                    )
                             // Awaits for completion of the completion stage without blocking a thread
                             .await()
                 }
@@ -73,17 +76,13 @@ fun ChatClient.allEventUpdates(
     // Emit Response
     emitAll(
             emitter.asFlow()
-                    .map { response ->
-                        response.events
-                                // Filter out redundant events that were already emitted prior
-                                .filter { event ->
-                                    (event.ts ?: 0L) > lastEventTs.value
-                                }
-                                .also { events ->
-                                    // Update lastEventTs with the latest ts
-                                    lastEventTs.sendBlocking(events.maxBy { it.ts ?: 0L }?.ts ?: 0L)
-                                }
+                    .onEach { response ->
+                        // Update internally stored chatroom event cursor
+                        response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
+                            chatRoomEventCursor[chatRoomId] = cursor
+                        }
                     }
+                    .map { it.events }
     )
 
 }
