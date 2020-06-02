@@ -121,3 +121,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-reactivestreams:$androidXLifecycleVersion"
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
