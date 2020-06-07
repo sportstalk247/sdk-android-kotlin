@@ -59,7 +59,13 @@ data class ChatEvent(
         /** [ModerationType] */
         val moderation: String? = null /* "na" */,
         val reports: List<ChatEventReport> = listOf()
-) : Parcelable
+) : Parcelable {
+    /**
+     * Time bound cursor that you can use with listPreviousEvents or getUpdates
+     */
+    fun getEventCursor(): String =
+            ts?.toString(10) ?: ""
+}
 
 @Parcelize
 @Serializable
