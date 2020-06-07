@@ -9,6 +9,5 @@ data class GetUpdatesResponse(
         val cursor: String? = null,
         val more: Boolean? = null,
         val itemcount: Long? = null,
-        val room: ChatRoom? = null,
         val events: List<ChatEvent> = listOf()
 )
