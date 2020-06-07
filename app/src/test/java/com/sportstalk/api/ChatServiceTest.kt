@@ -1138,7 +1138,6 @@ class ChatServiceTest {
                 /*cursor = "",*/
                 more = false,
                 itemcount = 1,
-                room = testCreatedChatRoomData,
                 events = listOf(testSendMessageData)
         )
 
@@ -1160,7 +1159,6 @@ class ChatServiceTest {
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.itemcount!! >= testExpectedResult.itemcount!! }
         assertTrue { testActualResult.more == testExpectedResult.more }
-        assertTrue { testActualResult.room?.id == testExpectedResult.room?.id }
         assertTrue {
             testActualResult.events.any { ev ->
                 ev.id == testSendMessageData.id
