@@ -21,7 +21,7 @@ constructor(
 
     private val service: UsersRetrofitService = mRetrofit.create()
 
-    override fun createOrUpdateUser(request: CreateUpdateUserRequest): CompletableFuture<User> =
+    override suspend fun createOrUpdateUser(request: CreateUpdateUserRequest): User =
             service.createOrUpdateUser(
                     appId = appId,
                     userId = request.userid,
@@ -29,21 +29,21 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun deleteUser(userId: String): CompletableFuture<DeleteUserResponse> =
+    override suspend fun deleteUser(userId: String): DeleteUserResponse =
             service.deleteUser(
                     appId = appId,
                     userId = URLEncoder.encode(userId, Charsets.UTF_8.name())
             )
                     .handleSdkResponse(json)
 
-    override fun getUserDetails(userId: String): CompletableFuture<User> =
+    override suspend fun getUserDetails(userId: String): User =
             service.getUserDetails(
                     appId = appId,
                     userId = userId
             )
                     .handleSdkResponse(json)
 
-    override fun listUsers(limit: Int?, cursor: String?): CompletableFuture<ListUsersResponse> =
+    override suspend fun listUsers(limit: Int?, cursor: String?): ListUsersResponse =
             service.listUsers(
                     appId = appId,
                     cursor = cursor,
@@ -51,7 +51,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun setBanStatus(userId: String, banned: Boolean): CompletableFuture<User> =
+    override suspend fun setBanStatus(userId: String, banned: Boolean): User =
             service.setBanStatus(
                     appId = appId,
                     userId = URLEncoder.encode(userId, Charsets.UTF_8.name()),
@@ -59,13 +59,13 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun searchUsers(
+    override suspend fun searchUsers(
             handle: String?,
             name: String?,
             userid: String?,
             limit: Int?,
             cursor: String?
-    ): CompletableFuture<ListUsersResponse> =
+    ): ListUsersResponse =
             service.searchUsers(
                     appId = appId,
                     request = SearchUsersRequest(

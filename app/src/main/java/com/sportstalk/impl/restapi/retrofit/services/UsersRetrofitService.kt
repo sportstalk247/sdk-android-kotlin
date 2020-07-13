@@ -10,42 +10,42 @@ import java.util.concurrent.CompletableFuture
 interface UsersRetrofitService {
 
     @POST("{appId}/user/users/{userId}")
-    fun createOrUpdateUser(
+    suspend fun createOrUpdateUser(
             @Path("appId") appId: String,
             @Path("userId") userId: String,
             @Body request: CreateUpdateUserRequest
-    ): CompletableFuture<Response<ApiResponse<User>>>
+    ): Response<ApiResponse<User>>
 
     @DELETE("{appId}/user/users/{userId}")
-    fun deleteUser(
+    suspend fun deleteUser(
             @Path("appId") appId: String,
             @Path(value = "userId", encoded = true) userId: String
-    ): CompletableFuture<Response<ApiResponse<DeleteUserResponse>>>
+    ): Response<ApiResponse<DeleteUserResponse>>
 
     @GET("{appId}/user/users/{userId}")
-    fun getUserDetails(
+    suspend fun getUserDetails(
             @Path("appId") appId: String,
             @Path("userId") userId: String
-    ): CompletableFuture<Response<ApiResponse<User>>>
+    ): Response<ApiResponse<User>>
 
     @GET("{appId}/user/users/")
-    fun listUsers(
+    suspend fun listUsers(
             @Path("appId") appId: String,
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null
-    ): CompletableFuture<Response<ApiResponse<ListUsersResponse>>>
+    ): Response<ApiResponse<ListUsersResponse>>
 
     @POST("{appId}/user/users/{userId}/ban")
-    fun setBanStatus(
+    suspend fun setBanStatus(
             @Path("appId") appId: String,
             @Path(value = "userId", encoded = true) userId: String,
             @Body request: BanUserRequest
-    ): CompletableFuture<Response<ApiResponse<User>>>
+    ): Response<ApiResponse<User>>
 
     @POST("{appId}/user/search")
-    fun searchUsers(
+    suspend fun searchUsers(
             @Path("appId") appId: String,
             @Body request: SearchUsersRequest
-    ): CompletableFuture<Response<ApiResponse<ListUsersResponse>>>
+    ): Response<ApiResponse<ListUsersResponse>>
 
 }

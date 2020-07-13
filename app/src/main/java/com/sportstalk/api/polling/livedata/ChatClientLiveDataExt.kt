@@ -47,8 +47,6 @@ fun ChatClient.allEventUpdates(
                             // Apply event cursor
                             cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
                     )
-                            // Awaits for completion of the completion stage without blocking a thread
-                            .await()
                 }
 
                 // Emit response value

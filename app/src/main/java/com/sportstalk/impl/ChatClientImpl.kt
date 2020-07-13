@@ -8,7 +8,6 @@ import com.sportstalk.api.service.ChatModerationService
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
-import java.util.concurrent.CompletableFuture
 
 
 class ChatClientImpl
@@ -48,125 +47,115 @@ constructor(
     override fun stopListeningToChatUpdates(forRoomId: String) =
             chatService.stopListeningToChatUpdates(forRoomId)
 
-    override fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ChatRoom> =
+    override suspend fun createRoom(request: CreateChatRoomRequest): ChatRoom =
             chatService.createRoom(request = request)
 
-    override fun getRoomDetails(chatRoomId: String): CompletableFuture<ChatRoom> =
+    override suspend fun getRoomDetails(chatRoomId: String): ChatRoom =
             chatService.getRoomDetails(chatRoomId = chatRoomId)
 
-    override fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ChatRoom> =
+    override suspend fun getRoomDetailsByCustomId(chatRoomCustomId: String): ChatRoom =
             chatService.getRoomDetailsByCustomId(chatRoomCustomId = chatRoomCustomId)
 
-    override fun deleteRoom(chatRoomId: String): CompletableFuture<DeleteChatRoomResponse> =
+    override suspend fun deleteRoom(chatRoomId: String): DeleteChatRoomResponse =
             chatService.deleteRoom(chatRoomId = chatRoomId)
 
-    override fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ChatRoom> =
+    override suspend fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): ChatRoom =
             chatService.updateRoom(
                     chatRoomId = chatRoomId,
                     request = request
             )
 
-    override fun listRooms(limit: Int?, cursor: String?): CompletableFuture<ListRoomsResponse> =
+    override suspend fun listRooms(limit: Int?, cursor: String?): ListRoomsResponse =
             chatService.listRooms(
                     limit = limit,
                     cursor = cursor
             )
 
-    override fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<JoinChatRoomResponse> =
+    override suspend fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
             chatService.joinRoom(
                     chatRoomId = chatRoomId,
                     request = request
-            )
-                    .handle { response, err ->
-                        if(err != null) throw err
-                        // Set current chat room
-                        _currentRoom = response.room
-                        return@handle response
-                    }
+            ).also { resp ->
+                _currentRoom = resp.room
+            }
 
-    override fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<JoinChatRoomResponse> =
+    override suspend fun joinRoom(chatRoomIdOrLabel: String): JoinChatRoomResponse =
             chatService.joinRoom(
                     chatRoomIdOrLabel = chatRoomIdOrLabel
             )
-                    .handle { response, err ->
-                        if(err != null) throw err
+                    .also { resp ->
                         // Set current chat room
-                        _currentRoom = response.room
-                        return@handle response
+                        _currentRoom = resp.room
                     }
 
-    override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): CompletableFuture<JoinChatRoomResponse> =
+    override suspend fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
             chatService.joinRoomByCustomId(
                     chatRoomCustomId = chatRoomCustomId,
                     request = request
             )
-                    .handle { response, err ->
-                        if(err != null) throw err
+                    .also { resp ->
                         // Set current chat room
-                        _currentRoom = response.room
-                        return@handle response
+                        _currentRoom = resp.room
                     }
 
-    override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListChatRoomParticipantsResponse> =
+    override suspend fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): ListChatRoomParticipantsResponse =
             chatService.listRoomParticipants(
                     chatRoomId = chatRoomId,
                     limit = limit,
                     cursor = cursor
             )
 
-    override fun exitRoom(chatRoomId: String, userId: String): CompletableFuture<Any> =
+    override suspend fun exitRoom(chatRoomId: String, userId: String) =
             chatService.exitRoom(
                     chatRoomId = chatRoomId,
                     userId = userId
             )
-                    .handle { response, err ->
-                        if(err != null) throw err
+                    .also { resp ->
                         // Unset currently active chat room
                         _currentRoom = null
-                        return@handle response
                     }
 
-    override fun getUpdates(chatRoomId: String, cursor: String?): CompletableFuture<GetUpdatesResponse> =
+    override suspend fun getUpdates(chatRoomId: String, cursor: String?): GetUpdatesResponse =
             chatService.getUpdates(
                     chatRoomId = chatRoomId,
                     cursor = cursor
             )
 
-    override fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+    override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             chatService.listPreviousEvents(
                     chatRoomId = chatRoomId,
                     limit = limit,
                     cursor = cursor
             )
 
-    override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+    override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             chatService.listEventsHistory(
                     chatRoomId = chatRoomId,
                     limit = limit,
                     cursor = cursor
             )
 
-    override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): CompletableFuture<ExecuteChatCommandResponse> =
+    override suspend fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): ExecuteChatCommandResponse =
             chatService.executeChatCommand(
                     chatRoomId = chatRoomId,
                     request = request
             )
 
-    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): CompletableFuture<ExecuteChatCommandResponse> =
+    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ExecuteChatCommandResponse =
             chatService.sendThreadedReply(
                     chatRoomId = chatRoomId,
                     replyTo = replyTo,
                     request = request
             )
 
-    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): CompletableFuture<ChatEvent> =
+    override suspend fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): ChatEvent =
             chatService.sendQuotedReply(
                     chatRoomId = chatRoomId,
                     replyTo = replyTo,
                     request = request
             )
 
-    override fun listMessagesByUser(chatRoomId: String, userId: String, limit: Int?, cursor: String?): CompletableFuture<ListMessagesByUser> =
+    override suspend fun listMessagesByUser(chatRoomId: String, userId: String, limit: Int?, cursor: String?): ListMessagesByUser =
             chatService.listMessagesByUser(
                     chatRoomId = chatRoomId,
                     userId = userId,
@@ -174,7 +163,7 @@ constructor(
                     cursor = cursor
             )
 
-    override fun removeEvent(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
+    override suspend fun removeEvent(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
             chatService.removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -183,7 +172,7 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
+    override suspend fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): DeleteEventResponse =
             chatService.permanentlyDeleteEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -191,7 +180,7 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
+    override suspend fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): DeleteEventResponse =
             chatService.flagEventLogicallyDeleted(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -199,27 +188,27 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun reportMessage(chatRoomId: String, eventId: String, request: ReportMessageRequest): CompletableFuture<ChatEvent> =
+    override suspend fun reportMessage(chatRoomId: String, eventId: String, request: ReportMessageRequest): ChatEvent =
             chatService.reportMessage(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
             )
 
-    override fun reactToEvent(chatRoomId: String, eventId: String, request: ReactToAMessageRequest): CompletableFuture<ChatEvent> =
+    override suspend fun reactToEvent(chatRoomId: String, eventId: String, request: ReactToAMessageRequest): ChatEvent =
             chatService.reactToEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
             )
 
-    override fun approveMessage(eventId: String, approve: Boolean): CompletableFuture<ChatEvent> =
+    override suspend fun approveMessage(eventId: String, approve: Boolean): ChatEvent =
             moderationService.approveMessage(
                     eventId = eventId,
                     approve = approve
             )
 
-    override fun listMessagesNeedingModeration(roomId: String?, limit: Int?, cursor: String?): CompletableFuture<ListMessagesNeedingModerationResponse> =
+    override suspend fun listMessagesNeedingModeration(roomId: String?, limit: Int?, cursor: String?): ListMessagesNeedingModerationResponse =
             moderationService.listMessagesNeedingModeration(
                     roomId = roomId,
                     limit = limit,

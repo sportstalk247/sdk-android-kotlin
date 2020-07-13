@@ -36,35 +36,35 @@ constructor(
         roomSubscriptions.remove(forRoomId)
     }
 
-    override fun createRoom(request: CreateChatRoomRequest): CompletableFuture<ChatRoom> =
+    override suspend fun createRoom(request: CreateChatRoomRequest): ChatRoom =
             service.createRoom(
                     appId = appId,
                     request = request
             )
                     .handleSdkResponse(json)
 
-    override fun getRoomDetails(chatRoomId: String): CompletableFuture<ChatRoom> =
+    override suspend fun getRoomDetails(chatRoomId: String): ChatRoom =
             service.getRoomDetails(
                     appId = appId,
                     chatRoomId = chatRoomId
             )
                     .handleSdkResponse(json)
 
-    override fun getRoomDetailsByCustomId(chatRoomCustomId: String): CompletableFuture<ChatRoom> =
+    override suspend fun getRoomDetailsByCustomId(chatRoomCustomId: String): ChatRoom =
             service.getRoomDetailsByCustomId(
                     appId = appId,
                     chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name())
             )
                     .handleSdkResponse(json)
 
-    override fun deleteRoom(chatRoomId: String): CompletableFuture<DeleteChatRoomResponse> =
+    override suspend fun deleteRoom(chatRoomId: String): DeleteChatRoomResponse =
             service.deleteRoom(
                     appId = appId,
                     chatRoomId = URLEncoder.encode(chatRoomId, Charsets.UTF_8.name())
             )
                     .handleSdkResponse(json)
 
-    override fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): CompletableFuture<ChatRoom> =
+    override suspend fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): ChatRoom =
             service.updateRoom(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -72,7 +72,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun listRooms(limit: Int?, cursor: String?): CompletableFuture<ListRoomsResponse> =
+    override suspend fun listRooms(limit: Int?, cursor: String?): ListRoomsResponse =
             service.listRooms(
                     appId = appId,
                     limit = limit,
@@ -80,58 +80,46 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): CompletableFuture<JoinChatRoomResponse> =
+    override suspend fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
             service.joinRoom(
                     appId = appId,
                     chatRoomId = chatRoomId,
                     request = request
             )
                     .handleSdkResponse(json)
-                    .handle { response, err ->
-                        if(err != null) throw err
-
+                    .also { resp ->
                         // Internally store chatroom event cursor
-                        val cursor = response.eventscursor?.cursor ?: ""
+                        val cursor = resp.eventscursor?.cursor ?: ""
                         chatRoomEventCursor[chatRoomId] = cursor
-
-                        return@handle response
                     }
 
-    override fun joinRoom(chatRoomIdOrLabel: String): CompletableFuture<JoinChatRoomResponse> =
+    override suspend fun joinRoom(chatRoomIdOrLabel: String): JoinChatRoomResponse =
             service.joinRoom(
                     appId = appId,
                     chatRoomId = chatRoomIdOrLabel
             )
                     .handleSdkResponse(json)
-                    .handle { response, err ->
-                        if(err != null) throw err
-
+                    .also { resp ->
                         // Internally store chatroom event cursor
-                        val roomId = response.room?.id ?: return@handle response
-                        val cursor = response.eventscursor?.cursor ?: ""
+                        val roomId = resp.room?.id ?: return@also
+                        val cursor = resp.eventscursor?.cursor ?: ""
                         chatRoomEventCursor[roomId] = cursor
-
-                        return@handle response
                     }
 
-    override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): CompletableFuture<JoinChatRoomResponse> =
+    override suspend fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
             service.joinRoomByCustomId(
                     appId = appId,
                     chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name()),
                     request = request
             )
                     .handleSdkResponse(json)
-                    .handle { response, err ->
-                        if(err != null) throw err
-
+                    .also { resp ->
                         // Internally store chatroom event cursor
-                        val cursor = response.eventscursor?.cursor ?: ""
+                        val cursor = resp.eventscursor?.cursor ?: ""
                         chatRoomEventCursor[chatRoomCustomId] = cursor
-
-                        return@handle response
                     }
 
-    override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListChatRoomParticipantsResponse> =
+    override suspend fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): ListChatRoomParticipantsResponse =
             service.listRoomParticipants(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -140,63 +128,54 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun exitRoom(chatRoomId: String, userId: String): CompletableFuture<Any> =
-            service.exitRoom(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    request = ExitChatRoomRequest(userid = userId)
-            )
-                    .handle { resp, err ->
-                        if (err != null) {
-                            throw SportsTalkException(message = err.message, err = err)
-                        } else {
-                            if (resp.isSuccessful) {
-                                // Remove internally stored event cursor
-                                chatRoomEventCursor.remove(chatRoomId)
-                                Any()
-                            } else {
-                                throw resp.errorBody()?.string()?.let { errBodyStr ->
-                                    json.parse(SportsTalkException.serializer(), errBodyStr)
-                                }
-                                        ?: SportsTalkException(
-                                                kind = Kind.API,
-                                                message = resp.message(),
-                                                code = resp.code()
-                                        )
-                            }
-                        }
-                    }
+    override suspend fun exitRoom(chatRoomId: String, userId: String) {
+        val response = service.exitRoom(
+                appId = appId,
+                chatRoomId = chatRoomId,
+                request = ExitChatRoomRequest(userid = userId)
+        )
 
-    override fun getUpdates(
+        if (response.isSuccessful) {
+            // Remove internally stored event cursor
+            chatRoomEventCursor.remove(chatRoomId)
+        } else {
+            throw response.errorBody()?.string()?.let { errBodyStr ->
+                json.parse(SportsTalkException.serializer(), errBodyStr)
+            }
+                    ?: SportsTalkException(
+                            kind = Kind.API,
+                            message = response.message(),
+                            code = response.code()
+                    )
+        }
+    }
+
+    override suspend fun getUpdates(
             chatRoomId: String,
             cursor: String?
-    ): CompletableFuture<GetUpdatesResponse> =
-            service.getUpdates(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    cursor = cursor
-            )
-                    .handle { resp, err ->
-                        if (err != null) {
-                            throw SportsTalkException(message = err.message, err = err)
-                        } else {
-                            val respBody = resp.body()
-                            if (resp.isSuccessful && respBody?.data != null) {
-                                respBody.data
-                            } else {
-                                throw resp.errorBody()?.string()?.let { errBodyStr ->
-                                    json.parse(SportsTalkException.serializer(), errBodyStr)
-                                }
-                                        ?: SportsTalkException(
-                                                kind = respBody?.kind ?: Kind.API,
-                                                message = respBody?.message ?: resp.message(),
-                                                code = respBody?.code ?: resp.code()
-                                        )
-                            }
-                        }
-                    }
+    ): GetUpdatesResponse {
+        val response = service.getUpdates(
+                appId = appId,
+                chatRoomId = chatRoomId,
+                cursor = cursor
+        )
 
-    override fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+        val respBody = response.body()
+        return if (response.isSuccessful && respBody?.data != null) {
+            respBody.data
+        } else {
+            throw response.errorBody()?.string()?.let { errBodyStr ->
+                json.parse(SportsTalkException.serializer(), errBodyStr)
+            }
+                    ?: SportsTalkException(
+                            kind = respBody?.kind ?: Kind.API,
+                            message = respBody?.message ?: response.message(),
+                            code = respBody?.code ?: response.code()
+                    )
+        }
+    }
+
+    override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             service.listPreviousEvents(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -205,7 +184,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): CompletableFuture<ListEvents> =
+    override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             service.listEventsHistory(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -214,10 +193,10 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun executeChatCommand(
+    override suspend fun executeChatCommand(
             chatRoomId: String,
             request: ExecuteChatCommandRequest
-    ): CompletableFuture<ExecuteChatCommandResponse> =
+    ): ExecuteChatCommandResponse =
             service.executeChatCommand(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -225,7 +204,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): CompletableFuture<ExecuteChatCommandResponse> =
+    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ExecuteChatCommandResponse =
             service.sendThreadedReply(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -234,7 +213,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): CompletableFuture<ChatEvent> =
+    override suspend fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): ChatEvent =
             service.sendQuotedReply(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -243,12 +222,12 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun listMessagesByUser(
+    override suspend fun listMessagesByUser(
             chatRoomId: String,
             userId: String,
             limit: Int?,
             cursor: String?
-    ): CompletableFuture<ListMessagesByUser> =
+    ): ListMessagesByUser =
             service.listMessagesByUser(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -258,13 +237,13 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun removeEvent(
+    override suspend fun removeEvent(
             chatRoomId: String,
             eventId: String,
             userid: String,
             deleted: Boolean,
             permanentifnoreplies: Boolean?
-    ): CompletableFuture<DeleteEventResponse> =
+    ): DeleteEventResponse =
             service.setMessageAsDeleted(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -275,7 +254,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
+    override suspend fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): DeleteEventResponse =
             removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -284,7 +263,7 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): CompletableFuture<DeleteEventResponse> =
+    override suspend fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): DeleteEventResponse =
             removeEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -293,11 +272,11 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override fun reportMessage(
+    override suspend fun reportMessage(
             chatRoomId: String,
             eventId: String,
             request: ReportMessageRequest
-    ): CompletableFuture<ChatEvent> =
+    ): ChatEvent =
             service.reportMessage(
                     appId = appId,
                     chatRoomId = chatRoomId,
@@ -306,11 +285,11 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun reactToEvent(
+    override suspend fun reactToEvent(
             chatRoomId: String,
             eventId: String,
             request: ReactToAMessageRequest
-    ): CompletableFuture<ChatEvent> =
+    ): ChatEvent =
             service.reactMessage(
                     appId = appId,
                     chatRoomId = chatRoomId,

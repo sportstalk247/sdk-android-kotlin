@@ -11,18 +11,18 @@ import java.util.concurrent.CompletableFuture
 interface ChatModerationRetrofitService {
 
     @POST("{appId}/chat/moderation/queues/events/{eventid}/applydecision")
-    fun approveMessage(
+    suspend fun approveMessage(
             @Path("appId") appId: String,
             @Path("eventid") eventId: String,
             @Body request: ApproveMessageRequest
-    ): CompletableFuture<Response<ApiResponse<ChatEvent>>>
+    ): Response<ApiResponse<ChatEvent>>
 
     @GET("{appId}/chat/moderation/queues/events")
-    fun listMessagesNeedingModeration(
+    suspend fun listMessagesNeedingModeration(
             @Path("appId") appId: String,
             @Query("roomId") roomId: String? = null,
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null
-    ): CompletableFuture<Response<ApiResponse<ListMessagesNeedingModerationResponse>>>
+    ): Response<ApiResponse<ListMessagesNeedingModerationResponse>>
 
 }

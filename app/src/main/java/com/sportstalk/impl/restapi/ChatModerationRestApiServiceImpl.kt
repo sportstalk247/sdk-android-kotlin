@@ -23,10 +23,10 @@ constructor(
 
     private val service: ChatModerationRetrofitService = mRetrofit.create()
 
-    override fun approveMessage(
+    override suspend fun approveMessage(
             eventId: String,
             approve: Boolean
-    ): CompletableFuture<ChatEvent> =
+    ): ChatEvent =
             service.approveMessage(
                     appId = appId,
                     eventId = eventId,
@@ -34,7 +34,7 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun listMessagesNeedingModeration(roomId: String?, limit: Int?, cursor: String?): CompletableFuture<ListMessagesNeedingModerationResponse> =
+    override suspend fun listMessagesNeedingModeration(roomId: String?, limit: Int?, cursor: String?): ListMessagesNeedingModerationResponse =
             service.listMessagesNeedingModeration(
                     appId = appId,
                     roomId = roomId,

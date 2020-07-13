@@ -43,7 +43,7 @@ import kotlin.test.assertTrue
 @ImplicitReflectionSerializer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.P])
+@Config(sdk = [Build.VERSION_CODES.KITKAT])
 class ChatModerationServiceTest {
 
     private lateinit var context: Context
@@ -91,20 +91,20 @@ class ChatModerationServiceTest {
     /**
      * Helper function to clean up Test Users from the Backend Server
      */
-    private fun deleteTestUsers(vararg userIds: String?) {
+    private suspend fun deleteTestUsers(vararg userIds: String?) {
         for (id in userIds) {
             id ?: continue
-            userService.deleteUser(userId = id).get()
+            userService.deleteUser(userId = id)
         }
     }
 
     /**
      * Helper function to clean up Test Users from the Backend Server
      */
-    private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
+    private suspend fun deleteTestChatRooms(vararg chatRoomIds: String?) {
         for (id in chatRoomIds) {
             id ?: continue
-            chatService.deleteRoom(chatRoomId = id).get()
+            chatService.deleteRoom(chatRoomId = id)
         }
     }
 
@@ -131,7 +131,6 @@ class ChatModerationServiceTest {
                         eventId = "non-existing-event-id",
                         approve = true
                 )
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(
@@ -152,7 +151,7 @@ class ChatModerationServiceTest {
     }
 
     @Test
-    fun `A) Approve Message`() {
+    fun `A) Approve Message`() = runBlocking {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -163,7 +162,7 @@ class ChatModerationServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
                 // Moderation MUST BE SET to "pre"
@@ -181,7 +180,7 @@ class ChatModerationServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get()
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -192,7 +191,7 @@ class ChatModerationServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputChatRoomId,
                 request = testJoinRoomInputRequest
-        ).get()
+        )
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -202,7 +201,7 @@ class ChatModerationServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).get().speech!!
+        ).speech!!
 
         val testInputRequest = ApproveMessageRequest(
                 approve = true
@@ -215,7 +214,7 @@ class ChatModerationServiceTest {
         val testActualResult = chatModerationService.approveMessage(
                 eventId = testSendMessageData.id!!,
                 approve = testInputRequest.approve
-        ).get()
+        )
 
         // THEN
         println(
@@ -255,7 +254,6 @@ class ChatModerationServiceTest {
                         eventId = testInputNonExistingEventId,
                         approve = true
                 )
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(
@@ -276,7 +274,7 @@ class ChatModerationServiceTest {
     }
 
     @Test
-    fun `B) List Messages Needing Moderation`() {
+    fun `B) List Messages Needing Moderation`() = runBlocking {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -287,7 +285,7 @@ class ChatModerationServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest).get()
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
                 // Moderation MUST BE SET to "pre"
@@ -305,7 +303,7 @@ class ChatModerationServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest).get()
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -315,7 +313,7 @@ class ChatModerationServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputChatRoomId,
                 request = testJoinRoomInputRequest
-        ).get()
+        )
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -325,7 +323,7 @@ class ChatModerationServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).get().speech!!
+        ).speech!!
 
         val testInputRequest = ApproveMessageRequest(
                 approve = true
@@ -336,7 +334,7 @@ class ChatModerationServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatModerationService.listMessagesNeedingModeration().get()
+        val testActualResult = chatModerationService.listMessagesNeedingModeration()
 
         // THEN
         println(

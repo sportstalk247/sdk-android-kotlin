@@ -14,7 +14,6 @@ import com.sportstalk.models.users.DeleteUserResponse
 import com.sportstalk.models.users.ListUsersResponse
 import com.sportstalk.models.users.User
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -40,7 +39,7 @@ import kotlin.test.assertTrue
 @ImplicitReflectionSerializer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.P])
+@Config(sdk = [Build.VERSION_CODES.KITKAT])
 class UserServiceTest {
 
     private lateinit var context: Context
@@ -84,10 +83,10 @@ class UserServiceTest {
     /**
      * Helper function to clean up Test Users from the Backend Server
      */
-    private fun deleteTestUsers(vararg userIds: String?) {
+    private suspend fun deleteTestUsers(vararg userIds: String?) {
         for (id in userIds) {
             id ?: continue
-            userService.deleteUser(userId = id).get()
+            userService.deleteUser(userId = id)
         }
     }
 
@@ -113,7 +112,6 @@ class UserServiceTest {
         try {
             withContext(Dispatchers.IO) {
                 userCaseUserService.createOrUpdateUser(request = testInputRequest)
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(
@@ -134,7 +132,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `1) Create or Update User`() {
+    fun `1) Create or Update User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -150,7 +148,7 @@ class UserServiceTest {
         )
 
         // WHEN
-        val testActualResult = userService.createOrUpdateUser(request = testInputRequest).get()
+        val testActualResult = userService.createOrUpdateUser(request = testInputRequest)
 
         // THEN
         println(
@@ -187,7 +185,6 @@ class UserServiceTest {
         try {
             withContext(Dispatchers.IO) {
                 userService.createOrUpdateUser(request = testInputRequest)
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(
@@ -208,7 +205,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `2) Delete User`() {
+    fun `2) Delete User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -216,7 +213,7 @@ class UserServiceTest {
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest)
 
         val testExpectedResult = DeleteUserResponse(
                 kind = "deleted.appuser",
@@ -226,7 +223,7 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.deleteUser(
                 userId = testCreatedUser.userid!!
-        ).get()
+        )
 
         // THEN
         println(
@@ -259,7 +256,6 @@ class UserServiceTest {
                 userService.deleteUser(
                         userId = testInputUserId
                 )
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(
@@ -280,7 +276,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `3) Get User Details`() {
+    fun `3) Get User Details`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -288,14 +284,14 @@ class UserServiceTest {
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest)
 
         val testExpectedResult = testCreatedUser.copy()
 
         // WHEN
         val testActualResult = userService.getUserDetails(
                 userId = testCreatedUser.userid!!
-        ).get()
+        )
 
         // THEN
         println(
@@ -330,7 +326,6 @@ class UserServiceTest {
                 userService.getUserDetails(
                         userId = testInputUserId
                 )
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(
@@ -351,7 +346,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `4) List Users`() {
+    fun `4) List Users`() = runBlocking {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -364,8 +359,8 @@ class UserServiceTest {
                 displayname = "Test List Users 2"
         )
         // Should create a test user first
-        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get()
-        val testCreatedUser2 = userService.createOrUpdateUser(request = testInputRequest2).get()
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1)
+        val testCreatedUser2 = userService.createOrUpdateUser(request = testInputRequest2)
 
         val testExpectedResult = ListUsersResponse(
                 kind = "list.users",
@@ -378,11 +373,11 @@ class UserServiceTest {
         val testActualResult1 = userService.listUsers(
                 limit = testInputLimit,
                 cursor = testCreatedUser1.userid
-        ).get()
+        )
         val testActualResult2 = userService.listUsers(
                 limit = testInputLimit,
                 cursor = testCreatedUser2.userid
-        ).get()
+        )
 
         // THEN
         println(
@@ -413,7 +408,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `5) Ban User`() {
+    fun `5) Ban User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -421,7 +416,7 @@ class UserServiceTest {
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest)
 
         val testExpectedResult = testCreatedUser.copy()
 
@@ -429,7 +424,7 @@ class UserServiceTest {
         val testActualResult = userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
                 banned = true
-        ).get()
+        )
 
         // THEN
         println(
@@ -467,7 +462,6 @@ class UserServiceTest {
                         userId = testInputUserId,
                         banned = true
                 )
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(
@@ -488,7 +482,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `6) Restore User`() {
+    fun `6) Restore User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -496,13 +490,13 @@ class UserServiceTest {
                 displayname = "Test 1"
         )
         // Should create a test user first
-        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest).get()
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest)
 
         // The test user should be BANNED first
         userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
                 banned = true
-        ).get()
+        )
 
         val testExpectedResult = testCreatedUser.copy()
 
@@ -510,7 +504,7 @@ class UserServiceTest {
         val testActualResult = userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
                 banned = false
-        ).get()
+        )
 
         // THEN
         println(
@@ -548,7 +542,6 @@ class UserServiceTest {
                         userId = testInputUserId,
                         banned = false
                 )
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(
@@ -569,7 +562,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7A) Search Users - By Handle`() {
+    fun `7A) Search Users - By Handle`() = runBlocking {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -577,7 +570,7 @@ class UserServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get()
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1)
 
         val testExpectedResult = ListUsersResponse(
                 kind = "list.users",
@@ -590,7 +583,7 @@ class UserServiceTest {
         val testActualResult1 = userService.searchUsers(
                 handle = testCreatedUser1.handle!!,
                 limit = testInputLimit
-        ).get()
+        )
 
         // THEN
         println(
@@ -610,7 +603,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7B) Search Users - By Name`() {
+    fun `7B) Search Users - By Name`() = runBlocking {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -618,7 +611,7 @@ class UserServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get()
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1)
 
         val testExpectedResult = ListUsersResponse(
                 kind = "list.users",
@@ -631,7 +624,7 @@ class UserServiceTest {
         val testActualResult1 = userService.searchUsers(
                 name = testCreatedUser1.displayname,
                 limit = testInputLimit
-        ).get()
+        )
 
         // THEN
         println(
@@ -651,7 +644,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7C) Search Users - By UserId`() {
+    fun `7C) Search Users - By UserId`() = runBlocking {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -659,7 +652,7 @@ class UserServiceTest {
                 displayname = "Test List Users 1"
         )
         // Should create a test user(s) first
-        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1).get()
+        val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1)
 
         val testExpectedResult = ListUsersResponse(
                 kind = "list.users",
@@ -672,7 +665,7 @@ class UserServiceTest {
         val testActualResult1 = userService.searchUsers(
                 userid = testCreatedUser1.userid!!,
                 limit = testInputLimit
-        ).get()
+        )
 
         // THEN
         println(
@@ -705,7 +698,6 @@ class UserServiceTest {
                         // No search criteria provided
                         limit = 100
                 )
-                        .await()
             }
         } catch (err: SportsTalkException) {
             println(

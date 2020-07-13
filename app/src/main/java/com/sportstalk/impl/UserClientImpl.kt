@@ -19,21 +19,21 @@ constructor(
 
     private val userService = ServiceFactory.RestApi.User.get(config)
 
-    override fun createOrUpdateUser(request: CreateUpdateUserRequest): CompletableFuture<User> =
+    override suspend fun createOrUpdateUser(request: CreateUpdateUserRequest): User =
             userService.createOrUpdateUser(request)
 
-    override fun deleteUser(userId: String): CompletableFuture<DeleteUserResponse> =
+    override suspend fun deleteUser(userId: String): DeleteUserResponse =
             userService.deleteUser(userId)
 
-    override fun getUserDetails(userId: String): CompletableFuture<User> =
+    override suspend fun getUserDetails(userId: String): User =
             userService.getUserDetails(userId)
 
-    override fun listUsers(limit: Int?, cursor: String?): CompletableFuture<ListUsersResponse> =
+    override suspend fun listUsers(limit: Int?, cursor: String?): ListUsersResponse =
             userService.listUsers(limit)
 
-    override fun setBanStatus(userId: String, banned: Boolean): CompletableFuture<User> =
+    override suspend fun setBanStatus(userId: String, banned: Boolean): User =
             userService.setBanStatus(userId, banned)
 
-    override fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): CompletableFuture<ListUsersResponse> =
+    override suspend fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): ListUsersResponse =
             userService.searchUsers(handle, name, userid, limit, cursor)
 }

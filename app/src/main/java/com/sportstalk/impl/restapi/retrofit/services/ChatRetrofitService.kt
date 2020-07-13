@@ -4,162 +4,161 @@ import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.chat.*
 import retrofit2.Response
 import retrofit2.http.*
-import java.util.concurrent.CompletableFuture
 
 interface ChatRetrofitService {
 
     @POST("{appId}/chat/rooms")
-    fun createRoom(
+    suspend fun createRoom(
             @Path("appId") appId: String,
             @Body request: CreateChatRoomRequest
-    ): CompletableFuture<Response<ApiResponse<ChatRoom>>>
+    ): Response<ApiResponse<ChatRoom>>
 
     @GET("{appId}/chat/rooms/{chatroomid}")
-    fun getRoomDetails(
+    suspend fun getRoomDetails(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String
-    ): CompletableFuture<Response<ApiResponse<ChatRoom>>>
+    ): Response<ApiResponse<ChatRoom>>
 
     @GET("{appId}/chat/roomsbycustomid/{chatroom_customid}")
-    fun getRoomDetailsByCustomId(
+    suspend fun getRoomDetailsByCustomId(
             @Path("appId") appId: String,
             @Path(value = "chatroom_customid", encoded = true) chatRoomCustomId: String
-    ): CompletableFuture<Response<ApiResponse<ChatRoom>>>
+    ): Response<ApiResponse<ChatRoom>>
 
     @DELETE("{appId}/chat/rooms/{chatroomid}")
-    fun deleteRoom(
+    suspend fun deleteRoom(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String
-    ): CompletableFuture<Response<ApiResponse<DeleteChatRoomResponse>>>
+    ): Response<ApiResponse<DeleteChatRoomResponse>>
 
     @POST("{appId}/chat/rooms/{chatroomid}")
-    fun updateRoom(
+    suspend fun updateRoom(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Body request: UpdateChatRoomRequest
-    ): CompletableFuture<Response<ApiResponse<ChatRoom>>>
+    ): Response<ApiResponse<ChatRoom>>
 
     @GET("{appId}/chat/rooms/")
-    fun listRooms(
+    suspend fun listRooms(
             @Path("appId") appId: String,
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null
-    ): CompletableFuture<Response<ApiResponse<ListRoomsResponse>>>
+    ): Response<ApiResponse<ListRoomsResponse>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/join")
-    fun joinRoom(
+    suspend fun joinRoom(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Body request: JoinChatRoomRequest
-    ): CompletableFuture<Response<ApiResponse<JoinChatRoomResponse>>>
+    ): Response<ApiResponse<JoinChatRoomResponse>>
 
     @POST("{appId}/chat/rooms/{chatRoomIdOrLabel}/join")
-    fun joinRoom(
+    suspend fun joinRoom(
             @Path("appId") appId: String,
             @Path("chatRoomIdOrLabel") chatRoomId: String
-    ): CompletableFuture<Response<ApiResponse<JoinChatRoomResponse>>>
+    ): Response<ApiResponse<JoinChatRoomResponse>>
 
     @POST("{appId}/chat/roomsbycustomid/{chatroom_customid}/join")
-    fun joinRoomByCustomId(
+    suspend fun joinRoomByCustomId(
             @Path("appId") appId: String,
             @Path(value = "chatroom_customid", encoded = true) chatRoomCustomId: String,
             @Body request: JoinChatRoomRequest
-    ): CompletableFuture<Response<ApiResponse<JoinChatRoomResponse>>>
+    ): Response<ApiResponse<JoinChatRoomResponse>>
 
     @GET("{appId}/chat/rooms/{chatroomid}/participants")
-    fun listRoomParticipants(
+    suspend fun listRoomParticipants(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null
-    ): CompletableFuture<Response<ApiResponse<ListChatRoomParticipantsResponse>>>
+    ): Response<ApiResponse<ListChatRoomParticipantsResponse>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/exit")
-    fun exitRoom(
+    suspend fun exitRoom(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Body request: ExitChatRoomRequest
-    ): CompletableFuture<Response<ApiResponse<String>>>
+    ): Response<ApiResponse<String>>
 
     @GET("{appId}/chat/rooms/{chatroomid}/updates")
-    fun getUpdates(
+    suspend fun getUpdates(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Query("cursor") cursor: String? = null /* eventId */
-    ): CompletableFuture<Response<ApiResponse<GetUpdatesResponse>>>
+    ): Response<ApiResponse<GetUpdatesResponse>>
 
     @GET("{appId}/chat/rooms/{chatroomid}/listpreviousevents")
-    fun listPreviousEvents(
+    suspend fun listPreviousEvents(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null /* eventId */
-    ): CompletableFuture<Response<ApiResponse<ListEvents>>>
+    ): Response<ApiResponse<ListEvents>>
 
     @GET("{appId}/chat/rooms/{chatroomid}/listeventshistory")
-    fun listEventsHistory(
+    suspend fun listEventsHistory(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null /* eventId */
-    ): CompletableFuture<Response<ApiResponse<ListEvents>>>
+    ): Response<ApiResponse<ListEvents>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/command")
-    fun executeChatCommand(
+    suspend fun executeChatCommand(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Body request: ExecuteChatCommandRequest
-    ): CompletableFuture<Response<ApiResponse<ExecuteChatCommandResponse>>>
+    ): Response<ApiResponse<ExecuteChatCommandResponse>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/events/{replyto}/reply")
-    fun sendThreadedReply(
+    suspend fun sendThreadedReply(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("replyto") replyto: String,
             @Body request: SendThreadedReplyRequest
-    ): CompletableFuture<Response<ApiResponse<ExecuteChatCommandResponse>>>
+    ): Response<ApiResponse<ExecuteChatCommandResponse>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/events/{replyto}/quote")
-    fun sendQuotedReply(
+    suspend fun sendQuotedReply(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("replyto") replyto: String,
             @Body request: SendQuotedReplyRequest
-    ): CompletableFuture<Response<ApiResponse<ChatEvent>>>
+    ): Response<ApiResponse<ChatEvent>>
 
     @GET("{appId}/chat/rooms/{chatroomid}/messagesbyuser/{userid}")
-    fun listMessagesByUser(
+    suspend fun listMessagesByUser(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("userid") userId: String,
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null
-    ): CompletableFuture<Response<ApiResponse<ListMessagesByUser>>>
+    ): Response<ApiResponse<ListMessagesByUser>>
 
     @PUT("{appId}/chat/rooms/{chatroomid}/events/{eventid}/setdeleted")
-    fun setMessageAsDeleted(
+    suspend fun setMessageAsDeleted(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("eventid") eventId: String,
             @Query("userid") userid: String,
             @Query("deleted") deleted: Boolean,
             @Query("permanentifnoreplies") permanentifnoreplies: Boolean? = null
-    ): CompletableFuture<Response<ApiResponse<DeleteEventResponse>>>
+    ): Response<ApiResponse<DeleteEventResponse>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/events/{eventid}/report")
-    fun reportMessage(
+    suspend fun reportMessage(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("eventid") eventId: String,
             @Body request: ReportMessageRequest
-    ): CompletableFuture<Response<ApiResponse<ChatEvent>>>
+    ): Response<ApiResponse<ChatEvent>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/events/{eventid}/react")
-    fun reactMessage(
+    suspend fun reactMessage(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("eventid") eventId: String,
             @Body request: ReactToAMessageRequest
-    ): CompletableFuture<Response<ApiResponse<ChatEvent>>>
+    ): Response<ApiResponse<ChatEvent>>
 
 }
