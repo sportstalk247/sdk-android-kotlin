@@ -34,7 +34,7 @@ Then sync again. The gradle build should now be successful.
 ## Instantiate SportsTalkManager Client
 This Sportstalk SDK is meant to power custom chat applications. Sportstalk does not enforce any restricitons on your UI design, but instead empowers your developers to focus on the user experience without worrying about the underlying chat behavior.    
     
-Android Sportstalk SDK is a Reactive and Asynchronous-driven API, powered by Java 8's CompletableFuture to handle asynchronous operation with direct compatibility to Kotlin [Coroutines]([https://developer.android.com/kotlin/coroutines](https://developer.android.com/kotlin/coroutines)) and [Flow](https://kotlinlang.org/docs/reference/coroutines/flow.html). Additionally, provides bridge support to wrap this API with [Rx2Java](https://github.com/Kotlin/kotlinx.coroutines/blob/master/reactive/kotlinx-coroutines-rx2/README.md) or [LiveData](https://developer.android.com/kotlin/ktx\#livedata) extensions. This gives enough flexibility to any developers whichever framework they are familiar with.
+Android Sportstalk SDK is an Asynchronous-driven API, powered by Kotlin [Coroutines]([https://developer.android.com/kotlin/coroutines](https://developer.android.com/kotlin/coroutines)) to gracefully handle asynchronous operations.
 
 ```kotlin
 class MyFragment: Fragment() {  
@@ -72,93 +72,7 @@ class MyFragment: Fragment() {
    }
 }  
 ```
-    
-    
-## How to Integrate Reactive Frameworks
-### Using Coroutine Flow
-Below are the following dependencies in order to make the SDK compatible to Coroutines:
-```gradle
-implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1"      
-implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:1.3.1"      
-implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.1"      
-implementation "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.1"    
-```
 
-```kotlin  
-// Execute from within any coroutine scope  
-lifecycleScope.launch {
-   userClient.createOrUpdateUser(
-      request = CreateUpdateUserRequest(
-          userid = "<USERID>",
-          handle = "sample_handle_123",
-          displayname = "Test Name 123", // OPTIONAL
-          pictureurl = "<Image URL>", // OPTIONAL
-          profileurl = "<Image URL>" // OPTIONAL
-      )
-   )
-}
-```  
-  
-### Using Rx2Java
-Below are the following dependencies in order to make the SDK compatible to Rx2Java:    
-```gradle    
-implementation "io.reactivex.rxjava2:rxandroid:2.1.1"    
-implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"    
-```  
-Java 8's CompletableFuture can be turned into Rx Single.  
-```kotlin  
-// Execute from within any coroutine scope  
-Single.fromFuture(  
-   userClient.createOrUpdateUser(  
-      request = CreateUpdateUserRequest(  
-      userid = "<USERID>",  
-      handle = "sample_handle_123",  
-      displayname = "Test Name 123", // OPTIONAL  
-      pictureurl = "<Image URL>", // OPTIONAL  
-      profileurl = "<Image URL>" // OPTIONAL   
-      )  
-   ),   
-   // Indicate which Rx Scheduler will the CompletableFuture be executed(use IO(non-UI) scheduler)  
-   Schedulers.IO  
-)  
-.subscribeOn(Schedulers.IO)  
-.observeOn(AndroidSchedulers.mainThread())  
-.subscribe { response -> /* Handle response from here... */ }  
-// Although Rx Single is already disposes itself, it is still a good practice to explicitly manage this disposable  
-.addTo(rxDisposeBag)  
-```  
-   
-### Using LiveData Below are the following dependencies in order to make the SDK compatible to LiveData:
-```gradle    
-implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"      
-kapt "androidx.lifecycle:lifecycle-common-java8:2.2.0"      
-implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"      
-implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0"    
-```    
-This is a bit more of a combination of coroutines and livedata where CompletableFuture will be subjected into deferred action by using coroutine `await()` extension function and emitting the response value to livedata.  
-```kotlin  
-// Execute from within any coroutine scope  
-lifecycleScope.launch {  
-   liveData {  
-      val createdUserResponse = withContext(Dispatchers.IO) {  
-            userClient.createOrUpdateUser(  
-               request = CreateUpdateUserRequest(  
-               userid = "<USERID>",  
-               handle = "sample_handle_123",  
-               displayname = "Test Name 123", // OPTIONAL  
-               pictureurl = "<Image URL>", // OPTIONAL  
-               profileurl = "<Image URL>" // OPTIONAL  
-            )
-         )  
-      }  
-      // Emit to livedata the response  
-      emit(createdUserResponse)  
-   }
-   .observe(viewLifecycleOwner) { createdUserResponse ->  
-      // Resolve emitted response from here...  
-   }
-}
-```  
    
 ## How to use Chat Client
 ```kotlin  
@@ -194,8 +108,38 @@ lifecycleScope.launch {
    val initialMessages: List<ChatEvent> = joinResponse.eventscursor?.events ?: listOf()
    // ex. display in UI the initial chat messages/events
 }  
-```  
+```
 ### Listen to Event Updates
+
+The Chat service provides a polling mechanism to dispatch chat event/message updates every N milliseconds(provided as frequency argument). Chat event/message updates are dispatched in a reactive pattern. The SDK exposes 3 Reactive framework types for the developer to use in order implement this feature, namely as follows:
+
+* [Flow](https://kotlinlang.org/docs/reference/coroutines/flow.html)
+Below are the following dependencies in order to use this framework:
+```gradle
+implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.1"
+implementation "org.jetbrains.kotlinx:kotlinx-coroutines-rx2:1.3.1"
+implementation "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.3.1"
+```
+
+* [Rx2Java](https://github.com/Kotlin/kotlinx.coroutines/blob/master/reactive/kotlinx-coroutines-rx2/README.md)
+Below are the following dependencies in order to use this framework:
+```gradle
+implementation "io.reactivex.rxjava2:rxandroid:2.1.1"
+implementation "io.reactivex.rxjava2:rxkotlin:2.4.0"
+```
+
+* [LiveData](https://developer.android.com/kotlin/ktx\#livedata) extensions
+Below are the following dependencies in order to use this framework:
+```gradle
+implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+kapt "androidx.lifecycle:lifecycle-common-java8:2.2.0"
+implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
+implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.2.0"
+```
+
+This gives enough flexibility to any developers whichever framework they are familiar with.
+
+
 ```kotlin  
 import com.sportstalk.api.polling.coroutines.allEventUpdates    
   
