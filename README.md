@@ -1,5 +1,5 @@
+[![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
 
-    
 # sdk-android-kotlin
 # Implementing the SDK
 You can download the latest SportsTalk Android SDK from the following location:    
