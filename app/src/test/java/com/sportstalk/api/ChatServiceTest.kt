@@ -1849,6 +1849,97 @@ class ChatServiceTest {
     }
 
     @Test
+    fun `M-8) Execute Chat Command - Announcement`() = runBlocking {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = testUserData.handle,
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        )
+
+        val testInputRequest = ExecuteChatCommandRequest(
+                command = "This is a test announcement!",
+                userid = testCreatedUserData.userid!!,
+                eventtype = EventType.ANNOUNCEMENT
+        )
+        val testExpectedResult = ExecuteChatCommandResponse(
+                kind = "chat.executecommand",
+                op = EventType.SPEECH,
+                room = testCreatedChatRoomData,
+                speech = ChatEvent(
+                        kind = "chat.event",
+                        roomid = testCreatedChatRoomData.id,
+                        body = testInputRequest.command,
+                        eventtype = EventType.ANNOUNCEMENT,
+                        userid = testCreatedUserData.userid,
+                        user = testCreatedUserData
+                ),
+                action = null
+        )
+
+        // WHEN
+        val testActualResult = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInputRequest
+        )
+
+        // THEN
+        println(
+                "`Execute Chat Command - Announcement`() -> testActualResult = \n" +
+                        json.stringify(
+                                ExecuteChatCommandResponse.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.op == testExpectedResult.op }
+        assertTrue { testActualResult.speech?.kind == testExpectedResult.speech?.kind }
+        assertTrue { testActualResult.speech?.roomid == testExpectedResult.speech?.roomid }
+        assertTrue { testActualResult.speech?.body == testExpectedResult.speech?.body }
+        assertTrue { testActualResult.speech?.eventtype == testExpectedResult.speech?.eventtype }
+        assertTrue { testActualResult.speech?.userid == testExpectedResult.speech?.userid }
+        assertTrue { testActualResult.speech?.user?.userid == testExpectedResult.speech?.user?.userid }
+        assertTrue { testActualResult.action == testExpectedResult.action }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
     fun `M-ERROR-404-User-NOT-found) Execute Chat Command`() = runBlocking {
         // GIVEN
         // GIVEN

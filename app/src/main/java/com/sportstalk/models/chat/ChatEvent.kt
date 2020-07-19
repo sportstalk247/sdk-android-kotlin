@@ -95,6 +95,9 @@ object EventType {
     const val QUOTE = "quote"
     const val GOAL = "goal" // custom type
     const val ADVERTISEMENT = "advertisement" // custom type
+    const val CUSTOM = "custom" // This indicates you will be using a custom event type.
+    const val AD = "ad" // Use this event type to push an advertisement. Use the CustomPayload property to specify parameters for your add.
+    const val ANNOUNCEMENT = "announcement" // This indicates the event is of type announcement.
 }
 
 object EventReaction {
