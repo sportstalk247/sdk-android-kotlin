@@ -26,6 +26,7 @@ object ServiceFactory {
             Json(
                     JsonBuilder()
                             .apply {
+                                encodeDefaults = false
                                 prettyPrint = true
                                 isLenient = true
                                 ignoreUnknownKeys = true
