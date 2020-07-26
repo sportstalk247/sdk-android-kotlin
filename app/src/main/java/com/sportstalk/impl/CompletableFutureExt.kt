@@ -36,7 +36,7 @@ fun <T> CompletableFuture<Response<ApiResponse<T>>>.handleSdkResponse(
 fun <T> Response<ApiResponse<T>>.handleSdkResponse(
         json: Json
 ): T =
-        if (this.isSuccessful) {
+        if (this.isSuccessful && this.body() != null && this.body()!!.data != null) {
             this.body()!!.data!!
         } else {
             throw this.errorBody()?.string()?.let { errBodyStr ->
