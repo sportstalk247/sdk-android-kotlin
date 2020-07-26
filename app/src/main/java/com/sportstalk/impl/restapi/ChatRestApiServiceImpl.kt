@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.impl.handleSdkResponse
 import com.sportstalk.impl.restapi.retrofit.services.ChatRetrofitService
-import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.Kind
 import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.*
@@ -12,7 +11,6 @@ import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.create
 import java.net.URLEncoder
-import java.util.concurrent.CompletableFuture
 
 class ChatRestApiServiceImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -20,7 +18,7 @@ constructor(
         private val appId: String,
         private val json: Json,
         mRetrofit: Retrofit
-): ChatService {
+) : ChatService {
 
     private val service: ChatRetrofitService = mRetrofit.create()
 
@@ -37,116 +35,195 @@ constructor(
     }
 
     override suspend fun createRoom(request: CreateChatRoomRequest): ChatRoom =
-            service.createRoom(
-                    appId = appId,
-                    request = request
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.createRoom(
+                        appId = appId,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun getRoomDetails(chatRoomId: String): ChatRoom =
-            service.getRoomDetails(
-                    appId = appId,
-                    chatRoomId = chatRoomId
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.getRoomDetails(
+                        appId = appId,
+                        chatRoomId = chatRoomId
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun getRoomDetailsByCustomId(chatRoomCustomId: String): ChatRoom =
-            service.getRoomDetailsByCustomId(
-                    appId = appId,
-                    chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name())
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.getRoomDetailsByCustomId(
+                        appId = appId,
+                        chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name())
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun deleteRoom(chatRoomId: String): DeleteChatRoomResponse =
-            service.deleteRoom(
-                    appId = appId,
-                    chatRoomId = URLEncoder.encode(chatRoomId, Charsets.UTF_8.name())
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.deleteRoom(
+                        appId = appId,
+                        chatRoomId = URLEncoder.encode(chatRoomId, Charsets.UTF_8.name())
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): ChatRoom =
-            service.updateRoom(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    request = request
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.updateRoom(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun listRooms(limit: Int?, cursor: String?): ListRoomsResponse =
-            service.listRooms(
-                    appId = appId,
-                    limit = limit,
-                    cursor = cursor
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.listRooms(
+                        appId = appId,
+                        limit = limit,
+                        cursor = cursor
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
-            service.joinRoom(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    request = request
-            )
-                    .handleSdkResponse(json)
-                    .also { resp ->
-                        // Internally store chatroom event cursor
-                        val cursor = resp.eventscursor?.cursor ?: ""
-                        chatRoomEventCursor[chatRoomId] = cursor
-                    }
+            try {
+                service.joinRoom(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+                        .also { resp ->
+                            // Internally store chatroom event cursor
+                            val cursor = resp.eventscursor?.cursor ?: ""
+                            chatRoomEventCursor[chatRoomId] = cursor
+                        }
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun joinRoom(chatRoomIdOrLabel: String): JoinChatRoomResponse =
-            service.joinRoom(
-                    appId = appId,
-                    chatRoomId = chatRoomIdOrLabel
-            )
-                    .handleSdkResponse(json)
-                    .also { resp ->
-                        // Internally store chatroom event cursor
-                        val roomId = resp.room?.id ?: return@also
-                        val cursor = resp.eventscursor?.cursor ?: ""
-                        chatRoomEventCursor[roomId] = cursor
-                    }
+            try {
+                service.joinRoom(
+                        appId = appId,
+                        chatRoomId = chatRoomIdOrLabel
+                )
+                        .handleSdkResponse(json)
+                        .also { resp ->
+                            // Internally store chatroom event cursor
+                            val roomId = resp.room?.id ?: return@also
+                            val cursor = resp.eventscursor?.cursor ?: ""
+                            chatRoomEventCursor[roomId] = cursor
+                        }
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
-            service.joinRoomByCustomId(
-                    appId = appId,
-                    chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name()),
-                    request = request
-            )
-                    .handleSdkResponse(json)
-                    .also { resp ->
-                        // Internally store chatroom event cursor
-                        val cursor = resp.eventscursor?.cursor ?: ""
-                        chatRoomEventCursor[chatRoomCustomId] = cursor
-                    }
+            try {
+                service.joinRoomByCustomId(
+                        appId = appId,
+                        chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name()),
+                        request = request
+                )
+                        .handleSdkResponse(json)
+                        .also { resp ->
+                            // Internally store chatroom event cursor
+                            val cursor = resp.eventscursor?.cursor ?: ""
+                            chatRoomEventCursor[chatRoomCustomId] = cursor
+                        }
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): ListChatRoomParticipantsResponse =
-            service.listRoomParticipants(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    limit = limit,
-                    cursor = cursor
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.listRoomParticipants(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        limit = limit,
+                        cursor = cursor
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun exitRoom(chatRoomId: String, userId: String) {
-        val response = service.exitRoom(
-                appId = appId,
-                chatRoomId = chatRoomId,
-                request = ExitChatRoomRequest(userid = userId)
-        )
+        try {
+            val response = service.exitRoom(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    request = ExitChatRoomRequest(userid = userId)
+            )
 
-        if (response.isSuccessful) {
-            // Remove internally stored event cursor
-            chatRoomEventCursor.remove(chatRoomId)
-        } else {
-            throw response.errorBody()?.string()?.let { errBodyStr ->
-                json.parse(SportsTalkException.serializer(), errBodyStr)
+            if (response.isSuccessful) {
+                // Remove internally stored event cursor
+                chatRoomEventCursor.remove(chatRoomId)
+            } else {
+                throw response.errorBody()?.string()?.let { errBodyStr ->
+                    json.parse(SportsTalkException.serializer(), errBodyStr)
+                }
+                        ?: SportsTalkException(
+                                kind = Kind.API,
+                                message = response.message(),
+                                code = response.code()
+                        )
             }
-                    ?: SportsTalkException(
-                            kind = Kind.API,
-                            message = response.message(),
-                            code = response.code()
-                    )
+        } catch (err: SportsTalkException) {
+            throw err
+        } catch (err: Throwable) {
+            throw SportsTalkException(
+                    message = err.message,
+                    err = err
+            )
         }
     }
 
@@ -154,73 +231,117 @@ constructor(
             chatRoomId: String,
             cursor: String?
     ): GetUpdatesResponse {
-        val response = service.getUpdates(
-                appId = appId,
-                chatRoomId = chatRoomId,
-                cursor = cursor
-        )
+        try {
+            val response = service.getUpdates(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    cursor = cursor
+            )
 
-        val respBody = response.body()
-        return if (response.isSuccessful && respBody?.data != null) {
-            respBody.data
-        } else {
-            throw response.errorBody()?.string()?.let { errBodyStr ->
-                json.parse(SportsTalkException.serializer(), errBodyStr)
+            val respBody = response.body()
+            return if (response.isSuccessful && respBody?.data != null) {
+                respBody.data
+            } else {
+                throw response.errorBody()?.string()?.let { errBodyStr ->
+                    json.parse(SportsTalkException.serializer(), errBodyStr)
+                }
+                        ?: SportsTalkException(
+                                kind = respBody?.kind ?: Kind.API,
+                                message = respBody?.message ?: response.message(),
+                                code = respBody?.code ?: response.code()
+                        )
             }
-                    ?: SportsTalkException(
-                            kind = respBody?.kind ?: Kind.API,
-                            message = respBody?.message ?: response.message(),
-                            code = respBody?.code ?: response.code()
-                    )
+        } catch (err: SportsTalkException) {
+            throw err
+        } catch (err: Throwable) {
+            throw SportsTalkException(
+                    message = err.message,
+                    err = err
+            )
         }
     }
 
     override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
-            service.listPreviousEvents(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    limit = limit,
-                    cursor = cursor
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.listPreviousEvents(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        limit = limit,
+                        cursor = cursor
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
-            service.listEventsHistory(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    limit = limit,
-                    cursor = cursor
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.listEventsHistory(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        limit = limit,
+                        cursor = cursor
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun executeChatCommand(
             chatRoomId: String,
             request: ExecuteChatCommandRequest
     ): ExecuteChatCommandResponse =
-            service.executeChatCommand(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    request = request
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.executeChatCommand(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ExecuteChatCommandResponse =
-            service.sendThreadedReply(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    replyto = replyTo,
-                    request = request
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.sendThreadedReply(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        replyto = replyTo,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): ChatEvent =
-            service.sendQuotedReply(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    replyto = replyTo,
-                    request = request
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.sendQuotedReply(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        replyto = replyTo,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun listMessagesByUser(
             chatRoomId: String,
@@ -228,14 +349,21 @@ constructor(
             limit: Int?,
             cursor: String?
     ): ListMessagesByUser =
-            service.listMessagesByUser(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    userId = userId,
-                    limit = limit,
-                    cursor = cursor
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.listMessagesByUser(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        userId = userId,
+                        limit = limit,
+                        cursor = cursor
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun removeEvent(
             chatRoomId: String,
@@ -244,15 +372,22 @@ constructor(
             deleted: Boolean,
             permanentifnoreplies: Boolean?
     ): DeleteEventResponse =
-            service.setMessageAsDeleted(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    eventId = eventId,
-                    userid = userid,
-                    deleted = deleted,
-                    permanentifnoreplies = permanentifnoreplies
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.setMessageAsDeleted(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        eventId = eventId,
+                        userid = userid,
+                        deleted = deleted,
+                        permanentifnoreplies = permanentifnoreplies
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): DeleteEventResponse =
             removeEvent(
@@ -277,24 +412,38 @@ constructor(
             eventId: String,
             request: ReportMessageRequest
     ): ChatEvent =
-            service.reportMessage(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    eventId = eventId,
-                    request = request
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.reportMessage(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        eventId = eventId,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun reactToEvent(
             chatRoomId: String,
             eventId: String,
             request: ReactToAMessageRequest
     ): ChatEvent =
-            service.reactMessage(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    eventId = eventId,
-                    request = request
-            )
-                    .handleSdkResponse(json)
+            try {
+                service.reactMessage(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        eventId = eventId,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 }
