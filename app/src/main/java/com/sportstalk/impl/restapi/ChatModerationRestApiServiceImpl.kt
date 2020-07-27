@@ -33,6 +33,8 @@ constructor(
                         request = ApproveMessageRequest(approve = approve)
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -49,6 +51,8 @@ constructor(
                         cursor = cursor
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,

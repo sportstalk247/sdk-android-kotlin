@@ -29,6 +29,8 @@ constructor(
                         request = request
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -43,6 +45,8 @@ constructor(
                         userId = URLEncoder.encode(userId, Charsets.UTF_8.name())
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -57,6 +61,8 @@ constructor(
                         userId = userId
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -72,6 +78,8 @@ constructor(
                         limit = limit
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -87,6 +95,8 @@ constructor(
                         request = BanUserRequest(banned)
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -113,6 +123,8 @@ constructor(
                         )
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
