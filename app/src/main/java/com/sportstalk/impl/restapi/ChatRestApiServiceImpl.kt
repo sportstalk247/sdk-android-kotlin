@@ -41,6 +41,8 @@ constructor(
                         request = request
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -55,6 +57,8 @@ constructor(
                         chatRoomId = chatRoomId
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -69,6 +73,8 @@ constructor(
                         chatRoomCustomId = URLEncoder.encode(chatRoomCustomId, Charsets.UTF_8.name())
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -83,6 +89,8 @@ constructor(
                         chatRoomId = URLEncoder.encode(chatRoomId, Charsets.UTF_8.name())
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -98,6 +106,8 @@ constructor(
                         request = request
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -113,6 +123,8 @@ constructor(
                         cursor = cursor
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -133,6 +145,8 @@ constructor(
                             val cursor = resp.eventscursor?.cursor ?: ""
                             chatRoomEventCursor[chatRoomId] = cursor
                         }
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -153,6 +167,8 @@ constructor(
                             val cursor = resp.eventscursor?.cursor ?: ""
                             chatRoomEventCursor[roomId] = cursor
                         }
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -173,6 +189,8 @@ constructor(
                             val cursor = resp.eventscursor?.cursor ?: ""
                             chatRoomEventCursor[chatRoomCustomId] = cursor
                         }
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -189,6 +207,8 @@ constructor(
                         cursor = cursor
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -270,6 +290,8 @@ constructor(
                         cursor = cursor
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -286,6 +308,8 @@ constructor(
                         cursor = cursor
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -304,6 +328,8 @@ constructor(
                         request = request
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -320,6 +346,8 @@ constructor(
                         request = request
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -336,6 +364,8 @@ constructor(
                         request = request
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -358,6 +388,8 @@ constructor(
                         cursor = cursor
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -382,6 +414,8 @@ constructor(
                         permanentifnoreplies = permanentifnoreplies
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -420,6 +454,8 @@ constructor(
                         request = request
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
@@ -440,6 +476,8 @@ constructor(
                         request = request
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
             } catch (err: Throwable) {
                 throw SportsTalkException(
                         message = err.message,
