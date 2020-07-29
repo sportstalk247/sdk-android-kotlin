@@ -6,6 +6,7 @@ import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.ChatClient
 import com.sportstalk.api.service.ChatModerationService
 import com.sportstalk.models.ClientConfig
+import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.*
 import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
 
@@ -116,10 +117,19 @@ constructor(
                     }
 
     override suspend fun getUpdates(chatRoomId: String, cursor: String?): GetUpdatesResponse =
-            chatService.getUpdates(
-                    chatRoomId = chatRoomId,
-                    cursor = cursor
-            )
+            try {
+                chatService.getUpdates(
+                        chatRoomId = chatRoomId,
+                        cursor = cursor
+                )
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 
     override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             chatService.listPreviousEvents(
