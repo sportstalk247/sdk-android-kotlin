@@ -6,15 +6,13 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
 import com.sportstalk.api.ChatClient
 import com.sportstalk.api.polling.*
-import com.sportstalk.models.ApiResponse
+import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.ConflatedBroadcastChannel
-import kotlinx.coroutines.channels.sendBlocking
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.future.await
 
 /**
  * Returns an instance of reactive coroutine Flow which emits Event Updates received at
@@ -45,17 +43,21 @@ fun ChatClient.allEventUpdates(
         scope.launchWhenStarted {
             // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
             if (roomSubscriptions.contains(chatRoomId)) {
-                // Perform GET UPDATES operation
-                val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                    getUpdates(
-                            chatRoomId = chatRoomId,
-                            // Apply event cursor
-                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                    )
-                }
+                try {
+                    // Perform GET UPDATES operation
+                    val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                        getUpdates(
+                                chatRoomId = chatRoomId,
+                                // Apply event cursor
+                                cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                        )
+                    }
 
-                // Emit response value
-                emitter.send(response)
+                    // Emit response value
+                    emitter.send(response)
+                } catch (err: SportsTalkException) {
+                    err.printStackTrace()
+                }
             }
             // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
         }

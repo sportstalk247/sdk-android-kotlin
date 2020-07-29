@@ -3,12 +3,11 @@ package com.sportstalk.api.polling.livedata
 import androidx.lifecycle.*
 import com.sportstalk.api.ChatClient
 import com.sportstalk.api.polling.*
-import com.sportstalk.models.ApiResponse
+import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.await
 import kotlinx.coroutines.withContext
 
 /**
@@ -40,17 +39,21 @@ fun ChatClient.allEventUpdates(
         scope.launchWhenStarted {
             // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
             if (roomSubscriptions.contains(chatRoomId)) {
-                // Perform GET UPDATES operation
-                val response = withContext(Dispatchers.IO) {
-                    getUpdates(
-                            chatRoomId = chatRoomId,
-                            // Apply event cursor
-                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                    )
-                }
+                try {
+                    // Perform GET UPDATES operation
+                    val response = withContext(Dispatchers.IO) {
+                        getUpdates(
+                                chatRoomId = chatRoomId,
+                                // Apply event cursor
+                                cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                        )
+                    }
 
-                // Emit response value
-                emitter.postValue(response)
+                    // Emit response value
+                    emitter.postValue(response)
+                } catch (err: SportsTalkException) {
+                    err.printStackTrace()
+                }
             }
             // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
         }
