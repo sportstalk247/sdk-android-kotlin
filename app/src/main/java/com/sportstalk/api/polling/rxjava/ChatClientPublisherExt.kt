@@ -10,9 +10,7 @@ import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
-import io.reactivex.subjects.BehaviorSubject
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.await
 
 /**
  * Returns an instance of reactive RxJava Publisher which emits Event Updates received at
@@ -47,17 +45,21 @@ fun ChatClient.allEventUpdates(
                 try {
                     // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
                     if (roomSubscriptions.contains(chatRoomId)) {
-                        // Perform GET UPDATES operation
-                        val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                            getUpdates(
-                                    chatRoomId = chatRoomId,
-                                    // Apply event cursor
-                                    cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                            )
-                        }
+                        try {
+                            // Perform GET UPDATES operation
+                            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                                getUpdates(
+                                        chatRoomId = chatRoomId,
+                                        // Apply event cursor
+                                        cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                                )
+                            }
 
-                        // Emit response value
-                        emitter.onNext(response)
+                            // Emit response value
+                            emitter.onNext(response)
+                        } catch (err: SportsTalkException) {
+                            err.printStackTrace()
+                        }
                     }
                     // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
                 } catch (err: SportsTalkException) {
