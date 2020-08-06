@@ -322,12 +322,35 @@ constructor(
             request: ExecuteChatCommandRequest
     ): ExecuteChatCommandResponse =
             try {
-                service.executeChatCommand(
-                        appId = appId,
-                        chatRoomId = chatRoomId,
-                        request = request
-                )
-                        .handleSdkResponse(json)
+                if(request.command.contains("purge")) {
+                    val response = service.executeChatCommand(
+                            appId = appId,
+                            chatRoomId = chatRoomId,
+                            request = request
+                    )
+                    if (response.isSuccessful && response.body() != null) {
+                        ExecuteChatCommandResponse(
+                                kind = response.body()?.kind,
+                                message = response.body()?.message
+                        )
+                    } else {
+                        throw response.errorBody()?.string()?.let { errBodyStr ->
+                            json.parse(SportsTalkException.serializer(), errBodyStr)
+                        }
+                                ?: SportsTalkException(
+                                        kind = Kind.API,
+                                        message = response.message(),
+                                        code = response.code()
+                                )
+                    }
+                } else {
+                    service.executeChatCommand(
+                            appId = appId,
+                            chatRoomId = chatRoomId,
+                            request = request
+                    )
+                            .handleSdkResponse(json)!!
+                }
             } catch (err: SportsTalkException) {
                 throw err
             } catch (err: Throwable) {

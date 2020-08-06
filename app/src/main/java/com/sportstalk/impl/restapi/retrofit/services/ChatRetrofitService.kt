@@ -108,7 +108,7 @@ interface ChatRetrofitService {
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Body request: ExecuteChatCommandRequest
-    ): Response<ApiResponse<ExecuteChatCommandResponse>>
+    ): Response<ApiResponse<ExecuteChatCommandResponse?>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/events/{replyto}/reply")
     suspend fun sendThreadedReply(
