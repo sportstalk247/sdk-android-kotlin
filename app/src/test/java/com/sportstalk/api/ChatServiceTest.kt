@@ -15,6 +15,7 @@ import com.sportstalk.models.chat.*
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.User
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -1667,7 +1668,100 @@ class ChatServiceTest {
 
     @Test
     fun `M-4) Execute Chat Command - Purge User Messages`() = runBlocking {
-        // TODO:: Admin password is hardcoded as "zola".
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testUserID = RandomString.make(4)
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_$testUserID",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        val testAdminID = RandomString.make(4)
+        val testCreateAdminInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "test_admin_$testAdminID",
+                displayname = "Test Admin $testAdminID"
+        )
+
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedAdminData = userService.createOrUpdateUser(request = testCreateAdminInputRequest)
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        )
+        val testAdminJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedAdminData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testAdminJoinRoomInputRequest
+        )
+
+        val testInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Send test message
+        chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInputRequest
+        )
+
+        val testExpectedResult = ExecuteChatCommandResponse(
+                kind = Kind.API/*"chat.executecommand"*/,
+                message = "The user's 1 messages were purged."
+        )
+
+        // WHEN
+        val testActualResult = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = ExecuteChatCommandRequest(
+                        command = "*purge zola ${testCreatedUserData.handle!!}",
+                        userid = testCreatedUserData.userid!!
+                )
+        )
+
+        // THEN
+        println(
+                "`Execute Chat Command - Purge User Messages`() -> testActualResult = \n" +
+                        json.stringify(
+                                ExecuteChatCommandResponse.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.message == testExpectedResult.message }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid, testCreatedAdminData.userid)
     }
 
     @Test
