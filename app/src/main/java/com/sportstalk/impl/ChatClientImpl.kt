@@ -163,6 +163,12 @@ constructor(
                     cursor = cursor
             )
 
+    override suspend fun bounceUser(chatRoomId: String, request: BounceUserRequest): BounceUserResponse =
+            chatService.bounceUser(
+                    chatRoomId = chatRoomId,
+                    request = request
+            )
+
     override suspend fun removeEvent(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
             chatService.removeEvent(
                     chatRoomId = chatRoomId,
