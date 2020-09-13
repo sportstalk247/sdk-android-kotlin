@@ -1,3 +1,4 @@
+
 [![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
 
 # sdk-android-kotlin
@@ -223,7 +224,34 @@ lifecycleScope.launch {
    
    // Resolve `removeMessageResponse`, ex. update UI or display a prompt
 }  
-```  
+```
+
+### Bounce User (ban user from room)
+```kotlin  
+// Under Fragment class  
+// Execute within coroutine scope  
+lifecycleScope.launch {  
+  // This is with the assumption that   
+   // 1. A test user has been created(or already exists)  
+   // 2. A test chat room has already been created(or already exists)  
+   // 3. Test user already joined the room
+   val banUserInputRequest = BounceUserRequest(
+      userid = testUserData.userid!!,
+      bounce = true,
+      announcement = "Test user has been banned."
+   )
+   
+   val banUserResponse = withContext(Dispatchers.IO) {  
+      chatClient.bounceUser(  
+      chatRoomId = testChatRoomData.id!!,  
+      request = banUserInputRequest  
+    )
+   }  
+     
+   // Resolve `banUserResponse` from HERE(ex. Display Prompt, update UI)
+   // Next call to getEventUpdates() now includes a ChatEvent with eventtype="bounce"
+}  
+```
   
 ## How to use Comment Client
 ```kotlin  
@@ -330,7 +358,7 @@ lifecycleScope.launch {
    // Resolve `setCommentDeletedResponse` from HERE(ex. Display Prompt, update UI)
 }  
 ```
-  
+
 ## Handling SDK Exception
 If any client operations receive an error response, whether it be Network, Server, or Validation Error, these functions will throw an instance of `SportsTalkException`.  
 ```kotlin

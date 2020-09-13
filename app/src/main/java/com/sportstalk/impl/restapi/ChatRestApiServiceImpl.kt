@@ -420,6 +420,23 @@ constructor(
                 )
             }
 
+    override suspend fun bounceUser(chatRoomId: String, request: BounceUserRequest): BounceUserResponse =
+            try {
+                service.bounceUser(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
     override suspend fun removeEvent(
             chatRoomId: String,
             eventId: String,

@@ -2,6 +2,7 @@ package com.sportstalk.models
 
 import kotlinx.serialization.ContextualSerialization
 import kotlinx.serialization.Serializable
+import java.lang.Exception
 import java.util.concurrent.CompletionException
 
 @Serializable
@@ -13,4 +14,4 @@ data class SportsTalkException(
         @ContextualSerialization(Throwable::class)
         @Transient
         val err: Throwable? = null
-): CompletionException(message, err)
+): Exception(message, err)

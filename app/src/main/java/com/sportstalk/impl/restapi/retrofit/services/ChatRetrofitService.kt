@@ -135,6 +135,13 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null
     ): Response<ApiResponse<ListMessagesByUser>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/bounce")
+    suspend fun bounceUser(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Body request: BounceUserRequest
+    ): Response<ApiResponse<BounceUserResponse>>
+
     @PUT("{appId}/chat/rooms/{chatroomid}/events/{eventid}/setdeleted")
     suspend fun setMessageAsDeleted(
             @Path("appId") appId: String,

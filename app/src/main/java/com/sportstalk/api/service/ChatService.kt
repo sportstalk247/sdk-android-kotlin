@@ -198,7 +198,16 @@ interface ChatService {
             cursor: String? = null
     ): ListMessagesByUser
 
-    // TODO:: `Removes a message` API is broken at the moment
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/bounce
+     * - https://apiref.sportstalk247.com/?version=latest#7116d7ca-a1b8-44c1-8894-bea85225e4c7
+     * - Bounce User (ban user from room)
+     */
+    suspend fun bounceUser(
+            chatRoomId: String,
+            request: BounceUserRequest
+    ): BounceUserResponse
+
     /**
      * Flag Message Event As Deleted
      * [PUT] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/setdeleted?userid=&deleted=true&permanentifnoreplies

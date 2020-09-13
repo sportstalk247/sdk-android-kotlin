@@ -32,5 +32,6 @@ data class ChatRoom(
         val moderation: String? = null /* "pre"/"post" */,
         val maxreports: Long? = null,
         val enableprofanityfilter: Boolean? = null,
-        val delaymessageseconds: Long? = null
+        val delaymessageseconds: Long? = null,
+        val bouncedusers: List<String>? = null       // List of user IDs
 ): Parcelable
