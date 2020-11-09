@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-SportsTalk 247 iOS SDK Documentation
+SportsTalk 247 Android SDK Documentation
 ====================================
 
 .. toctree::
