@@ -11,7 +11,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -51,7 +51,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -85,7 +85,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -120,7 +120,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -155,7 +155,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -192,7 +192,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -245,7 +245,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
