@@ -100,7 +100,7 @@ lifecycleScope.launch {
     val listUsers = withContext(Dispatchers.IO) {
         userClient.listUsers(
             limit = 10, /* Defaults to 200 on backend API server */
-            cursor = null // OPTIONAL: user ID which will act as beginning cursor for this paginated fetch. Null if fetching the first list of user(s).
+            cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
         )
     }
 
