@@ -1419,3 +1419,74 @@ lifecycleScope.launch {
 }
 
 ```
+
+## List Messages Needing Moderation
+
+Invoke this function to list all the messages in the moderation queue.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#bcdbda1b-e495-46c9-8fe9-c5dc6a4c1756>
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val chatClient = SportsTalk247.ChatClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val listMessagesInModeration = withContext(Dispatchers.IO) {
+        chatClient.listMessagesNeedingModeration(
+            roomId = "080001297623242ac002",    // ID of an existing chat room
+            limit = 20, /* Defaults to 200 on backend API server */
+            cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of messages from this chatroom.
+        )
+    }
+
+    // Resolve `listMessagesInModeration` from HERE onwards(ex. update UI displaying the response data)...
+}
+
+```
+
+## Approve Message
+
+Invoke this function to approve a message in the moderation queue.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#6f9bf714-5b3b-48c9-87d2-eb2e12d2bcbf>
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val chatClient = SportsTalk247.ChatClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val approveResponse = withContext(Dispatchers.IO) {
+        chatClient.approveMessage(
+            eventId = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
+            approve = true
+        )
+    }
+
+    // Resolve `approveResponse` from HERE onwards(ex. update UI displaying the response data)...
+}
+
+```
