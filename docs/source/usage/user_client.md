@@ -11,7 +11,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -51,7 +51,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -85,7 +85,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -100,7 +100,7 @@ lifecycleScope.launch {
     val listUsers = withContext(Dispatchers.IO) {
         userClient.listUsers(
             limit = 10, /* Defaults to 200 on backend API server */
-            cursor = null // OPTIONAL: user ID which will act as beginning cursor for this paginated fetch. Null if fetching the first list of user(s).
+            cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
         )
     }
 
@@ -120,7 +120,7 @@ Refer to the SportsTalk API Documentation for more details:
 Below is a code sample on how to use this SDK feature:
 
 ```kotlin
-val chatClient = SportsTalk247.ChatClient(
+val userClient = SportsTalk247.UserClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
@@ -140,6 +140,130 @@ lifecycleScope.launch {
     }
 
     // Resolve `bannedUser` from HERE onwards(ex. update UI displaying the response data)...
+}
+
+```
+
+## Shadow Ban User
+
+This function toggles the specified user's `shadowbanned` flag.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#211a5696-59ce-4988-82c9-7c614cab3efb>
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val userClient = SportsTalk247.UserClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val shadowBannedUser = withContext(Dispatchers.IO) {
+        userClient.shadowBanUser(
+            userid = "023976080242ac120002",
+            shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
+            expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
+
+        )
+    }
+
+    // Resolve `shadowBannedUser` from HERE onwards(ex. update UI displaying the response data)...
+}
+
+```
+
+## Search User(s)
+
+This function searches the users in an app.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#dea07871-86bb-4c12-bef3-d7290d762a06>
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val userClient = SportsTalk247.UserClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    // Search by Handle
+    val searchedUsersByHandle = withContext(Dispatchers.IO) {
+        userClient.searchUsers(
+            handle = "testhandle1",
+            limit = 20, // Defaults to 200 on backend API server
+            cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+        )
+    }
+
+    // Search by Name
+    val searchedUsersByName = withContext(Dispatchers.IO) {
+        userClient.searchUsers(
+            name = "Josie Rizal",
+            limit = 20, // Defaults to 200 on backend API server
+            cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+        )
+    }
+
+    // Search by User ID
+    val searchedUsersByUserId = withContext(Dispatchers.IO) {
+        userClient.searchUsers(
+            userid = "userid_georgew",
+            limit = 20, // Defaults to 200 on backend API server
+            cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+        )
+    }
+}
+
+```
+
+## Delete User
+
+This function will delete the specified user. All rooms with messages by that user will have the messages from this user purged in the rooms.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#ab387784-ad82-4025-bb3b-56659129279c>
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val userClient = SportsTalk247.UserClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val deletedUser = withContext(Dispatchers.IO) {
+        userClient.deleteUser(
+            userid = "023976080242ac120002"
+        )
+    }
+
+    // Resolve `deletedUser` from HERE onwards(ex. update UI displaying the response data)...
 }
 
 ```
