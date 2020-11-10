@@ -3,17 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Sportstalk Android SDK's documentation!
-==================================================
+SportsTalk 247 Android SDK Documentation
+========================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
 
    usage/getting_started
    usage/how_to_download_the_sdk
    usage/how_to_use_sdk
    usage/user_client
+   usage/chat_client
 
 Indices and tables
 ==================
