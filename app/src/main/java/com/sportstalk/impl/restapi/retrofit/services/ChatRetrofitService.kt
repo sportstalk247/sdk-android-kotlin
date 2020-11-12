@@ -95,6 +95,13 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null /* eventId */
     ): Response<ApiResponse<ListEvents>>
 
+    @GET("{appId}/chat/rooms/{chatroomid}/events/{eventId}")
+    suspend fun getEventById(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("eventId") eventId: String
+    ): Response<ApiResponse<ChatEvent>>
+
     @GET("{appId}/chat/rooms/{chatroomid}/listeventshistory")
     suspend fun listEventsHistory(
             @Path("appId") appId: String,

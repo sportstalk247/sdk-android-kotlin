@@ -299,6 +299,23 @@ constructor(
                 )
             }
 
+    override suspend fun getEventById(chatRoomId: String, eventId: String): ChatEvent =
+            try {
+                service.getEventById(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        eventId = eventId
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
     override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             try {
                 service.listEventsHistory(

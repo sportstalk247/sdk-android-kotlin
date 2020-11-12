@@ -138,6 +138,12 @@ constructor(
                     cursor = cursor
             )
 
+    override suspend fun getEventById(chatRoomId: String, eventId: String): ChatEvent =
+            chatService.getEventById(
+                    chatRoomId = chatRoomId,
+                    eventId = eventId
+            )
+
     override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             chatService.listEventsHistory(
                     chatRoomId = chatRoomId,
