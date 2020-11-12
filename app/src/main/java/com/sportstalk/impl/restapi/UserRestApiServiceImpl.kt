@@ -131,4 +131,28 @@ constructor(
                         err = err
                 )
             }
+
+    override suspend fun shadowBanUser(
+            userId: String,
+            shadowban: Boolean,
+            expireseconds: Long?
+    ): User =
+            try {
+                service.shadowBanUser(
+                        appId = appId,
+                        userId = userId,
+                        request = ShadowBanUserRequest(
+                                shadowban = shadowban,
+                                expireseconds = expireseconds
+                        )
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 }

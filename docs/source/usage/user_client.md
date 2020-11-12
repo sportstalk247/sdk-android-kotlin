@@ -169,7 +169,7 @@ lifecycleScope.launch {
     // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
     val shadowBannedUser = withContext(Dispatchers.IO) {
         userClient.shadowBanUser(
-            userid = "023976080242ac120002",
+            userId = "023976080242ac120002",
             shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
             expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
 

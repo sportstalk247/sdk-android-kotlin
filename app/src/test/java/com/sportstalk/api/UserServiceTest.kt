@@ -717,4 +717,46 @@ class UserServiceTest {
         return@runBlocking
     }
 
+    @Test
+    fun `8) Shadow Ban User`() = runBlocking {
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
+                displayname = "Test 1"
+        )
+        // Should create a test user first
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest)
+
+        val testExpectedResult = testCreatedUser.copy(
+                shadowbanned = true
+        )
+
+        // WHEN
+        val testActualResult = userService.shadowBanUser(
+                userId = testCreatedUser.userid!!,
+                shadowban = true
+        )
+
+        // THEN
+        println(
+                "`Shadow Ban User`() -> testActualResult = \n" +
+                        json.stringify(
+                                User.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        // "@handle_test1 was banned"
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.handle == testExpectedResult.handle!! }
+        assertTrue { testActualResult.handlelowercase == testExpectedResult.handlelowercase!! }
+        assertTrue { testActualResult.displayname == testExpectedResult.displayname }
+        assertTrue { testActualResult.shadowbanned == true }
+
+        // Perform Delete Test User
+        deleteTestUsers(testActualResult.userid)
+    }
+
 }

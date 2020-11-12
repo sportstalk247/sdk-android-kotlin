@@ -1064,7 +1064,7 @@ lifecycleScope.launch {
 
 ```
 
-## Get Event by ID (TODO::)
+## Get Event by ID
 
 Invoke this function to get a chat event by ID.
 
@@ -1086,12 +1086,11 @@ val chatClient = SportsTalk247.ChatClient(
 // Launch thru coroutine block
 // https://developer.android.com/topic/libraries/architecture/coroutines
 lifecycleScope.launch {
-    // TODO:: NOT YET IMPLEMENTED
     // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
     val chatEventResponse = withContext(Dispatchers.IO) {
-        chatClient.getChatEventById(
+        chatClient.getEventById(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
-            chatEventId = "7620812242ac09300002"    // ID of an existing event from the chat room
+            eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
         )
     }
 
@@ -1216,11 +1215,12 @@ val chatClient = SportsTalk247.ChatClient(
 lifecycleScope.launch {
     // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
     val deleteEventResponse = withContext(Dispatchers.IO) {
-        chatClient.flagEventLogicallyDeleted(
+        chatClient.setMessageAsDeleted(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
             // Assuming user "@nicoleWd" exists
+            deleted = false,
             permanentifnoreplies = true
         )
     }
@@ -1253,15 +1253,15 @@ val chatClient = SportsTalk247.ChatClient(
 // https://developer.android.com/topic/libraries/architecture/coroutines
 lifecycleScope.launch {
     // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val removeEventResponse = withContext(Dispatchers.IO) {
-        chatClient.removeEvent(
+    val deleteEventResponse = withContext(Dispatchers.IO) {
+        chatClient.deleteEvent(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
         )
     }
 
-    // Resolve `removeEventResponse` from HERE onwards(ex. update UI displaying the response data)...
+    // Resolve `deleteEventResponse` from HERE onwards(ex. update UI displaying the response data)...
 }
 
 ```

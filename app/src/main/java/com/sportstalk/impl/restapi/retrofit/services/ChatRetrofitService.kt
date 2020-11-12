@@ -95,6 +95,13 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null /* eventId */
     ): Response<ApiResponse<ListEvents>>
 
+    @GET("{appId}/chat/rooms/{chatroomid}/events/{eventId}")
+    suspend fun getEventById(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("eventId") eventId: String
+    ): Response<ApiResponse<ChatEvent>>
+
     @GET("{appId}/chat/rooms/{chatroomid}/listeventshistory")
     suspend fun listEventsHistory(
             @Path("appId") appId: String,
@@ -141,6 +148,14 @@ interface ChatRetrofitService {
             @Path("chatroomid") chatRoomId: String,
             @Body request: BounceUserRequest
     ): Response<ApiResponse<BounceUserResponse>>
+
+    @DELETE("{appId}/chat/rooms/{chatroomid}/events/{eventid}")
+    suspend fun deleteEvent(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("eventid") eventId: String,
+            @Query("userid") userid: String
+    ): Response<ApiResponse<DeleteEventResponse>>
 
     @PUT("{appId}/chat/rooms/{chatroomid}/events/{eventid}/setdeleted")
     suspend fun setMessageAsDeleted(

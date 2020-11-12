@@ -14,5 +14,7 @@ data class User(
         val displayname: String? = null,
         val pictureurl: String? = null,
         val profileurl: String? = null,
-        val banned: Boolean? = null
+        val banned: Boolean? = null,
+        val shadowbanned: Boolean? = null,
+        val shadowbanexpires: String? = null   // ISODate ex. "2020-11-11T11:35:07.657812Z"
 ): Parcelable

@@ -136,6 +136,16 @@ interface ChatService {
     ): ListEvents
 
     /**
+     * [GET] /{{api_appid}}/chat/rooms/{chatroomid}/events/{eventId}
+     * - https://apiref.sportstalk247.com/?version=latest#04f8f563-eacf-4a64-9f00-b3d6c050a2fa
+     * - Get Chat Event by ID
+     */
+    suspend fun getEventById(
+            chatRoomId: String,
+            eventId: String
+    ): ChatEvent
+
+    /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/listeventshistory
      * - https://apiref.sportstalk247.com/?version=latest#b8ca9766-ab07-4c8c-8e25-002a24a8feaa
      * - LIST EVENTS HISTORY
@@ -208,35 +218,23 @@ interface ChatService {
             request: BounceUserRequest
     ): BounceUserResponse
 
+    suspend fun deleteEvent(
+            chatRoomId: String,
+            eventId: String,
+            userid: String
+    ): DeleteEventResponse
+
     /**
      * Flag Message Event As Deleted
      * [PUT] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/setdeleted?userid=&deleted=true&permanentifnoreplies
      * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
      * - Removes a message from a room
      */
-    suspend fun removeEvent(
+    suspend fun setMessageAsDeleted(
             chatRoomId: String,
             eventId: String,
             userid: String,
             deleted: Boolean,
-            permanentifnoreplies: Boolean? = null
-    ): DeleteEventResponse
-    /**
-     * Convenience Function to Remove Message where `deleted` = true and `permanentifnoreplies` = true
-     */
-    suspend fun permanentlyDeleteEvent(
-            chatRoomId: String,
-            eventId: String,
-            userid: String,
-            permanentifnoreplies: Boolean? = null
-    ): DeleteEventResponse
-    /**
-     * Convenience Function to Remove Message where `deleted` = false and `permanentifnoreplies` = false
-     */
-    suspend fun flagEventLogicallyDeleted(
-            chatRoomId: String,
-            eventId: String,
-            userid: String,
             permanentifnoreplies: Boolean? = null
     ): DeleteEventResponse
 
