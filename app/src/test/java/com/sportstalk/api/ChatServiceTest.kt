@@ -2503,7 +2503,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `Q) Remove a Message - Permanently Delete`() = runBlocking {
+    fun `Q) Delete Event`() = runBlocking {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2555,7 +2555,6 @@ class ChatServiceTest {
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputEventId = testSendMessageData.id!!
         val testInputUserId = testCreatedUserData.userid!!
-        val testInputPermanentIfNoReplies = true
         val testExpectedResult = DeleteEventResponse(
                 kind = Kind.DELETED_COMMENT,
                 permanentdelete = true,
@@ -2565,16 +2564,15 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.permanentlyDeleteEvent(
+        val testActualResult = chatService.deleteEvent(
                 chatRoomId = testInputChatRoomId,
                 eventId = testInputEventId,
-                userid = testInputUserId,
-                permanentifnoreplies = testInputPermanentIfNoReplies
+                userid = testInputUserId
         )
 
         // THEN
         println(
-                "`Remove a Message - Permanently Delete`() -> testActualResult = \n" +
+                "`Delete Event`() -> testActualResult = \n" +
                         json.stringify(
                                 DeleteEventResponse.serializer(),
                                 testActualResult
@@ -2582,8 +2580,8 @@ class ChatServiceTest {
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.permanentdelete == testExpectedResult.permanentdelete }
         assertTrue { testActualResult.event?.id == testExpectedResult.event?.id }
-        assertTrue { testActualResult.event?.deleted == testExpectedResult.event?.deleted }
         assertTrue { testActualResult.event?.userid == testExpectedResult.event?.userid }
 
         // Perform Delete Test Chat Room
@@ -2645,20 +2643,22 @@ class ChatServiceTest {
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputEventId = testSendMessageData.id!!
         val testInputUserId = testCreatedUserData.userid!!
+        val testInputDeleted = true
         val testInputPermanentIfNoReplies = false
         val testExpectedResult = DeleteEventResponse(
                 kind = Kind.DELETED_COMMENT,
                 permanentdelete = false,
                 event = testSendMessageData.copy(
-                        deleted = false
+                        deleted = testInputDeleted
                 )
         )
 
         // WHEN
-        val testActualResult = chatService.flagEventLogicallyDeleted(
+        val testActualResult = chatService.setMessageAsDeleted(
                 chatRoomId = testInputChatRoomId,
                 eventId = testInputEventId,
                 userid = testInputUserId,
+                deleted = testInputDeleted,
                 permanentifnoreplies = testInputPermanentIfNoReplies
         )
 
@@ -2672,6 +2672,7 @@ class ChatServiceTest {
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.permanentdelete == testExpectedResult.permanentdelete }
         assertTrue { testActualResult.event?.id == testExpectedResult.event?.id }
         assertTrue { testActualResult.event?.deleted == testExpectedResult.event?.deleted }
         assertTrue { testActualResult.event?.userid == testExpectedResult.event?.userid }

@@ -218,35 +218,23 @@ interface ChatService {
             request: BounceUserRequest
     ): BounceUserResponse
 
+    suspend fun deleteEvent(
+            chatRoomId: String,
+            eventId: String,
+            userid: String
+    ): DeleteEventResponse
+
     /**
      * Flag Message Event As Deleted
      * [PUT] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}/setdeleted?userid=&deleted=true&permanentifnoreplies
      * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
      * - Removes a message from a room
      */
-    suspend fun removeEvent(
+    suspend fun setMessageAsDeleted(
             chatRoomId: String,
             eventId: String,
             userid: String,
             deleted: Boolean,
-            permanentifnoreplies: Boolean? = null
-    ): DeleteEventResponse
-    /**
-     * Convenience Function to Remove Message where `deleted` = true and `permanentifnoreplies` = true
-     */
-    suspend fun permanentlyDeleteEvent(
-            chatRoomId: String,
-            eventId: String,
-            userid: String,
-            permanentifnoreplies: Boolean? = null
-    ): DeleteEventResponse
-    /**
-     * Convenience Function to Remove Message where `deleted` = false and `permanentifnoreplies` = false
-     */
-    suspend fun flagEventLogicallyDeleted(
-            chatRoomId: String,
-            eventId: String,
-            userid: String,
             permanentifnoreplies: Boolean? = null
     ): DeleteEventResponse
 

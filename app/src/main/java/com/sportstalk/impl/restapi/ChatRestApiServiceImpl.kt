@@ -454,13 +454,29 @@ constructor(
                 )
             }
 
-    override suspend fun removeEvent(
+    override suspend fun deleteEvent(
             chatRoomId: String,
             eventId: String,
-            userid: String,
-            deleted: Boolean,
-            permanentifnoreplies: Boolean?
+            userid: String
     ): DeleteEventResponse =
+            try {
+                service.deleteEvent(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        eventId = eventId,
+                        userid = userid
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
             try {
                 service.setMessageAsDeleted(
                         appId = appId,
@@ -479,24 +495,6 @@ constructor(
                         err = err
                 )
             }
-
-    override suspend fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): DeleteEventResponse =
-            removeEvent(
-                    chatRoomId = chatRoomId,
-                    eventId = eventId,
-                    userid = userid,
-                    deleted = true,
-                    permanentifnoreplies = permanentifnoreplies
-            )
-
-    override suspend fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, permanentifnoreplies: Boolean?): DeleteEventResponse =
-            removeEvent(
-                    chatRoomId = chatRoomId,
-                    eventId = eventId,
-                    userid = userid,
-                    deleted = false,
-                    permanentifnoreplies = permanentifnoreplies
-            )
 
     override suspend fun reportMessage(
             chatRoomId: String,
