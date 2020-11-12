@@ -36,4 +36,7 @@ constructor(
 
     override suspend fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): ListUsersResponse =
             userService.searchUsers(handle, name, userid, limit, cursor)
+
+    override suspend fun shadowBanUser(userId: String, shadowban: Boolean, expireseconds: Long?): User =
+            userService.shadowBanUser(userId, shadowban, expireseconds)
 }

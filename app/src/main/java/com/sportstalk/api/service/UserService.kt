@@ -58,4 +58,15 @@ interface UserService {
             cursor: String? = null
     ): ListUsersResponse
 
+    /**
+     * [POST] /{{api_appid}}/user/users/{userId}/shadowban
+     * - https://apiref.sportstalk247.com/?version=latest#211a5696-59ce-4988-82c9-7c614cab3efb
+     * - Will toggle the user's shadow banned flag
+     */
+    suspend fun shadowBanUser(
+            userId: String,
+            shadowban: Boolean,
+            expireseconds: Long? = null
+    ): User
+
 }

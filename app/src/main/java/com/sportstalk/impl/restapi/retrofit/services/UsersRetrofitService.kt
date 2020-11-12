@@ -48,4 +48,11 @@ interface UsersRetrofitService {
             @Body request: SearchUsersRequest
     ): Response<ApiResponse<ListUsersResponse>>
 
+    @POST("{appId}/user/users/{userId}/shadowban")
+    suspend fun shadowBanUser(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Body request: ShadowBanUserRequest
+    ): Response<ApiResponse<User>>
+
 }
