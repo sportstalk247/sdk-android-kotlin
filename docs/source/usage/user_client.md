@@ -144,6 +144,41 @@ lifecycleScope.launch {
 
 ```
 
+## Global Purge User
+
+This function will purge all chat content published by the specified user.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#c36d94e2-4fd9-4c9f-8009-f1d8ae9da6f5>
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val userClient = SportsTalk247.UserClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val response = withContext(Dispatchers.IO) {
+        userClient.globalPurge(
+            userid = "023976080242ac120002",
+            banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
+        )
+    }
+
+    // Resolve `response` from HERE onwards(ex. update UI displaying the response data)...
+}
+
+```
+
 ## Shadow Ban User
 
 This function toggles the specified user's `shadowbanned` flag.
