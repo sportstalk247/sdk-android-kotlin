@@ -19,8 +19,6 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
 import org.junit.*
@@ -33,10 +31,7 @@ import org.robolectric.annotation.Config
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
-
 @Suppress("MainFunctionReturnUnit")
-@UnstableDefault
-@ImplicitReflectionSerializer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.KITKAT])
@@ -116,7 +111,7 @@ class UserServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -153,7 +148,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Create or Update User`() -> testActualResult = \n" +
-                        json.stringify(
+                        json.encodeToString(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -189,7 +184,7 @@ class UserServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-400 - Create or Update User`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -228,7 +223,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Delete User`() -> testActualResult = \n" +
-                        json.stringify(
+                        json.encodeToString(
                                 DeleteUserResponse.serializer(),
                                 testActualResult
                         )
@@ -260,7 +255,7 @@ class UserServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Delete User`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -296,7 +291,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Get User Details`() -> testActualResult = \n" +
-                        json.stringify(
+                        json.encodeToString(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -330,7 +325,7 @@ class UserServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Get User Details`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -382,14 +377,14 @@ class UserServiceTest {
         // THEN
         println(
                 "`List Users`() -> testActualResult1 = " +
-                        json.stringify(
+                        json.encodeToString(
                                 ListUsersResponse.serializer(),
                                 testActualResult1
                         )
         )
         println(
                 "`List Users`() -> testActualResult2 = " +
-                        json.stringify(
+                        json.encodeToString(
                                 ListUsersResponse.serializer(),
                                 testActualResult2
                         )
@@ -429,7 +424,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Ban User`() -> testActualResult = \n" +
-                        json.stringify(
+                        json.encodeToString(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -466,7 +461,7 @@ class UserServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Ban User`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -509,7 +504,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Restore User`() -> testActualResult = \n" +
-                        json.stringify(
+                        json.encodeToString(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -546,7 +541,7 @@ class UserServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Restore User`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -588,7 +583,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Search Users`() -> testActualResult1 = " +
-                        json.stringify(
+                        json.encodeToString(
                                 ListUsersResponse.serializer(),
                                 testActualResult1
                         )
@@ -629,7 +624,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Search Users`() -> testActualResult1 = " +
-                        json.stringify(
+                        json.encodeToString(
                                 ListUsersResponse.serializer(),
                                 testActualResult1
                         )
@@ -670,7 +665,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Search Users`() -> testActualResult1 = " +
-                        json.stringify(
+                        json.encodeToString(
                                 ListUsersResponse.serializer(),
                                 testActualResult1
                         )
@@ -702,7 +697,7 @@ class UserServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-400 - Search Users`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -741,7 +736,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Shadow Ban User`() -> testActualResult = \n" +
-                        json.stringify(
+                        json.encodeToString(
                                 User.serializer(),
                                 testActualResult
                         )
