@@ -1,9 +1,6 @@
 package com.sportstalk.api.service
 
-import com.sportstalk.models.users.CreateUpdateUserRequest
-import com.sportstalk.models.users.DeleteUserResponse
-import com.sportstalk.models.users.ListUsersResponse
-import com.sportstalk.models.users.User
+import com.sportstalk.models.users.*
 
 interface UserService {
 
@@ -68,5 +65,15 @@ interface UserService {
             shadowban: Boolean,
             expireseconds: Long? = null
     ): User
+
+    /**
+     * [POST] /{{api_appid}}/user/users/{userId}/globalpurge
+     * - https://apiref.sportstalk247.com/?version=latest#c36d94e2-4fd9-4c9f-8009-f1d8ae9da6f5
+     * - Will purge all chat content published by the specified user
+     */
+    suspend fun globalPurge(
+            userId: String,
+            banned: Boolean
+    ): GlobalPurgeResponse
 
 }

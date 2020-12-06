@@ -55,4 +55,11 @@ interface UsersRetrofitService {
             @Body request: ShadowBanUserRequest
     ): Response<ApiResponse<User>>
 
+    @POST("{appId}/user/users/{userId}/globalpurge")
+    suspend fun globalPurge(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Body request: GlobalPurgeRequest
+    ): Response<ApiResponse<GlobalPurgeResponse>>
+
 }

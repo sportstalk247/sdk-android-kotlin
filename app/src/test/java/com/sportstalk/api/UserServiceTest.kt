@@ -9,10 +9,7 @@ import com.sportstalk.api.service.UserService
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.Kind
 import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.users.CreateUpdateUserRequest
-import com.sportstalk.models.users.DeleteUserResponse
-import com.sportstalk.models.users.ListUsersResponse
-import com.sportstalk.models.users.User
+import com.sportstalk.models.users.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -30,6 +27,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.random.Random
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 @Suppress("MainFunctionReturnUnit")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -752,6 +750,43 @@ class UserServiceTest {
 
         // Perform Delete Test User
         deleteTestUsers(testActualResult.userid)
+    }
+
+    @Test
+    fun `9) Global Purge User`() = runBlocking {
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
+                displayname = "Test 1"
+        )
+        // Should create a test user first
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest)
+
+        // WHEN
+        try {
+            val testActualResult = userService.globalPurge(
+                    userId = testInputRequest.userid,
+                    banned = true
+            )
+
+            // THEN
+            println(
+                    "`Global Purge User`() -> testActualResult = \n" +
+                            json.encodeToString(
+                                    GlobalPurgeResponse.serializer(),
+                                    testActualResult
+                            )
+            )
+
+            assertTrue { true }
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUser.userid)
+        }
     }
 
 }

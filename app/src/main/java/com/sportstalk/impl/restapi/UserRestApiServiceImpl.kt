@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.sportstalk.api.service.UserService
 import com.sportstalk.impl.handleSdkResponse
 import com.sportstalk.impl.restapi.retrofit.services.UsersRetrofitService
+import com.sportstalk.models.Kind
 import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.users.*
 import kotlinx.serialization.json.Json
@@ -147,6 +148,37 @@ constructor(
                         )
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun globalPurge(userId: String, banned: Boolean): GlobalPurgeResponse =
+            try {
+                val response = service.globalPurge(
+                        appId = appId,
+                        userId = userId,
+                        request = GlobalPurgeRequest(banned = banned)
+                )
+
+                val respBody = response.body()
+
+                if(response.isSuccessful) {
+                    GlobalPurgeResponse()
+                } else {
+                    throw response.errorBody()?.string()?.let { errBodyStr ->
+                        json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                    }
+                            ?: SportsTalkException(
+                                    kind = respBody?.kind ?: Kind.API,
+                                    message = respBody?.message ?: response.message(),
+                                    code = respBody?.code ?: response.code()
+                            )
+                }
             } catch (err: SportsTalkException) {
                 throw err
             } catch (err: Throwable) {
