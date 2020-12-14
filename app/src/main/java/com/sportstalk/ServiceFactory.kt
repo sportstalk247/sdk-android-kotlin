@@ -10,7 +10,6 @@ import com.sportstalk.impl.restapi.ChatRestApiServiceImpl
 import com.sportstalk.impl.restapi.UserRestApiServiceImpl
 import com.sportstalk.models.ClientConfig
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonBuilder
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -23,16 +22,12 @@ object ServiceFactory {
     object RestApi {
         @JvmStatic
         internal val json: Json by lazy {
-            Json(
-                    JsonBuilder()
-                            .apply {
-                                encodeDefaults = false
-                                prettyPrint = true
-                                isLenient = true
-                                ignoreUnknownKeys = true
-                            }
-                            .buildConfiguration()
-            )
+            Json {
+                encodeDefaults = false
+                prettyPrint = true
+                isLenient = true
+                ignoreUnknownKeys = true
+            }
         }
 
         @JvmStatic

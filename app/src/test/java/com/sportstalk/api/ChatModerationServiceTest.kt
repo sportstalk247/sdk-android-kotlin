@@ -9,7 +9,6 @@ import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatModerationService
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.service.UserService
-import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.Kind
 import com.sportstalk.models.SportsTalkException
@@ -19,14 +18,11 @@ import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationRespon
 import com.sportstalk.models.users.CreateUpdateUserRequest
 import com.sportstalk.models.users.User
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.await
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
 import org.junit.*
@@ -39,8 +35,6 @@ import org.robolectric.annotation.Config
 import kotlin.random.Random
 import kotlin.test.assertTrue
 
-@UnstableDefault
-@ImplicitReflectionSerializer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.KITKAT])
@@ -135,7 +129,7 @@ class ChatModerationServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -219,7 +213,7 @@ class ChatModerationServiceTest {
         // THEN
         println(
                 "`Approve Message`() -> testActualResult = \n" +
-                        json.stringify(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 testActualResult
                         )
@@ -258,7 +252,7 @@ class ChatModerationServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Approve Message`() -> testActualResult = \n" +
-                            json.stringify(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -339,7 +333,7 @@ class ChatModerationServiceTest {
         // THEN
         println(
                 "`List Messages Needing Moderation`() -> testActualResult = \n" +
-                        json.stringify(
+                        json.encodeToString(
                                 ListMessagesNeedingModerationResponse.serializer(),
                                 testActualResult
                         )

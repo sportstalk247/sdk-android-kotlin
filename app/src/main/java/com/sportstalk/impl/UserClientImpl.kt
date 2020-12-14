@@ -5,10 +5,7 @@ import com.sportstalk.ServiceFactory
 import com.sportstalk.api.UserClient
 import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.users.CreateUpdateUserRequest
-import com.sportstalk.models.users.DeleteUserResponse
-import com.sportstalk.models.users.ListUsersResponse
-import com.sportstalk.models.users.User
+import com.sportstalk.models.users.*
 import java.util.concurrent.CompletableFuture
 
 class UserClientImpl
@@ -39,4 +36,7 @@ constructor(
 
     override suspend fun shadowBanUser(userId: String, shadowban: Boolean, expireseconds: Long?): User =
             userService.shadowBanUser(userId, shadowban, expireseconds)
+
+    override suspend fun globalPurge(userId: String, banned: Boolean): GlobalPurgeResponse =
+            userService.globalPurge(userId, banned)
 }

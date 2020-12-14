@@ -9,8 +9,6 @@ import com.sportstalk.api.service.CommentModerationService
 import com.sportstalk.api.service.CommentService
 import com.sportstalk.api.service.UserService
 import com.sportstalk.models.ClientConfig
-import kotlinx.serialization.ImplicitReflectionSerializer
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Before
@@ -21,8 +19,6 @@ import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@UnstableDefault
-@ImplicitReflectionSerializer
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
