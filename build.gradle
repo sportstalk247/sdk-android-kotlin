@@ -36,15 +36,18 @@ buildscript {
     ext.kotlin_version = '1.4.20'
     ext.kotlinx_serialization_version = '1.0.1'
     ext.buildGradleToolVersion = '4.1.0'
-    
+    ext.dokkaVersion = '1.4.20'
+
     repositories {
         google()
+        gradlePluginPortal()
         jcenter()
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$buildGradleToolVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:$dokkaVersion"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -62,3 +65,5 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+apply plugin: 'org.jetbrains.dokka'
