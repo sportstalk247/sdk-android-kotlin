@@ -3,10 +3,8 @@ package com.sportstalk.impl
 import androidx.annotation.RestrictTo
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.UserClient
-import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.users.*
-import java.util.concurrent.CompletableFuture
 
 class UserClientImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -39,4 +37,7 @@ constructor(
 
     override suspend fun globalPurge(userId: String, banned: Boolean): GlobalPurgeResponse =
             userService.globalPurge(userId, banned)
+
+    override suspend fun reportUser(userId: String, reporttype: String): ReportUserResponse =
+            userService.reportUser(userId, reporttype)
 }
