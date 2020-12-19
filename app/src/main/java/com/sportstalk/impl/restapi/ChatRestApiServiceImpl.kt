@@ -281,6 +281,9 @@ constructor(
         }
     }
 
+    override suspend fun messageIsReported(which: ChatEvent, userid: String): Boolean =
+            which.reports.any { _report -> _report.userid == userid }
+
     override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             try {
                 service.listPreviousEvents(
