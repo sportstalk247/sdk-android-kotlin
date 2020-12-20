@@ -10,6 +10,7 @@ import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -24,7 +25,6 @@ fun ChatClient.allEventUpdates(
         chatRoomId: String,
         /* Polling Frequency */
         frequency: Long = 500L,
-        lifecycleOwner: LifecycleOwner,
         /*
         * The following are placeholder/convenience functions should they opt to provide custom callbacks
         */
@@ -35,20 +35,6 @@ fun ChatClient.allEventUpdates(
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
 ): Flow<List<ChatEvent>> = flow<List<ChatEvent>> {
-    val emitter = MutableSharedFlow<GetUpdatesResponse>()
-
-    // Emit Response
-    emitAll(
-            emitter.asSharedFlow()
-                    .onEach { response ->
-                        // Update internally stored chatroom event cursor
-                        response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
-                            chatRoomEventCursor[chatRoomId] = cursor
-                        }
-                    }
-                    .map { it.events }
-    )
-
     do {
         // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
         if (roomSubscriptions.contains(chatRoomId)) {
@@ -63,8 +49,13 @@ fun ChatClient.allEventUpdates(
                 }
 
                 // Emit response value
-                emitter.emit(response)
+                response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
+                    chatRoomEventCursor[chatRoomId] = cursor
+                }
+                emit(response.events)
             } catch (err: SportsTalkException) {
+                err.printStackTrace()
+            } catch (err: CancellationException) {
                 err.printStackTrace()
             }
         } else {
@@ -73,8 +64,7 @@ fun ChatClient.allEventUpdates(
         }
 
         delay(frequency)
-    } while (lifecycleOwner.lifecycle.coroutineScope.isActive)
-
+    } while (true)
 }
         // Trigger callbacks based on event type
         .onEach { events ->

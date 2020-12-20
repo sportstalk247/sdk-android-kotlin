@@ -10,9 +10,7 @@ import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.*
 
 /**
  * Returns an instance of reactive RxJava Publisher which emits Event Updates received at
@@ -21,7 +19,7 @@ import kotlinx.coroutines.isActive
  */
 fun ChatClient.allEventUpdates(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner,
+        coroutineScope: CoroutineScope,
         /* Polling Frequency */
         frequency: Long = 500L,
         /*
@@ -35,9 +33,7 @@ fun ChatClient.allEventUpdates(
         onPurgeEvent: OnPurgeEvent? = null
 ): Flowable<List<ChatEvent>> {
     return Flowable.create<GetUpdatesResponse>({ emitter ->
-
-        val scope = lifecycleOwner.lifecycle.coroutineScope
-        scope.launchWhenCreated {
+        coroutineScope.launch {
             do {
                 // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
                 if (roomSubscriptions.contains(chatRoomId)) {
@@ -63,7 +59,7 @@ fun ChatClient.allEventUpdates(
                 }
 
                 delay(frequency)
-            } while (scope.isActive)
+            } while (true)
         }
 
     }, BackpressureStrategy.LATEST)

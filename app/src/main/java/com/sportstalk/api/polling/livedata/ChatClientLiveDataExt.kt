@@ -16,7 +16,6 @@ import kotlinx.coroutines.*
  */
 fun ChatClient.allEventUpdates(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L,
         /*
@@ -83,5 +82,5 @@ fun ChatClient.allEventUpdates(
         }
 
         delay(frequency)
-    } while (lifecycleOwner.lifecycle.coroutineScope.isActive)
+    } while (true)
 }
