@@ -10,7 +10,7 @@ import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 
 /**
  * Returns an instance of reactive RxJava Publisher which emits Event Updates received at
@@ -19,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
  */
 fun ChatClient.allEventUpdates(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner,
+        coroutineScope: CoroutineScope,
         /* Polling Frequency */
         frequency: Long = 500L,
         /*
@@ -32,51 +32,35 @@ fun ChatClient.allEventUpdates(
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
 ): Flowable<List<ChatEvent>> {
-    /*LiveDataReactiveStreams.toPublisher(
-                lifecycleOwner,
-                allEventUpdatesLiveData(chatRoomId, eventTypeFilter, lifecycleOwner)
-        )*/
     return Flowable.create<GetUpdatesResponse>({ emitter ->
-        val scope = lifecycleOwner.lifecycle.coroutineScope
-        // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
-        val getUpdateAction = Runnable {
-            // Execute block from within coroutine scope
-            scope.launchWhenStarted {
-                try {
-                    // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-                    if (roomSubscriptions.contains(chatRoomId)) {
-                        try {
-                            // Perform GET UPDATES operation
-                            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                                getUpdates(
-                                        chatRoomId = chatRoomId,
-                                        // Apply event cursor
-                                        cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                                )
-                            }
-
-                            // Emit response value
-                            emitter.onNext(response)
-                        } catch (err: SportsTalkException) {
-                            err.printStackTrace()
+        coroutineScope.launch {
+            do {
+                // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
+                if (roomSubscriptions.contains(chatRoomId)) {
+                    try {
+                        // Perform GET UPDATES operation
+                        val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                            getUpdates(
+                                    chatRoomId = chatRoomId,
+                                    // Apply event cursor
+                                    cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                            )
                         }
-                    }
-                    // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-                } catch (err: SportsTalkException) {
-                    emitter.onError(err)
-                }
-            }
-        }
 
-        /**
-         * Add GetUpdates Lifecycle Observer Implementation to this lifecycle owner's set of observers
-         */
-        lifecycleOwner.lifecycle.addObserver(
-                GetUpdatesObserver(
-                        getUpdateAction = getUpdateAction,
-                        frequency = frequency
-                )
-        )
+                        // Emit response value
+                        emitter.onNext(response)
+                    } catch (err: SportsTalkException) {
+                        err.printStackTrace()
+                        emitter.onError(err)
+                    }
+                } else {
+                    // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
+                    break
+                }
+
+                delay(frequency)
+            } while (true)
+        }
 
     }, BackpressureStrategy.LATEST)
             .doOnNext { response ->

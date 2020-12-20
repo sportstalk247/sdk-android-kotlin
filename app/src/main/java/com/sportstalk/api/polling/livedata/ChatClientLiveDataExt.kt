@@ -7,8 +7,7 @@ import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 /**
  * Returns an instance of reactive LiveData which emits Event Updates received at
@@ -17,7 +16,6 @@ import kotlinx.coroutines.withContext
  */
 fun ChatClient.allEventUpdates(
         chatRoomId: String,
-        lifecycleOwner: LifecycleOwner,
         /* Polling Frequency */
         frequency: Long = 500L,
         /*
@@ -31,43 +29,6 @@ fun ChatClient.allEventUpdates(
         onPurgeEvent: OnPurgeEvent? = null
 ): LiveData<List<ChatEvent>> = liveData<List<ChatEvent>> {
     val emitter = MutableLiveData<GetUpdatesResponse>()
-
-    val scope = lifecycleOwner.lifecycle.coroutineScope
-    // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
-    val getUpdateAction = Runnable {
-        // Execute block from within coroutine scope
-        scope.launchWhenStarted {
-            // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-            if (roomSubscriptions.contains(chatRoomId)) {
-                try {
-                    // Perform GET UPDATES operation
-                    val response = withContext(Dispatchers.IO) {
-                        getUpdates(
-                                chatRoomId = chatRoomId,
-                                // Apply event cursor
-                                cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                        )
-                    }
-
-                    // Emit response value
-                    emitter.postValue(response)
-                } catch (err: SportsTalkException) {
-                    err.printStackTrace()
-                }
-            }
-            // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-        }
-    }
-
-    /**
-     * Add GetUpdates Lifecycle Observer Implementation to this lifecycle owner's set of observers
-     */
-    lifecycleOwner.lifecycle.addObserver(
-            GetUpdatesObserver(
-                    getUpdateAction = getUpdateAction,
-                    frequency = frequency
-            )
-    )
 
     // Emit Response
     emitSource(
@@ -96,4 +57,30 @@ fun ChatClient.allEventUpdates(
                 }
             }
     )
+
+    do {
+        // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
+        if (roomSubscriptions.contains(chatRoomId)) {
+            try {
+                // Perform GET UPDATES operation
+                val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                    getUpdates(
+                            chatRoomId = chatRoomId,
+                            // Apply event cursor
+                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                    )
+                }
+
+                // Emit response value
+                emitter.value = response
+            } catch (err: SportsTalkException) {
+                err.printStackTrace()
+            }
+        } else {
+            // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
+            break
+        }
+
+        delay(frequency)
+    } while (true)
 }
