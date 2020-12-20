@@ -302,3 +302,37 @@ lifecycleScope.launch {
 }
 
 ```
+
+## Report User
+
+This function REPORTS a USER to the moderation team.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#5bfd5d93-dbfb-445c-84ff-c69f184e4277>
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val userClient = SportsTalk247.UserClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val reportedUser = withContext(Dispatchers.IO) {
+        userClient.reportUser(
+            userid = "023976080242ac120002"
+        )
+    }
+
+    // Resolve `reportedUser` from HERE onwards(ex. update UI displaying the response data)...
+}
+
+```

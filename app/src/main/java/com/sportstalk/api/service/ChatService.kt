@@ -125,6 +125,30 @@ interface ChatService {
     ): GetUpdatesResponse
 
     /**
+     * Checks if the user has already reported a message.
+     * @param which     The [ChatEvent] to check.
+     * @param userid    The userid of the [User] to check if he/she has already reported the [ChatEvent]
+     * @return          Returns true if specified [User] has reported the [ChatEvent]. Otherwise, returns false.
+     */
+    suspend fun messageIsReported(
+            which: ChatEvent,
+            userid: String
+    ): Boolean
+
+    /**
+     * Checks if the user has already reported a message.
+     * @param which     The [ChatEvent] to check.
+     * @param userid    The userid of the [User] to check if he/she has reacted to the [ChatEvent]
+     * @param reaction  The type of reaction([EventReaction]]) to check.
+     * @return          Returns true if specified [User] has reacted with a certain reaction([EventReaction]) to the [ChatEvent]. Otherwise, returns false.
+     */
+    suspend fun messageIsReactedTo(
+            which: ChatEvent,
+            userid: String,
+            reaction: String
+    ): Boolean
+
+    /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/listpreviousevents
      * - https://apiref.sportstalk247.com/?version=latest#f750f610-5db8-46ca-b9f7-a800c2e9c94a
      * - LIST PREVIOUS EVENTS

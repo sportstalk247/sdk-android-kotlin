@@ -167,7 +167,7 @@ constructor(
 
                 val respBody = response.body()
 
-                if(response.isSuccessful) {
+                if (response.isSuccessful) {
                     GlobalPurgeResponse()
                 } else {
                     throw response.errorBody()?.string()?.let { errBodyStr ->
@@ -179,6 +179,23 @@ constructor(
                                     code = respBody?.code ?: response.code()
                             )
                 }
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun reportUser(userId: String, reporttype: String): ReportUserResponse =
+            try {
+                service.reportUser(
+                        appId = appId,
+                        userId = userId,
+                        request = ReportUserRequest(userid = userId, reporttype = reporttype)
+                )
+                        .handleSdkResponse(json)
             } catch (err: SportsTalkException) {
                 throw err
             } catch (err: Throwable) {

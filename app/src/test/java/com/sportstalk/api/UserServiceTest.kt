@@ -9,6 +9,7 @@ import com.sportstalk.api.service.UserService
 import com.sportstalk.models.ClientConfig
 import com.sportstalk.models.Kind
 import com.sportstalk.models.SportsTalkException
+import com.sportstalk.models.chat.ReportType
 import com.sportstalk.models.users.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -84,7 +85,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `0-ERROR-403) Request is not authorized with a token`() = runBlocking {
+    fun `A-ERROR-403) Request is not authorized with a token`() = runBlocking {
         val userCaseUserService = ServiceFactory.RestApi.User.get(
                 config.copy(
                         apiToken = "not-a-valid-auth-api-token"
@@ -125,7 +126,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `1) Create or Update User`() = runBlocking {
+    fun `A) Create or Update User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -163,7 +164,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `1-ERROR-400) Create or Update User`() = runBlocking {
+    fun `A-ERROR-400) Create or Update User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -198,7 +199,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `2) Delete User`() = runBlocking {
+    fun `B) Delete User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -236,7 +237,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `2-ERROR-404) Delete User`() = runBlocking {
+    fun `B-ERROR-404) Delete User`() = runBlocking {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -269,7 +270,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `3) Get User Details`() = runBlocking {
+    fun `C) Get User Details`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -306,7 +307,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `3-ERROR-404) Get User Details`() = runBlocking {
+    fun `C-ERROR-404) Get User Details`() = runBlocking {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -339,7 +340,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `4) List Users`() = runBlocking {
+    fun `D) List Users`() = runBlocking {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -401,7 +402,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `5) Ban User`() = runBlocking {
+    fun `E) Ban User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -441,7 +442,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `5-ERROR-404) Ban User`() = runBlocking {
+    fun `E-ERROR-404) Ban User`() = runBlocking {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -475,7 +476,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `6) Restore User`() = runBlocking {
+    fun `F) Restore User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -521,7 +522,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `6-ERROR-404) Restore User`() = runBlocking {
+    fun `F-ERROR-404) Restore User`() = runBlocking {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -555,7 +556,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7A) Search Users - By Handle`() = runBlocking {
+    fun `F1) Search Users - By Handle`() = runBlocking {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -596,7 +597,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7B) Search Users - By Name`() = runBlocking {
+    fun `F2) Search Users - By Name`() = runBlocking {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -637,7 +638,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7C) Search Users - By UserId`() = runBlocking {
+    fun `F3) Search Users - By UserId`() = runBlocking {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -678,7 +679,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `7-ERROR-400) Search Users`() = runBlocking {
+    fun `F-ERROR-400) Search Users`() = runBlocking {
         // GIVEN
 
         // EXPECT
@@ -711,7 +712,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `8) Shadow Ban User`() = runBlocking {
+    fun `G) Shadow Ban User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -753,7 +754,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `9) Global Purge User`() = runBlocking {
+    fun `H) Global Purge User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -788,5 +789,67 @@ class UserServiceTest {
             deleteTestUsers(testCreatedUser.userid)
         }
     }
+
+
+    @Test
+    fun `I) Report User`() = runBlocking {
+        // GIVEN
+        val testInputCreateRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
+                displayname = "Test 1"
+        )
+        // Should create a test user first
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputCreateRequest)
+
+        val testInputRequest = ReportUserRequest(
+                userid = testCreatedUser.userid!!,
+                reporttype = ReportType.ABUSE
+        )
+        val testExpectedResult = testCreatedUser.copy(
+                reports = listOf(
+                        UserReport(
+                                userid = testInputRequest.userid,
+                                reason = testInputRequest.reporttype
+                        )
+                )
+        )
+
+        try {
+            // WHEN
+            val testActualResult = userService.reportUser(
+                    userId = testInputRequest.userid!!,
+                    reporttype = testInputRequest.reporttype!!
+            )
+
+            // THEN
+            println(
+                    "`Report User`() -> testActualResult = \n" +
+                            json.encodeToString(
+                                    User.serializer(),
+                                    testActualResult
+                            )
+            )
+
+            assertTrue { testActualResult.kind == testExpectedResult.kind }
+            assertTrue { testActualResult.userid == testExpectedResult.userid }
+            assertTrue { testActualResult.handle == testExpectedResult.handle!! }
+            assertTrue { testActualResult.handlelowercase == testExpectedResult.handlelowercase!! }
+            assertTrue { testActualResult.displayname == testExpectedResult.displayname }
+            // A User Report will be added
+            assertTrue {
+                testActualResult.reports.find { _rprt ->
+                    _rprt.userid == testInputRequest.userid
+                            && _rprt.reason == testInputRequest.reporttype
+                } != null
+            }
+        } catch (err: SportsTalkException) {
+            fail(err.message)
+        } finally {
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUser.userid)
+        }
+    }
+
 
 }

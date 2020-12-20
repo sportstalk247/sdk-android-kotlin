@@ -1022,6 +1022,69 @@ lifecycleScope.launch {
 
 ```
 
+## Message is Reported
+
+Invoke this function to check if the current user has already reported a message.
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val chatClient = SportsTalk247.ChatClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val messageIsReported = withContext(Dispatchers.IO) {
+        chatClient.messageIsReported(
+            eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
+            userid = "023976080242ac120002", // ID of an existing user from the chat room
+        )
+    }
+
+    // Resolve `messageIsReported` from HERE onwards(ex. update UI displaying the response data)...
+}
+
+```
+
+## Message is Reacted To
+
+Invoke this function to check if a message was reacted to by the current user.
+
+Below is a code sample on how to use this SDK feature:
+
+```kotlin
+val chatClient = SportsTalk247.ChatClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val messageIsReactedTo = withContext(Dispatchers.IO) {
+        chatClient.messageIsReactedTo(
+            eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
+            userid = "023976080242ac120002", // ID of an existing user from the chat room
+            reaction = "like"   // One of the EventReaction string constants
+        )
+    }
+
+    // Resolve `messageIsReactedTo` from HERE onwards(ex. update UI displaying the response data)...
+}
+
+```
+
 ## List Previous Events
 
 Invoke this function to list previous events.

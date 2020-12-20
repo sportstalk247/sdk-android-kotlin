@@ -281,6 +281,23 @@ constructor(
         }
     }
 
+    override suspend fun messageIsReported(which: ChatEvent, userid: String): Boolean =
+            which.reports.any { _report -> _report.userid == userid }
+
+    override suspend fun messageIsReactedTo(which: ChatEvent, userid: String, reaction: String): Boolean =
+            if(which.replyto != null) {
+                which.reactions.any { _reaction ->
+                    _reaction.type == reaction
+                            && _reaction.users.find { _usr -> _usr.userid == userid } != null
+                }
+                        || messageIsReactedTo(which.replyto, userid, reaction)
+            } else {
+                which.reactions.any { _reaction ->
+                    _reaction.type == reaction
+                            && _reaction.users.find { _usr -> _usr.userid == userid } != null
+                }
+            }
+
     override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             try {
                 service.listPreviousEvents(

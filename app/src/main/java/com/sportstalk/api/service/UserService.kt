@@ -76,4 +76,15 @@ interface UserService {
             banned: Boolean
     ): GlobalPurgeResponse
 
+    /**
+     * [POST] /{{api_appid}}/user/users/{userId}/report
+     * - https://apiref.sportstalk247.com/?version=latest#5bfd5d93-dbfb-445c-84ff-c69f184e4277
+     * - REPORTS a USER to the moderation team.
+     */
+    suspend fun reportUser(
+            userId: String,
+            /** [ReportType] */
+            reporttype: String,
+    ): ReportUserResponse
+
 }

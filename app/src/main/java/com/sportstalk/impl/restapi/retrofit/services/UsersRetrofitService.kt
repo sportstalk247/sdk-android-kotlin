@@ -4,8 +4,6 @@ import com.sportstalk.models.ApiResponse
 import com.sportstalk.models.users.*
 import retrofit2.Response
 import retrofit2.http.*
-import java.util.concurrent.CompletableFuture
-
 
 interface UsersRetrofitService {
 
@@ -61,5 +59,12 @@ interface UsersRetrofitService {
             @Path(value = "userId", encoded = true) userId: String,
             @Body request: GlobalPurgeRequest
     ): Response<ApiResponse<GlobalPurgeResponse>>
+
+    @POST("{appId}/user/users/{userId}/report")
+    suspend fun reportUser(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Body request: ReportUserRequest
+    ): Response<ApiResponse<ReportUserResponse>>
 
 }

@@ -131,6 +131,12 @@ constructor(
                 )
             }
 
+    override suspend fun messageIsReported(which: ChatEvent, userid: String): Boolean =
+            chatService.messageIsReported(which, userid)
+
+    override suspend fun messageIsReactedTo(which: ChatEvent, userid: String, reaction: String): Boolean =
+            chatService.messageIsReactedTo(which, userid, reaction)
+
     override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             chatService.listPreviousEvents(
                     chatRoomId = chatRoomId,
