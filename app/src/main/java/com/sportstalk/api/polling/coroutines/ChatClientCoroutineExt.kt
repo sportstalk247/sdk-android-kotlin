@@ -10,10 +10,10 @@ import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.ConflatedBroadcastChannel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.isActive
 
 /**
  * Returns an instance of reactive coroutine Flow which emits Event Updates received at
@@ -35,52 +35,11 @@ fun ChatClient.allEventUpdates(
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
 ): Flow<List<ChatEvent>> = flow<List<ChatEvent>> {
-    val emitter = ConflatedBroadcastChannel<GetUpdatesResponse>()
-
-    val scope = lifecycleOwner.lifecycle.coroutineScope
-    // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
-    val getUpdateAction = Runnable {
-        try {
-            // Execute block from within coroutine scope
-            scope.launchWhenCreated {
-                // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-                if (roomSubscriptions.contains(chatRoomId)) {
-                    try {
-                        // Perform GET UPDATES operation
-                        val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                            getUpdates(
-                                    chatRoomId = chatRoomId,
-                                    // Apply event cursor
-                                    cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                            )
-                        }
-
-                        // Emit response value
-                        emitter.send(response)
-                    } catch (err: SportsTalkException) {
-                        err.printStackTrace()
-                    }
-                }
-                // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-            }
-        } catch (err: CancellationException) {
-            err.printStackTrace()
-        }
-    }
-
-    /**
-     * Add GetUpdates Lifecycle Observer Implementation to this lifecycle owner's set of observers
-     */
-    lifecycleOwner.lifecycle.addObserver(
-            GetUpdatesObserver(
-                    getUpdateAction = getUpdateAction,
-                    frequency = frequency
-            )
-    )
+    val emitter = MutableSharedFlow<GetUpdatesResponse>()
 
     // Emit Response
     emitAll(
-            emitter.asFlow()
+            emitter.asSharedFlow()
                     .onEach { response ->
                         // Update internally stored chatroom event cursor
                         response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
@@ -89,6 +48,32 @@ fun ChatClient.allEventUpdates(
                     }
                     .map { it.events }
     )
+
+    do {
+        // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
+        if (roomSubscriptions.contains(chatRoomId)) {
+            try {
+                // Perform GET UPDATES operation
+                val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                    getUpdates(
+                            chatRoomId = chatRoomId,
+                            // Apply event cursor
+                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                    )
+                }
+
+                // Emit response value
+                emitter.emit(response)
+            } catch (err: SportsTalkException) {
+                err.printStackTrace()
+            }
+        } else {
+            // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
+            break
+        }
+
+        delay(frequency)
+    } while (lifecycleOwner.lifecycle.coroutineScope.isActive)
 
 }
         // Trigger callbacks based on event type
