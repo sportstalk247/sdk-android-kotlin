@@ -7,6 +7,7 @@ import com.sportstalk.models.SportsTalkException
 import com.sportstalk.models.chat.ChatEvent
 import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -36,26 +37,30 @@ fun ChatClient.allEventUpdates(
     // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
     val getUpdateAction = Runnable {
         // Execute block from within coroutine scope
-        scope.launchWhenStarted {
-            // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-            if (roomSubscriptions.contains(chatRoomId)) {
-                try {
-                    // Perform GET UPDATES operation
-                    val response = withContext(Dispatchers.IO) {
-                        getUpdates(
-                                chatRoomId = chatRoomId,
-                                // Apply event cursor
-                                cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                        )
-                    }
+        scope.launchWhenCreated {
+            try {
+                // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
+                if (roomSubscriptions.contains(chatRoomId)) {
+                    try {
+                        // Perform GET UPDATES operation
+                        val response = withContext(Dispatchers.IO) {
+                            getUpdates(
+                                    chatRoomId = chatRoomId,
+                                    // Apply event cursor
+                                    cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                            )
+                        }
 
-                    // Emit response value
-                    emitter.postValue(response)
-                } catch (err: SportsTalkException) {
-                    err.printStackTrace()
+                        // Emit response value
+                        emitter.postValue(response)
+                    } catch (err: SportsTalkException) {
+                        err.printStackTrace()
+                    }
                 }
+                // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
+            } catch (err: CancellationException) {
+                err.printStackTrace()
             }
-            // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
         }
     }
 

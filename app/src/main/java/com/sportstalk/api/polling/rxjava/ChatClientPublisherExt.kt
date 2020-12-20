@@ -10,6 +10,7 @@ import com.sportstalk.models.chat.EventType
 import com.sportstalk.models.chat.GetUpdatesResponse
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 
 /**
@@ -40,31 +41,35 @@ fun ChatClient.allEventUpdates(
         val scope = lifecycleOwner.lifecycle.coroutineScope
         // This code block gets executed at a fixed rate, used from within [GetUpdatesObserver],
         val getUpdateAction = Runnable {
-            // Execute block from within coroutine scope
-            scope.launchWhenStarted {
-                try {
-                    // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-                    if (roomSubscriptions.contains(chatRoomId)) {
-                        try {
-                            // Perform GET UPDATES operation
-                            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                                getUpdates(
-                                        chatRoomId = chatRoomId,
-                                        // Apply event cursor
-                                        cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                                )
-                            }
+            try {
+                // Execute block from within coroutine scope
+                scope.launchWhenCreated {
+                    try {
+                        // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
+                        if (roomSubscriptions.contains(chatRoomId)) {
+                            try {
+                                // Perform GET UPDATES operation
+                                val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                                    getUpdates(
+                                            chatRoomId = chatRoomId,
+                                            // Apply event cursor
+                                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                                    )
+                                }
 
-                            // Emit response value
-                            emitter.onNext(response)
-                        } catch (err: SportsTalkException) {
-                            err.printStackTrace()
+                                // Emit response value
+                                emitter.onNext(response)
+                            } catch (err: SportsTalkException) {
+                                err.printStackTrace()
+                            }
                         }
+                        // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
+                    } catch (err: SportsTalkException) {
+                        emitter.onError(err)
                     }
-                    // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-                } catch (err: SportsTalkException) {
-                    emitter.onError(err)
                 }
+            } catch (err: CancellationException) {
+                err.printStackTrace()
             }
         }
 
