@@ -783,7 +783,6 @@ import com.sportstalk.api.polling.coroutines.allEventUpdates
 lifecycleScope.launch {
     chatClient.allEventUpdates(
         chatRoomId = testChatRoom.id!!,
-        lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
         frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
         /*
         * The following are placeholder/convenience functions should the developers want to implement it
