@@ -157,7 +157,8 @@ constructor(
             try {
                 service.joinRoom(
                         appId = appId,
-                        chatRoomId = chatRoomIdOrLabel
+                        chatRoomId = chatRoomIdOrLabel,
+                        request = JoinChatRoomRequest(userid = "")
                 )
                         .handleSdkResponse(json)
                         .also { resp ->

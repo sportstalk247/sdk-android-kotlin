@@ -96,7 +96,8 @@ constructor(
     override fun joinRoom(chatRoomIdOrLabel: String): Single<JoinChatRoomResponse> =
             service.joinRoom(
                     appId = appId,
-                    chatRoomId = chatRoomIdOrLabel
+                    chatRoomId = chatRoomIdOrLabel,
+                    request = JoinChatRoomRequest(userid = "")
             )
                     .handleSdkResponse(json)
                     .doOnSuccess { resp ->
@@ -147,7 +148,21 @@ constructor(
                     chatRoomId = chatRoomId,
                     cursor = cursor
             )
-                    .handleSdkResponse(json)
+                    .map { response ->
+                        val respBody = response.body()
+                        return@map if (response.isSuccessful && respBody?.data != null) {
+                            respBody.data!!
+                        } else {
+                            throw response.errorBody()?.string()?.let { errBodyStr ->
+                                json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                            }
+                                    ?: SportsTalkException(
+                                            kind = respBody?.kind ?: Kind.API,
+                                            message = respBody?.message ?: response.message(),
+                                            code = respBody?.code ?: response.code()
+                                    )
+                        }
+                    }
 
     override fun messageIsReported(which: ChatEvent, userid: String): Boolean =
             which.reports.any { _report -> _report.userid == userid }

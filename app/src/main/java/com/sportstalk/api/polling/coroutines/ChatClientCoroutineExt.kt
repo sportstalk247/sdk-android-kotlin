@@ -2,7 +2,7 @@
 
 package com.sportstalk.api.polling.coroutines
 
-import com.sportstalk.api.ChatClient
+import com.sportstalk.api.service.ChatService
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
@@ -10,7 +10,9 @@ import com.sportstalk.datamodels.chat.polling.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
 /**
@@ -18,7 +20,7 @@ import kotlinx.coroutines.withContext
  * a certain frequency. This will stop emitting when `chatClient.stopEventUpdates()` has been invoked
  * OR if the underlying lifecycleOwner reaches STOP state.
  */
-fun ChatClient.allEventUpdates(
+fun ChatService.allEventUpdates(
         chatRoomId: String,
         /* Polling Frequency */
         frequency: Long = 500L,

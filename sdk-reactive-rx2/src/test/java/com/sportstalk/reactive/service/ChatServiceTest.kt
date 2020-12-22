@@ -1,33 +1,34 @@
-package com.sportstalk.api
+package com.sportstalk.reactive.service
 
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.DateUtils
-import com.sportstalk.ServiceFactory
-import com.sportstalk.api.polling.coroutines.allEventUpdates
-import com.sportstalk.api.service.ChatService
-import com.sportstalk.api.service.UserService
-import com.sportstalk.datamodels.*
-import com.sportstalk.datamodels.users.*
+import com.sportstalk.datamodels.Kind
+import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.users.CreateUpdateUserRequest
+import com.sportstalk.datamodels.users.User
+import com.sportstalk.reactive.ServiceFactory
+import com.sportstalk.reactive.api.polling.allEventUpdates
+import io.reactivex.Flowable
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.TestObserver
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.builtins.ArraySerializer
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
-import org.junit.*
-import org.junit.rules.ExpectedException
+import org.junit.After
+import org.junit.Before
+import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -43,10 +44,7 @@ class ChatServiceTest {
     private lateinit var chatService: ChatService
     private lateinit var json: Json
 
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @get:Rule
-    val thrown = ExpectedException.none()
+    private lateinit var rxDisposeBag: CompositeDisposable
 
     @Before
     fun setup() {
@@ -68,23 +66,22 @@ class ChatServiceTest {
         userService = ServiceFactory.User.get(config)
         chatService = ServiceFactory.Chat.get(config)
 
-        Dispatchers.setMain(testDispatcher)
+        rxDisposeBag = CompositeDisposable()
     }
 
     @After
     fun cleanUp() {
-        testDispatcher.cleanupTestCoroutines()
-        Dispatchers.resetMain()
+        rxDisposeBag.dispose()
     }
 
     /**
      * Helper function to clean up Test Users from the Backend Server
      */
-    private suspend fun deleteTestUsers(vararg userIds: String?) {
+    private fun deleteTestUsers(vararg userIds: String?) {
         for (id in userIds) {
             id ?: continue
             try {
-                userService.deleteUser(userId = id)
+                userService.deleteUser(userId = id).blockingGet()
             } catch (err: Throwable) {
             }
         }
@@ -93,18 +90,18 @@ class ChatServiceTest {
     /**
      * Helper function to clean up Test Users from the Backend Server
      */
-    private suspend fun deleteTestChatRooms(vararg chatRoomIds: String?) {
+    private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
         for (id in chatRoomIds) {
             id ?: continue
             try {
-                chatService.deleteRoom(chatRoomId = id)
+                chatService.deleteRoom(chatRoomId = id).blockingGet()
             } catch (err: Throwable) {
             }
         }
     }
 
     @Test
-    fun `0-ERROR-403) Request is not authorized with a token`() = runBlocking {
+    fun `0-ERROR-403) Request is not authorized with a token`() {
         val userCaseChatService = ServiceFactory.Chat.get(
                 config.copy(
                         apiToken = "not-a-valid-auth-api-token"
@@ -115,35 +112,36 @@ class ChatServiceTest {
         val testInputRequest = CreateChatRoomRequest(
                 /*userid = "NON-Existing-User-ID"*/
         )
-
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val createRoom = TestObserver<ChatRoom>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                userCaseChatService.createRoom(request = testInputRequest)
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "Request is not authorized with a token." }
-            assertTrue { err.code == 403 }
+        userCaseChatService.createRoom(request = testInputRequest)
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(createRoom)
 
-            throw err
-        }
+        // THEN
+        createRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "Request is not authorized with a token."
+                            && err.code == 403
+                }
     }
 
     @Test
-    fun `A) Create Room`() = runBlocking {
+    fun `A) Create Room`() {
         // GIVEN
         val testExpectedData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -177,7 +175,7 @@ class ChatServiceTest {
         // WHEN
         val testActualResult = chatService.createRoom(
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -206,40 +204,42 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `A-ERROR-404-User-not-found) Create Room`() = runBlocking {
+    fun `A-ERROR-404-User-not-found) Create Room`() {
         // GIVEN
         val testInputRequest = CreateChatRoomRequest(
                 userid = "NON-Existing-User-ID"
         )
 
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val createRoom = TestObserver<ChatRoom>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.createRoom(request = testInputRequest)
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404-User-not-found - Create Room`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified ownerid ${testInputRequest.userid!!} was not found" }
-            assertTrue { err.code == 404 }
+        chatService.createRoom(request = testInputRequest)
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(createRoom)
 
-            throw err
-        }
+        // THEN
+        createRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404-User-not-found - Create Room`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified ownerid ${testInputRequest.userid!!} was not found"
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `B - 1) Get Room Details`() = runBlocking {
+    fun `B - 1) Get Room Details`() {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -255,14 +255,16 @@ class ChatServiceTest {
                 maxreports = testData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testInputRequest)
+                .blockingGet()
 
         val testExpectedResult = testCreatedChatRoomData.copy()
 
         // WHEN
         val testActualResult = chatService.getRoomDetails(
                 chatRoomId = testCreatedChatRoomData.id!!
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -290,38 +292,39 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `B-ERROR-404) Get Room Details`() = runBlocking {
+    fun `B-ERROR-404) Get Room Details`() {
         // GIVEN
         val testInputRoomId = "NON-Existing-Room-ID"
-
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val getRoomDetails = TestObserver<ChatRoom>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.getRoomDetails(testInputRoomId)
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404 - Get Room Details`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified roomId was not found." }
-            assertTrue { err.code == 404 }
+        chatService.getRoomDetails(testInputRoomId)
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(getRoomDetails)
 
-            throw err
-        }
+        // THEN
+        getRoomDetails
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404 - Get Room Details`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified roomId was not found."
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `B - 2) Get Room Details - By Custom ID`() = runBlocking {
+    fun `B - 2) Get Room Details - By Custom ID`() {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         // Should create a test chat room first
@@ -338,14 +341,14 @@ class ChatServiceTest {
                         roomisopen = testData.open,
                         maxreports = testData.maxreports
                 )
-        )
+        ).blockingGet()
 
         val testExpectedResult = testCreatedChatRoomData.copy()
 
         // WHEN
         val testActualResult = chatService.getRoomDetailsByCustomId(
                 chatRoomCustomId = testCreatedChatRoomData.customid!!
-        )
+        ).blockingGet()
 
         // THEN
         assertTrue { testActualResult.kind == testExpectedResult.kind }
@@ -359,38 +362,39 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `B-ERROR-404) Get Room Details - By Custom ID`() = runBlocking {
+    fun `B-ERROR-404) Get Room Details - By Custom ID`() {
         // GIVEN
         val testInputCustomRoomId = "NON-Existing-Custom-Room-ID"
-
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val getRoomDetailsByCustomId = TestObserver<ChatRoom>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.getRoomDetailsByCustomId(testInputCustomRoomId)
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404 - Get Room Details - By Custom ID`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified roomId was not found." }
-            assertTrue { err.code == 404 }
+        chatService.getRoomDetailsByCustomId(testInputCustomRoomId)
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(getRoomDetailsByCustomId)
 
-            throw err
-        }
+        // THEN
+        getRoomDetailsByCustomId
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404 - Get Room Details - By Custom ID`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified roomId was not found."
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `C) Delete Room`() = runBlocking {
+    fun `C) Delete Room`() {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -406,7 +410,9 @@ class ChatServiceTest {
                 maxreports = testData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testInputRequest)
+                .blockingGet()
 
         val testExpectedResult = DeleteChatRoomResponse(
                 kind = "deleted.room",
@@ -417,7 +423,7 @@ class ChatServiceTest {
         // WHEN
         val testActualResult = chatService.deleteRoom(
                 chatRoomId = testCreatedChatRoomData.id!!
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -434,38 +440,39 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `C-ERROR-404) Delete Room`() = runBlocking {
+    fun `C-ERROR-404) Delete Room`() {
         // GIVEN
         val testInputCustomRoomId = "NON-Existing-Room-ID"
-
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val deleteRoom = TestObserver<DeleteChatRoomResponse>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.deleteRoom(testInputCustomRoomId)
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404 - Delete Room`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specifed room does not exist." }
-            assertTrue { err.code == 404 }
+        chatService.deleteRoom(testInputCustomRoomId)
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(deleteRoom)
 
-            throw err
-        }
+        // THEN
+        deleteRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404 - Delete Room`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specifed room does not exist."
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `D) Update Room`() = runBlocking {
+    fun `D) Update Room`() {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         // Should create a test chat room first
@@ -482,7 +489,7 @@ class ChatServiceTest {
                         roomisopen = testData.open,
                         maxreports = testData.maxreports
                 )
-        )
+        ).blockingGet()
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputRequest = UpdateChatRoomRequest(
@@ -507,7 +514,7 @@ class ChatServiceTest {
         val testActualResult = chatService.updateRoom(
                 chatRoomId = testInputChatRoomId,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -532,7 +539,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `D-ERROR-404) Update Room`() = runBlocking {
+    fun `D-ERROR-404) Update Room`() {
         // GIVEN
         val testInputRoomId = "NON-Existing-Room-ID"
         val testData = TestData.chatRooms(config.appId).first()
@@ -544,38 +551,39 @@ class ChatServiceTest {
                 enableenterandexit = !testData.enableenterandexit!!,
                 maxreports = 30L
         )
-
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val updateRoom = TestObserver<ChatRoom>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.updateRoom(
-                        chatRoomId = testInputRoomId,
-                        request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404 - Update Room`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified roomid could not be found: $testInputRoomId" }
-            assertTrue { err.code == 404 }
+        chatService.updateRoom(
+                chatRoomId = testInputRoomId,
+                request = testInputRequest
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(updateRoom)
 
-            throw err
-        }
+        // THEN
+        updateRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404 - Update Room`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified roomid could not be found: $testInputRoomId"
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `E) List Rooms`() = runBlocking {
+    fun `E) List Rooms`() {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -591,7 +599,9 @@ class ChatServiceTest {
                 maxreports = testData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testInputRequest)
+                .blockingGet()
 
         val testExpectedResult = ListRoomsResponse(
                 kind = "list.chatrooms",
@@ -602,7 +612,7 @@ class ChatServiceTest {
         val testActualResult = chatService.listRooms(
                 limit = 100/*,
                 cursor = testCreatedChatRoomData.id!!*/
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -621,80 +631,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `F) Join Room - Authenticated User`() = runBlocking {
-        // GIVEN
-        val testUserData = TestData.users.first()
-        val testCreateUserInputRequest = CreateUpdateUserRequest(
-                userid = RandomString.make(16),
-                handle = "${testUserData.handle}_${RandomString.make(6)}",
-                displayname = testUserData.displayname,
-                pictureurl = testUserData.pictureurl,
-                profileurl = testUserData.profileurl
-        )
-        // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
-
-        val testChatRoomData = TestData.chatRooms(config.appId).first()
-        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
-                name = testChatRoomData.name!!,
-                customid = testChatRoomData.customid,
-                description = testChatRoomData.description,
-                moderation = testChatRoomData.moderation,
-                enableactions = testChatRoomData.enableactions,
-                enableenterandexit = testChatRoomData.enableenterandexit,
-                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
-                delaymessageseconds = testChatRoomData.delaymessageseconds,
-                roomisopen = testChatRoomData.open,
-                maxreports = testChatRoomData.maxreports
-        )
-        // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
-
-        val testExpectedResult = JoinChatRoomResponse(
-                kind = "chat.joinroom",
-                user = testCreatedUserData,
-                room = testCreatedChatRoomData.copy(inroom = testCreatedChatRoomData.inroom!! + 1)
-        )
-
-        val testInputChatRoomId = testCreatedChatRoomData.id!!
-        val testInputRequest = JoinChatRoomRequest(
-                userid = testCreatedUserData.userid!!,
-                handle = testCreatedUserData.handle!!
-        )
-
-        // WHEN
-        val testActualResult = chatService.joinRoom(
-                chatRoomId = testInputChatRoomId,
-                request = testInputRequest
-        )
-
-        // THEN
-        println(
-                "`Join Room - Authenticated User`() -> testActualResult = \n" +
-                        json.encodeToString(
-                                JoinChatRoomResponse.serializer(),
-                                testActualResult
-                        )
-        )
-
-        assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
-        assertTrue { testActualResult.user?.handle == testExpectedResult.user?.handle }
-        assertTrue { testActualResult.room?.id == testExpectedResult.room?.id }
-        assertTrue { testActualResult.room?.name == testExpectedResult.room?.name }
-        assertTrue { testActualResult.room?.description == testExpectedResult.room?.description }
-
-        // Also, assert that ChatRoomEventCursor is currently stored
-        assertTrue { testActualResult.eventscursor?.cursor == chatService.chatRoomEventCursor[testInputChatRoomId] }
-
-        // Perform Delete Test Chat Room
-        deleteTestChatRooms(testCreatedChatRoomData.id)
-        // Perform Delete Test User
-        deleteTestUsers(testCreatedUserData.userid)
-    }
-
-    @Test
-    fun `G) Join Room - Anonymous User`() = runBlocking {
+    fun `G) Join Room - Anonymous User`() {
         // GIVEN
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -710,7 +647,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testExpectedResult = JoinChatRoomResponse(
                 kind = "chat.joinroom",
@@ -720,7 +659,7 @@ class ChatServiceTest {
         // WHEN
         val testActualResult = chatService.joinRoom(
                 chatRoomIdOrLabel = testCreatedChatRoomData.id!!
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -743,44 +682,46 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `G-ERROR-404-Room-not-found) Join Room`() = runBlocking {
+    fun `G-ERROR-404-Room-not-found) Join Room`() {
         // GIVEN
         val testInputRoomId = "NON-Existing-Room-ID"
         val testInputRequest = JoinChatRoomRequest(
                 userid = "non-existing-user"
         )
 
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val joinRoom = TestObserver<JoinChatRoomResponse>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.joinRoom(
-                        chatRoomId = testInputRoomId,
-                        request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified roomid '${testInputRoomId}' was not found." }
-            assertTrue { err.code == 404 }
+        chatService.joinRoom(
+                chatRoomId = testInputRoomId,
+                request = testInputRequest
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(joinRoom)
 
-            throw err
-        }
+        // THEN
+        joinRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified roomid '${testInputRoomId}' was not found."
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `H) Join Room - By Custom ID`() = runBlocking {
+    fun `H) Join Room - By Custom ID`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -791,7 +732,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testExpectedResult = JoinChatRoomResponse(
                 kind = "chat.joinroom",
@@ -814,7 +757,7 @@ class ChatServiceTest {
                         roomisopen = testRoomData.open,
                         maxreports = testRoomData.maxreports
                 )
-        )
+        ).blockingGet()
 
         val testInputRequest = JoinChatRoomRequest(
                 userid = testCreatedUserData.userid!!,
@@ -825,7 +768,7 @@ class ChatServiceTest {
         val testActualResult = chatService.joinRoomByCustomId(
                 chatRoomCustomId = testCreatedChatRoomData.customid!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -851,7 +794,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `I) List Room Participants`() = runBlocking {
+    fun `I) List Room Participants`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -862,7 +805,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -878,7 +823,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testInputJoinRequest = JoinChatRoomRequest(
@@ -889,7 +836,7 @@ class ChatServiceTest {
         val testJoinChatRoomData = chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testInputJoinRequest
-        )
+        ).blockingGet()
 
         val testExpectedResult = ListChatRoomParticipantsResponse(
                 kind = Kind.CHAT_LIST_PARTICIPANTS,
@@ -908,7 +855,7 @@ class ChatServiceTest {
         val testActualResult = chatService.listRoomParticipants(
                 chatRoomId = testInputChatRoomId,
                 limit = testInputLimit
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -930,44 +877,46 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `I-ERROR-404) Join Room`() = runBlocking {
+    fun `I-ERROR-404) Join Room`() {
         // GIVEN
         val testInputRoomId = "NON-Existing-Room-ID"
         val testInputRequest = JoinChatRoomRequest(
                 userid = "non-existing-user"
         )
 
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val joinRoom = TestObserver<JoinChatRoomResponse>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.joinRoom(
-                        chatRoomId = testInputRoomId,
-                        request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified roomid '${testInputRoomId}' was not found." }
-            assertTrue { err.code == 404 }
+        chatService.joinRoom(
+                chatRoomId = testInputRoomId,
+                request = testInputRequest
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(joinRoom)
 
-            throw err
-        }
+        // THEN
+        joinRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified roomid '${testInputRoomId}' was not found."
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `J) Exit a Room`() = runBlocking {
+    fun `J) Exit a Room`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -978,7 +927,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -994,7 +945,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1004,7 +957,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testExpectedResult = Any()
 
@@ -1015,7 +968,7 @@ class ChatServiceTest {
         val testActualResult = chatService.exitRoom(
                 chatRoomId = testInputChatRoomId,
                 userId = testInputUserId
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -1031,44 +984,46 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `J-ERROR-404) Exit a Room`() = runBlocking {
+    fun `J-ERROR-404) Exit a Room`() {
         // GIVEN
         val testInputRoomId = "NON-Existing-Room-ID"
         val testInputRequest = JoinChatRoomRequest(
                 userid = "non-existing-user"
         )
 
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val joinRoom = TestObserver<JoinChatRoomResponse>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.joinRoom(
-                        chatRoomId = testInputRoomId,
-                        request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified roomid '${testInputRoomId}' was not found." }
-            assertTrue { err.code == 404 }
+        chatService.joinRoom(
+                chatRoomId = testInputRoomId,
+                request = testInputRequest
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(joinRoom)
 
-            throw err
-        }
+        // THEN
+        joinRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified roomid '${testInputRoomId}' was not found."
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `K) Get Updates`() = runBlocking {
+    fun `K) Get Updates`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1079,7 +1034,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1095,7 +1052,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1105,7 +1064,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1115,7 +1074,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testExpectedResult = GetUpdatesResponse(
                 kind = "list.chatevents",
@@ -1129,7 +1090,7 @@ class ChatServiceTest {
         val testActualResult = chatService.getUpdates(
                 chatRoomId = testCreatedChatRoomData.id!!/*,
                 cursor = null*/
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -1159,40 +1120,42 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `K-ERROR-404) Get Updates`() = runBlocking {
+    fun `K-ERROR-404) Get Updates`() {
         // GIVEN
-        val testInputRoomId = "NON-Existing-Room-ID"
-
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val testInputRoomId = "NON-Existing-Room-ID-XXX"
+        val getUpdates = TestObserver<GetUpdatesResponse>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.getUpdates(
-                        chatRoomId = testInputRoomId
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404 - Get Updates`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified room was not found." }
-            assertTrue { err.code == 404 }
+        chatService.getUpdates(
+                chatRoomId = testInputRoomId
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(getUpdates)
 
-            throw err
-        }
+        // THEN
+        getUpdates
+                .awaitDone(1000, TimeUnit.MILLISECONDS)
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404 - Get Updates`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified room was not found."
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `K-1) All Event Updates`() = runBlocking {
+    fun `K-1) All Event Updates`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1203,7 +1166,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1219,7 +1184,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1229,7 +1196,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1239,7 +1206,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testExpectedResult = GetUpdatesResponse(
                 kind = "list.chatevents",
@@ -1249,49 +1218,55 @@ class ChatServiceTest {
                 events = listOf(testSendMessageData)
         )
 
+        val allEventUpdates = TestObserver<List<ChatEvent>>()
         val chatRoomId = testCreatedChatRoomData.id!!
         chatService.roomSubscriptions.add(chatRoomId)
 
-        val allEventUpdates = MutableSharedFlow<List<ChatEvent>>()
-
         // WHEN
-        val job = chatService.allEventUpdates(
+        chatService.allEventUpdates(
                 chatRoomId = chatRoomId,
                 frequency = 500
         )
-                .take(2)
-                .withIndex()
-                .onEach { (index, testActualResult) ->
+                .toObservable()
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .doOnDispose {
+                    // Perform Delete Test Chat Room
+                    deleteTestChatRooms(testCreatedChatRoomData.id)
+                    // Perform Delete Test User
+                    deleteTestUsers(testCreatedUserData.userid)
+                }
+                .subscribe(allEventUpdates)
+
+        // THEN
+        allEventUpdates
+                .awaitCount(2)
+                .assertValueCount(2)
+                .assertValueAt(0) { testActualResult ->
                     println(
-                            "`All Event Updates[$index]`() -> response = \n" +
+                            "`All Event Updates[0]`() -> response = \n" +
                                     json.encodeToString(
                                             ArraySerializer(ChatEvent.serializer()),
                                             testActualResult.toTypedArray()
                                     )
                     )
 
-                    if(index == 0) {
-                        assertTrue { testActualResult.size == testExpectedResult.itemcount!!.toInt() }
-                    } else {
-                        assertTrue { testActualResult.isEmpty() }
-                    }
+                    return@assertValueAt testActualResult.size == testExpectedResult.itemcount!!.toInt()
                 }
-                .launchIn(GlobalScope)
+                .assertValueAt(1) { testActualResult ->
+                    println(
+                            "`All Event Updates[1]`() -> response = \n" +
+                                    json.encodeToString(
+                                            ArraySerializer(ChatEvent.serializer()),
+                                            testActualResult.toTypedArray()
+                                    )
+                    )
 
-        delay(1000)
-
-        job.cancelAndJoin()
-
-        // Perform Delete Test Chat Room
-        deleteTestChatRooms(testCreatedChatRoomData.id)
-        // Perform Delete Test User
-        deleteTestUsers(testCreatedUserData.userid)
-
-        return@runBlocking
+                    return@assertValueAt testActualResult.isEmpty()
+                }
     }
 
     @Test
-    fun `L) Message Is Reported`() = runBlocking {
+    fun `L) Message Is Reported`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1302,7 +1277,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1318,7 +1295,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1328,7 +1307,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1338,7 +1317,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputReportMessageRequest = ReportMessageRequest(
                 reporttype = "abuse",
@@ -1349,7 +1330,7 @@ class ChatServiceTest {
                 chatRoomId = testCreatedChatRoomData.id!!,
                 eventId = testSendMessageData.id!!,
                 request = testInputReportMessageRequest
-        )
+        ).blockingGet()
 
         // WHEN
         val messageIsReported = chatService.messageIsReported(
@@ -1369,7 +1350,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `M) Message Is Reacted To`() = runBlocking {
+    fun `M) Message Is Reacted To`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1380,7 +1361,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1396,7 +1379,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1406,7 +1391,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1416,7 +1401,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputReaction = EventReaction.LIKE
 
@@ -1430,7 +1417,8 @@ class ChatServiceTest {
                 chatRoomId = testCreatedChatRoomData.id!!,
                 eventId = testSendMessageData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
+
         println(
                 "`Message Is Reacted To`() -> reactToEventResponse = \n" +
                         json.encodeToString(
@@ -1458,7 +1446,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `N) List Previous Events`() = runBlocking {
+    fun `N) List Previous Events`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1469,7 +1457,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1485,7 +1475,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1495,7 +1487,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1505,7 +1497,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputLimit = 10
@@ -1518,7 +1512,7 @@ class ChatServiceTest {
         val testActualResult = chatService.listPreviousEvents(
                 chatRoomId = testInputChatRoomId,
                 limit = testInputLimit
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -1547,7 +1541,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `O) Get Event By ID`() = runBlocking {
+    fun `O) Get Event By ID`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1558,7 +1552,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1574,7 +1570,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1584,7 +1582,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1594,7 +1592,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputChatEventId = testSendMessageData.id!!
@@ -1604,7 +1604,7 @@ class ChatServiceTest {
         val testActualResult = chatService.getEventById(
                 chatRoomId = testInputChatRoomId,
                 eventId = testInputChatEventId
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -1627,7 +1627,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P) List Events History`() = runBlocking {
+    fun `P) List Events History`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1638,7 +1638,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1654,7 +1656,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1664,7 +1668,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1674,7 +1678,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputLimit = 10
@@ -1687,7 +1693,7 @@ class ChatServiceTest {
         val testActualResult = chatService.listEventsHistory(
                 chatRoomId = testInputChatRoomId,
                 limit = testInputLimit
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -1716,7 +1722,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P-1) Execute Chat Command - Speech`() = runBlocking {
+    fun `P-1) Execute Chat Command - Speech`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1727,7 +1733,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1743,7 +1751,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1753,7 +1763,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1778,7 +1788,7 @@ class ChatServiceTest {
         val testActualResult = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -1806,7 +1816,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P-2) Execute Chat Command - Action`() = runBlocking {
+    fun `P-2) Execute Chat Command - Action`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1817,7 +1827,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1833,7 +1845,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1843,7 +1857,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 // "/high5 {{handle}}"
@@ -1870,7 +1884,7 @@ class ChatServiceTest {
         val testActualResult = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -1898,7 +1912,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P-3) Execute Chat Command - Reply to a Message - Threaded`() = runBlocking {
+    fun `P-3) Execute Chat Command - Reply to a Message - Threaded`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1909,7 +1923,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -1925,7 +1941,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -1935,7 +1953,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -1945,7 +1963,9 @@ class ChatServiceTest {
         val testInitialSendMessage = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
 
         val testInputRequest = SendThreadedReplyRequest(
@@ -1973,7 +1993,7 @@ class ChatServiceTest {
                 chatRoomId = testCreatedChatRoomData.id!!,
                 replyTo = testInitialSendMessage.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -2004,7 +2024,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P-4) Execute Chat Command - Purge User Messages`() = runBlocking {
+    fun `P-4) Execute Chat Command - Purge User Messages`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testUserID = RandomString.make(4)
@@ -2023,8 +2043,12 @@ class ChatServiceTest {
         )
 
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
-        val testCreatedAdminData = userService.createOrUpdateUser(request = testCreateAdminInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
+        val testCreatedAdminData = userService
+                .createOrUpdateUser(request = testCreateAdminInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2040,7 +2064,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2050,7 +2076,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
         val testAdminJoinRoomInputRequest = JoinChatRoomRequest(
                 userid = testCreatedAdminData.userid!!
         )
@@ -2058,7 +2084,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testAdminJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -2068,7 +2094,7 @@ class ChatServiceTest {
         chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         val testExpectedResult = ExecuteChatCommandResponse(
                 kind = Kind.API/*"chat.executecommand"*/,
@@ -2083,7 +2109,7 @@ class ChatServiceTest {
                             command = "*purge zola ${testCreatedUserData.handle!!}",
                             userid = testCreatedUserData.userid!!
                     )
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -2095,7 +2121,7 @@ class ChatServiceTest {
             )
 
             assertTrue { testActualResult.message == testExpectedResult.message }
-        } catch (err: SportsTalkException) {
+        } catch (err: Throwable) {
             err.printStackTrace()
             fail(err.message)
         } finally {
@@ -2107,12 +2133,12 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P-5) Execute Chat Command - Admin Command`() = runBlocking {
+    fun `P-5) Execute Chat Command - Admin Command`() {
         // TODO:: Admin password is hardcoded as "zola".
     }
 
     @Test
-    fun `P-6) Execute Chat Command - Admin - Delete All Events`() = runBlocking {
+    fun `P-6) Execute Chat Command - Admin - Delete All Events`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2123,7 +2149,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2139,7 +2167,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2149,7 +2179,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 command = "*deleteallevents ${TestData.ADMIN_PASSWORD}",
@@ -2167,7 +2197,7 @@ class ChatServiceTest {
         val testActualResult = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -2188,7 +2218,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P-7) Send Quoted Reply`() = runBlocking {
+    fun `P-7) Send Quoted Reply`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2199,7 +2229,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2215,7 +2247,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2225,7 +2259,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -2235,7 +2269,9 @@ class ChatServiceTest {
         val testInitialSendMessage = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
 
         val testInputRequest = SendQuotedReplyRequest(
@@ -2257,7 +2293,7 @@ class ChatServiceTest {
                 chatRoomId = testCreatedChatRoomData.id!!,
                 replyTo = testInitialSendMessage.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -2285,7 +2321,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P-8) Execute Chat Command - Announcement`() = runBlocking {
+    fun `P-8) Execute Chat Command - Announcement`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2296,7 +2332,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2312,7 +2350,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2322,7 +2362,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 command = "This is a test announcement!",
@@ -2348,7 +2388,7 @@ class ChatServiceTest {
         val testActualResult = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -2376,7 +2416,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `P-ERROR-404-User-NOT-found) Execute Chat Command`() = runBlocking {
+    fun `P-ERROR-404-User-NOT-found) Execute Chat Command`() {
         // GIVEN
         // GIVEN
         val testInputUserId = "non-existing-user-id"
@@ -2394,48 +2434,52 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 command = "Yow error test",
                 userid = testInputUserId
         )
 
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val executeChatCommand = TestObserver<ExecuteChatCommandResponse>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.executeChatCommand(
-                        chatRoomId = testCreatedChatRoomData.id!!,
-                        request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404-User-NOT-found - Execute Chat Command`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified user was not found" }
-            assertTrue { err.code == 404 }
+        chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInputRequest
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .doOnDispose {
+                    // Perform Delete Test Chat Room
+                    deleteTestChatRooms(testCreatedChatRoomData.id)
+                }
+                .subscribe(executeChatCommand)
 
-            throw err
-        } finally {
-            // Perform Delete Test Chat Room
-            deleteTestChatRooms(testCreatedChatRoomData.id)
-        }
+        // THEN
+        executeChatCommand
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404-User-NOT-found - Execute Chat Command`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified user was not found"
+                            && err.code == 404
+                }
     }
 
     @Test
-    fun `P-ERROR-412-User-not-yet-joined) Execute Chat Command`() = runBlocking {
-        // GIVEN
+    fun `P-ERROR-412-User-not-yet-joined) Execute Chat Command`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2446,7 +2490,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2462,50 +2508,54 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputRequest = ExecuteChatCommandRequest(
                 command = "Yow error test",
                 userid = testCreatedUserData.userid!!
         )
 
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val executeChatCommand = TestObserver<ExecuteChatCommandResponse>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.executeChatCommand(
-                        chatRoomId = testCreatedChatRoomData.id!!,
-                        request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404-User-not-yet-joined - Execute Chat Command`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "A user cannot execute commands in a room unless the user has joined the room." }
-            assertTrue { err.code == 412 }
+        chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInputRequest
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .doOnDispose {
+                    // Perform Delete Test Chat Room
+                    deleteTestChatRooms(testCreatedChatRoomData.id)
+                    // Perform Delete Test User
+                    deleteTestUsers(testCreatedUserData.userid)
+                }
+                .subscribe(executeChatCommand)
 
-            throw err
-        } finally {
-            // Perform Delete Test Chat Room
-            deleteTestChatRooms(testCreatedChatRoomData.id)
-            // Perform Delete Test User
-            deleteTestUsers(testCreatedUserData.userid)
-        }
+        // THEN
+        executeChatCommand
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404-User-not-yet-joined - Execute Chat Command`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "A user cannot execute commands in a room unless the user has joined the room."
+                            && err.code == 412
+                }
     }
 
-
     @Test
-    fun `P-ERROR-404-REPLY-NOT-FOUND) Execute Chat Command`() = runBlocking {
+    fun `P-ERROR-404-REPLY-NOT-FOUND) Execute Chat Command`() {
         // GIVEN
         // GIVEN
         val testUserData = TestData.users.first()
@@ -2517,7 +2567,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2533,7 +2585,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2543,7 +2597,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testReplyToIdNonExisting = "non-existing-ID"
         val testInputRequest = ExecuteChatCommandRequest(
@@ -2552,45 +2606,47 @@ class ChatServiceTest {
                 replyto = testReplyToIdNonExisting
         )
 
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val executeChatCommand = TestObserver<ExecuteChatCommandResponse>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.executeChatCommand(
-                        chatRoomId = testCreatedChatRoomData.id!!,
-                        request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404-REPLY-NOT-FOUND - Execute Chat Command`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The message you want to reply to can't be found." }
-            assertTrue { err.code == 404 }
-            assertTrue { err.data?.get("kind") == Kind.CHAT_COMMAND }
-            assertTrue { err.data?.get("op") == "speech" }
+        chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInputRequest
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .doOnDispose {
+                    // Perform Delete Test Chat Room
+                    deleteTestChatRooms(testCreatedChatRoomData.id)
+                    // Perform Delete Test User
+                    deleteTestUsers(testCreatedUserData.userid)
+                }
+                .subscribe(executeChatCommand)
 
-            throw err
-        } finally {
-            // Perform Delete Test Chat Room
-            deleteTestChatRooms(testCreatedChatRoomData.id)
-            // Perform Delete Test User
-            deleteTestUsers(testCreatedUserData.userid)
-        }
+        // THEN
+        executeChatCommand
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404-REPLY-NOT-FOUND - Execute Chat Command`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The message you want to reply to can't be found."
+                            && err.code == 404
+                            && err.data?.get("kind") == Kind.CHAT_COMMAND
+                            && err.data?.get("op") == "speech"
+                }
     }
 
-
     @Test
-    fun `Q) List Messages By User`() = runBlocking {
+    fun `Q) List Messages By User`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2601,7 +2657,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2617,7 +2675,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2627,7 +2687,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -2637,7 +2697,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputUserId = testCreatedUserData.userid!!
@@ -2652,7 +2714,7 @@ class ChatServiceTest {
                 chatRoomId = testInputChatRoomId,
                 userId = testInputUserId,
                 limit = testInputLimit
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -2679,7 +2741,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `R) Bounce User - Ban user`() = runBlocking {
+    fun `R) Bounce User - Ban user`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2690,7 +2752,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2706,7 +2770,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2716,7 +2782,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val bounceMessageBody = "`${testCreatedUserData.handle}` has been banned."
         val testInputRequest = BounceUserRequest(
@@ -2740,7 +2806,7 @@ class ChatServiceTest {
         val testActualResult = chatService.bounceUser(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -2764,7 +2830,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `S) Delete Event`() = runBlocking {
+    fun `S) Delete Event`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2775,7 +2841,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2791,7 +2859,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2801,7 +2871,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -2811,7 +2881,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputEventId = testSendMessageData.id!!
@@ -2829,7 +2901,7 @@ class ChatServiceTest {
                 chatRoomId = testInputChatRoomId,
                 eventId = testInputEventId,
                 userid = testInputUserId
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -2852,7 +2924,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `T) Remove a Message - Logically Delete`() = runBlocking {
+    fun `T) Remove a Message - Logically Delete`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2863,7 +2935,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2879,7 +2953,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2889,7 +2965,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -2899,7 +2975,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputEventId = testSendMessageData.id!!
@@ -2921,7 +2999,7 @@ class ChatServiceTest {
                 userid = testInputUserId,
                 deleted = testInputDeleted,
                 permanentifnoreplies = testInputPermanentIfNoReplies
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -2945,7 +3023,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `U) Report a Message`() = runBlocking {
+    fun `U) Report a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2956,7 +3034,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2972,7 +3052,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -2982,7 +3064,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -2992,7 +3074,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputRequest = ReportMessageRequest(
                 reporttype = "abuse",
@@ -3014,7 +3098,7 @@ class ChatServiceTest {
                 chatRoomId = testCreatedChatRoomData.id!!,
                 eventId = testSendMessageData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(
@@ -3038,7 +3122,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `U-ERROR-404-EVENT-NOT-FOUND) Report a Message`() = runBlocking {
+    fun `U-ERROR-404-EVENT-NOT-FOUND) Report a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -3049,7 +3133,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -3065,7 +3151,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -3075,7 +3163,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testChatIdNonExisting = "non-existing-ID"
         val testInputRequest = ReportMessageRequest(
@@ -3083,44 +3171,47 @@ class ChatServiceTest {
                 userid = testCreatedUserData.userid!!
         )
 
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
+        val reportMessage = TestObserver<ChatEvent>()
 
         // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.reportMessage(
-                        chatRoomId = testCreatedChatRoomData.id!!,
-                        eventId = testChatIdNonExisting,
-                        request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                    "`ERROR-404-EVENT-NOT-FOUND - Report a Message`() -> testActualResult = \n" +
-                            json.encodeToString(
-                                    SportsTalkException.serializer(),
-                                    err
-                            )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified event was not found." }
-            assertTrue { err.code == 404 }
-            assertTrue { err.data?.get("eventId") == testChatIdNonExisting }
+        chatService.reportMessage(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                eventId = testChatIdNonExisting,
+                request = testInputRequest
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .doOnDispose {
+                    // Perform Delete Test Chat Room
+                    deleteTestChatRooms(testCreatedChatRoomData.id)
+                    // Perform Delete Test User
+                    deleteTestUsers(testCreatedUserData.userid)
+                }
+                .subscribe(reportMessage)
 
-            throw err
-        } finally {
-            // Perform Delete Test Chat Room
-            deleteTestChatRooms(testCreatedChatRoomData.id)
-            // Perform Delete Test User
-            deleteTestUsers(testCreatedUserData.userid)
-        }
+        // THEN
+        reportMessage
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
 
-        return@runBlocking
+                    println(
+                            "`ERROR-404-EVENT-NOT-FOUND - Report a Message`() -> testActualResult = \n" +
+                                    json.encodeToString(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified event was not found."
+                            && err.code == 404
+                            && err.data?.get("eventId") == testChatIdNonExisting
+                }
     }
 
     @Test
-    fun `V) React to a Message`() = runBlocking {
+    fun `V) React to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -3131,7 +3222,9 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -3147,7 +3240,9 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
@@ -3157,7 +3252,7 @@ class ChatServiceTest {
         chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
-        )
+        ).blockingGet()
 
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
@@ -3167,7 +3262,9 @@ class ChatServiceTest {
         val testSendMessageData = chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInitialSendMessageInputRequest
-        ).speech!!
+        )
+                .blockingGet()
+                .speech!!
 
         val testInputRequest = ReactToAMessageRequest(
                 userid = testCreatedUserData.userid!!,
@@ -3202,7 +3299,7 @@ class ChatServiceTest {
                 chatRoomId = testCreatedChatRoomData.id!!,
                 eventId = testSendMessageData.id!!,
                 request = testInputRequest
-        )
+        ).blockingGet()
 
         // THEN
         println(

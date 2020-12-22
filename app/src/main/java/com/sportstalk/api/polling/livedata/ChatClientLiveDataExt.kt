@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
-import com.sportstalk.api.ChatClient
+import com.sportstalk.api.service.ChatService
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
@@ -18,7 +18,7 @@ import kotlinx.coroutines.delay
  * a certain frequency. This will stop emitting when `chatClient.stopEventUpdates()` has been invoked
  * OR if the underlying lifecycleOwner reaches STOP state.
  */
-fun ChatClient.allEventUpdates(
+fun ChatService.allEventUpdates(
         chatRoomId: String,
         /* Polling Frequency */
         frequency: Long = 500L,

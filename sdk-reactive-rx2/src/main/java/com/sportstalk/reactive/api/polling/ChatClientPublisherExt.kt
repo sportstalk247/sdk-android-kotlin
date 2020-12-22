@@ -3,7 +3,7 @@ package com.sportstalk.reactive.api.polling
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
 import com.sportstalk.datamodels.chat.polling.*
-import com.sportstalk.reactive.api.ChatClient
+import com.sportstalk.reactive.service.ChatService
 import io.reactivex.Flowable
 import java.util.concurrent.TimeUnit
 
@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit
  * Returns an instance of reactive RxJava Publisher which emits Event Updates received at
  * a certain frequency. This will stop emitting when `chatClient.stopEventUpdates()` has been invoked
  */
-fun ChatClient.allEventUpdates(
+fun ChatService.allEventUpdates(
         chatRoomId: String,
         /* Polling Frequency */
         frequency: Long = 500L,
