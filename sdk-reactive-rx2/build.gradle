@@ -56,10 +56,8 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs += [
-                "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
-                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi",
-                "-Xuse-experimental=kotlinx.serialization.UnstableDefault"
+                "-Xuse-experimental=kotlinx.serialization.UnstableDefault",
+                "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
         ]
     }
 
@@ -95,9 +93,9 @@ dependencies {
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$rootProject.retrofitKotlinxSerializationConverterVersion")
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofitVersion"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttpVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     androidTestImplementation "androidx.test:runner:$rootProject.androidXTest"

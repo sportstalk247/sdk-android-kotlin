@@ -11,6 +11,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import java.util.concurrent.TimeUnit
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -65,6 +66,9 @@ object ServiceFactory {
                             .baseUrl(config.endpoint)
                             .addConverterFactory(
                                     json.asConverterFactory(MediaType.get("application/json"))
+                            )
+                            .addCallAdapterFactory(
+                                    RxJava2CallAdapterFactory.create()
                             )
                             .client(okHttpClient)
                             .build()
