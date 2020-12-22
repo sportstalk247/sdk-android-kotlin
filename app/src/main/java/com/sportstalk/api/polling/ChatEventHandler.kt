@@ -1,6 +1,6 @@
 package com.sportstalk.api.polling
 
-import com.sportstalk.models.chat.ChatEvent
+import com.sportstalk.datamodels.chat.ChatEvent
 
 typealias OnChatEvent = ((chatEvent: ChatEvent) -> Unit)
 typealias OnGoalEvent = ((chatEvent: ChatEvent /* eventtype = EventType.GOAL */ ) -> Unit)

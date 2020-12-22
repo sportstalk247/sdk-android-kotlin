@@ -1,7 +1,7 @@
 package com.sportstalk.impl.restapi.retrofit.services
 
-import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.users.*
+import com.sportstalk.datamodels.users.*
+import com.sportstalk.datamodels.ApiResponse
 import retrofit2.Response
 import retrofit2.http.*
 

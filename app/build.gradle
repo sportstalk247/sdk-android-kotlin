@@ -79,7 +79,9 @@ android {
 }
 
 dependencies {
-  implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':datamodels')
 
     testImplementation "org.robolectric:robolectric:$rootProject.roboelectric"
 

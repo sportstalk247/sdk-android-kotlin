@@ -5,10 +5,10 @@ import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.ChatClient
 import com.sportstalk.api.service.ChatModerationService
-import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.*
-import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
+import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.chat.moderation.*
 
 
 class ChatClientImpl

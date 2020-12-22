@@ -8,7 +8,7 @@ import com.sportstalk.api.service.UserService
 import com.sportstalk.impl.restapi.ChatModerationRestApiServiceImpl
 import com.sportstalk.impl.restapi.ChatRestApiServiceImpl
 import com.sportstalk.impl.restapi.UserRestApiServiceImpl
-import com.sportstalk.models.ClientConfig
+import com.sportstalk.datamodels.ClientConfig
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import okhttp3.OkHttpClient

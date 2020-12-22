@@ -1,13 +1,11 @@
 package com.sportstalk.api.polling.rxjava
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.coroutineScope
 import com.sportstalk.api.ChatClient
 import com.sportstalk.api.polling.*
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.ChatEvent
-import com.sportstalk.models.chat.EventType
-import com.sportstalk.models.chat.GetUpdatesResponse
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.chat.ChatEvent
+import com.sportstalk.datamodels.chat.EventType
+import com.sportstalk.datamodels.chat.GetUpdatesResponse
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import kotlinx.coroutines.*

@@ -2,19 +2,16 @@
 
 package com.sportstalk.api.polling.coroutines
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.coroutineScope
 import com.sportstalk.api.ChatClient
 import com.sportstalk.api.polling.*
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.ChatEvent
-import com.sportstalk.models.chat.EventType
-import com.sportstalk.models.chat.GetUpdatesResponse
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.chat.ChatEvent
+import com.sportstalk.datamodels.chat.EventType
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.withContext
 
 /**
  * Returns an instance of reactive coroutine Flow which emits Event Updates received at
@@ -40,7 +37,7 @@ fun ChatClient.allEventUpdates(
         if (roomSubscriptions.contains(chatRoomId)) {
             try {
                 // Perform GET UPDATES operation
-                val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                val response = withContext(Dispatchers.IO) {
                     getUpdates(
                             chatRoomId = chatRoomId,
                             // Apply event cursor

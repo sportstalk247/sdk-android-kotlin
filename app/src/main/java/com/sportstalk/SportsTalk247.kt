@@ -6,7 +6,7 @@ import com.sportstalk.api.UserClient
 import com.sportstalk.impl.ChatClientImpl
 import com.sportstalk.impl.CommentClientImpl
 import com.sportstalk.impl.UserClientImpl
-import com.sportstalk.models.ClientConfig
+import com.sportstalk.datamodels.ClientConfig
 
 object SportsTalk247 {
     /**

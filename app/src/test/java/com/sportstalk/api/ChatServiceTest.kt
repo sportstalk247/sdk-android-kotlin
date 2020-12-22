@@ -8,12 +8,9 @@ import com.sportstalk.DateUtils
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.service.UserService
-import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.Kind
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.*
-import com.sportstalk.models.users.CreateUpdateUserRequest
-import com.sportstalk.models.users.User
+import com.sportstalk.datamodels.*
+import com.sportstalk.datamodels.users.*
+import com.sportstalk.datamodels.chat.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher

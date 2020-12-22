@@ -1,8 +1,8 @@
 package com.sportstalk.api.service
 
-import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.comment.Comment
-import com.sportstalk.models.comment.ListComments
+import com.sportstalk.datamodels.ApiResponse
+import com.sportstalk.datamodels.comment.Comment
+import com.sportstalk.datamodels.comment.ListComments
 import java.util.concurrent.CompletableFuture
 
 interface CommentModerationService {

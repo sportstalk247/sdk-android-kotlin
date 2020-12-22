@@ -3,8 +3,8 @@ package com.sportstalk.impl
 import androidx.annotation.RestrictTo
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.UserClient
-import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.users.*
+import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.users.*
 
 class UserClientImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

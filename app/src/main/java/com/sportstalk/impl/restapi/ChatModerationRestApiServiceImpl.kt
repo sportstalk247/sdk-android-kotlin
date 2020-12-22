@@ -4,10 +4,10 @@ import androidx.annotation.RestrictTo
 import com.sportstalk.api.service.ChatModerationService
 import com.sportstalk.impl.handleSdkResponse
 import com.sportstalk.impl.restapi.retrofit.services.ChatModerationRetrofitService
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.ChatEvent
-import com.sportstalk.models.chat.moderation.ApproveMessageRequest
-import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.chat.ChatEvent
+import com.sportstalk.datamodels.chat.moderation.ApproveMessageRequest
+import com.sportstalk.datamodels.chat.moderation.ListMessagesNeedingModerationResponse
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.create

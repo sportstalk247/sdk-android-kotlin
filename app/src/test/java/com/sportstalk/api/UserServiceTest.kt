@@ -6,11 +6,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.UserService
-import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.Kind
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.ReportType
-import com.sportstalk.models.users.*
+import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.Kind
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.users.*
+import com.sportstalk.datamodels.chat.ReportType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher

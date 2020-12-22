@@ -4,9 +4,8 @@ import androidx.annotation.RestrictTo
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.impl.handleSdkResponse
 import com.sportstalk.impl.restapi.retrofit.services.ChatRetrofitService
-import com.sportstalk.models.Kind
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.*
+import com.sportstalk.datamodels.*
+import com.sportstalk.datamodels.chat.*
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.create
@@ -260,7 +259,7 @@ constructor(
 
             val respBody = response.body()
             return if (response.isSuccessful && respBody?.data != null) {
-                respBody.data
+                respBody.data!!
             } else {
                 throw response.errorBody()?.string()?.let { errBodyStr ->
                     json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
@@ -290,7 +289,7 @@ constructor(
                     _reaction.type == reaction
                             && _reaction.users.find { _usr -> _usr.userid == userid } != null
                 }
-                        || messageIsReactedTo(which.replyto, userid, reaction)
+                        || messageIsReactedTo(which.replyto!!, userid, reaction)
             } else {
                 which.reactions.any { _reaction ->
                     _reaction.type == reaction

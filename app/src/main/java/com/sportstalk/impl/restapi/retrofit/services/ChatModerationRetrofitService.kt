@@ -1,12 +1,11 @@
 package com.sportstalk.impl.restapi.retrofit.services
 
-import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.chat.ChatEvent
-import com.sportstalk.models.chat.moderation.ApproveMessageRequest
-import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
+import com.sportstalk.datamodels.ApiResponse
+import com.sportstalk.datamodels.chat.ChatEvent
+import com.sportstalk.datamodels.chat.moderation.ApproveMessageRequest
+import com.sportstalk.datamodels.chat.moderation.ListMessagesNeedingModerationResponse
 import retrofit2.Response
 import retrofit2.http.*
-import java.util.concurrent.CompletableFuture
 
 interface ChatModerationRetrofitService {
 
