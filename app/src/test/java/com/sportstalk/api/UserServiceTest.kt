@@ -63,7 +63,7 @@ class UserServiceTest {
                 endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
         )
         json = ServiceFactory.RestApi.json
-        userService = ServiceFactory.RestApi.User.get(config)
+        userService = ServiceFactory.User.get(config)
 
         Dispatchers.setMain(testDispatcher)
     }
@@ -86,7 +86,7 @@ class UserServiceTest {
 
     @Test
     fun `A-ERROR-403) Request is not authorized with a token`() = runBlocking {
-        val userCaseUserService = ServiceFactory.RestApi.User.get(
+        val userCaseUserService = ServiceFactory.User.get(
                 config.copy(
                         apiToken = "not-a-valid-auth-api-token"
                 )

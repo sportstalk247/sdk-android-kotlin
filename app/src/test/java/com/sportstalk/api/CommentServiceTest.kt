@@ -46,7 +46,7 @@ class CommentServiceTest {
                 endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
         )
         json = ServiceFactory.RestApi.json
-        userService = ServiceFactory.RestApi.User.get(config)
+        userService = ServiceFactory.User.get(config)
     }
 
     @After
