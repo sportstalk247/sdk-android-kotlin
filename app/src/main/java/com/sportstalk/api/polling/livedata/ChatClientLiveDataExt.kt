@@ -5,11 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
 import androidx.lifecycle.switchMap
 import com.sportstalk.api.ChatClient
-import com.sportstalk.api.polling.*
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
 import com.sportstalk.datamodels.chat.GetUpdatesResponse
+import com.sportstalk.datamodels.chat.polling.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 

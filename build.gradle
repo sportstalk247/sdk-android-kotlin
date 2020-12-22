@@ -9,6 +9,7 @@ ext {
     retrofutureVersion = '1.7.2'
 
     // App dependencies
+    androidXAnnotation = '1.1.0'
     androidXTest = '1.1.1'
     androidXTestExt = '1.0.0'
     androidXTestEspresso = '3.1.1'
@@ -28,6 +29,8 @@ ext {
     coroutinesVersion = '1.4.0-M1'
 
     androidXLifecycleVersion = '2.2.0'
+
+    rxjava2xVersion = '2.2.0'
 }
 
 buildscript {

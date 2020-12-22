@@ -1,23 +1,18 @@
-package com.sportstalk.api.polling.rxjava
+package com.sportstalk.reactive.api.polling
 
-import com.sportstalk.api.ChatClient
-import com.sportstalk.api.polling.*
-import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
-import com.sportstalk.datamodels.chat.GetUpdatesResponse
-import io.reactivex.BackpressureStrategy
+import com.sportstalk.datamodels.chat.polling.*
+import com.sportstalk.reactive.ChatClient
 import io.reactivex.Flowable
-import kotlinx.coroutines.*
+import java.util.concurrent.TimeUnit
 
 /**
  * Returns an instance of reactive RxJava Publisher which emits Event Updates received at
  * a certain frequency. This will stop emitting when `chatClient.stopEventUpdates()` has been invoked
- * OR if the underlying lifecycleOwner reaches STOP state.
  */
 fun ChatClient.allEventUpdates(
         chatRoomId: String,
-        coroutineScope: CoroutineScope,
         /* Polling Frequency */
         frequency: Long = 500L,
         /*
@@ -30,37 +25,17 @@ fun ChatClient.allEventUpdates(
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
 ): Flowable<List<ChatEvent>> {
-    return Flowable.create<GetUpdatesResponse>({ emitter ->
-        coroutineScope.launch {
-            do {
-                // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-                if (roomSubscriptions.contains(chatRoomId)) {
-                    try {
-                        // Perform GET UPDATES operation
-                        val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
-                            getUpdates(
-                                    chatRoomId = chatRoomId,
-                                    // Apply event cursor
-                                    cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                            )
-                        }
-
-                        // Emit response value
-                        emitter.onNext(response)
-                    } catch (err: SportsTalkException) {
-                        err.printStackTrace()
-                        emitter.onError(err)
-                    }
-                } else {
-                    // ELSE, Either event updates has NOT yet started or `stopEventUpdates()` has been explicitly invoked
-                    break
-                }
-
-                delay(frequency)
-            } while (true)
-        }
-
-    }, BackpressureStrategy.LATEST)
+    return Flowable.interval(0, frequency, TimeUnit.MILLISECONDS)
+            // Proceed EMIT ONLY If still currently subscribed with the `chatRoomId`
+            .filter { roomSubscriptions.contains(chatRoomId) }
+            .switchMap {
+                getUpdates(
+                        chatRoomId = chatRoomId,
+                        // Apply event cursor
+                        cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                )
+                        .toFlowable()
+            }
             .doOnNext { response ->
                 // Update internally stored chatroom event cursor
                 response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->

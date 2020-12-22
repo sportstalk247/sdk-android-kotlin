@@ -1,4 +1,4 @@
-package com.sportstalk
+package com.sportstalk.datamodels
 
 import android.annotation.SuppressLint
 import java.text.SimpleDateFormat

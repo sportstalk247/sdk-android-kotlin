@@ -4,7 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import com.sportstalk.DateUtils
+import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatModerationService
 import com.sportstalk.api.service.ChatService

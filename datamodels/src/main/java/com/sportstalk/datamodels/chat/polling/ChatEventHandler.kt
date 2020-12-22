@@ -1,4 +1,4 @@
-package com.sportstalk.api.polling
+package com.sportstalk.datamodels.chat.polling
 
 import com.sportstalk.datamodels.chat.ChatEvent
 
