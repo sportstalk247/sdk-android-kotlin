@@ -1,14 +1,12 @@
-package com.sportstalk
+package com.sportstalk.reactive
 
 import androidx.annotation.RestrictTo
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.sportstalk.api.service.ChatModerationService
-import com.sportstalk.api.service.ChatService
-import com.sportstalk.api.service.UserService
-import com.sportstalk.impl.restapi.ChatModerationRestApiServiceImpl
-import com.sportstalk.impl.restapi.ChatRestApiServiceImpl
-import com.sportstalk.impl.restapi.UserRestApiServiceImpl
 import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.reactive.impl.restapi.ChatRestApiServiceImpl
+import com.sportstalk.reactive.impl.restapi.UserRestApiServiceImpl
+import com.sportstalk.reactive.service.ChatService
+import com.sportstalk.reactive.service.UserService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -70,7 +68,6 @@ object ServiceFactory {
                             )
                             .client(okHttpClient)
                             .build()
-
     }
 
     object User {
@@ -110,29 +107,6 @@ object ServiceFactory {
                     val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
                     // REST API Implementation
                     ChatRestApiServiceImpl(
-                            appId = config.appId,
-                            json = RestApi.json,
-                            mRetrofit = retrofit
-                    ).also {
-                        instances[config] = it
-                    }
-                }
-    }
-
-    object ChatModeration {
-        @JvmStatic
-        private val instances: HashMap<ClientConfig, ChatModerationService> = hashMapOf()
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @JvmStatic
-        fun get(config: ClientConfig): ChatModerationService =
-                if (instances.containsKey(config)) {
-                    instances[config]!!
-                } else {
-                    val okHttpClient = RestApi.getOkHttpInstance(config)
-                    val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
-                    // REST API Implementation
-                    ChatModerationRestApiServiceImpl(
                             appId = config.appId,
                             json = RestApi.json,
                             mRetrofit = retrofit

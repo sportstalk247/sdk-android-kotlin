@@ -12,7 +12,7 @@ constructor(
         private val config: ClientConfig
 ) : UserClient {
 
-    private val userService = ServiceFactory.RestApi.User.get(config)
+    private val userService = ServiceFactory.User.get(config)
 
     override suspend fun createOrUpdateUser(request: CreateUpdateUserRequest): User =
             userService.createOrUpdateUser(request)

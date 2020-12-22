@@ -3,7 +3,7 @@ package com.sportstalk.reactive.api.polling
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
 import com.sportstalk.datamodels.chat.polling.*
-import com.sportstalk.reactive.ChatClient
+import com.sportstalk.reactive.api.ChatClient
 import io.reactivex.Flowable
 import java.util.concurrent.TimeUnit
 

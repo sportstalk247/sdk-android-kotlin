@@ -1,24 +1,21 @@
-package com.sportstalk.impl
+package com.sportstalk.reactive.impl
 
 import androidx.annotation.RestrictTo
-import com.sportstalk.ServiceFactory
-import com.sportstalk.api.service.ChatService
-import com.sportstalk.api.ChatClient
-import com.sportstalk.api.service.ChatModerationService
 import com.sportstalk.datamodels.ClientConfig
-import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
-import com.sportstalk.datamodels.chat.moderation.*
-
+import com.sportstalk.reactive.ServiceFactory
+import com.sportstalk.reactive.api.ChatClient
+import com.sportstalk.reactive.service.ChatService
+import io.reactivex.Completable
+import io.reactivex.Single
 
 class ChatClientImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
         config: ClientConfig
-) : ChatClient {
+): ChatClient {
 
     private val chatService: ChatService = ServiceFactory.Chat.get(config)
-    private val moderationService: ChatModerationService = ServiceFactory.ChatModeration.get(config)
 
     // Room state tracking
     private var _currentRoom: ChatRoom? = null
@@ -48,136 +45,127 @@ constructor(
     override fun stopListeningToChatUpdates(forRoomId: String) =
             chatService.stopListeningToChatUpdates(forRoomId)
 
-    override suspend fun createRoom(request: CreateChatRoomRequest): ChatRoom =
+    override fun createRoom(request: CreateChatRoomRequest): Single<ChatRoom> =
             chatService.createRoom(request = request)
 
-    override suspend fun getRoomDetails(chatRoomId: String): ChatRoom =
+    override fun getRoomDetails(chatRoomId: String): Single<ChatRoom> =
             chatService.getRoomDetails(chatRoomId = chatRoomId)
 
-    override suspend fun getRoomDetailsByCustomId(chatRoomCustomId: String): ChatRoom =
+    override fun getRoomDetailsByCustomId(chatRoomCustomId: String): Single<ChatRoom> =
             chatService.getRoomDetailsByCustomId(chatRoomCustomId = chatRoomCustomId)
 
-    override suspend fun deleteRoom(chatRoomId: String): DeleteChatRoomResponse =
+    override fun deleteRoom(chatRoomId: String): Single<DeleteChatRoomResponse> =
             chatService.deleteRoom(chatRoomId = chatRoomId)
 
-    override suspend fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): ChatRoom =
+    override fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): Single<ChatRoom> =
             chatService.updateRoom(
                     chatRoomId = chatRoomId,
                     request = request
             )
 
-    override suspend fun listRooms(limit: Int?, cursor: String?): ListRoomsResponse =
+    override fun listRooms(limit: Int?, cursor: String?): Single<ListRoomsResponse> =
             chatService.listRooms(
                     limit = limit,
                     cursor = cursor
             )
 
-    override suspend fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
+    override fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): Single<JoinChatRoomResponse> =
             chatService.joinRoom(
                     chatRoomId = chatRoomId,
                     request = request
-            ).also { resp ->
+            ).doOnSuccess { resp ->
                 _currentRoom = resp.room
             }
 
-    override suspend fun joinRoom(chatRoomIdOrLabel: String): JoinChatRoomResponse =
+    override fun joinRoom(chatRoomIdOrLabel: String): Single<JoinChatRoomResponse> =
             chatService.joinRoom(
                     chatRoomIdOrLabel = chatRoomIdOrLabel
             )
-                    .also { resp ->
+                    .doOnSuccess { resp ->
                         // Set current chat room
                         _currentRoom = resp.room
                     }
 
-    override suspend fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
+    override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): Single<JoinChatRoomResponse> =
             chatService.joinRoomByCustomId(
                     chatRoomCustomId = chatRoomCustomId,
                     request = request
             )
-                    .also { resp ->
+                    .doOnSuccess { resp ->
                         // Set current chat room
                         _currentRoom = resp.room
                     }
 
-    override suspend fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): ListChatRoomParticipantsResponse =
+    override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): Single<ListChatRoomParticipantsResponse> =
             chatService.listRoomParticipants(
                     chatRoomId = chatRoomId,
                     limit = limit,
                     cursor = cursor
             )
 
-    override suspend fun exitRoom(chatRoomId: String, userId: String) =
+    override fun exitRoom(chatRoomId: String, userId: String): Completable =
             chatService.exitRoom(
                     chatRoomId = chatRoomId,
                     userId = userId
             )
-                    .also { resp ->
+                    .doOnComplete {
                         // Unset currently active chat room
                         _currentRoom = null
                     }
 
-    override suspend fun getUpdates(chatRoomId: String, cursor: String?): GetUpdatesResponse =
-            try {
-                chatService.getUpdates(
-                        chatRoomId = chatRoomId,
-                        cursor = cursor
-                )
-            } catch (err: SportsTalkException) {
-                throw err
-            } catch (err: Throwable) {
-                throw SportsTalkException(
-                        message = err.message,
-                        err = err
-                )
-            }
+    override fun getUpdates(chatRoomId: String, cursor: String?): Single<GetUpdatesResponse> =
+            chatService.getUpdates(
+                    chatRoomId = chatRoomId,
+                    cursor = cursor
+            )
 
-    override suspend fun messageIsReported(which: ChatEvent, userid: String): Boolean =
+    override fun messageIsReported(which: ChatEvent, userid: String): Boolean =
             chatService.messageIsReported(which, userid)
 
-    override suspend fun messageIsReactedTo(which: ChatEvent, userid: String, reaction: String): Boolean =
+    override fun messageIsReactedTo(which: ChatEvent, userid: String, reaction: String): Boolean =
             chatService.messageIsReactedTo(which, userid, reaction)
 
-    override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
+    override fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): Single<ListEvents> =
             chatService.listPreviousEvents(
                     chatRoomId = chatRoomId,
                     limit = limit,
                     cursor = cursor
             )
 
-    override suspend fun getEventById(chatRoomId: String, eventId: String): ChatEvent =
+    override fun getEventById(chatRoomId: String, eventId: String): Single<ChatEvent> =
             chatService.getEventById(
                     chatRoomId = chatRoomId,
                     eventId = eventId
             )
 
-    override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
+    override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): Single<ListEvents> =
             chatService.listEventsHistory(
                     chatRoomId = chatRoomId,
                     limit = limit,
                     cursor = cursor
             )
 
-    override suspend fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): ExecuteChatCommandResponse =
+    override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): Single<ExecuteChatCommandResponse> =
             chatService.executeChatCommand(
                     chatRoomId = chatRoomId,
                     request = request
             )
 
-    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ExecuteChatCommandResponse =
+    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): Single<ExecuteChatCommandResponse> =
             chatService.sendThreadedReply(
                     chatRoomId = chatRoomId,
                     replyTo = replyTo,
                     request = request
             )
 
-    override suspend fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): ChatEvent =
+    override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): Single<ChatEvent> =
             chatService.sendQuotedReply(
                     chatRoomId = chatRoomId,
                     replyTo = replyTo,
                     request = request
             )
 
-    override suspend fun listMessagesByUser(chatRoomId: String, userId: String, limit: Int?, cursor: String?): ListMessagesByUser =
+    override fun listMessagesByUser(chatRoomId: String, userId: String, limit: Int?, cursor: String?): Single<ListMessagesByUser> =
             chatService.listMessagesByUser(
                     chatRoomId = chatRoomId,
                     userId = userId,
@@ -185,20 +173,20 @@ constructor(
                     cursor = cursor
             )
 
-    override suspend fun bounceUser(chatRoomId: String, request: BounceUserRequest): BounceUserResponse =
+    override fun bounceUser(chatRoomId: String, request: BounceUserRequest): Single<BounceUserResponse> =
             chatService.bounceUser(
                     chatRoomId = chatRoomId,
                     request = request
             )
 
-    override suspend fun deleteEvent(chatRoomId: String, eventId: String, userid: String): DeleteEventResponse =
+    override fun deleteEvent(chatRoomId: String, eventId: String, userid: String): Single<DeleteEventResponse> =
             chatService.deleteEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     userid = userid
             )
 
-    override suspend fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
+    override fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): Single<DeleteEventResponse> =
             chatService.setMessageAsDeleted(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -207,30 +195,17 @@ constructor(
                     permanentifnoreplies = permanentifnoreplies
             )
 
-    override suspend fun reportMessage(chatRoomId: String, eventId: String, request: ReportMessageRequest): ChatEvent =
+    override fun reportMessage(chatRoomId: String, eventId: String, request: ReportMessageRequest): Single<ChatEvent> =
             chatService.reportMessage(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
             )
 
-    override suspend fun reactToEvent(chatRoomId: String, eventId: String, request: ReactToAMessageRequest): ChatEvent =
+    override fun reactToEvent(chatRoomId: String, eventId: String, request: ReactToAMessageRequest): Single<ChatEvent> =
             chatService.reactToEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
-            )
-
-    override suspend fun approveMessage(eventId: String, approve: Boolean): ChatEvent =
-            moderationService.approveMessage(
-                    eventId = eventId,
-                    approve = approve
-            )
-
-    override suspend fun listMessagesNeedingModeration(roomId: String?, limit: Int?, cursor: String?): ListMessagesNeedingModerationResponse =
-            moderationService.listMessagesNeedingModeration(
-                    roomId = roomId,
-                    limit = limit,
-                    cursor = cursor
             )
 }

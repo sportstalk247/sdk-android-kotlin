@@ -1,4 +1,4 @@
-package com.sportstalk.reactive
+package com.sportstalk.reactive.api
 
 import com.sportstalk.datamodels.chat.ChatRoom
 import com.sportstalk.reactive.service.ChatService
