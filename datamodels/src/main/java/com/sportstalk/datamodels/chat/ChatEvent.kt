@@ -88,6 +88,7 @@ object EventType {
     const val SPEECH = "speech"
     const val PURGE = "purge"
     const val REACTION = "reaction"
+    const val REPLACE = "replace"
     const val ROOM_CLOSED = "roomclosed"
     const val ROOM_OPEN = "roomopened"
     const val ACTION = "action"
