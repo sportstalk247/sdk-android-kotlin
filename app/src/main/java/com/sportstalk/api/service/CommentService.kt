@@ -1,7 +1,7 @@
 package com.sportstalk.api.service
 
-import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.comment.*
+import com.sportstalk.datamodels.ApiResponse
+import com.sportstalk.datamodels.comment.*
 import java.util.concurrent.CompletableFuture
 
 interface CommentService {

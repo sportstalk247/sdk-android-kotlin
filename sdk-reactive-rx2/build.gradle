@@ -1,0 +1,111 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlinx-serialization'
+
+android {
+    buildToolsVersion = rootProject.ext.buildToolsVersion
+
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    lintOptions {
+        abortOnError false
+    }
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+
+            manifestPlaceholders = [
+                    // TODO:: When multiple environments are setup(i.e. DEV Environment), change this value accordingly
+                    "apiUrlEndpoint": "https://qa-talkapi.sportstalk247.com/api/v3/"
+                    /*"apiUrlEndpoint": "https://api.sportstalk247.com/api/v3/"*/
+            ]
+        }
+
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
+            manifestPlaceholders = [
+                    // TODO:: When multiple environments are setup(i.e. PROD Environment), change this value accordingly
+                    "apiUrlEndpoint": "https://api.sportstalk247.com/api/v3/"
+            ]
+        }
+    }
+
+    kapt {
+        generateStubs = true
+    }
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+
+    // https://stackoverflow.com/a/48988779/11419056
+    // * Go to Build, Execution, Deployment > Compiler > Kotlin Compiler BUT Other Settings > Kotlin compiler
+    // * Change the Target JVM version to 1.8, then Apply
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs += [
+                "-Xuse-experimental=kotlinx.serialization.UnstableDefault",
+                "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
+        ]
+    }
+
+    packagingOptions {
+        exclude 'META-INF/main.kotlin_module'
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = true
+        }
+
+    }
+}
+
+dependencies {
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':datamodels')
+
+    testImplementation "org.robolectric:robolectric:$rootProject.roboelectric"
+
+    // Jetbrains Kotlin Dependencies
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
+
+    implementation "androidx.annotation:annotation:$androidXAnnotation"
+
+    // Retrofit
+    implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$rootProject.retrofitKotlinxSerializationConverterVersion")
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$rootProject.retrofitVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+
+    testImplementation "junit:junit:$rootProject.ext.junitVersion"
+    androidTestImplementation "androidx.test:runner:$rootProject.androidXTest"
+    androidTestImplementation "androidx.test:rules:$rootProject.androidXTest"
+    androidTestImplementation "androidx.test.ext:junit:$rootProject.androidXTestExt"
+    testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
+    androidTestImplementation "org.mockito:mockito-android:$rootProject.ext.mockitoVersion"
+    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
+
+    // RxJava 2.x
+    implementation "io.reactivex.rxjava2:rxjava:$rxjava2xVersion"
+
+}

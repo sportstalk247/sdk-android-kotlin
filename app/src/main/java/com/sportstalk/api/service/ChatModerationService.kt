@@ -1,7 +1,7 @@
 package com.sportstalk.api.service
 
-import com.sportstalk.models.chat.ChatEvent
-import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
+import com.sportstalk.datamodels.chat.ChatEvent
+import com.sportstalk.datamodels.chat.moderation.ListMessagesNeedingModerationResponse
 
 interface ChatModerationService {
 

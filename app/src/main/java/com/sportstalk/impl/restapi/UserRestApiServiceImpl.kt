@@ -4,9 +4,8 @@ import androidx.annotation.RestrictTo
 import com.sportstalk.api.service.UserService
 import com.sportstalk.impl.handleSdkResponse
 import com.sportstalk.impl.restapi.retrofit.services.UsersRetrofitService
-import com.sportstalk.models.Kind
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.users.*
+import com.sportstalk.datamodels.*
+import com.sportstalk.datamodels.users.*
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.create

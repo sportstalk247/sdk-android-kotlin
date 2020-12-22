@@ -5,10 +5,10 @@ import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.ChatClient
 import com.sportstalk.api.service.ChatModerationService
-import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.*
-import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
+import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.chat.moderation.*
 
 
 class ChatClientImpl
@@ -17,8 +17,8 @@ constructor(
         config: ClientConfig
 ) : ChatClient {
 
-    private val chatService: ChatService = ServiceFactory.RestApi.Chat.get(config)
-    private val moderationService: ChatModerationService = ServiceFactory.RestApi.ChatModeration.get(config)
+    private val chatService: ChatService = ServiceFactory.Chat.get(config)
+    private val moderationService: ChatModerationService = ServiceFactory.ChatModeration.get(config)
 
     // Room state tracking
     private var _currentRoom: ChatRoom? = null

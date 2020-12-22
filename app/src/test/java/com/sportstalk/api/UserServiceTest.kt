@@ -6,11 +6,11 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.UserService
-import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.Kind
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.ReportType
-import com.sportstalk.models.users.*
+import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.Kind
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.users.*
+import com.sportstalk.datamodels.chat.ReportType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -63,7 +63,7 @@ class UserServiceTest {
                 endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
         )
         json = ServiceFactory.RestApi.json
-        userService = ServiceFactory.RestApi.User.get(config)
+        userService = ServiceFactory.User.get(config)
 
         Dispatchers.setMain(testDispatcher)
     }
@@ -86,7 +86,7 @@ class UserServiceTest {
 
     @Test
     fun `A-ERROR-403) Request is not authorized with a token`() = runBlocking {
-        val userCaseUserService = ServiceFactory.RestApi.User.get(
+        val userCaseUserService = ServiceFactory.User.get(
                 config.copy(
                         apiToken = "not-a-valid-auth-api-token"
                 )

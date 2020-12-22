@@ -7,7 +7,7 @@ import android.os.Build
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.CommentService
 import com.sportstalk.api.service.UserService
-import com.sportstalk.models.ClientConfig
+import com.sportstalk.datamodels.ClientConfig
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Before
@@ -24,7 +24,7 @@ import org.robolectric.annotation.Config
 class CommentServiceTest {
 
     private lateinit var context: Context
-    private lateinit var config: ClientConfig
+    private lateinit var config: com.sportstalk.datamodels.ClientConfig
     private lateinit var userService: UserService
     private lateinit var commentService: CommentService
     private lateinit var json: Json
@@ -40,13 +40,13 @@ class CommentServiceTest {
                     null
                 }
 
-        config = ClientConfig(
+        config = com.sportstalk.datamodels.ClientConfig(
                 appId = appInfo?.metaData?.getString("sportstalk.api.app_id")!!,
                 apiToken = appInfo.metaData?.getString("sportstalk.api.auth_token")!!,
                 endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
         )
         json = ServiceFactory.RestApi.json
-        userService = ServiceFactory.RestApi.User.get(config)
+        userService = ServiceFactory.User.get(config)
     }
 
     @After

@@ -1,8 +1,6 @@
 package com.sportstalk.impl
 
-import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.Kind
-import com.sportstalk.models.SportsTalkException
+import com.sportstalk.datamodels.*
 import kotlinx.serialization.json.Json
 import retrofit2.Response
 

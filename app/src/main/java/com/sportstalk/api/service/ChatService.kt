@@ -1,9 +1,7 @@
 package com.sportstalk.api.service
 
 import androidx.annotation.RestrictTo
-import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.chat.*
-import java.util.concurrent.CompletableFuture
+import com.sportstalk.datamodels.chat.*
 
 interface ChatService {
 

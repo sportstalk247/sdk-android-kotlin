@@ -1,20 +1,24 @@
 package com.sportstalk.api.polling.livedata
 
-import androidx.lifecycle.*
-import com.sportstalk.api.ChatClient
-import com.sportstalk.api.polling.*
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.ChatEvent
-import com.sportstalk.models.chat.EventType
-import com.sportstalk.models.chat.GetUpdatesResponse
-import kotlinx.coroutines.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.liveData
+import androidx.lifecycle.switchMap
+import com.sportstalk.api.service.ChatService
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.chat.ChatEvent
+import com.sportstalk.datamodels.chat.EventType
+import com.sportstalk.datamodels.chat.GetUpdatesResponse
+import com.sportstalk.datamodels.chat.polling.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 
 /**
  * Returns an instance of reactive LiveData which emits Event Updates received at
  * a certain frequency. This will stop emitting when `chatClient.stopEventUpdates()` has been invoked
  * OR if the underlying lifecycleOwner reaches STOP state.
  */
-fun ChatClient.allEventUpdates(
+fun ChatService.allEventUpdates(
         chatRoomId: String,
         /* Polling Frequency */
         frequency: Long = 500L,

@@ -8,7 +8,7 @@ import com.sportstalk.api.service.UserService
 import com.sportstalk.impl.restapi.ChatModerationRestApiServiceImpl
 import com.sportstalk.impl.restapi.ChatRestApiServiceImpl
 import com.sportstalk.impl.restapi.UserRestApiServiceImpl
-import com.sportstalk.models.ClientConfig
+import com.sportstalk.datamodels.ClientConfig
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import okhttp3.OkHttpClient
@@ -71,76 +71,75 @@ object ServiceFactory {
                             .client(okHttpClient)
                             .build()
 
+    }
 
-        object User {
-            @JvmStatic
-            private val instances: HashMap<ClientConfig, UserService> = hashMapOf()
+    object User {
+        @JvmStatic
+        private val instances: HashMap<ClientConfig, UserService> = hashMapOf()
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @JvmStatic
-            fun get(config: ClientConfig): UserService =
-                    if (instances.containsKey(config)) {
-                        instances[config]!!
-                    } else {
-                        val okHttpClient = getOkHttpInstance(config)
-                        val retrofit = getRetrofitInstance(config, okHttpClient, json)
-                        // REST API Implementation
-                        UserRestApiServiceImpl(
-                                appId = config.appId,
-                                json = json,
-                                mRetrofit = retrofit
-                        ).also {
-                            instances[config] = it
-                        }
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun get(config: ClientConfig): UserService =
+                if (instances.containsKey(config)) {
+                    instances[config]!!
+                } else {
+                    val okHttpClient = RestApi.getOkHttpInstance(config)
+                    val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
+                    // REST API Implementation
+                    UserRestApiServiceImpl(
+                            appId = config.appId,
+                            json = RestApi.json,
+                            mRetrofit = retrofit
+                    ).also {
+                        instances[config] = it
                     }
-        }
+                }
+    }
 
-        object Chat {
-            @JvmStatic
-            private val instances: HashMap<ClientConfig, ChatService> = hashMapOf()
+    object Chat {
+        @JvmStatic
+        private val instances: HashMap<ClientConfig, ChatService> = hashMapOf()
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @JvmStatic
-            fun get(config: ClientConfig): ChatService =
-                    if (instances.containsKey(config)) {
-                        instances[config]!!
-                    } else {
-                        val okHttpClient = getOkHttpInstance(config)
-                        val retrofit = getRetrofitInstance(config, okHttpClient, json)
-                        // REST API Implementation
-                        ChatRestApiServiceImpl(
-                                appId = config.appId,
-                                json = json,
-                                mRetrofit = retrofit
-                        ).also {
-                            instances[config] = it
-                        }
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun get(config: ClientConfig): ChatService =
+                if (instances.containsKey(config)) {
+                    instances[config]!!
+                } else {
+                    val okHttpClient = RestApi.getOkHttpInstance(config)
+                    val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
+                    // REST API Implementation
+                    ChatRestApiServiceImpl(
+                            appId = config.appId,
+                            json = RestApi.json,
+                            mRetrofit = retrofit
+                    ).also {
+                        instances[config] = it
                     }
-        }
+                }
+    }
 
-        object ChatModeration {
-            @JvmStatic
-            private val instances: HashMap<ClientConfig, ChatModerationService> = hashMapOf()
+    object ChatModeration {
+        @JvmStatic
+        private val instances: HashMap<ClientConfig, ChatModerationService> = hashMapOf()
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @JvmStatic
-            fun get(config: ClientConfig): ChatModerationService =
-                    if (instances.containsKey(config)) {
-                        instances[config]!!
-                    } else {
-                        val okHttpClient = getOkHttpInstance(config)
-                        val retrofit = getRetrofitInstance(config, okHttpClient, json)
-                        // REST API Implementation
-                        ChatModerationRestApiServiceImpl(
-                                appId = config.appId,
-                                json = json,
-                                mRetrofit = retrofit
-                        ).also {
-                            instances[config] = it
-                        }
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun get(config: ClientConfig): ChatModerationService =
+                if (instances.containsKey(config)) {
+                    instances[config]!!
+                } else {
+                    val okHttpClient = RestApi.getOkHttpInstance(config)
+                    val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
+                    // REST API Implementation
+                    ChatModerationRestApiServiceImpl(
+                            appId = config.appId,
+                            json = RestApi.json,
+                            mRetrofit = retrofit
+                    ).also {
+                        instances[config] = it
                     }
-        }
-
+                }
     }
 
 }

@@ -2,26 +2,25 @@
 
 package com.sportstalk.api.polling.coroutines
 
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.coroutineScope
-import com.sportstalk.api.ChatClient
-import com.sportstalk.api.polling.*
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.ChatEvent
-import com.sportstalk.models.chat.EventType
-import com.sportstalk.models.chat.GetUpdatesResponse
+import com.sportstalk.api.service.ChatService
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.chat.ChatEvent
+import com.sportstalk.datamodels.chat.EventType
+import com.sportstalk.datamodels.chat.polling.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 
 /**
  * Returns an instance of reactive coroutine Flow which emits Event Updates received at
  * a certain frequency. This will stop emitting when `chatClient.stopEventUpdates()` has been invoked
  * OR if the underlying lifecycleOwner reaches STOP state.
  */
-fun ChatClient.allEventUpdates(
+fun ChatService.allEventUpdates(
         chatRoomId: String,
         /* Polling Frequency */
         frequency: Long = 500L,
@@ -40,7 +39,7 @@ fun ChatClient.allEventUpdates(
         if (roomSubscriptions.contains(chatRoomId)) {
             try {
                 // Perform GET UPDATES operation
-                val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                val response = withContext(Dispatchers.IO) {
                     getUpdates(
                             chatRoomId = chatRoomId,
                             // Apply event cursor

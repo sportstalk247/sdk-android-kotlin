@@ -4,19 +4,15 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import com.sportstalk.DateUtils
+import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.ServiceFactory
 import com.sportstalk.api.service.ChatModerationService
 import com.sportstalk.api.service.ChatService
 import com.sportstalk.api.service.UserService
-import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.Kind
-import com.sportstalk.models.SportsTalkException
-import com.sportstalk.models.chat.*
-import com.sportstalk.models.chat.moderation.ApproveMessageRequest
-import com.sportstalk.models.chat.moderation.ListMessagesNeedingModerationResponse
-import com.sportstalk.models.users.CreateUpdateUserRequest
-import com.sportstalk.models.users.User
+import com.sportstalk.datamodels.*
+import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.chat.moderation.*
+import com.sportstalk.datamodels.users.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -69,9 +65,9 @@ class ChatModerationServiceTest {
                 endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
         )
         json = ServiceFactory.RestApi.json
-        userService = ServiceFactory.RestApi.User.get(config)
-        chatService = ServiceFactory.RestApi.Chat.get(config)
-        chatModerationService = ServiceFactory.RestApi.ChatModeration.get(config)
+        userService = ServiceFactory.User.get(config)
+        chatService = ServiceFactory.Chat.get(config)
+        chatModerationService = ServiceFactory.ChatModeration.get(config)
 
         Dispatchers.setMain(testDispatcher)
     }
@@ -104,7 +100,7 @@ class ChatModerationServiceTest {
 
     @Test
     fun `0-ERROR-403) Request is not authorized with a token`() = runBlocking {
-        val userCaseChatModService = ServiceFactory.RestApi.ChatModeration.get(
+        val userCaseChatModService = ServiceFactory.ChatModeration.get(
                 config.copy(
                         apiToken = "not-a-valid-auth-api-token"
                 )

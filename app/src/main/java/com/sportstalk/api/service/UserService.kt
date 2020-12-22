@@ -1,6 +1,6 @@
 package com.sportstalk.api.service
 
-import com.sportstalk.models.users.*
+import com.sportstalk.datamodels.users.*
 
 interface UserService {
 

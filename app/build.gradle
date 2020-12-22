@@ -79,7 +79,9 @@ android {
 }
 
 dependencies {
-  implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(':datamodels')
 
     testImplementation "org.robolectric:robolectric:$rootProject.roboelectric"
 
@@ -104,14 +106,12 @@ dependencies {
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesVersion"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
-
     androidTestImplementation "androidx.test:runner:$rootProject.androidXTest"
     androidTestImplementation "androidx.test:rules:$rootProject.androidXTest"
-    androidTestImplementation "junit:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation "org.mockito:mockito-android:$rootProject.ext.mockitoVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.androidXTestExt"
+    testImplementation "androidx.arch.core:core-testing:$androidXCoreTesting"
+    androidTestImplementation "org.mockito:mockito-android:$rootProject.ext.mockitoVersion"
+    testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
 
     // AndroidX Lifecycle
     implementation "androidx.lifecycle:lifecycle-extensions:$androidXLifecycleVersion"

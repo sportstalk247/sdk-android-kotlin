@@ -1,9 +1,9 @@
 package com.sportstalk.impl
 
 import com.sportstalk.api.CommentClient
-import com.sportstalk.models.ApiResponse
-import com.sportstalk.models.ClientConfig
-import com.sportstalk.models.comment.*
+import com.sportstalk.datamodels.ApiResponse
+import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.comment.*
 import java.util.concurrent.CompletableFuture
 
 class CommentClientImpl(
