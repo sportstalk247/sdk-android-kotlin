@@ -1,4 +1,3 @@
-
 [![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
 
 # sdk-android-kotlin:sdk-reactive-rx2
@@ -39,7 +38,7 @@ allprojects {
 2. Add the following lines in your module **build.gradle** file, under dependencies section
 
 ```groovy
-implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:vX.Y.Z'
+implementation 'com.gitlab.sportstalk247.sdk-android-kotlin:sdk-reactive-rx2:vX.Y.Z'
 ```
 
 [![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
