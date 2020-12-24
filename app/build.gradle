@@ -81,7 +81,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation project(':datamodels')
+    api project(':datamodels')
 
     testImplementation "org.robolectric:robolectric:$rootProject.roboelectric"
 
