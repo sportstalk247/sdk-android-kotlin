@@ -10,7 +10,8 @@ data class JoinChatRoomRequest(
         val pictureurl: String? = null,
         val profileurl: String? = null,
         /**
-         * Defaults to 50. This limits the number of previous messages returned when joining the room.
+         * This limits the number of previous messages returned when joining the room.
+         * - If null, API response defaults to 20 itemcount.
          */
-        val limit: Int = 50
+        val limit: Int? = null
 )
