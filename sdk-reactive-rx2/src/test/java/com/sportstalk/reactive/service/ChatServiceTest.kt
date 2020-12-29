@@ -630,56 +630,57 @@ class ChatServiceTest {
         deleteTestChatRooms(testCreatedChatRoomData.id)
     }
 
-    @Test
-    fun `G) Join Room - Anonymous User`() {
-        // GIVEN
-        val testChatRoomData = TestData.chatRooms(config.appId).first()
-        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
-                name = testChatRoomData.name!!,
-                customid = testChatRoomData.customid,
-                description = testChatRoomData.description,
-                moderation = testChatRoomData.moderation,
-                enableactions = testChatRoomData.enableactions,
-                enableenterandexit = testChatRoomData.enableenterandexit,
-                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
-                delaymessageseconds = testChatRoomData.delaymessageseconds,
-                roomisopen = testChatRoomData.open,
-                maxreports = testChatRoomData.maxreports
-        )
-        // Should create a test chat room first
-        val testCreatedChatRoomData = chatService
-                .createRoom(testCreateChatRoomInputRequest)
-                .blockingGet()
-
-        val testExpectedResult = JoinChatRoomResponse(
-                kind = "chat.joinroom",
-                user = null,
-                room = null
-        )
-        // WHEN
-        val testActualResult = chatService.joinRoom(
-                chatRoomIdOrLabel = testCreatedChatRoomData.id!!
-        ).blockingGet()
-
-        // THEN
-        println(
-                "`Join Room - Anonymous User`() -> testActualResult = \n" +
-                        json.encodeToString(
-                                JoinChatRoomResponse.serializer(),
-                                testActualResult
-                        )
-        )
-
-        assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.user == null }
-        assertTrue { testActualResult.room == testCreatedChatRoomData }
-
-        // Also, assert that ChatRoomEventCursor is currently stored
-        assertTrue { testActualResult.eventscursor?.cursor == chatService.chatRoomEventCursor[testCreatedChatRoomData.id!!] }
-
-        // Perform Delete Test Chat Room
-        deleteTestChatRooms(testCreatedChatRoomData.id)
-    }
+//  Join Room - Anonymous User No Longer Supported
+//    @Test
+//    fun `G) Join Room - Anonymous User`() {
+//        // GIVEN
+//        val testChatRoomData = TestData.chatRooms(config.appId).first()
+//        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+//                name = testChatRoomData.name!!,
+//                customid = testChatRoomData.customid,
+//                description = testChatRoomData.description,
+//                moderation = testChatRoomData.moderation,
+//                enableactions = testChatRoomData.enableactions,
+//                enableenterandexit = testChatRoomData.enableenterandexit,
+//                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+//                delaymessageseconds = testChatRoomData.delaymessageseconds,
+//                roomisopen = testChatRoomData.open,
+//                maxreports = testChatRoomData.maxreports
+//        )
+//        // Should create a test chat room first
+//        val testCreatedChatRoomData = chatService
+//                .createRoom(testCreateChatRoomInputRequest)
+//                .blockingGet()
+//
+//        val testExpectedResult = JoinChatRoomResponse(
+//                kind = "chat.joinroom",
+//                user = null,
+//                room = null
+//        )
+//        // WHEN
+//        val testActualResult = chatService.joinRoom(
+//                chatRoomIdOrLabel = testCreatedChatRoomData.id!!
+//        ).blockingGet()
+//
+//        // THEN
+//        println(
+//                "`Join Room - Anonymous User`() -> testActualResult = \n" +
+//                        json.encodeToString(
+//                                JoinChatRoomResponse.serializer(),
+//                                testActualResult
+//                        )
+//        )
+//
+//        assertTrue { testActualResult.kind == testExpectedResult.kind }
+//        assertTrue { testActualResult.user == null }
+//        assertTrue { testActualResult.room == testCreatedChatRoomData }
+//
+//        // Also, assert that ChatRoomEventCursor is currently stored
+//        assertTrue { testActualResult.eventscursor?.cursor == chatService.chatRoomEventCursor[testCreatedChatRoomData.id!!] }
+//
+//        // Perform Delete Test Chat Room
+//        deleteTestChatRooms(testCreatedChatRoomData.id)
+//    }
 
     @Test
     fun `G-ERROR-404-Room-not-found) Join Room`() {
