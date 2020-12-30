@@ -20,6 +20,9 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+-dontwarn com.sportstalk.reactive.**
+-keep class com.sportstalk.reactive.** {*;}
+
 # kotlinx-serialization
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.SerializationKt
