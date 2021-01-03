@@ -18,10 +18,14 @@ allprojects {
 }
 ```
 
-2. Add the following lines in your module **build.gradle** file, under dependencies section
+2. Add the following lines in your module **build.gradle** file, depending on the chosen SDK implementation(Coroutine or Rx2Java), under dependencies section:
 
 ```groovy
-implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:vX.Y.Z'
+// For SDK coroutine implementation
+implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:sdk-coroutine:vX.Y.Z'
+// OR
+// For SDK Rx2Java implementation
+implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:vX.Y.Z'
 ```
 
 [![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)

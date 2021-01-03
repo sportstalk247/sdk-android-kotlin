@@ -19,7 +19,7 @@ You need to visit the dashboard with the following URL:
 
 <https://dashboard.sportstalk247.com>
 
-Then click on ''Application Management'' link to generate the above
+Then click on "Application Management" link to generate the above
 
 ## Authentication
 

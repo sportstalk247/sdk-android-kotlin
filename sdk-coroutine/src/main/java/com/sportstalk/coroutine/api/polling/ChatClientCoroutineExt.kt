@@ -1,6 +1,6 @@
 @file:Suppress("EXPERIMENTAL_API_USAGE")
 
-package com.sportstalk.coroutine.api.polling.coroutines
+package com.sportstalk.coroutine.api.polling
 
 import com.sportstalk.coroutine.service.ChatService
 import com.sportstalk.datamodels.SportsTalkException

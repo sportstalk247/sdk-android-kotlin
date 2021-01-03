@@ -6,7 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.coroutine.ServiceFactory
-import com.sportstalk.coroutine.api.polling.coroutines.allEventUpdates
+import com.sportstalk.coroutine.api.polling.allEventUpdates
 import com.sportstalk.coroutine.service.ChatService
 import com.sportstalk.coroutine.service.UserService
 import com.sportstalk.datamodels.*
