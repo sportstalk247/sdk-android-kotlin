@@ -26,20 +26,23 @@ fun ChatService.allEventUpdates(
         onPurgeEvent: OnPurgeEvent? = null
 ): Flowable<List<ChatEvent>> {
     return Flowable.interval(0, frequency, TimeUnit.MILLISECONDS)
-            // Proceed EMIT ONLY If still currently subscribed with the `chatRoomId`
-            .filter { roomSubscriptions.contains(chatRoomId) }
             .switchMap {
-                getUpdates(
-                        chatRoomId = chatRoomId,
-                        // Apply event cursor
-                        cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
-                )
-                        .toFlowable()
-            }
-            .doOnNext { response ->
-                // Update internally stored chatroom event cursor
-                response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
-                    chatRoomEventCursor[chatRoomId] = cursor
+                // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
+                return@switchMap if(roomSubscriptions.contains(chatRoomId)) {
+                    getUpdates(
+                            chatRoomId = chatRoomId,
+                            // Apply event cursor
+                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                    )
+                            .doOnSuccess { response ->
+                                // Update internally stored chatroom event cursor
+                                response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
+                                    chatRoomEventCursor[chatRoomId] = cursor
+                                }
+                            }
+                            .toFlowable()
+                } else {
+                    Flowable.empty()
                 }
             }
             .map { it.events }
