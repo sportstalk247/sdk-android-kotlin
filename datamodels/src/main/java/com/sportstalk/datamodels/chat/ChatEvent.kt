@@ -23,7 +23,7 @@ data class ChatEvent(
         * Updates when event changes.
         * - ISODateTime Format
         */
-        val whenmodified: String? = null,
+        val modified: String? = null,
         val ts: Long? = null,
         /** [EventType] */
         val eventtype: String? = null,
