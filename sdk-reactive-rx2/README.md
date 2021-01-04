@@ -1,4 +1,3 @@
-
 [![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
 
 # sdk-reactive-rx2
