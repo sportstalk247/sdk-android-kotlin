@@ -955,7 +955,7 @@ Below is a code sample on how to use this SDK feature:
                     frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
                     /*
                     * The following are placeholder/convenience functions should the developers want to implement it
-                    * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }. In coroutine flow, these are invoked via .onEach { ... })
+                    * in a callback-oriented way. (Invoked as subscription's side-effect. In coroutine flow, these are invoked via .onEach { ... })
                     */
                     onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
                     onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
@@ -1012,7 +1012,7 @@ Below is a code sample on how to use this SDK feature:
             frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
             /*
             * The following are placeholder/convenience functions should the developers want to implement it
-            * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }. In coroutine flow, these are invoked via .onEach { ... })
+            * in a callback-oriented way. (Invoked as subscription's side-effect.)
             */
             onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
             onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
@@ -1051,58 +1051,56 @@ Below is a code sample on how to use this SDK feature:
         import com.sportstalk.reactive.api.polling.allEventUpdates
         // ...
 
-        val rxDisposeBag = CompositeDisposable()
-
         // Under Fragment class
         // ...
+
+        val rxDisposeBag = CompositeDisposable()
+
         // User must first Join Chat Room
         // Now that the test user has joined the room, setup reactive subscription to event updates
         // Below returns a Flowable<List<ChatEvent>>
-        lifecycleScope.launch {
-            chatClient.allEventUpdates(
-                chatRoomId = testChatRoom.id!!,
-                lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
-                frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
-                /*
-                * The following are placeholder/convenience functions should the developers want to implement it
-                * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }. In coroutine flow, these are invoked via .onEach { ... })
-                */
-                onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
-                onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
-                onAdEvent = { adEvent: ChatEvent -> /* Handle eventtype == "advertisement" */ }, // OPTIONAL
-                onReply = { replyEvent: ChatEvent -> /* Handle eventtype == "reply" */ }, // OPTIONAL
-                onReaction = { reactionEvent: ChatEvent -> /* Handle eventtype == "reaction" */ }, // OPTIONAL
-                onPurgeEvent = { purgeEvent: ChatEvent -> /* Handle eventtype == "purge" */ } // OPTIONAL
-            )
-            .distinctUntilChanged()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { rxDisposeBag.add(it) }
-            .subscribe { events ->
-                // Alternatively, the developer can opt to consume the events in here...
-                // NOTE:: ONLY choose 1 approach to avoid handling it twice.
-                // Iterate each event item(s)
-                events.forEach { chatEvent ->
-                    when(chatEvent.eventtype) {
-                        EventType.GOAL -> { /* Handle goal event types */ }
-                        EventType.ADVERTISEMENT -> { /* Handle advertisements event types */ }
-                        // ...
-                        // ...
-                    }
+        chatClient.allEventUpdates(
+            chatRoomId = testChatRoom.id!!,
+            lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
+            frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
+            /*
+            * The following are placeholder/convenience functions should the developers want to implement it
+            * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }.)
+            */
+            onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
+            onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
+            onAdEvent = { adEvent: ChatEvent -> /* Handle eventtype == "advertisement" */ }, // OPTIONAL
+            onReply = { replyEvent: ChatEvent -> /* Handle eventtype == "reply" */ }, // OPTIONAL
+            onReaction = { reactionEvent: ChatEvent -> /* Handle eventtype == "reaction" */ }, // OPTIONAL
+            onPurgeEvent = { purgeEvent: ChatEvent -> /* Handle eventtype == "purge" */ } // OPTIONAL
+        )
+        .distinctUntilChanged()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { events ->
+            // Alternatively, the developer can opt to consume the events in here...
+            // NOTE:: ONLY choose 1 approach to avoid handling it twice.
+            // Iterate each event item(s)
+            events.forEach { chatEvent ->
+                when(chatEvent.eventtype) {
+                    EventType.GOAL -> { /* Handle goal event types */ }
+                    EventType.ADVERTISEMENT -> { /* Handle advertisements event types */ }
+                    // ...
+                    // ...
                 }
             }
-
-            // Then, perform start listening to event updates
-            chatClient.startListeningToChatUpdates(
-                forRoomId = testChatRoom.id!!
-            )
-
-            // At some point in time, the developer might want to explicitly stop listening to event updates
-            chatClient.stopListeningToChatUpdates(
-                forRoomId = testChatRoom.id!!
-            )
-
         }
+        .also { rxDisposeBag.add(it) }
+
+        // Then, perform start listening to event updates
+        chatClient.startListeningToChatUpdates(
+            forRoomId = testChatRoom.id!!
+        )
+
+        // At some point in time, the developer might want to explicitly stop listening to event updates
+        chatClient.stopListeningToChatUpdates(
+            forRoomId = testChatRoom.id!!
+        )
 ```
 
 ## List Messages By User
