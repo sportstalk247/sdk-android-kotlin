@@ -1,10 +1,10 @@
-package com.sportstalk.reactive.impl
+package com.sportstalk.reactive.rx2.impl
 
 import androidx.annotation.RestrictTo
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.users.*
-import com.sportstalk.reactive.ServiceFactory
-import com.sportstalk.reactive.api.UserClient
+import com.sportstalk.reactive.rx2.ServiceFactory
+import com.sportstalk.reactive.rx2.api.UserClient
 import io.reactivex.Single
 
 class UserClientImpl

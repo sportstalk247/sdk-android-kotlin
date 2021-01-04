@@ -1,4 +1,4 @@
-package com.sportstalk.reactive.service
+package com.sportstalk.reactive.rx2.service
 
 import androidx.annotation.RestrictTo
 import io.reactivex.Completable

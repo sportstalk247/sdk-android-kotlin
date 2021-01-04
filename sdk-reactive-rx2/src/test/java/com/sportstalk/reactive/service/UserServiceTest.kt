@@ -9,7 +9,8 @@ import com.sportstalk.datamodels.Kind
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.ReportType
 import com.sportstalk.datamodels.users.*
-import com.sportstalk.reactive.ServiceFactory
+import com.sportstalk.reactive.rx2.ServiceFactory
+import com.sportstalk.reactive.rx2.service.UserService
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.TestObserver
 import kotlinx.serialization.json.Json

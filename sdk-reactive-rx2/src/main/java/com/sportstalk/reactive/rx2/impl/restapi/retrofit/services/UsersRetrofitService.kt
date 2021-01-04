@@ -1,4 +1,4 @@
-package com.sportstalk.reactive.impl.restapi.retrofit.services
+package com.sportstalk.reactive.rx2.impl.restapi.retrofit.services
 
 import com.sportstalk.datamodels.users.*
 import com.sportstalk.datamodels.ApiResponse

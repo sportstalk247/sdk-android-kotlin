@@ -1,10 +1,10 @@
-package com.sportstalk.reactive
+package com.sportstalk.reactive.rx2
 
 import com.sportstalk.datamodels.ClientConfig
-import com.sportstalk.reactive.api.ChatClient
-import com.sportstalk.reactive.api.UserClient
-import com.sportstalk.reactive.impl.ChatClientImpl
-import com.sportstalk.reactive.impl.UserClientImpl
+import com.sportstalk.reactive.rx2.api.ChatClient
+import com.sportstalk.reactive.rx2.api.UserClient
+import com.sportstalk.reactive.rx2.impl.ChatClientImpl
+import com.sportstalk.reactive.rx2.impl.UserClientImpl
 
 object SportsTalk247 {
     /**

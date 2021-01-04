@@ -11,9 +11,10 @@ import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
-import com.sportstalk.reactive.ServiceFactory
-import com.sportstalk.reactive.api.polling.allEventUpdates
-import io.reactivex.Flowable
+import com.sportstalk.reactive.rx2.ServiceFactory
+import com.sportstalk.reactive.rx2.api.polling.allEventUpdates
+import com.sportstalk.reactive.rx2.service.ChatService
+import com.sportstalk.reactive.rx2.service.UserService
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.TestObserver
 import kotlinx.serialization.builtins.ArraySerializer

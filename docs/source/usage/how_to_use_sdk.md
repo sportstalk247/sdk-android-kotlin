@@ -13,7 +13,7 @@ This Sportstalk SDK is meant to power custom chat applications. Sportstalk does 
 
     .. code-tab:: kotlin sdk-reactive-rx2
 
-        import com.sportstalk.reactive.SportsTalk247
+        import com.sportstalk.reactive.rx2.SportsTalk247
         // ...
 
 ```

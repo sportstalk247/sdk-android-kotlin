@@ -1,7 +1,7 @@
-package com.sportstalk.reactive.api
+package com.sportstalk.reactive.rx2.api
 
 import com.sportstalk.datamodels.chat.ChatRoom
-import com.sportstalk.reactive.service.ChatService
+import com.sportstalk.reactive.rx2.service.ChatService
 
 interface ChatClient: ChatService {
     var currentRoom: ChatRoom?

@@ -1,11 +1,11 @@
-package com.sportstalk.reactive.impl
+package com.sportstalk.reactive.rx2.impl
 
 import androidx.annotation.RestrictTo
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.chat.*
-import com.sportstalk.reactive.ServiceFactory
-import com.sportstalk.reactive.api.ChatClient
-import com.sportstalk.reactive.service.ChatService
+import com.sportstalk.reactive.rx2.ServiceFactory
+import com.sportstalk.reactive.rx2.api.ChatClient
+import com.sportstalk.reactive.rx2.service.ChatService
 import io.reactivex.Completable
 import io.reactivex.Single
 

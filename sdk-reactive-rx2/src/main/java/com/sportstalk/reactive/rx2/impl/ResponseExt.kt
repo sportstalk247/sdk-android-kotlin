@@ -1,4 +1,4 @@
-package com.sportstalk.reactive.impl
+package com.sportstalk.reactive.rx2.impl
 
 import com.sportstalk.datamodels.*
 import io.reactivex.Single

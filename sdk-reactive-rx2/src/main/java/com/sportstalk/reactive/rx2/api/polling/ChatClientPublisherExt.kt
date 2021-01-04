@@ -1,9 +1,9 @@
-package com.sportstalk.reactive.api.polling
+package com.sportstalk.reactive.rx2.api.polling
 
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
 import com.sportstalk.datamodels.chat.polling.*
-import com.sportstalk.reactive.service.ChatService
+import com.sportstalk.reactive.rx2.service.ChatService
 import io.reactivex.Flowable
 import java.util.concurrent.TimeUnit
 

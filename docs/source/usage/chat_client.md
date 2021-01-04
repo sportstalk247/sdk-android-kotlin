@@ -1048,7 +1048,7 @@ Below is a code sample on how to use this SDK feature:
 
     .. code-tab:: kotlin sdk-reactive-rx2
 
-        import com.sportstalk.reactive.api.polling.allEventUpdates
+        import com.sportstalk.reactive.rx2.api.polling.allEventUpdates
         // ...
 
         // Under Fragment class

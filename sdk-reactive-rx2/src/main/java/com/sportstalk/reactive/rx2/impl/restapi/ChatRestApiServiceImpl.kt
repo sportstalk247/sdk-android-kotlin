@@ -1,12 +1,12 @@
-package com.sportstalk.reactive.impl.restapi
+package com.sportstalk.reactive.rx2.impl.restapi
 
 import androidx.annotation.RestrictTo
 import com.sportstalk.datamodels.Kind
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
-import com.sportstalk.reactive.impl.handleSdkResponse
-import com.sportstalk.reactive.impl.restapi.retrofit.services.ChatRetrofitService
-import com.sportstalk.reactive.service.ChatService
+import com.sportstalk.reactive.rx2.impl.handleSdkResponse
+import com.sportstalk.reactive.rx2.impl.restapi.retrofit.services.ChatRetrofitService
+import com.sportstalk.reactive.rx2.service.ChatService
 import io.reactivex.Completable
 import io.reactivex.Single
 import kotlinx.serialization.json.Json
