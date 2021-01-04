@@ -1,5 +1,15 @@
 # User Client
 
+```kotlin
+val userClient = SportsTalk247.UserClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+```
+
 ## Create or Update User
 
 Invoke this function if you want to create a user or update an existing user.
@@ -10,34 +20,48 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val createdUser = withContext(Dispatchers.IO) {
-        userClient.createOrUpdateUser(
-        request = CreateUpdateUserRequest(
-                    userid = "023976080242ac120002",
-                    handle = "sample_handle_123",
-                    displayname = "Test Name 123", // OPTIONAL
-                    pictureurl = "<Image URL>", // OPTIONAL
-                    profileurl = "<Image URL>" // OPTIONAL
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val createdUser = withContext(Dispatchers.IO) {
+                userClient.createOrUpdateUser(
+                    request = CreateUpdateUserRequest(
+                                userid = "023976080242ac120002",
+                                handle = "sample_handle_123",
+                                displayname = "Test Name 123", // OPTIONAL
+                                pictureurl = "<Image URL>", // OPTIONAL
+                                profileurl = "<Image URL>" // OPTIONAL
+                    )
                 )
+            }
+
+            // Resolve `createdUser` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.createOrUpdateUser(
+            request = CreateUpdateUserRequest(
+                        userid = "023976080242ac120002",
+                        handle = "sample_handle_123",
+                        displayname = "Test Name 123", // OPTIONAL
+                        pictureurl = "<Image URL>", // OPTIONAL
+                        profileurl = "<Image URL>" // OPTIONAL
+            )
         )
-    }
-
-    // Resolve `createdUser` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { createdUser ->
+                // Resolve `createdUser` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Get User Details
@@ -50,28 +74,36 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val userDetails = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val userDetails = withContext(Dispatchers.IO) {
+                userClient.getUserDetails(
+                    userid = "023976080242ac120002"
+                )
+            }
+
+            // Resolve `userDetails` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         userClient.getUserDetails(
             userid = "023976080242ac120002"
         )
-    }
-
-    // Resolve `userDetails` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { userDetails ->
+                // Resolve `userDetails` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## List Users
@@ -84,29 +116,38 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val listUsers = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listUsers = withContext(Dispatchers.IO) {
+                userClient.listUsers(
+                    limit = 10, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+                )
+            }
+
+            // Resolve `listUsers` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         userClient.listUsers(
             limit = 10, /* Defaults to 200 on backend API server */
             cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
         )
-    }
-
-    // Resolve `listUsers` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listUsers ->
+                // Resolve `listUsers` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Ban User
@@ -119,29 +160,38 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val bannedUser = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val bannedUser = withContext(Dispatchers.IO) {
+                userClient.setBanStatus(
+                    userid = "023976080242ac120002",
+                    banned = true // If set to true, attempt to ban the user. If set to false, attempt to remove the ban from user
+                )
+            }
+
+            // Resolve `bannedUser` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         userClient.setBanStatus(
             userid = "023976080242ac120002",
             banned = true // If set to true, attempt to ban the user. If set to false, attempt to remove the ban from user
         )
-    }
-
-    // Resolve `bannedUser` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { bannedUser ->
+                // Resolve `bannedUser` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Global Purge User
@@ -154,29 +204,38 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val response = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val response = withContext(Dispatchers.IO) {
+                userClient.globalPurge(
+                    userid = "023976080242ac120002",
+                    banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
+                )
+            }
+
+            // Resolve `response` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         userClient.globalPurge(
             userid = "023976080242ac120002",
             banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
         )
-    }
-
-    // Resolve `response` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { response ->
+                // Resolve `response` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Shadow Ban User
@@ -189,31 +248,42 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val shadowBannedUser = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val shadowBannedUser = withContext(Dispatchers.IO) {
+                userClient.shadowBanUser(
+                    userId = "023976080242ac120002",
+                    shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
+                    expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
+
+                )
+            }
+
+            // Resolve `shadowBannedUser` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         userClient.shadowBanUser(
             userId = "023976080242ac120002",
             shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
             expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
 
         )
-    }
-
-    // Resolve `shadowBannedUser` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { shadowBannedUser ->
+                // Resolve `shadowBannedUser` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Search User(s)
@@ -226,46 +296,84 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    // Search by Handle
-    val searchedUsersByHandle = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            // Search by Handle
+            val searchedUsersByHandle = withContext(Dispatchers.IO) {
+                userClient.searchUsers(
+                    handle = "testhandle1",
+                    limit = 20, // Defaults to 200 on backend API server
+                    cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+                )
+            }
+
+            // Search by Name
+            val searchedUsersByName = withContext(Dispatchers.IO) {
+                userClient.searchUsers(
+                    name = "Josie Rizal",
+                    limit = 20, // Defaults to 200 on backend API server
+                    cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+                )
+            }
+
+            // Search by User ID
+            val searchedUsersByUserId = withContext(Dispatchers.IO) {
+                userClient.searchUsers(
+                    userid = "userid_georgew",
+                    limit = 20, // Defaults to 200 on backend API server
+                    cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+                )
+            }
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        // Search by Handle
         userClient.searchUsers(
             handle = "testhandle1",
             limit = 20, // Defaults to 200 on backend API server
             cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
         )
-    }
-
-    // Search by Name
-    val searchedUsersByName = withContext(Dispatchers.IO) {
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { searchedUsersByHandle ->
+                // Resolve `searchedUsersByHandle` (ex. Display prompt OR Update UI)
+            }
+        
+        // Search by Name
         userClient.searchUsers(
             name = "Josie Rizal",
             limit = 20, // Defaults to 200 on backend API server
             cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
         )
-    }
-
-    // Search by User ID
-    val searchedUsersByUserId = withContext(Dispatchers.IO) {
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { searchedUsersByName ->
+                // Resolve `searchedUsersByName` (ex. Display prompt OR Update UI)
+            }
+        
+        // Search by User ID
         userClient.searchUsers(
             userid = "userid_georgew",
             limit = 20, // Defaults to 200 on backend API server
             cursor = null   // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
         )
-    }
-}
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { searchedUsersByUserId ->
+                // Resolve `searchedUsersByUserId` (ex. Display prompt OR Update UI)
+            }
 
 ```
 
@@ -279,28 +387,36 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val deletedUser = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val deletedUser = withContext(Dispatchers.IO) {
+                userClient.deleteUser(
+                    userid = "023976080242ac120002"
+                )
+            }
+
+            // Resolve `deletedUser` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         userClient.deleteUser(
             userid = "023976080242ac120002"
         )
-    }
-
-    // Resolve `deletedUser` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { deletedUser ->
+                // Resolve `deletedUser` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Report User
@@ -313,26 +429,34 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val userClient = SportsTalk247.UserClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val reportedUser = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val reportedUser = withContext(Dispatchers.IO) {
+                userClient.reportUser(
+                    userid = "023976080242ac120002"
+                )
+            }
+
+            // Resolve `reportedUser` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         userClient.reportUser(
             userid = "023976080242ac120002"
         )
-    }
-
-    // Resolve `reportedUser` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { reportedUser ->
+                // Resolve `reportedUser` (ex. Display prompt OR Update UI)
+            }
 ```

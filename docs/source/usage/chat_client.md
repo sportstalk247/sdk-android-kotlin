@@ -1,5 +1,15 @@
 # Chat Client
 
+```kotlin
+val chatClient = SportsTalk247.ChatClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
+      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+   )
+)
+```
+
 ## Create Room
 
 Invoke this function to create a new chat room.
@@ -10,20 +20,38 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val createdRoom = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val createdRoom = withContext(Dispatchers.IO) {
+                chatClient.createRoom(
+                    request = CreateChatRoomRequest(
+                        name = "Test Chat Room 1",
+                        customid = "test-room-1",
+                        description = "This is a test chat room 1.",
+                        moderation = "post",
+                        enableactions = true,
+                        enableenterandexit = true,
+                        enableprofanityfilter = false,
+                        delaymessageseconds = 0L,
+                        roomisopen = true,
+                        maxreports = 0
+                    )
+                )
+            }
+
+            // Resolve `createdRoom` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.createRoom(
             request = CreateChatRoomRequest(
                 name = "Test Chat Room 1",
@@ -38,11 +66,12 @@ lifecycleScope.launch {
                 maxreports = 0
             )
         )
-    }
-
-    // Resolve `createdRoom` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { createdRoom ->
+                // Resolve `createdRoom` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Get Room Details
@@ -55,28 +84,36 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val chatRoom = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val chatRoom = withContext(Dispatchers.IO) {
+                chatClient.getRoomDetails(
+                    chatRoomId = "080001297623242ac002"
+                )
+            }
+
+            // Resolve `chatRoom` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.getRoomDetails(
             chatRoomId = "080001297623242ac002"
         )
-    }
-
-    // Resolve `chatRoom` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { chatRoom ->
+                // Resolve `chatRoom` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Get Room Details By CustomId
@@ -89,28 +126,36 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val chatRoom = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val chatRoom = withContext(Dispatchers.IO) {
+                chatClient.getRoomDetailsByCustomId(
+                    chatRoomCustomId = "custom-id-0239760802"
+                )
+            }
+
+            // Resolve `chatRoom` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.getRoomDetailsByCustomId(
             chatRoomCustomId = "custom-id-0239760802"
         )
-    }
-
-    // Resolve `chatRoom` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { chatRoom ->
+                // Resolve `chatRoom` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## List Rooms
@@ -123,29 +168,38 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val listRooms = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listRooms = withContext(Dispatchers.IO) {
+                chatClient.listRooms(
+                    limit = 20, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of chat room(s).
+                )
+            }
+
+            // Resolve `chatRoom` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.listRooms(
             limit = 20, /* Defaults to 200 on backend API server */
             cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of chat room(s).
         )
-    }
-
-    // Resolve `chatRoom` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listRooms ->
+                // Resolve `listRooms` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Join Room (Authenticated User)
@@ -167,31 +221,42 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val joinRoomResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val joinRoomResponse = withContext(Dispatchers.IO) {
+                chatClient.joinRoom(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    request = JoinChatRoomRequest(
+                        userid = "023976080242ac120002" // ID of an existing user from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `joinRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.joinRoom(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             request = JoinChatRoomRequest(
                 userid = "023976080242ac120002" // ID of an existing user from this chatroom
             )
         )
-    }
-
-    // Resolve `joinRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { joinRoomResponse ->
+                // Resolve `joinRoomResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Join Room By CustomID
@@ -215,67 +280,42 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val joinRoomResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val joinRoomResponse = withContext(Dispatchers.IO) {
+                chatClient.joinRoomByCustomId(
+                    chatRoomCustomId = "custom-room-id-12976",    // Custom ID of an existing chat room
+                    request = JoinChatRoomRequest(
+                        userid = "023976080242ac120002" // ID of an existing user from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `joinRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.joinRoomByCustomId(
             chatRoomCustomId = "custom-room-id-12976",    // Custom ID of an existing chat room
             request = JoinChatRoomRequest(
                 userid = "023976080242ac120002" // ID of an existing user from this chatroom
             )
         )
-    }
-
-    // Resolve `joinRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
-```
-
-## Join Room (Anonymous User)
-
-Invoke this function to join a room as an anonymous user.
-
-A user can be added to a room in a logged in state or in an anonymous state. Typically the anonymous state is used so that people can see what is happening in the room and be enticed to register with you in order to participate in the conversation, as they must be logged in to say something or react to anything happening in the room.
-
-Refer to the SportsTalk API Documentation for more details:
-
-<https://apiref.sportstalk247.com/?version=latest#c83c1afc-300b-4a18-b7e2-e3a1797dbca3>
-
-Below is a code sample on how to use this SDK feature:
-
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
-
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val joinRoomResponse = withContext(Dispatchers.IO) {
-        chatClient.joinRoom(
-            chatRoomIdOrLabel = "080001297623242ac002"    // ID of an existing chat room
-        )
-    }
-
-    // Resolve `joinRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { joinRoomResponse ->
+                // Resolve `joinRoomResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## List Room Participants
@@ -292,30 +332,40 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val listRoomParticipants = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listRoomParticipants = withContext(Dispatchers.IO) {
+                chatClient.listRoomParticipants(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    limit = 20, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of chatroom participant(s).
+                )
+            }
+
+            // Resolve `listRoomParticipants` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.listRoomParticipants(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             limit = 20, /* Defaults to 200 on backend API server */
             cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of chatroom participant(s).
         )
-    }
-
-    // Resolve `listRoomParticipants` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listRoomParticipants ->
+                // Resolve `listRoomParticipants` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Update Room
@@ -328,20 +378,35 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val updatedRoom = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val updatedRoom = withContext(Dispatchers.IO) {
+                chatClient.updateRoom(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    request = UpdateChatRoomRequest(
+                        name = "${testData.name!!}-updated",
+                        customid = "${testData.customid}-updated(${System.currentTimeMillis()})",
+                        description = "${testData.description}-updated",
+                        enableactions = !testData.enableactions!!,
+                        enableenterandexit = !testData.enableenterandexit!!,
+                        maxreports = 30L
+                    )
+                )
+            }
+
+            // Resolve `updatedRoom` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.updateRoom(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             request = UpdateChatRoomRequest(
@@ -353,11 +418,12 @@ lifecycleScope.launch {
                 maxreports = 30L
             )
         )
-    }
-
-    // Resolve `updatedRoom` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { updatedRoom ->
+                // Resolve `updatedRoom` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Execute Chat Command (say 'Hello, World!')
@@ -447,20 +513,31 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val executeChatCmdResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val executeChatCmdResponse = withContext(Dispatchers.IO) {
+                chatClient.executeChatCommand(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    request = ExecuteChatCommandRequest(
+                        command = "Hello World!",
+                        userid = "023976080242ac120002" // ID of an existing user from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `executeChatCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.executeChatCommand(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             request = ExecuteChatCommandRequest(
@@ -468,11 +545,12 @@ lifecycleScope.launch {
                 userid = "023976080242ac120002" // ID of an existing user from this chatroom
             )
         )
-    }
-
-    // Resolve `executeChatCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { executeChatCmdResponse ->
+                // Resolve `executeChatCmdResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Execute Chat Command (Announcement by Admin)
@@ -487,20 +565,32 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val executeChatCmdResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val executeChatCmdResponse = withContext(Dispatchers.IO) {
+                chatClient.executeChatCommand(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    request = ExecuteChatCommandRequest(
+                        command = "This is a test annoncement!",
+                        userid = "023976080242ac120002", // ID of an existing user from this chatroom
+                        eventtype = "announcement"
+                    )
+                )
+            }
+
+            // Resolve `executeChatCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.executeChatCommand(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             request = ExecuteChatCommandRequest(
@@ -509,11 +599,12 @@ lifecycleScope.launch {
                 eventtype = "announcement"
             )
         )
-    }
-
-    // Resolve `executeChatCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { executeChatCmdResponse ->
+                // Resolve `executeChatCmdResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Execute Dance Action
@@ -528,20 +619,31 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val executeChatCmdResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val executeChatCmdResponse = withContext(Dispatchers.IO) {
+                chatClient.executeChatCommand(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    request = ExecuteChatCommandRequest(
+                        command = "/high5 georgew",
+                        userid = "023976080242ac120002", // ID of an existing user from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `executeChatCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.executeChatCommand(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             request = ExecuteChatCommandRequest(
@@ -549,11 +651,12 @@ lifecycleScope.launch {
                 userid = "023976080242ac120002", // ID of an existing user from this chatroom
             )
         )
-    }
-
-    // Resolve `executeChatCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { executeChatCmdResponse ->
+                // Resolve `executeChatCmdResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Reply to a Message (Threaded)
@@ -566,20 +669,32 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val sendThreadedReplyResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val sendThreadedReplyResponse = withContext(Dispatchers.IO) {
+                chatClient.sendThreadedReply(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    replyTo = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
+                    request = SendThreadedReplyRequest(
+                        body = "This is Jessy, replying to your greetings yow!!!",
+                        userid = "023976080242ac120002", // ID of an existing user from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `sendThreadedReplyResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.sendThreadedReply(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             replyTo = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
@@ -588,11 +703,12 @@ lifecycleScope.launch {
                 userid = "023976080242ac120002", // ID of an existing user from this chatroom
             )
         )
-    }
-
-    // Resolve `sendThreadedReplyResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { sendThreadedReplyResponse ->
+                // Resolve `sendThreadedReplyResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Quote a Message
@@ -605,20 +721,32 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val sendQuotedReplyResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val sendQuotedReplyResponse = withContext(Dispatchers.IO) {
+                chatClient.sendQuotedReply(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    replyTo = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
+                    request = SendQuotedReplyRequest(
+                        body = "This is Jessy, quoting your greetings yow!!!",
+                        userid = "023976080242ac120002", // ID of an existing user from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `sendQuotedReplyResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.sendQuotedReply(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             replyTo = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
@@ -627,11 +755,12 @@ lifecycleScope.launch {
                 userid = "023976080242ac120002", // ID of an existing user from this chatroom
             )
         )
-    }
-
-    // Resolve `sendQuotedReplyResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { sendQuotedReplyResponse ->
+                // Resolve `sendQuotedReplyResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## React To A Message ("Like")
@@ -646,20 +775,33 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val reactToAMsgResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val reactToAMsgResponse = withContext(Dispatchers.IO) {
+                chatClient.reactToEvent(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    eventId = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
+                    request = ReactToAMessageRequest(
+                        userid = "023976080242ac120002", // ID of an existing user from this chatroom
+                        reaction = "like",
+                        reacted = true
+                    )
+                )
+            }
+
+            // Resolve `reactToAMsgResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.reactToEvent(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
@@ -669,11 +811,12 @@ lifecycleScope.launch {
                 reacted = true
             )
         )
-    }
-
-    // Resolve `reactToAMsgResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { reactToAMsgResponse ->
+                // Resolve `reactToAMsgResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Report Message
@@ -688,20 +831,32 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val reportMsgResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val reportMsgResponse = withContext(Dispatchers.IO) {
+                chatClient.reportMessage(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    eventId = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
+                    request = ReportMessageRequest(
+                        reporttype = "abuse",
+                        userid = "023976080242ac120002" // ID of an existing user from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `reportMsgResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.reportMessage(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
@@ -710,11 +865,12 @@ lifecycleScope.launch {
                 userid = "023976080242ac120002" // ID of an existing user from this chatroom
             )
         )
-    }
-
-    // Resolve `reportMsgResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { reportMsgResponse ->
+                // Resolve `reportMsgResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Execute Admin Command (*help)
@@ -729,20 +885,31 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val executeChatCmdResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val executeChatCmdResponse = withContext(Dispatchers.IO) {
+                chatClient.executeChatCommand(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    request = ExecuteChatCommandRequest(
+                        command = "*help*",
+                        userid = "023976080242ac120002", // ID of an existing user from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `executeChatCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.executeChatCommand(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             request = ExecuteChatCommandRequest(
@@ -750,11 +917,12 @@ lifecycleScope.launch {
                 userid = "023976080242ac120002", // ID of an existing user from this chatroom
             )
         )
-    }
-
-    // Resolve `executeChatCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { executeChatCmdResponse ->
+                // Resolve `executeChatCmdResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Get Updates
@@ -769,175 +937,170 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-### Using Coroutines Flow extension
+``` tabs::
 
-```kotlin
-import com.sportstalk.api.polling.coroutines.allEventUpdates
-// ...
+    .. code-tab:: kotlin sdk-coroutine
 
-// Under Fragment class
-// ...
-// User must first Join Chat Room
-// Now that the test user has joined the room, setup reactive subscription to event updates
-// Below returns a Flow<List<ChatEvent>>
-lifecycleScope.launch {
-    chatClient.allEventUpdates(
-        chatRoomId = testChatRoom.id!!,
-        frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
-        /*
-        * The following are placeholder/convenience functions should the developers want to implement it
-        * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }. In coroutine flow, these are invoked via .onEach { ... })
+        import com.sportstalk.coroutine.api.polling.allEventUpdates
+        // ...
+
+        // Under Fragment class
+        // ...
+        // User must first Join Chat Room
+        // Now that the test user has joined the room, setup reactive subscription to event updates
+        // Below returns a Flow<List<ChatEvent>>
+        lifecycleScope.launch {
+                chatClient.allEventUpdates(
+                    chatRoomId = testChatRoom.id!!,
+                    frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
+                    /*
+                    * The following are placeholder/convenience functions should the developers want to implement it
+                    * in a callback-oriented way. (Invoked as subscription's side-effect. In coroutine flow, these are invoked via .onEach { ... })
+                    */
+                    onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
+                    onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
+                    onAdEvent = { adEvent: ChatEvent -> /* Handle eventtype == "advertisement" */ }, // OPTIONAL
+                    onReply = { replyEvent: ChatEvent -> /* Handle eventtype == "reply" */ }, // OPTIONAL
+                    onReaction = { reactionEvent: ChatEvent -> /* Handle eventtype == "reaction" */ }, // OPTIONAL
+                    onPurgeEvent = { purgeEvent: ChatEvent -> /* Handle eventtype == "purge" */ } // OPTIONAL
+                )
+            .distinctUntilChanged()
+            .onEach { events ->
+                // Alternatively, the developer can opt to consume the events in here...
+                // NOTE:: ONLY choose 1 approach to avoid handling it twice.
+                // Iterate each event item(s)
+                events.forEach { chatEvent ->
+                    when(chatEvent.eventtype) {
+                        EventType.GOAL -> { /* Handle goal event types */ }
+                        EventType.ADVERTISEMENT -> { /* Handle advertisements event types */ }
+                        // ...
+                        // ...
+                    }
+                }
+            }
+            .launchIn(lifecycleScope /* Already provided by androidx.Fragment */)
+
+            // Then, perform start listening to event updates
+            chatClient.startListeningToChatUpdates(
+                forRoomId = testChatRoom.id!!
+            )
+
+            // At some point in time, the developer might want to explicitly stop listening to event updates
+            chatClient.stopListeningToChatUpdates(
+                forRoomId = testChatRoom.id!!
+            )
+        }
+
+    .. code-tab:: kotlin sdk-coroutine (LiveData)
+
+        /**
+        * ALTERNATIVELY, `sdk-coroutine` artifact also provides a 
+        * similar function that returns a LiveData.
         */
-        onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
-        onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
-        onAdEvent = { adEvent: ChatEvent -> /* Handle eventtype == "advertisement" */ }, // OPTIONAL
-        onReply = { replyEvent: ChatEvent -> /* Handle eventtype == "reply" */ }, // OPTIONAL
-        onReaction = { reactionEvent: ChatEvent -> /* Handle eventtype == "reaction" */ }, // OPTIONAL
-        onPurgeEvent = { purgeEvent: ChatEvent -> /* Handle eventtype == "purge" */ } // OPTIONAL
-   )
-   .distinctUntilChanged()
-   .onEach { events ->
-      // Alternatively, the developer can opt to consume the events in here...
-      // NOTE:: ONLY choose 1 approach to avoid handling it twice.
-      // Iterate each event item(s)
-      events.forEach { chatEvent ->
-         when(chatEvent.eventtype) {
-            EventType.GOAL -> { /* Handle goal event types */ }
-            EventType.ADVERTISEMENT -> { /* Handle advertisements event types */ }
-            // ...
-            // ...
-         }
-      }
-   }
-   .launchIn(lifecycleScope /* Already provided by androidx.Fragment */)
 
-    // Then, perform start listening to event updates
-    chatClient.startListeningToChatUpdates(
-        forRoomId = testChatRoom.id!!
-    )
+        import com.sportstalk.coroutine.api.polling.livedata.allEventUpdates
+        // ...
 
-    // At some point in time, the developer might want to explicitly stop listening to event updates
-    chatClient.stopListeningToChatUpdates(
-        forRoomId = testChatRoom.id!!
-    )
+        // Under Fragment class
+        // ...
+        // User must first Join Chat Room
+        // Now that the test user has joined the room, setup reactive subscription to event updates
+        // Below returns a LiveData<List<ChatEvent>>
+        chatClient.allEventUpdates(
+            chatRoomId = testChatRoom.id!!,
+            lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
+            frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
+            /*
+            * The following are placeholder/convenience functions should the developers want to implement it
+            * in a callback-oriented way. (Invoked as subscription's side-effect.)
+            */
+            onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
+            onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
+            onAdEvent = { adEvent: ChatEvent -> /* Handle eventtype == "advertisement" */ }, // OPTIONAL
+            onReply = { replyEvent: ChatEvent -> /* Handle eventtype == "reply" */ }, // OPTIONAL
+            onReaction = { reactionEvent: ChatEvent -> /* Handle eventtype == "reaction" */ }, // OPTIONAL
+            onPurgeEvent = { purgeEvent: ChatEvent -> /* Handle eventtype == "purge" */ } // OPTIONAL
+        )
+        .distinctUntilChanged()  // livedata-ktx
+        .observe(viewLifeCycleOwner, Observer { events ->
+            // Alternatively, the developer can opt to consume the events in here...
+            // NOTE:: ONLY choose 1 approach to avoid handling it twice.
+            // Iterate each event item(s)
+            events.forEach { chatEvent ->
+                when(chatEvent.eventtype) {
+                    EventType.GOAL -> { /* Handle goal event types */ }
+                    EventType.ADVERTISEMENT -> { /* Handle advertisements event types */ }
+                    // ...
+                    // ...
+                }
+            }
+        })
 
-}
+        // Then, perform start listening to event updates
+        chatClient.startListeningToChatUpdates(
+            forRoomId = testChatRoom.id!!
+        )
 
-```
+        // At some point in time, the developer might want to explicitly stop listening to event updates
+        chatClient.stopListeningToChatUpdates(
+            forRoomId = testChatRoom.id!!
+        )
 
-### Using Rx2Java extension
+    .. code-tab:: kotlin sdk-reactive-rx2
 
-```kotlin
-import com.sportstalk.api.polling.rxjava.allEventUpdates
-// ...
+        import com.sportstalk.reactive.rx2.api.polling.allEventUpdates
+        // ...
 
-// Under Fragment class
-// ...
-// User must first Join Chat Room
-// Now that the test user has joined the room, setup reactive subscription to event updates
-// Below returns a Flowable<List<ChatEvent>>
-lifecycleScope.launch {
-    chatClient.allEventUpdates(
-        chatRoomId = testChatRoom.id!!,
-        lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
-        frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
-        /*
-        * The following are placeholder/convenience functions should the developers want to implement it
-        * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }. In coroutine flow, these are invoked via .onEach { ... })
-        */
-        onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
-        onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
-        onAdEvent = { adEvent: ChatEvent -> /* Handle eventtype == "advertisement" */ }, // OPTIONAL
-        onReply = { replyEvent: ChatEvent -> /* Handle eventtype == "reply" */ }, // OPTIONAL
-        onReaction = { reactionEvent: ChatEvent -> /* Handle eventtype == "reaction" */ }, // OPTIONAL
-        onPurgeEvent = { purgeEvent: ChatEvent -> /* Handle eventtype == "purge" */ } // OPTIONAL
-   )
-   .distinctUntilChanged()
-   .subscribeOn(Schedulers.io())
-   .observeOn(AndroidSchedulers.mainThread())
-   .subscribe { events ->
-      // Alternatively, the developer can opt to consume the events in here...
-      // NOTE:: ONLY choose 1 approach to avoid handling it twice.
-      // Iterate each event item(s)
-      events.forEach { chatEvent ->
-         when(chatEvent.eventtype) {
-            EventType.GOAL -> { /* Handle goal event types */ }
-            EventType.ADVERTISEMENT -> { /* Handle advertisements event types */ }
-            // ...
-            // ...
-         }
-      }
-   }
-   .addTo(rxDisposeBag) // RxKotlin `Observable<*>.addTo()`/`Flowable<*>.addTo()`
+        // Under Fragment class
+        // ...
 
-    // Then, perform start listening to event updates
-    chatClient.startListeningToChatUpdates(
-        forRoomId = testChatRoom.id!!
-    )
+        val rxDisposeBag = CompositeDisposable()
 
-    // At some point in time, the developer might want to explicitly stop listening to event updates
-    chatClient.stopListeningToChatUpdates(
-        forRoomId = testChatRoom.id!!
-    )
+        // User must first Join Chat Room
+        // Now that the test user has joined the room, setup reactive subscription to event updates
+        // Below returns a Flowable<List<ChatEvent>>
+        chatClient.allEventUpdates(
+            chatRoomId = testChatRoom.id!!,
+            lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
+            frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
+            /*
+            * The following are placeholder/convenience functions should the developers want to implement it
+            * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }.)
+            */
+            onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
+            onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
+            onAdEvent = { adEvent: ChatEvent -> /* Handle eventtype == "advertisement" */ }, // OPTIONAL
+            onReply = { replyEvent: ChatEvent -> /* Handle eventtype == "reply" */ }, // OPTIONAL
+            onReaction = { reactionEvent: ChatEvent -> /* Handle eventtype == "reaction" */ }, // OPTIONAL
+            onPurgeEvent = { purgeEvent: ChatEvent -> /* Handle eventtype == "purge" */ } // OPTIONAL
+        )
+        .distinctUntilChanged()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { events ->
+            // Alternatively, the developer can opt to consume the events in here...
+            // NOTE:: ONLY choose 1 approach to avoid handling it twice.
+            // Iterate each event item(s)
+            events.forEach { chatEvent ->
+                when(chatEvent.eventtype) {
+                    EventType.GOAL -> { /* Handle goal event types */ }
+                    EventType.ADVERTISEMENT -> { /* Handle advertisements event types */ }
+                    // ...
+                    // ...
+                }
+            }
+        }
+        .also { rxDisposeBag.add(it) }
 
-}
+        // Then, perform start listening to event updates
+        chatClient.startListeningToChatUpdates(
+            forRoomId = testChatRoom.id!!
+        )
 
-```
-
-### Using LiveData extension
-
-```kotlin
-import com.sportstalk.api.polling.livedata.allEventUpdates
-// ...
-
-// Under Fragment class
-// ...
-// User must first Join Chat Room
-// Now that the test user has joined the room, setup reactive subscription to event updates
-// Below returns a LiveData<List<ChatEvent>>
-lifecycleScope.launch {
-    chatClient.allEventUpdates(
-        chatRoomId = testChatRoom.id!!,
-        lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
-        frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
-        /*
-        * The following are placeholder/convenience functions should the developers want to implement it
-        * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }. In coroutine flow, these are invoked via .onEach { ... })
-        */
-        onChatEvent = { event: ChatEvent -> /* Handle all other eventtype */ }, // OPTIONAL
-        onGoalEvent = { goalEvent: ChatEvent -> /* Handle eventtype == "goal" */ }, // OPTIONAL
-        onAdEvent = { adEvent: ChatEvent -> /* Handle eventtype == "advertisement" */ }, // OPTIONAL
-        onReply = { replyEvent: ChatEvent -> /* Handle eventtype == "reply" */ }, // OPTIONAL
-        onReaction = { reactionEvent: ChatEvent -> /* Handle eventtype == "reaction" */ }, // OPTIONAL
-        onPurgeEvent = { purgeEvent: ChatEvent -> /* Handle eventtype == "purge" */ } // OPTIONAL
-   )
-   .distinctUntilChanged()  // livedata-ktx
-   .observe(viewLifeCycleOwner, Observer { events ->
-      // Alternatively, the developer can opt to consume the events in here...
-      // NOTE:: ONLY choose 1 approach to avoid handling it twice.
-      // Iterate each event item(s)
-      events.forEach { chatEvent ->
-         when(chatEvent.eventtype) {
-            EventType.GOAL -> { /* Handle goal event types */ }
-            EventType.ADVERTISEMENT -> { /* Handle advertisements event types */ }
-            // ...
-            // ...
-         }
-      }
-   })
-
-    // Then, perform start listening to event updates
-    chatClient.startListeningToChatUpdates(
-        forRoomId = testChatRoom.id!!
-    )
-
-    // At some point in time, the developer might want to explicitly stop listening to event updates
-    chatClient.stopListeningToChatUpdates(
-        forRoomId = testChatRoom.id!!
-    )
-
-}
-
+        // At some point in time, the developer might want to explicitly stop listening to event updates
+        chatClient.stopListeningToChatUpdates(
+            forRoomId = testChatRoom.id!!
+        )
 ```
 
 ## List Messages By User
@@ -954,31 +1117,42 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val listUserMessages = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listUserMessages = withContext(Dispatchers.IO) {
+                chatClient.listMessagesByUser(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    userid = "023976080242ac120002", // ID of an existing user from this chatroom
+                    limit = 20, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user message(s).
+                )
+            }
+
+            // Resolve `listUserMessages` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.listMessagesByUser(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             userid = "023976080242ac120002", // ID of an existing user from this chatroom
             limit = 20, /* Defaults to 200 on backend API server */
             cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user message(s).
         )
-    }
-
-    // Resolve `listUserMessages` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listUserMessages ->
+                // Resolve `listUserMessages` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## List Event History
@@ -995,30 +1169,40 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val listEventsHistory = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listEventsHistory = withContext(Dispatchers.IO) {
+                chatClient.listEventsHistory(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    limit = 20, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of events.
+                )
+            }
+
+            // Resolve `listEventsHistory` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.listEventsHistory(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             limit = 20, /* Defaults to 200 on backend API server */
             cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of events.
         )
-    }
-
-    // Resolve `listEventsHistory` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listEventsHistory ->
+                // Resolve `listEventsHistory` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Message is Reported
@@ -1027,29 +1211,31 @@ Invoke this function to check if the current user has already reported a message
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val messageIsReported = withContext(Dispatchers.IO) {
-        chatClient.messageIsReported(
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // NO NEED to switch coroutine context as this operation does NOT perform network call
+            val messageIsReported = chatClient.messageIsReported(
+                eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
+                userid = "023976080242ac120002", // ID of an existing user from the chat room
+            )
+
+            // Resolve `messageIsReported` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        // This function just returns Boolean value rather than an RxJava type since this operation does NOT perform network call
+        val messageIsReported = chatClient.messageIsReported(
             eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user from the chat room
         )
-    }
-
-    // Resolve `messageIsReported` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+        
+        // Resolve `messageIsReported` (ex. Display prompt OR Update UI)
 ```
 
 ## Message is Reacted To
@@ -1058,30 +1244,33 @@ Invoke this function to check if a message was reacted to by the current user.
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val messageIsReactedTo = withContext(Dispatchers.IO) {
-        chatClient.messageIsReactedTo(
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // NO NEED to switch coroutine context as this operation does NOT perform network call
+            val messageIsReactedTo = chatClient.messageIsReactedTo(
+                eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
+                userid = "023976080242ac120002", // ID of an existing user from the chat room
+                reaction = "like"   // One of the EventReaction string constants
+            )
+
+            // Resolve `messageIsReactedTo` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        // This function just returns Boolean value rather than an RxJava type since this operation does NOT perform network call
+        val messageIsReactedTo = chatClient.messageIsReactedTo(
             eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user from the chat room
             reaction = "like"   // One of the EventReaction string constants
         )
-    }
-
-    // Resolve `messageIsReactedTo` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+        
+        // Resolve `messageIsReactedTo` (ex. Display prompt OR Update UI)
 ```
 
 ## List Previous Events
@@ -1100,30 +1289,40 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val listPreviousEvents = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listPreviousEvents = withContext(Dispatchers.IO) {
+                chatClient.listPreviousEvents(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    limit = 20, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of events.
+                )
+            }
+
+            // Resolve `listPreviousEvents` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.listPreviousEvents(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             limit = 20, /* Defaults to 200 on backend API server */
             cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of events.
         )
-    }
-
-    // Resolve `listPreviousEvents` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listPreviousEvents ->
+                // Resolve `listPreviousEvents` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Get Event by ID
@@ -1136,29 +1335,38 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val chatEventResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val chatEventResponse = withContext(Dispatchers.IO) {
+                chatClient.getEventById(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
+                )
+            }
+
+            // Resolve `chatEventResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.getEventById(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
         )
-    }
-
-    // Resolve `chatEventResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { chatEventResponse ->
+                // Resolve `chatEventResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Purge User Messages
@@ -1171,20 +1379,33 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val purgeCmdResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val purgeCmdResponse = withContext(Dispatchers.IO) {
+                chatClient.executeChatCommand(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    // Assuming ADMIN password "testpassword123"
+                    // Assuming user "@nicoleWd" exists
+                    request = ExecuteChatCommandRequest(
+                        command = "*purge testpassword123 nicoleWd",
+                        userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `purgeCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.executeChatCommand(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             // Assuming ADMIN password "testpassword123"
@@ -1194,11 +1415,12 @@ lifecycleScope.launch {
                 userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
             )
         )
-    }
-
-    // Resolve `purgeCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { chatEventResponse ->
+                // Resolve `chatEventResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Bounce User
@@ -1215,20 +1437,33 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val bounceUserResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val bounceUserResponse = withContext(Dispatchers.IO) {
+                chatClient.bounceUser(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    // Assuming user "@nicoleWd" exists
+                    request = BounceUserRequest(
+                        userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                        bounce = true,
+                        announcement = "@nicoleWd has been banned."
+                    )
+                )
+            }
+
+            // Resolve `bounceUserResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.bounceUser(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             // Assuming user "@nicoleWd" exists
@@ -1238,11 +1473,12 @@ lifecycleScope.launch {
                 announcement = "@nicoleWd has been banned."
             )
         )
-    }
-
-    // Resolve `bounceUserResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { bounceUserResponse ->
+                // Resolve `bounceUserResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Flag Message Event As Deleted
@@ -1263,20 +1499,32 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val deleteEventResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val deleteEventResponse = withContext(Dispatchers.IO) {
+                chatClient.setMessageAsDeleted(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
+                    userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                    // Assuming user "@nicoleWd" exists
+                    deleted = false,
+                    permanentifnoreplies = true
+                )
+            }
+
+            // Resolve `deleteEventResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.setMessageAsDeleted(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
@@ -1285,11 +1533,12 @@ lifecycleScope.launch {
             deleted = false,
             permanentifnoreplies = true
         )
-    }
-
-    // Resolve `deleteEventResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { deleteEventResponse ->
+                // Resolve `deleteEventResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Delete Event
@@ -1302,30 +1551,46 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val deleteEventResponse = withContext(Dispatchers.IO) {
-        chatClient.deleteEvent(
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val deleteEventResponse = withContext(Dispatchers.IO) {
+                chatClient.setMessageAsDeleted(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
+                    userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                    // Assuming user "@nicoleWd" exists
+                    deleted = false,
+                    permanentifnoreplies = true
+                )
+            }
+
+            // Resolve `deleteEventResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.setMessageAsDeleted(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+            // Assuming user "@nicoleWd" exists
+            deleted = false,
+            permanentifnoreplies = true
         )
-    }
-
-    // Resolve `deleteEventResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { deleteEventResponse ->
+                // Resolve `deleteEventResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Delete All Events in Room
@@ -1338,20 +1603,32 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val deleteAllEventsCmdResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val deleteAllEventsCmdResponse = withContext(Dispatchers.IO) {
+                chatClient.executeChatCommand(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    // Assuming ADMIN password "testpassword123"
+                    request = ExecuteChatCommandRequest(
+                        command = "*deleteallevents testpassword123",
+                        userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
+                    )
+                )
+            }
+
+            // Resolve `deleteAllEventsCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.executeChatCommand(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             // Assuming ADMIN password "testpassword123"
@@ -1360,11 +1637,12 @@ lifecycleScope.launch {
                 userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
             )
         )
-    }
-
-    // Resolve `deleteAllEventsCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { deleteAllEventsCmdResponse ->
+                // Resolve `deleteAllEventsCmdResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Update Room (Close a room)
@@ -1377,20 +1655,39 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val updatedEventResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val updatedRoomResponse = withContext(Dispatchers.IO) {
+                chatClient.updateRoom(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    request = UpdateChatRoomRequest(
+                            name = "Test Chat Room 1 - UPDATED",
+                            customid = "test-room-1-updated",
+                            description = "[UPDATED] This is a test chat room 1.",
+                            moderation = "post",
+                            enableactions = false,
+                            enableenterandexit = false,
+                            enableprofanityfilter = true,
+                            delaymessageseconds = 10L,
+                            roomisopen = false,
+                            maxreports = 30
+                    )
+                )
+            }
+
+            // Resolve `updatedRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.updateRoom(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             request = UpdateChatRoomRequest(
@@ -1406,11 +1703,12 @@ lifecycleScope.launch {
                     maxreports = 30
             )
         )
-    }
-
-    // Resolve `updatedEventResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { updatedRoomResponse ->
+                // Resolve `updatedRoomResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Exit a Room
@@ -1423,29 +1721,38 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val exitRoomResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val exitRoomResponse = withContext(Dispatchers.IO) {
+                chatClient.exitRoom(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    userid = "023976080242ac120002" // ID of an existing user from this chatroom
+                )
+            }
+
+            // Resolve `exitRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.exitRoom(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             userid = "023976080242ac120002" // ID of an existing user from this chatroom
         )
-    }
-
-    // Resolve `exitRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { exitRoomResponse ->
+                // Resolve `exitRoomResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Delete Room
@@ -1458,28 +1765,36 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val deleteRoomResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val deleteRoomResponse = withContext(Dispatchers.IO) {
+                chatClient.deleteRoom(
+                    chatRoomId = "080001297623242ac002"    // ID of an existing chat room
+                )
+            }
+
+            // Resolve `deleteRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.deleteRoom(
             chatRoomId = "080001297623242ac002"    // ID of an existing chat room
         )
-    }
-
-    // Resolve `deleteRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { deleteRoomResponse ->
+                // Resolve `deleteRoomResponse` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## List Messages Needing Moderation
@@ -1492,30 +1807,40 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val listMessagesInModeration = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listMessagesInModeration = withContext(Dispatchers.IO) {
+                chatClient.listMessagesNeedingModeration(
+                    roomId = "080001297623242ac002",    // ID of an existing chat room
+                    limit = 20, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of messages from this chatroom.
+                )
+            }
+
+            // Resolve `listMessagesInModeration` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.listMessagesNeedingModeration(
             roomId = "080001297623242ac002",    // ID of an existing chat room
             limit = 20, /* Defaults to 200 on backend API server */
             cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of messages from this chatroom.
         )
-    }
-
-    // Resolve `listMessagesInModeration` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listMessagesInModeration ->
+                // Resolve `listMessagesInModeration` (ex. Display prompt OR Update UI)
+            }
 ```
 
 ## Approve Message
@@ -1528,27 +1853,36 @@ Refer to the SportsTalk API Documentation for more details:
 
 Below is a code sample on how to use this SDK feature:
 
-```kotlin
-val chatClient = SportsTalk247.ChatClient(
-   config = ClientConfig(
-      appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
-      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
-   )
-)
+``` tabs::
 
-// Launch thru coroutine block
-// https://developer.android.com/topic/libraries/architecture/coroutines
-lifecycleScope.launch {
-    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-    val approveResponse = withContext(Dispatchers.IO) {
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val approveResponse = withContext(Dispatchers.IO) {
+                chatClient.approveMessage(
+                    eventId = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
+                    approve = true
+                )
+            }
+
+            // Resolve `approveResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
         chatClient.approveMessage(
             eventId = "0976280012ac00023242",   // ID of an existing event from this chatroom, which you intend to reply to
             approve = true
         )
-    }
-
-    // Resolve `approveResponse` from HERE onwards(ex. update UI displaying the response data)...
-}
-
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { approveResponse ->
+                // Resolve `approveResponse` (ex. Display prompt OR Update UI)
+            }
 ```

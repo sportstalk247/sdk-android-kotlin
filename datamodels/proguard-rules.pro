@@ -19,3 +19,27 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# kotlinx-serialization
+-keepattributes *Annotation*, InnerClasses
+-dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
+
+# kotlinx-serialization-json specific. Add this if you have java.lang.NoClassDefFoundError kotlinx.serialization.json.JsonObjectSerializer
+-keepclassmembers class kotlinx.serialization.json.** {
+    *** Companion;
+}
+-keepclasseswithmembers class kotlinx.serialization.json.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+
+-keep,includedescriptorclasses class com.sportstalk.datamodels.**$$serializer { *; }
+-keepclassmembers class com.sportstalk.datamodels.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.sportstalk.datamodels.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
+
+-dontwarn com.sportstalk.datamodels.**
+-keep class com.sportstalk.datamodels.** {*;}
