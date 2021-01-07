@@ -40,7 +40,7 @@ fun ChatService.allEventUpdates(
                 liveData<List<ChatEvent>> {
                     // Update internally stored chatroom event cursor
                     response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
-                        chatRoomEventCursor[chatRoomId] = cursor
+                        setChatRoomEventUpdateCursor(chatRoomId, cursor)
                     }
 
                     // Emit transform into List<ChatEvent>
@@ -64,14 +64,14 @@ fun ChatService.allEventUpdates(
 
     do {
         // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-        if (roomSubscriptions.contains(chatRoomId)) {
+        if (roomSubscriptions().contains(chatRoomId)) {
             try {
                 // Perform GET UPDATES operation
                 val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
                     getUpdates(
                             chatRoomId = chatRoomId,
                             // Apply event cursor
-                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                            cursor = getChatRoomEventUpdateCursor(chatRoomId)?.takeIf { it.isNotEmpty() }
                     )
                 }
 

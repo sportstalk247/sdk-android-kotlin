@@ -24,9 +24,22 @@ constructor(
 
     private val service: ChatRetrofitService = mRetrofit.create()
 
-    override val roomSubscriptions: MutableSet<String> = mutableSetOf()
+    private val roomSubscriptions: MutableSet<String> = mutableSetOf()
+    private val chatRoomEventUpdateCursor: HashMap<String, String> = hashMapOf()
 
-    override val chatRoomEventCursor: HashMap<String, String> = hashMapOf()
+    override fun roomSubscriptions(): Set<String> = roomSubscriptions
+
+    override fun getChatRoomEventUpdateCursor(forRoomId: String): String? =
+            if(chatRoomEventUpdateCursor.contains(forRoomId)) chatRoomEventUpdateCursor[forRoomId]
+            else null
+
+    override fun setChatRoomEventUpdateCursor(forRoomId: String, cursor: String) {
+        chatRoomEventUpdateCursor[forRoomId] = cursor
+    }
+
+    override fun clearChatRoomEventUpdateCursor(fromRoomId: String) {
+        chatRoomEventUpdateCursor.remove(fromRoomId)
+    }
 
     override fun startListeningToChatUpdates(forRoomId: String) {
         roomSubscriptions.add(forRoomId)
@@ -90,7 +103,10 @@ constructor(
                     .doOnSuccess { resp ->
                         // Internally store chatroom event cursor
                         val cursor = resp.eventscursor?.cursor ?: ""
-                        chatRoomEventCursor[chatRoomId] = cursor
+                        setChatRoomEventUpdateCursor(
+                                forRoomId = chatRoomId,
+                                cursor = cursor
+                        )
                     }
 
     override fun joinRoom(chatRoomIdOrLabel: String): Single<JoinChatRoomResponse> =
@@ -101,10 +117,13 @@ constructor(
             )
                     .handleSdkResponse(json)
                     .doOnSuccess { resp ->
-                        // Internally store chatroom event cursor
                         val roomId = resp.room?.id ?: return@doOnSuccess
+                        // Internally store chatroom event cursor
                         val cursor = resp.eventscursor?.cursor ?: ""
-                        chatRoomEventCursor[roomId] = cursor
+                        setChatRoomEventUpdateCursor(
+                                forRoomId = roomId,
+                                cursor = cursor
+                        )
                     }
 
     override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): Single<JoinChatRoomResponse> =
@@ -115,9 +134,12 @@ constructor(
             )
                     .handleSdkResponse(json)
                     .doOnSuccess { resp ->
-                        // Internally store chatroom event cursor
                         val cursor = resp.eventscursor?.cursor ?: ""
-                        chatRoomEventCursor[chatRoomCustomId] = cursor
+                        // Internally store chatroom event cursor
+                        setChatRoomEventUpdateCursor(
+                                forRoomId = chatRoomCustomId,
+                                cursor = cursor
+                        )
                     }
 
     override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): Single<ListChatRoomParticipantsResponse> =
@@ -138,7 +160,7 @@ constructor(
                     .handleSdkResponse(json)
                     .doOnSuccess {
                         // Remove internally stored event cursor
-                        chatRoomEventCursor.remove(chatRoomId)
+                        clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
                     }
                     .ignoreElement()
 

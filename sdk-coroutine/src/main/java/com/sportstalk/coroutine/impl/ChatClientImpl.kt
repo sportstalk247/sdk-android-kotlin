@@ -36,11 +36,19 @@ constructor(
             _defaultImageBannerUrl = value
         }
 
-    override val roomSubscriptions: MutableSet<String>
-        get() = chatService.roomSubscriptions
+    override fun roomSubscriptions(): Set<String> =
+            chatService.roomSubscriptions()
 
-    override val chatRoomEventCursor: HashMap<String, String>
-        get() = chatService.chatRoomEventCursor
+    override fun getChatRoomEventUpdateCursor(forRoomId: String): String? =
+            chatService.getChatRoomEventUpdateCursor(forRoomId)
+
+    override fun setChatRoomEventUpdateCursor(forRoomId: String, cursor: String) {
+        chatService.setChatRoomEventUpdateCursor(forRoomId, cursor)
+    }
+
+    override fun clearChatRoomEventUpdateCursor(fromRoomId: String) {
+        chatService.clearChatRoomEventUpdateCursor(fromRoomId)
+    }
 
     override fun startListeningToChatUpdates(forRoomId: String) =
             chatService.startListeningToChatUpdates(forRoomId)

@@ -125,7 +125,7 @@ class UserServiceTest {
                 displayname = "Test 1"
         )
         val testExpectedResult = User(
-                kind = "app.user",
+                kind = Kind.USER,
                 userid = testInputRequest.userid,
                 handle = testInputRequest.handle,
                 handlelowercase = testInputRequest.handle!!.toLowerCase(),
@@ -203,7 +203,7 @@ class UserServiceTest {
                 .blockingGet()
 
         val testExpectedResult = DeleteUserResponse(
-                kind = "deleted.appuser",
+                kind = Kind.DELETED_USER,
                 user = testCreatedUser
         )
 
@@ -358,7 +358,7 @@ class UserServiceTest {
                 .blockingGet()
 
         val testExpectedResult = ListUsersResponse(
-                kind = "list.users",
+                kind = Kind.USER_LIST,
                 users = listOf(testCreatedUser1, testCreatedUser2)
         )
 
@@ -580,7 +580,7 @@ class UserServiceTest {
                 .blockingGet()
 
         val testExpectedResult = ListUsersResponse(
-                kind = "list.users",
+                kind = Kind.USER_LIST,
                 users = listOf(testCreatedUser1)
         )
 
@@ -623,7 +623,7 @@ class UserServiceTest {
                 .blockingGet()
 
         val testExpectedResult = ListUsersResponse(
-                kind = "list.users",
+                kind = Kind.USER_LIST,
                 users = listOf(testCreatedUser1)
         )
 
@@ -666,7 +666,7 @@ class UserServiceTest {
                 .blockingGet()
 
         val testExpectedResult = ListUsersResponse(
-                kind = "list.users",
+                kind = Kind.USER_LIST,
                 users = listOf(testCreatedUser1)
         )
 

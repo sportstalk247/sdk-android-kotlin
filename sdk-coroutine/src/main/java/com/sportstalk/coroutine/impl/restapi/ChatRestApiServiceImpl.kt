@@ -21,9 +21,22 @@ constructor(
 
     private val service: ChatRetrofitService = mRetrofit.create()
 
-    override val roomSubscriptions: MutableSet<String> = mutableSetOf()
+    private val roomSubscriptions: MutableSet<String> = mutableSetOf()
+    private val chatRoomEventUpdateCursor: HashMap<String, String> = hashMapOf()
 
-    override val chatRoomEventCursor: HashMap<String, String> = hashMapOf()
+    override fun roomSubscriptions(): Set<String> = roomSubscriptions
+
+    override fun getChatRoomEventUpdateCursor(forRoomId: String): String? =
+            if(chatRoomEventUpdateCursor.contains(forRoomId)) chatRoomEventUpdateCursor[forRoomId]
+            else null
+
+    override fun setChatRoomEventUpdateCursor(forRoomId: String, cursor: String) {
+        chatRoomEventUpdateCursor[forRoomId] = cursor
+    }
+
+    override fun clearChatRoomEventUpdateCursor(fromRoomId: String) {
+        chatRoomEventUpdateCursor.remove(fromRoomId)
+    }
 
     override fun startListeningToChatUpdates(forRoomId: String) {
         roomSubscriptions.add(forRoomId)
@@ -142,7 +155,10 @@ constructor(
                         .also { resp ->
                             // Internally store chatroom event cursor
                             val cursor = resp.eventscursor?.cursor ?: ""
-                            chatRoomEventCursor[chatRoomId] = cursor
+                            setChatRoomEventUpdateCursor(
+                                    forRoomId = chatRoomId,
+                                    cursor = cursor
+                            )
                         }
             } catch (err: SportsTalkException) {
                 throw err
@@ -162,10 +178,13 @@ constructor(
                 )
                         .handleSdkResponse(json)
                         .also { resp ->
-                            // Internally store chatroom event cursor
                             val roomId = resp.room?.id ?: return@also
+                            // Internally store chatroom event cursor
                             val cursor = resp.eventscursor?.cursor ?: ""
-                            chatRoomEventCursor[roomId] = cursor
+                            setChatRoomEventUpdateCursor(
+                                    forRoomId = roomId,
+                                    cursor = cursor
+                            )
                         }
             } catch (err: SportsTalkException) {
                 throw err
@@ -185,9 +204,12 @@ constructor(
                 )
                         .handleSdkResponse(json)
                         .also { resp ->
-                            // Internally store chatroom event cursor
                             val cursor = resp.eventscursor?.cursor ?: ""
-                            chatRoomEventCursor[chatRoomCustomId] = cursor
+                            // Internally store chatroom event cursor
+                            setChatRoomEventUpdateCursor(
+                                    forRoomId = chatRoomCustomId,
+                                    cursor = cursor
+                            )
                         }
             } catch (err: SportsTalkException) {
                 throw err
@@ -226,7 +248,7 @@ constructor(
 
             if (response.isSuccessful) {
                 // Remove internally stored event cursor
-                chatRoomEventCursor.remove(chatRoomId)
+                clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
             } else {
                 throw response.errorBody()?.string()?.let { errBodyStr ->
                     json.decodeFromString(SportsTalkException.serializer(), errBodyStr)

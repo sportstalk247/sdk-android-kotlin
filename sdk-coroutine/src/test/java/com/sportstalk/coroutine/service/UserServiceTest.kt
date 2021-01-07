@@ -1,11 +1,10 @@
-package com.sportstalk.api
+package com.sportstalk.coroutine.service
 
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.coroutine.ServiceFactory
-import com.sportstalk.coroutine.service.UserService
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.Kind
 import com.sportstalk.datamodels.SportsTalkException
@@ -134,7 +133,7 @@ class UserServiceTest {
                 displayname = "Test 1"
         )
         val testExpectedResult = User(
-                kind = "app.user",
+                kind = Kind.USER,
                 userid = testInputRequest.userid,
                 handle = testInputRequest.handle,
                 handlelowercase = testInputRequest.handle!!.toLowerCase(),
@@ -210,7 +209,7 @@ class UserServiceTest {
         val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest)
 
         val testExpectedResult = DeleteUserResponse(
-                kind = "deleted.appuser",
+                kind = Kind.DELETED_USER,
                 user = testCreatedUser
         )
 
@@ -357,7 +356,7 @@ class UserServiceTest {
         val testCreatedUser2 = userService.createOrUpdateUser(request = testInputRequest2)
 
         val testExpectedResult = ListUsersResponse(
-                kind = "list.users",
+                kind = Kind.USER_LIST,
                 users = listOf(testCreatedUser1, testCreatedUser2)
         )
 
@@ -567,7 +566,7 @@ class UserServiceTest {
         val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1)
 
         val testExpectedResult = ListUsersResponse(
-                kind = "list.users",
+                kind = Kind.USER_LIST,
                 users = listOf(testCreatedUser1)
         )
 
@@ -608,7 +607,7 @@ class UserServiceTest {
         val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1)
 
         val testExpectedResult = ListUsersResponse(
-                kind = "list.users",
+                kind = Kind.USER_LIST,
                 users = listOf(testCreatedUser1)
         )
 
@@ -649,7 +648,7 @@ class UserServiceTest {
         val testCreatedUser1 = userService.createOrUpdateUser(request = testInputRequest1)
 
         val testExpectedResult = ListUsersResponse(
-                kind = "list.users",
+                kind = Kind.USER_LIST,
                 users = listOf(testCreatedUser1)
         )
 

@@ -10,12 +10,22 @@ interface ChatService {
     /**
      * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates
      */
-    val roomSubscriptions: MutableSet<String>
+    fun roomSubscriptions(): Set<String>
 
     /**
-     * Chatroom ID paired with current event cursor
+     * Get current event update cursor for the specified room ID
      */
-    val chatRoomEventCursor: HashMap<String, String>
+    fun getChatRoomEventUpdateCursor(forRoomId: String): String?
+
+    /**
+     * Override current event update cursor
+     */
+    fun setChatRoomEventUpdateCursor(forRoomId: String, cursor: String)
+
+    /**
+     * Clear event update cursor
+     */
+    fun clearChatRoomEventUpdateCursor(fromRoomId: String)
 
     /**
      * Signals the START of event updates being emitted

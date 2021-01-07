@@ -1,14 +1,11 @@
-package com.sportstalk.api
+package com.sportstalk.coroutine.service
 
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.coroutine.ServiceFactory
-import com.sportstalk.coroutine.service.ChatModerationService
-import com.sportstalk.coroutine.service.ChatService
-import com.sportstalk.coroutine.service.UserService
+import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.datamodels.*
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.chat.moderation.*
@@ -319,7 +316,7 @@ class ChatModerationServiceTest {
                 approve = true
         )
         val testExpectedResult = ListMessagesNeedingModerationResponse(
-                kind = "list.events",
+                kind = Kind.CHAT_LIST,
                 events = listOf(testSendMessageData)
         )
 
@@ -354,7 +351,7 @@ class ChatModerationServiceTest {
     object TestData {
         val users = listOf(
                 User(
-                        kind = "app.user",
+                        kind = Kind.USER,
                         userid = RandomString.make(16),
                         handle = "handle_test1",
                         displayname = "Test 1",
@@ -362,7 +359,7 @@ class ChatModerationServiceTest {
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
                 ),
                 User(
-                        kind = "app.user",
+                        kind = Kind.USER,
                         userid = RandomString.make(16),
                         handle = "handle_test2",
                         displayname = "Test 2",
@@ -370,7 +367,7 @@ class ChatModerationServiceTest {
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
                 ),
                 User(
-                        kind = "app.user",
+                        kind = Kind.USER,
                         userid = RandomString.make(16),
                         handle = "handle_test3",
                         displayname = "Test 3",
@@ -378,7 +375,7 @@ class ChatModerationServiceTest {
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
                 ),
                 User(
-                        kind = "app.user",
+                        kind = Kind.USER,
                         userid = RandomString.make(16),
                         handle = "handle_test3",
                         displayname = "Test 3",
@@ -392,7 +389,7 @@ class ChatModerationServiceTest {
                 if (_chatRooms != null) _chatRooms!!
                 else listOf(
                         ChatRoom(
-                                kind = "chat.room",
+                                kind = Kind.ROOM,
                                 id = RandomString.make(16),
                                 appid = appId,
                                 ownerid = null,
@@ -416,7 +413,7 @@ class ChatModerationServiceTest {
                                 delaymessageseconds = 0L
                         ),
                         ChatRoom(
-                                kind = "chat.room",
+                                kind = Kind.ROOM,
                                 id = RandomString.make(16),
                                 appid = appId,
                                 ownerid = null,
@@ -440,7 +437,7 @@ class ChatModerationServiceTest {
                                 delaymessageseconds = 0L
                         ),
                         ChatRoom(
-                                kind = "chat.room",
+                                kind = Kind.ROOM,
                                 id = RandomString.make(16),
                                 appid = appId,
                                 ownerid = null,
@@ -464,7 +461,7 @@ class ChatModerationServiceTest {
                                 delaymessageseconds = 0L
                         ),
                         ChatRoom(
-                                kind = "chat.room",
+                                kind = Kind.ROOM,
                                 id = RandomString.make(16),
                                 appid = appId,
                                 ownerid = null,
