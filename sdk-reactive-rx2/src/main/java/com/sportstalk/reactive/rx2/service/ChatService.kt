@@ -4,6 +4,8 @@ import androidx.annotation.RestrictTo
 import io.reactivex.Completable
 import io.reactivex.Single
 import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.users.ListUserNotificationsResponse
+import com.sportstalk.datamodels.users.UserNotification
 
 interface ChatService {
 
@@ -217,7 +219,7 @@ interface ChatService {
             chatRoomId: String,
             replyTo: String,
             request: SendThreadedReplyRequest
-    ): Single<ExecuteChatCommandResponse>
+    ): Single<ChatEvent>
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{chatEventId}}/quote

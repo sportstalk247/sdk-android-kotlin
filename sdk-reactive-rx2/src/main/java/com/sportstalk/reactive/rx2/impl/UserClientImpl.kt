@@ -41,4 +41,7 @@ constructor(
 
     override fun reportUser(userId: String, reporttype: String): Single<ReportUserResponse> =
             userService.reportUser(userId, reporttype)
+
+    override fun listUserNotifications(userId: String, filterNotificationTypes: List<UserNotification.Type>?, limit: Int, includeread: Boolean): Single<ListUserNotificationsResponse> =
+            userService.listUserNotifications(userId, filterNotificationTypes, limit, includeread)
 }

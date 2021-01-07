@@ -88,4 +88,16 @@ interface UserService {
             reporttype: String,
     ): Single<ReportUserResponse>
 
+    /**
+     * [GET] /{{api_appid}}/user/users/{userId}/notification/listnotifications?filterNotificationTypes=&limit=&includeread=
+     * - https://apiref.sportstalk247.com/?version=latest#f09d36c2-de40-4866-8818-74527b2a6df5
+     * - Returns a list of user notifications
+     */
+    fun listUserNotifications(
+            userId: String,
+            filterNotificationTypes: List<UserNotification.Type>? = null,
+            limit: Int,
+            includeread: Boolean
+    ): Single<ListUserNotificationsResponse>
+
 }

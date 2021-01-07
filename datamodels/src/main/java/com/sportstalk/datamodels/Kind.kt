@@ -4,6 +4,8 @@ object Kind {
     const val CHAT = "chat.event"
     const val ROOM = "chat.room"
     const val USER = "app.user"
+    const val NOTIFICATION = "notification"
+    const val LIST_USER_NOTIFICATIONS = "list.usernotifications"
     const val API = "api.result"
     const val WEBHOOK = "chat.webhook"
     const val WEBHOOK_LOGS = "list.webhook.logentries"

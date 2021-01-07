@@ -68,4 +68,13 @@ interface UsersRetrofitService {
             @Body request: ReportUserRequest
     ): Single<Response<ApiResponse<ReportUserResponse>>>
 
+    @GET("{appId}/user/users/{userId}/notification/listnotifications")
+    fun listUserNotifications(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Query("filterNotificationTypes") filterNotificationTypes: List<String>? = null,
+            @Query("limit") limit: Int,
+            @Query("includeread") includeread: Boolean
+    ): Single<Response<ApiResponse<ListUserNotificationsResponse>>>
+
 }

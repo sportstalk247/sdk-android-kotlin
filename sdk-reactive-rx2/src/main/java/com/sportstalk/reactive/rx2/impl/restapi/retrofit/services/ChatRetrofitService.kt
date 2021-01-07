@@ -124,7 +124,7 @@ interface ChatRetrofitService {
             @Path("chatroomid") chatRoomId: String,
             @Path("replyto") replyto: String,
             @Body request: SendThreadedReplyRequest
-    ): Single<Response<ApiResponse<ExecuteChatCommandResponse>>>
+    ): Single<Response<ApiResponse<ChatEvent>>>
 
     @POST("{appId}/chat/rooms/{chatroomid}/events/{replyto}/quote")
     fun sendQuotedReply(

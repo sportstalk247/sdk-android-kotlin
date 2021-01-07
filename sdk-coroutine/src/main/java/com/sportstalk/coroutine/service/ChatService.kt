@@ -215,7 +215,7 @@ interface ChatService {
             chatRoomId: String,
             replyTo: String,
             request: SendThreadedReplyRequest
-    ): ExecuteChatCommandResponse
+    ): ChatEvent
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{chatEventId}}/quote

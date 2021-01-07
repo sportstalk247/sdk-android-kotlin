@@ -837,7 +837,6 @@ class ChatServiceTest {
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
-        assertTrue { testActualResult.user == testExpectedResult.user }
         assertTrue { testActualResult.room?.customid == testCreatedChatRoomData.customid }
 
         // Also, assert that ChatRoomEventCursor is currently stored
@@ -1955,20 +1954,14 @@ class ChatServiceTest {
                 body = "This is Jessy, replying to your greetings yow!!!",
                 userid = testCreatedUserData.userid!!
         )
-        val testExpectedResult = ExecuteChatCommandResponse(
-                kind = Kind.CHAT/*"chat.executecommand"*/,
-                op = null/*"speech"*/,
-                room = null,
-                speech = null/*ChatEvent(
-                        kind = Kind.CHAT,
-                        roomid = testCreatedChatRoomData.id,
-                        body = testInputRequest.body,
-                        eventtype = "reply",
-                        userid = testCreatedUserData.userid,
-                        user = testCreatedUserData,
-                        replyto = testInitialSendMessage
-                )*/,
-                action = null
+        val testExpectedResult = ChatEvent(
+                kind = Kind.CHAT,
+                roomid = testCreatedChatRoomData.id,
+                body = testInputRequest.body,
+                eventtype = "reply",
+                userid = testCreatedUserData.userid,
+                user = testCreatedUserData,
+                replyto = testInitialSendMessage
         )
 
         // WHEN
@@ -1982,23 +1975,20 @@ class ChatServiceTest {
         println(
                 "`Execute Chat Command - Reply to a Message - Threaded`() -> testActualResult = \n" +
                         json.encodeToString(
-                                ExecuteChatCommandResponse.serializer(),
+                                ChatEvent.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.op == testExpectedResult.op }
-        assertTrue { testActualResult.room?.id == testExpectedResult.room?.id }
-        assertTrue { testActualResult.speech?.roomid == testExpectedResult.speech?.roomid }
-        assertTrue { testActualResult.speech?.body == testExpectedResult.speech?.body }
-        assertTrue { testActualResult.speech?.eventtype == testExpectedResult.speech?.eventtype }
-        assertTrue { testActualResult.speech?.userid == testExpectedResult.speech?.userid }
-        assertTrue { testActualResult.speech?.user?.userid == testExpectedResult.speech?.user?.userid }
-        assertTrue { testActualResult.speech?.replyto?.id == testExpectedResult.speech?.replyto?.id }
-        assertTrue { testActualResult.speech?.replyto?.kind == testExpectedResult.speech?.replyto?.kind }
-        assertTrue { testActualResult.speech?.replyto?.body == testExpectedResult.speech?.replyto?.body }
-        assertTrue { testActualResult.action == null }
+        assertTrue { testActualResult.roomid == testExpectedResult.roomid }
+        assertTrue { testActualResult.body == testExpectedResult.body }
+        assertTrue { testActualResult.eventtype == testExpectedResult.eventtype }
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
+        assertTrue { testActualResult.replyto?.id == testExpectedResult.replyto?.id }
+        assertTrue { testActualResult.replyto?.kind == testExpectedResult.replyto?.kind }
+        assertTrue { testActualResult.replyto?.body == testExpectedResult.replyto?.body }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)

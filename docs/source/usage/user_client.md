@@ -460,3 +460,51 @@ Below is a code sample on how to use this SDK feature:
                 // Resolve `reportedUser` (ex. Display prompt OR Update UI)
             }
 ```
+
+## List User Notifications
+
+This function returns a list of user notifications.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#f09d36c2-de40-4866-8818-74527b2a6df5>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listUserNotifications = withContext(Dispatchers.IO) {
+                userClient.listUserNotifications(
+                    userid = "023976080242ac120002",
+                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY, UserNotification.Type.CHAT_QUOTE), // [OPTIONAL] List could also have either `CHAT_REPLY` or `CHAT_QUOTE` ONLY
+                    limit = 10, // Can be any arbitrary number
+                    includeread = false // If [true], will only return a list of user notifications whose value `isread = true`. Otherwise, returns a list of user notifications whose value `isread = false`.
+                )
+            }
+
+            // Resolve `listUserNotifications` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.listUserNotifications(
+            userid = "023976080242ac120002",
+            filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY, UserNotification.Type.CHAT_QUOTE), // [OPTIONAL] List could also have either `CHAT_REPLY` or `CHAT_QUOTE` ONLY
+            limit = 10, // Can be any arbitrary number
+            includeread = false // If [true], will only return a list of user notifications whose value `isread = true`. Otherwise, returns a list of user notifications whose value `isread = false`.
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listUserNotifications ->
+                // Resolve `listUserNotifications` (ex. Display prompt OR Update UI)
+            }
+```

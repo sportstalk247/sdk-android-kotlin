@@ -5,11 +5,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.datamodels.Kind
 import com.sportstalk.datamodels.SportsTalkException
-import com.sportstalk.datamodels.chat.ReportType
+import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.*
 import com.sportstalk.reactive.rx2.ServiceFactory
+import com.sportstalk.reactive.rx2.service.ChatService
 import com.sportstalk.reactive.rx2.service.UserService
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.TestObserver
@@ -34,6 +36,7 @@ class UserServiceTest {
     private lateinit var context: Context
     private lateinit var config: ClientConfig
     private lateinit var userService: UserService
+    private lateinit var chatService: ChatService
     private lateinit var json: Json
 
     private val rxDisposeBag = CompositeDisposable()
@@ -59,6 +62,7 @@ class UserServiceTest {
         )
         json = ServiceFactory.RestApi.json
         userService = ServiceFactory.User.get(config)
+        chatService = ServiceFactory.Chat.get(config)
     }
 
     @After
@@ -73,6 +77,19 @@ class UserServiceTest {
         for (id in userIds) {
             id ?: continue
             userService.deleteUser(userId = id).blockingGet()
+        }
+    }
+
+    /**
+     * Helper function to clean up Test Users from the Backend Server
+     */
+    private fun deleteTestChatRooms(vararg chatRoomIds: String?) {
+        for (id in chatRoomIds) {
+            id ?: continue
+            try {
+                chatService.deleteRoom(chatRoomId = id).blockingGet()
+            } catch (err: Throwable) {
+            }
         }
     }
 
@@ -872,6 +889,260 @@ class UserServiceTest {
             // Perform Delete Test User
             deleteTestUsers(testCreatedUser.userid)
         }
+    }
+
+    @Test
+    fun `J) List User Notifications - Chat Reply`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+
+        // Should create a test chat room first
+        var testCreatedUserData: User? = null
+        var testCreatedChatRoomData: ChatRoom? = null
+
+        try {
+            // Should create a test user first
+            testCreatedUserData = userService
+                    .createOrUpdateUser(request = testCreateUserInputRequest)
+                    .blockingGet()
+
+            val testChatRoomData = TestData.chatRooms(config.appId).first()
+            val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                    name = testChatRoomData.name!!,
+                    customid = testChatRoomData.customid,
+                    description = testChatRoomData.description,
+                    moderation = testChatRoomData.moderation,
+                    enableactions = testChatRoomData.enableactions,
+                    enableenterandexit = testChatRoomData.enableenterandexit,
+                    enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                    delaymessageseconds = testChatRoomData.delaymessageseconds,
+                    roomisopen = testChatRoomData.open,
+                    maxreports = testChatRoomData.maxreports
+            )
+            // Should create a test chat room first
+            testCreatedChatRoomData = chatService
+                    .createRoom(testCreateChatRoomInputRequest)
+                    .blockingGet()
+
+            val testInputJoinChatRoomId = testCreatedChatRoomData?.id!!
+            val testJoinRoomInputRequest = JoinChatRoomRequest(
+                    userid = testCreatedUserData?.userid!!
+            )
+            // Test Created User Should join test created chat room
+            chatService.joinRoom(
+                    chatRoomId = testInputJoinChatRoomId,
+                    request = testJoinRoomInputRequest
+            ).blockingGet()
+
+            val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                    command = "Yow Jessy, how are you doin'?",
+                    userid = testCreatedUserData?.userid!!
+            )
+            // Test Created User Should send an initial message to the created chat room
+            val testInitialSendMessage = chatService.executeChatCommand(
+                    chatRoomId = testCreatedChatRoomData?.id!!,
+                    request = testInitialSendMessageInputRequest
+            )
+                    .blockingGet()
+                    .speech!!
+
+            val testInputChatReplyThreadedRequest = SendThreadedReplyRequest(
+                    body = "This is Jessy, replying to your greetings yow!!!",
+                    userid = testCreatedUserData?.userid!!
+            )
+
+            // Perform Chat Reply - Threaded
+            val testChatReplyThreaded = chatService.sendThreadedReply(
+                    chatRoomId = testCreatedChatRoomData?.id!!,
+                    replyTo = testInitialSendMessage.id!!,
+                    request = testInputChatReplyThreadedRequest
+            ).blockingGet()
+
+            // WHEN
+            val testActualResult = userService.listUserNotifications(
+                    userId = testInputChatReplyThreadedRequest.userid,
+                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY),
+                    limit = 10,
+                    includeread = false
+            )
+                    .blockingGet()
+
+            // THEN
+            println(
+                    "`List User Notifications - Chat Reply`() -> testActualResult = \n" +
+                            json.encodeToString(
+                                    ListUserNotificationsResponse.serializer(),
+                                    testActualResult
+                            )
+            )
+
+            assertTrue { testActualResult.kind == Kind.LIST_USER_NOTIFICATIONS }
+            assertTrue {
+                testActualResult.notifications.any { notif ->
+                    notif.userid == testCreatedUserData?.userid
+                            && notif.chatroomid == testCreatedChatRoomData?.id
+                            && notif.chateventid == testChatReplyThreaded.id
+                            && notif.notificationtype == UserNotification.Type.CHAT_REPLY
+                }
+            }
+
+        } catch(err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Room
+            deleteTestChatRooms(testCreatedChatRoomData?.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData?.userid)
+        }
+    }
+
+    object TestData {
+        val ADMIN_PASSWORD = "zola"
+
+        val users = listOf(
+                User(
+                        kind = Kind.USER,
+                        userid = RandomString.make(16),
+                        handle = "handle_test1",
+                        displayname = "Test 1",
+                        pictureurl = "http://www.thepresidentshalloffame.com/media/reviews/photos/original/a9/c7/a6/44-1-george-washington-18-1549729902.jpg",
+                        profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
+                ),
+                User(
+                        kind = Kind.USER,
+                        userid = RandomString.make(16),
+                        handle = "handle_test2",
+                        displayname = "Test 2",
+                        pictureurl = "http://www.thepresidentshalloffame.com/media/reviews/photos/original/a9/c7/a6/44-1-george-washington-18-1549729902.jpg",
+                        profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
+                ),
+                User(
+                        kind = Kind.USER,
+                        userid = RandomString.make(16),
+                        handle = "handle_test3",
+                        displayname = "Test 3",
+                        pictureurl = "http://www.thepresidentshalloffame.com/media/reviews/photos/original/a9/c7/a6/44-1-george-washington-18-1549729902.jpg",
+                        profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
+                ),
+                User(
+                        kind = Kind.USER,
+                        userid = RandomString.make(16),
+                        handle = "handle_test3",
+                        displayname = "Test 3",
+                        pictureurl = "http://www.thepresidentshalloffame.com/media/reviews/photos/original/a9/c7/a6/44-1-george-washington-18-1549729902.jpg",
+                        profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
+                )
+        )
+
+        var _chatRooms: List<ChatRoom>? = null
+        fun chatRooms(appId: String): List<ChatRoom> =
+                if (_chatRooms != null) _chatRooms!!
+                else listOf(
+                        ChatRoom(
+                                kind = Kind.ROOM,
+                                id = RandomString.make(16),
+                                appid = appId,
+                                ownerid = null,
+                                name = "Test Chat Room 1",
+                                description = "This is a test chat room 1.",
+                                customtype = null,
+                                customid = "test-room-1",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
+                                enableactions = true,
+                                enableenterandexit = true,
+                                open = true,
+                                inroom = 1,
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                moderation = "post",
+                                maxreports = 0L,
+                                enableprofanityfilter = true,
+                                delaymessageseconds = 0L
+                        ),
+                        ChatRoom(
+                                kind = Kind.ROOM,
+                                id = RandomString.make(16),
+                                appid = appId,
+                                ownerid = null,
+                                name = "Test Chat Room 2",
+                                description = "This is a test chat room 2.",
+                                customtype = null,
+                                customid = "test-room-2",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
+                                enableactions = false,
+                                enableenterandexit = false,
+                                open = false,
+                                inroom = 1,
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                moderation = "post",
+                                maxreports = 0L,
+                                enableprofanityfilter = false,
+                                delaymessageseconds = 0L
+                        ),
+                        ChatRoom(
+                                kind = Kind.ROOM,
+                                id = RandomString.make(16),
+                                appid = appId,
+                                ownerid = null,
+                                name = "Test Chat Room 3",
+                                description = "This is a test chat room 3.",
+                                customtype = null,
+                                customid = "test-room-3",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
+                                enableactions = true,
+                                enableenterandexit = true,
+                                open = false,
+                                inroom = 1,
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                moderation = "post",
+                                maxreports = 0L,
+                                enableprofanityfilter = false,
+                                delaymessageseconds = 0L
+                        ),
+                        ChatRoom(
+                                kind = Kind.ROOM,
+                                id = RandomString.make(16),
+                                appid = appId,
+                                ownerid = null,
+                                name = "Test Chat Room 4",
+                                description = "This is a test chat room 4.",
+                                customtype = null,
+                                customid = "test-room-4",
+                                custompayload = null,
+                                customtags = listOf(),
+                                customfield1 = null,
+                                customfield2 = null,
+                                enableactions = false,
+                                enableenterandexit = false,
+                                open = true,
+                                inroom = 1,
+                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                moderation = "post",
+                                maxreports = 0L,
+                                enableprofanityfilter = true,
+                                delaymessageseconds = 0L
+                        )
+                )
     }
 
 }

@@ -203,4 +203,28 @@ constructor(
                         err = err
                 )
             }
+
+    override suspend fun listUserNotifications(
+            userId: String,
+            filterNotificationTypes: List<UserNotification.Type>?,
+            limit: Int,
+            includeread: Boolean
+    ): ListUserNotificationsResponse =
+            try {
+                service.listUserNotifications(
+                        appId = appId,
+                        userId = userId,
+                        filterNotificationTypes = filterNotificationTypes?.map { _type -> _type.serialName },
+                        limit = limit,
+                        includeread = includeread
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 }

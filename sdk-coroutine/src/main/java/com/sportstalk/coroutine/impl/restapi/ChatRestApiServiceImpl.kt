@@ -416,7 +416,7 @@ constructor(
                 )
             }
 
-    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ExecuteChatCommandResponse =
+    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ChatEvent =
             try {
                 service.sendThreadedReply(
                         appId = appId,

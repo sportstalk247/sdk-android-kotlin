@@ -264,7 +264,7 @@ constructor(
                         .map { it }
             }
 
-    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): Single<ExecuteChatCommandResponse> =
+    override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): Single<ChatEvent> =
             service.sendThreadedReply(
                     appId = appId,
                     chatRoomId = chatRoomId,

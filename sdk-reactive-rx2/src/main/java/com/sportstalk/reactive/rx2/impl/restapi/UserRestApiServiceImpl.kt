@@ -115,4 +115,14 @@ constructor(
                     request = ReportUserRequest(userid = userId, reporttype = reporttype)
             )
                     .handleSdkResponse(json)
+
+    override fun listUserNotifications(userId: String, filterNotificationTypes: List<UserNotification.Type>?, limit: Int, includeread: Boolean): Single<ListUserNotificationsResponse> =
+            service.listUserNotifications(
+                    appId = appId,
+                    userId = userId,
+                    filterNotificationTypes = filterNotificationTypes?.map { _type -> _type.serialName },
+                    limit = limit,
+                    includeread = includeread
+            )
+                    .handleSdkResponse(json)
 }
