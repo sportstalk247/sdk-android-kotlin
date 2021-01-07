@@ -32,11 +32,11 @@ constructor(
     override suspend fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): ListUsersResponse =
             userService.searchUsers(handle, name, userid, limit, cursor)
 
-    override suspend fun shadowBanUser(userId: String, shadowban: Boolean, expireseconds: Long?): User =
-            userService.shadowBanUser(userId, shadowban, expireseconds)
+    override suspend fun setShadowBanStatus(userId: String, shadowban: Boolean, expireseconds: Long?): User =
+            userService.setShadowBanStatus(userId, shadowban, expireseconds)
 
-    override suspend fun globalPurge(userId: String, banned: Boolean): GlobalPurgeResponse =
-            userService.globalPurge(userId, banned)
+    override suspend fun globallyPurgeUserContent(userId: String, banned: Boolean): GloballyPurgeUserContentResponse =
+            userService.globallyPurgeUserContent(userId, banned)
 
     override suspend fun reportUser(userId: String, reporttype: String): ReportUserResponse =
             userService.reportUser(userId, reporttype)

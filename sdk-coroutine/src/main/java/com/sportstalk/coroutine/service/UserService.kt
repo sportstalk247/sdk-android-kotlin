@@ -60,7 +60,7 @@ interface UserService {
      * - https://apiref.sportstalk247.com/?version=latest#211a5696-59ce-4988-82c9-7c614cab3efb
      * - Will toggle the user's shadow banned flag
      */
-    suspend fun shadowBanUser(
+    suspend fun setShadowBanStatus(
             userId: String,
             shadowban: Boolean,
             expireseconds: Long? = null
@@ -71,10 +71,10 @@ interface UserService {
      * - https://apiref.sportstalk247.com/?version=latest#c36d94e2-4fd9-4c9f-8009-f1d8ae9da6f5
      * - Will purge all chat content published by the specified user
      */
-    suspend fun globalPurge(
+    suspend fun globallyPurgeUserContent(
             userId: String,
             banned: Boolean
-    ): GlobalPurgeResponse
+    ): GloballyPurgeUserContentResponse
 
     /**
      * [POST] /{{api_appid}}/user/users/{userId}/report

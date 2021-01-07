@@ -300,8 +300,8 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun deleteEvent(chatRoomId: String, eventId: String, userid: String): Single<DeleteEventResponse> =
-            service.deleteEvent(
+    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String): Single<DeleteEventResponse> =
+            service.permanentlyDeleteEvent(
                     appId = appId,
                     chatRoomId = chatRoomId,
                     eventId = eventId,
@@ -309,8 +309,8 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): Single<DeleteEventResponse> =
-            service.setMessageAsDeleted(
+    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): Single<DeleteEventResponse> =
+            service.flagEventLogicallyDeleted(
                     appId = appId,
                     chatRoomId = chatRoomId,
                     eventId = eventId,

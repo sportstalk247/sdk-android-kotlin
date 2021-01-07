@@ -151,7 +151,7 @@ interface ChatRetrofitService {
     ): Single<Response<ApiResponse<BounceUserResponse>>>
 
     @DELETE("{appId}/chat/rooms/{chatroomid}/events/{eventid}")
-    fun deleteEvent(
+    fun permanentlyDeleteEvent(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("eventid") eventId: String,
@@ -159,7 +159,7 @@ interface ChatRetrofitService {
     ): Single<Response<ApiResponse<DeleteEventResponse>>>
 
     @PUT("{appId}/chat/rooms/{chatroomid}/events/{eventid}/setdeleted")
-    fun setMessageAsDeleted(
+    fun flagEventLogicallyDeleted(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("eventid") eventId: String,

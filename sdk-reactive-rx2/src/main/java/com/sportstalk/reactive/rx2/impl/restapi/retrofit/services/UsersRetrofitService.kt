@@ -48,18 +48,18 @@ interface UsersRetrofitService {
     ): Single<Response<ApiResponse<ListUsersResponse>>>
 
     @POST("{appId}/user/users/{userId}/shadowban")
-    fun shadowBanUser(
+    fun setShadowBanStatus(
             @Path("appId") appId: String,
             @Path(value = "userId", encoded = true) userId: String,
-            @Body request: ShadowBanUserRequest
+            @Body request: SetShadowBanStatusRequest
     ): Single<Response<ApiResponse<User>>>
 
     @POST("{appId}/user/users/{userId}/globalpurge")
-    fun globalPurge(
+    fun globallyPurgeUserContent(
             @Path("appId") appId: String,
             @Path(value = "userId", encoded = true) userId: String,
-            @Body request: GlobalPurgeRequest
-    ): Single<Response<ApiResponse<GlobalPurgeResponse>>>
+            @Body request: GloballyPurgeUserContentRequest
+    ): Single<Response<ApiResponse<GloballyPurgeUserContentResponse>>>
 
     @POST("{appId}/user/users/{userId}/report")
     fun reportUser(

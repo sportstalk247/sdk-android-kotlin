@@ -2903,7 +2903,7 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.deleteEvent(
+        val testActualResult = chatService.permanentlyDeleteEvent(
                 chatRoomId = testInputChatRoomId,
                 eventId = testInputEventId,
                 userid = testInputUserId
@@ -2930,7 +2930,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `T) Remove a Message - Logically Delete`() {
+    fun `T) Flag Message Event as Deleted`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2999,7 +2999,7 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.setMessageAsDeleted(
+        val testActualResult = chatService.flagEventLogicallyDeleted(
                 chatRoomId = testInputChatRoomId,
                 eventId = testInputEventId,
                 userid = testInputUserId,
@@ -3009,7 +3009,7 @@ class ChatServiceTest {
 
         // THEN
         println(
-                "`Remove a Message - Logically Delete`() -> testActualResult = \n" +
+                "`Flag Message Event as Deleted`() -> testActualResult = \n" +
                         json.encodeToString(
                                 DeleteEventResponse.serializer(),
                                 testActualResult

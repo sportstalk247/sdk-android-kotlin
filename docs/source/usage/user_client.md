@@ -194,7 +194,7 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
-## Global Purge User
+## Globally Purge User Content
 
 This function will purge all chat content published by the specified user.
 
@@ -213,7 +213,7 @@ Below is a code sample on how to use this SDK feature:
         lifecycleScope.launch {
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
             val response = withContext(Dispatchers.IO) {
-                userClient.globalPurge(
+                userClient.globallyPurgeUserContent(
                     userid = "023976080242ac120002",
                     banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
                 )
@@ -226,7 +226,7 @@ Below is a code sample on how to use this SDK feature:
 
         val rxDisposeBag = CompositeDisposable()
 
-        userClient.globalPurge(
+        userClient.globallyPurgeUserContent(
             userid = "023976080242ac120002",
             banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
         )
@@ -238,7 +238,7 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
-## Shadow Ban User
+## Set Shadow Ban Status
 
 This function toggles the specified user's `shadowbanned` flag.
 
@@ -257,7 +257,7 @@ Below is a code sample on how to use this SDK feature:
         lifecycleScope.launch {
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
             val shadowBannedUser = withContext(Dispatchers.IO) {
-                userClient.shadowBanUser(
+                userClient.setShadowBanStatus(
                     userId = "023976080242ac120002",
                     shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
                     expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
@@ -272,7 +272,7 @@ Below is a code sample on how to use this SDK feature:
 
         val rxDisposeBag = CompositeDisposable()
 
-        userClient.shadowBanUser(
+        userClient.setShadowBanStatus(
             userId = "023976080242ac120002",
             shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
             expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.

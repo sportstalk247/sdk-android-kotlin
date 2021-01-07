@@ -730,7 +730,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `G) Shadow Ban User`() {
+    fun `G) Set Shadow Ban Status`() {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -747,14 +747,14 @@ class UserServiceTest {
         )
 
         // WHEN
-        val testActualResult = userService.shadowBanUser(
+        val testActualResult = userService.setShadowBanStatus(
                 userId = testCreatedUser.userid!!,
                 shadowban = true
         ).blockingGet()
 
         // THEN
         println(
-                "`Shadow Ban User`() -> testActualResult = \n" +
+                "`Set Shadow Ban Status`() -> testActualResult = \n" +
                         json.encodeToString(
                                 User.serializer(),
                                 testActualResult
@@ -774,7 +774,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `H) Global Purge User`() {
+    fun `H) Globally Purge User Content`() {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -788,16 +788,16 @@ class UserServiceTest {
 
         // WHEN
         try {
-            val testActualResult = userService.globalPurge(
+            val testActualResult = userService.globallyPurgeUserContent(
                     userId = testInputRequest.userid,
                     banned = true
             ).blockingGet()
 
             // THEN
             println(
-                    "`Global Purge User`() -> testActualResult = \n" +
+                    "`Globally Purge User Content`() -> testActualResult = \n" +
                             json.encodeToString(
-                                    GlobalPurgeResponse.serializer(),
+                                    GloballyPurgeUserContentResponse.serializer(),
                                     testActualResult
                             )
             )

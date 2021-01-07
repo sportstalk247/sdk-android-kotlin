@@ -252,7 +252,13 @@ interface ChatService {
             request: BounceUserRequest
     ): Single<BounceUserResponse>
 
-    fun deleteEvent(
+    /**
+     * Delete Event
+     * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}?userid={{userid}}
+     * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
+     * - Deletes an event from the room
+     */
+    fun permanentlyDeleteEvent(
             chatRoomId: String,
             eventId: String,
             userid: String
@@ -264,7 +270,7 @@ interface ChatService {
      * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
      * - Removes a message from a room
      */
-    fun setMessageAsDeleted(
+    fun flagEventLogicallyDeleted(
             chatRoomId: String,
             eventId: String,
             userid: String,

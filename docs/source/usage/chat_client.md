@@ -1549,8 +1549,8 @@ Below is a code sample on how to use this SDK feature:
         // https://developer.android.com/topic/libraries/architecture/coroutines
         lifecycleScope.launch {
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-            val deleteEventResponse = withContext(Dispatchers.IO) {
-                chatClient.setMessageAsDeleted(
+            val logicalDeleteResponse = withContext(Dispatchers.IO) {
+                chatClient.flagEventLogicallyDeleted(
                     chatRoomId = "080001297623242ac002",    // ID of an existing chat room
                     eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
                     userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
@@ -1560,14 +1560,14 @@ Below is a code sample on how to use this SDK feature:
                 )
             }
 
-            // Resolve `deleteEventResponse` from HERE onwards(ex. update UI displaying the response data)...
+            // Resolve `logicalDeleteResponse` from HERE onwards(ex. update UI displaying the response data)...
         }
 
     .. code-tab:: kotlin sdk-reactive-rx2
 
         val rxDisposeBag = CompositeDisposable()
 
-        chatClient.setMessageAsDeleted(
+        chatClient.flagEventLogicallyDeleted(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
@@ -1578,14 +1578,14 @@ Below is a code sample on how to use this SDK feature:
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { rxDisposeBag.add(it) }
-            .subscribe { deleteEventResponse ->
-                // Resolve `deleteEventResponse` (ex. Display prompt OR Update UI)
+            .subscribe { logicalDeleteResponse ->
+                // Resolve `logicalDeleteResponse` (ex. Display prompt OR Update UI)
             }
 ```
 
 ## Delete Event
 
-Invoke this function to deletes an event from the room.
+Invoke this function to delete an event from the room.
 
 Refer to the SportsTalk API Documentation for more details:
 
@@ -1602,13 +1602,11 @@ Below is a code sample on how to use this SDK feature:
         lifecycleScope.launch {
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
             val deleteEventResponse = withContext(Dispatchers.IO) {
-                chatClient.setMessageAsDeleted(
+                chatClient.permanentlyDeleteEvent(
                     chatRoomId = "080001297623242ac002",    // ID of an existing chat room
                     eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
-                    userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                    userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
                     // Assuming user "@nicoleWd" exists
-                    deleted = false,
-                    permanentifnoreplies = true
                 )
             }
 
@@ -1619,13 +1617,11 @@ Below is a code sample on how to use this SDK feature:
 
         val rxDisposeBag = CompositeDisposable()
 
-        chatClient.setMessageAsDeleted(
+        chatClient.permanentlyDeleteEvent(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
-            userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+            userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
             // Assuming user "@nicoleWd" exists
-            deleted = false,
-            permanentifnoreplies = true
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

@@ -493,13 +493,13 @@ constructor(
                 )
             }
 
-    override suspend fun deleteEvent(
+    override suspend fun permanentlyDeleteEvent(
             chatRoomId: String,
             eventId: String,
             userid: String
     ): DeleteEventResponse =
             try {
-                service.deleteEvent(
+                service.permanentlyDeleteEvent(
                         appId = appId,
                         chatRoomId = chatRoomId,
                         eventId = eventId,
@@ -515,9 +515,9 @@ constructor(
                 )
             }
 
-    override suspend fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
+    override suspend fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
             try {
-                service.setMessageAsDeleted(
+                service.flagEventLogicallyDeleted(
                         appId = appId,
                         chatRoomId = chatRoomId,
                         eventId = eventId,

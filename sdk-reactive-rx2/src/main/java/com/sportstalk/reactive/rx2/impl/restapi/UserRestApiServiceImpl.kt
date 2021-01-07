@@ -74,28 +74,28 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun shadowBanUser(userId: String, shadowban: Boolean, expireseconds: Long?): Single<User> =
-            service.shadowBanUser(
+    override fun setShadowBanStatus(userId: String, shadowban: Boolean, expireseconds: Long?): Single<User> =
+            service.setShadowBanStatus(
                     appId = appId,
                     userId = userId,
-                    request = ShadowBanUserRequest(
+                    request = SetShadowBanStatusRequest(
                             shadowban = shadowban,
                             expireseconds = expireseconds
                     )
             )
                     .handleSdkResponse(json)
 
-    override fun globalPurge(userId: String, banned: Boolean): Single<GlobalPurgeResponse> =
-            service.globalPurge(
+    override fun globallyPurgeUserContent(userId: String, banned: Boolean): Single<GloballyPurgeUserContentResponse> =
+            service.globallyPurgeUserContent(
                     appId = appId,
                     userId = userId,
-                    request = GlobalPurgeRequest(banned = banned)
+                    request = GloballyPurgeUserContentRequest(banned = banned)
             )
                     .map { response ->
                         val respBody = response.body()
 
                         if (response.isSuccessful) {
-                            GlobalPurgeResponse()
+                            GloballyPurgeUserContentResponse()
                         } else {
                             throw response.errorBody()?.string()?.let { errBodyStr ->
                                 json.decodeFromString(SportsTalkException.serializer(), errBodyStr)

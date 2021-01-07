@@ -187,15 +187,15 @@ constructor(
                     request = request
             )
 
-    override fun deleteEvent(chatRoomId: String, eventId: String, userid: String): Single<DeleteEventResponse> =
-            chatService.deleteEvent(
+    override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String): Single<DeleteEventResponse> =
+            chatService.permanentlyDeleteEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     userid = userid
             )
 
-    override fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): Single<DeleteEventResponse> =
-            chatService.setMessageAsDeleted(
+    override fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): Single<DeleteEventResponse> =
+            chatService.flagEventLogicallyDeleted(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     userid = userid,
