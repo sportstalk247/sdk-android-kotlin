@@ -10,6 +10,48 @@ val chatClient = SportsTalk247.ChatClient(
 )
 ```
 
+## Room Subscriptions
+
+Invoke this function to see the set of ChatRoom IDs to keep track which rooms are subscribed to get event updates. Room subscriptions gets updated each time `startListeningToChatUpdates(forRoomId: String)` and `stopListeningToChatUpdates(forRoomId: String)` gets invoked.
+
+```kotlin
+    val roomSubscriptions: Set<String> = chatClient.roomSubscriptions()
+```
+
+## Get Chat Room Event Update Cursor
+
+Get current event update cursor for the specified room ID. This gets updated either each time `allEventUpdates()` emits a value, when `joinRoom()`/`joinRoomByCustomId()` are invoked, OR when `setChatRoomEventUpdateCursor()`/`clearChatRoomEventUpdateCursor()` are invoked.
+
+```kotlin
+    val currentRoomId = "<joined-room-id>"
+    val currentEventUpdateCursor: String? = 
+        chatClient.getChatRoomEventUpdateCursor(
+            forRoomId = currentRoomId
+        )  // Could be `null` if not yet set
+```
+
+## Set Chat Room Event Update Cursor
+
+Allows developers to override the event updates cursor to have more control on how paging logic is implemented.
+
+```kotlin
+    val currentRoomId = "<joined-room-id>"
+    val overrideCursor = "<a valid event update cursor>"
+    chatClient.setChatRoomEventUpdateCursor(
+        forRoomId = currentRoomId,
+        cursor = overrideCursor
+    )
+```
+
+## Clear Chat Room Event Update Cursor
+
+Allows developers to clear the event updates cursor(when cleared, the next time `allEventUpdates()` performs REST API operation, it will NOT include a cursor value on the request).
+
+```kotlin
+    val currentRoomId = "<joined-room-id>"
+    chatClient.clearChatRoomEventUpdateCursor(forRoomId = currentRoomId)
+```
+
 ## Create Room
 
 Invoke this function to create a new chat room.
