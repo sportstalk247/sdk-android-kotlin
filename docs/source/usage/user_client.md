@@ -194,7 +194,7 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
-## Global Purge User
+## Globally Purge User Content
 
 This function will purge all chat content published by the specified user.
 
@@ -213,7 +213,7 @@ Below is a code sample on how to use this SDK feature:
         lifecycleScope.launch {
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
             val response = withContext(Dispatchers.IO) {
-                userClient.globalPurge(
+                userClient.globallyPurgeUserContent(
                     userid = "023976080242ac120002",
                     banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
                 )
@@ -226,7 +226,7 @@ Below is a code sample on how to use this SDK feature:
 
         val rxDisposeBag = CompositeDisposable()
 
-        userClient.globalPurge(
+        userClient.globallyPurgeUserContent(
             userid = "023976080242ac120002",
             banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
         )
@@ -238,7 +238,7 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
-## Shadow Ban User
+## Set Shadow Ban Status
 
 This function toggles the specified user's `shadowbanned` flag.
 
@@ -257,7 +257,7 @@ Below is a code sample on how to use this SDK feature:
         lifecycleScope.launch {
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
             val shadowBannedUser = withContext(Dispatchers.IO) {
-                userClient.shadowBanUser(
+                userClient.setShadowBanStatus(
                     userId = "023976080242ac120002",
                     shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
                     expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
@@ -272,7 +272,7 @@ Below is a code sample on how to use this SDK feature:
 
         val rxDisposeBag = CompositeDisposable()
 
-        userClient.shadowBanUser(
+        userClient.setShadowBanStatus(
             userId = "023976080242ac120002",
             shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
             expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
@@ -458,5 +458,99 @@ Below is a code sample on how to use this SDK feature:
             .doOnSubscribe { rxDisposeBag.add(it) }
             .subscribe { reportedUser ->
                 // Resolve `reportedUser` (ex. Display prompt OR Update UI)
+            }
+```
+
+## List User Notifications
+
+This function returns a list of user notifications.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#f09d36c2-de40-4866-8818-74527b2a6df5>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listUserNotifications = withContext(Dispatchers.IO) {
+                userClient.listUserNotifications(
+                    userid = "023976080242ac120002",
+                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY, UserNotification.Type.CHAT_QUOTE), // [OPTIONAL] List could also have either `CHAT_REPLY` or `CHAT_QUOTE` ONLY
+                    limit = 10, // Can be any arbitrary number
+                    includeread = false // If [true], will only return a list of user notifications whose value `isread = true`. Otherwise, returns a list of user notifications whose value `isread = false`.
+                )
+            }
+
+            // Resolve `listUserNotifications` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.listUserNotifications(
+            userid = "023976080242ac120002",
+            filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY, UserNotification.Type.CHAT_QUOTE), // [OPTIONAL] List could also have either `CHAT_REPLY` or `CHAT_QUOTE` ONLY
+            limit = 10, // Can be any arbitrary number
+            includeread = false // If [true], will only return a list of user notifications whose value `isread = true`. Otherwise, returns a list of user notifications whose value `isread = false`.
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listUserNotifications ->
+                // Resolve `listUserNotifications` (ex. Display prompt OR Update UI)
+            }
+```
+
+## Set User Notification as Read
+
+This marks a notification as being in READ status. That will prevent the notification from being returned in a call to List User Notifications unless the default filters are overridden. Notifications that are marked as read will be automatically deleted after some time.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val updatedNotification = withContext(Dispatchers.IO) {
+                userClient.setUserNotificationAsRead(
+                    userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+                    notificationId = "070200623280c142a902",    // The ID of notifications about to update
+                    read = true
+                )
+            }
+
+            // Resolve `updatedNotification` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.setUserNotificationAsRead(
+            userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+            notificationId = "070200623280c142a902",    // The ID of notifications about to update
+            read = true
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { updatedNotification ->
+                // Resolve `updatedNotification` (ex. Display prompt OR Update UI)
             }
 ```

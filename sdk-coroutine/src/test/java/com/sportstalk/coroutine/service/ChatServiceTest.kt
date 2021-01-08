@@ -1,14 +1,12 @@
-package com.sportstalk.api
+package com.sportstalk.coroutine.service
 
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.coroutine.ServiceFactory
+import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.coroutine.api.polling.allEventUpdates
-import com.sportstalk.coroutine.service.ChatService
-import com.sportstalk.coroutine.service.UserService
 import com.sportstalk.datamodels.*
 import com.sportstalk.datamodels.users.*
 import com.sportstalk.datamodels.chat.*
@@ -159,7 +157,7 @@ class ChatServiceTest {
         )
 
         val testExpectedResult = ChatRoom(
-                kind = "chat.room",
+                kind = Kind.ROOM,
                 appid = testExpectedData.appid,
                 name = testExpectedData.name,
                 customid = testExpectedData.customid,
@@ -408,7 +406,7 @@ class ChatServiceTest {
         val testCreatedChatRoomData = chatService.createRoom(testInputRequest)
 
         val testExpectedResult = DeleteChatRoomResponse(
-                kind = "deleted.room",
+                kind = Kind.DELETED_ROOM,
                 deletedEventsCount = 0,
                 room = testCreatedChatRoomData
         )
@@ -593,7 +591,7 @@ class ChatServiceTest {
         val testCreatedChatRoomData = chatService.createRoom(testInputRequest)
 
         val testExpectedResult = ListRoomsResponse(
-                kind = "list.chatrooms",
+                kind = Kind.ROOM_LIST,
                 rooms = listOf(testCreatedChatRoomData)
         )
 
@@ -650,7 +648,7 @@ class ChatServiceTest {
         val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
 
         val testExpectedResult = JoinChatRoomResponse(
-                kind = "chat.joinroom",
+                kind = Kind.JOIN_ROOM,
                 user = testCreatedUserData,
                 room = testCreatedChatRoomData.copy(inroom = testCreatedChatRoomData.inroom!! + 1)
         )
@@ -684,7 +682,8 @@ class ChatServiceTest {
         assertTrue { testActualResult.room?.description == testExpectedResult.room?.description }
 
         // Also, assert that ChatRoomEventCursor is currently stored
-        assertTrue { testActualResult.eventscursor?.cursor == chatService.chatRoomEventCursor[testInputChatRoomId] }
+        assertTrue { testActualResult.eventscursor?.cursor ==
+                chatService.getChatRoomEventUpdateCursor(testInputChatRoomId) }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)
@@ -713,7 +712,7 @@ class ChatServiceTest {
 //        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
 //
 //        val testExpectedResult = JoinChatRoomResponse(
-//                kind = "chat.joinroom",
+//                kind = Kind.JOIN_ROOM,
 //                user = null,
 //                room = null
 //        )
@@ -794,7 +793,7 @@ class ChatServiceTest {
         val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
 
         val testExpectedResult = JoinChatRoomResponse(
-                kind = "chat.joinroom",
+                kind = Kind.JOIN_ROOM,
                 user = testCreatedUserData/*,
                         room = null*/
         )
@@ -838,11 +837,11 @@ class ChatServiceTest {
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
-        assertTrue { testActualResult.user == testExpectedResult.user }
         assertTrue { testActualResult.room?.customid == testCreatedChatRoomData.customid }
 
         // Also, assert that ChatRoomEventCursor is currently stored
-        assertTrue { testActualResult.eventscursor?.cursor?.takeIf { it.isNotEmpty() } == chatService.chatRoomEventCursor[testCreatedChatRoomData.id!!] }
+        assertTrue { testActualResult.eventscursor?.cursor?.takeIf { it.isNotEmpty() } ==
+                chatService.getChatRoomEventUpdateCursor(testCreatedChatRoomData.id!!) }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testActualResult.room?.id)
@@ -895,7 +894,7 @@ class ChatServiceTest {
                 kind = Kind.CHAT_LIST_PARTICIPANTS,
                 participants = listOf(
                         ChatRoomParticipant(
-                                kind = "chat.participant",
+                                kind = Kind.CHAT_PARTICIPANT,
                                 user = testJoinChatRoomData.user!!
                         )
                 )
@@ -1118,7 +1117,7 @@ class ChatServiceTest {
         ).speech!!
 
         val testExpectedResult = GetUpdatesResponse(
-                kind = "list.chatevents",
+                kind = Kind.CHAT_LIST,
                 /*cursor = "",*/
                 more = false,
                 itemcount = 1,
@@ -1242,7 +1241,7 @@ class ChatServiceTest {
         ).speech!!
 
         val testExpectedResult = GetUpdatesResponse(
-                kind = "list.chatevents",
+                kind = Kind.CHAT_LIST,
                 /*cursor = "",*/
                 more = false,
                 itemcount = 1,
@@ -1250,7 +1249,7 @@ class ChatServiceTest {
         )
 
         val chatRoomId = testCreatedChatRoomData.id!!
-        chatService.roomSubscriptions.add(chatRoomId)
+        chatService.startListeningToChatUpdates(chatRoomId)
 
         val allEventUpdates = MutableSharedFlow<List<ChatEvent>>()
 
@@ -1275,6 +1274,9 @@ class ChatServiceTest {
                     } else {
                         assertTrue { testActualResult.isEmpty() }
                     }
+                }
+                .onCompletion {
+                    chatService.stopListeningToChatUpdates(chatRoomId)
                 }
                 .launchIn(GlobalScope)
 
@@ -1760,11 +1762,11 @@ class ChatServiceTest {
                 userid = testCreatedUserData.userid!!
         )
         val testExpectedResult = ExecuteChatCommandResponse(
-                kind = "chat.executecommand",
+                kind = Kind.CHAT_COMMAND,
                 op = "speech",
                 room = testCreatedChatRoomData,
                 speech = ChatEvent(
-                        kind = "chat.event",
+                        kind = Kind.CHAT,
                         roomid = testCreatedChatRoomData.id,
                         body = testInputRequest.command,
                         eventtype = "speech",
@@ -1851,12 +1853,12 @@ class ChatServiceTest {
                 userid = testCreatedUserData.userid!!
         )
         val testExpectedResult = ExecuteChatCommandResponse(
-                kind = "chat.executecommand",
+                kind = Kind.CHAT_COMMAND,
                 op = "action",
                 room = testCreatedChatRoomData,
                 speech = null,
                 action = ChatEvent(
-                        kind = "chat.event",
+                        kind = Kind.CHAT,
                         roomid = testCreatedChatRoomData.id,
                         // "Test 1 gave Test 1 a high 5!"
                         body = "${testCreatedUserData.displayname!!} gave ${testCreatedUserData.displayname!!} a high 5!",
@@ -1952,20 +1954,14 @@ class ChatServiceTest {
                 body = "This is Jessy, replying to your greetings yow!!!",
                 userid = testCreatedUserData.userid!!
         )
-        val testExpectedResult = ExecuteChatCommandResponse(
-                kind = Kind.CHAT/*"chat.executecommand"*/,
-                op = null/*"speech"*/,
-                room = null,
-                speech = null/*ChatEvent(
-                        kind = "chat.event",
-                        roomid = testCreatedChatRoomData.id,
-                        body = testInputRequest.body,
-                        eventtype = "reply",
-                        userid = testCreatedUserData.userid,
-                        user = testCreatedUserData,
-                        replyto = testInitialSendMessage
-                )*/,
-                action = null
+        val testExpectedResult = ChatEvent(
+                kind = Kind.CHAT,
+                roomid = testCreatedChatRoomData.id,
+                body = testInputRequest.body,
+                eventtype = "reply",
+                userid = testCreatedUserData.userid,
+                user = testCreatedUserData,
+                replyto = testInitialSendMessage
         )
 
         // WHEN
@@ -1979,23 +1975,20 @@ class ChatServiceTest {
         println(
                 "`Execute Chat Command - Reply to a Message - Threaded`() -> testActualResult = \n" +
                         json.encodeToString(
-                                ExecuteChatCommandResponse.serializer(),
+                                ChatEvent.serializer(),
                                 testActualResult
                         )
         )
 
         assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.op == testExpectedResult.op }
-        assertTrue { testActualResult.room?.id == testExpectedResult.room?.id }
-        assertTrue { testActualResult.speech?.roomid == testExpectedResult.speech?.roomid }
-        assertTrue { testActualResult.speech?.body == testExpectedResult.speech?.body }
-        assertTrue { testActualResult.speech?.eventtype == testExpectedResult.speech?.eventtype }
-        assertTrue { testActualResult.speech?.userid == testExpectedResult.speech?.userid }
-        assertTrue { testActualResult.speech?.user?.userid == testExpectedResult.speech?.user?.userid }
-        assertTrue { testActualResult.speech?.replyto?.id == testExpectedResult.speech?.replyto?.id }
-        assertTrue { testActualResult.speech?.replyto?.kind == testExpectedResult.speech?.replyto?.kind }
-        assertTrue { testActualResult.speech?.replyto?.body == testExpectedResult.speech?.replyto?.body }
-        assertTrue { testActualResult.action == null }
+        assertTrue { testActualResult.roomid == testExpectedResult.roomid }
+        assertTrue { testActualResult.body == testExpectedResult.body }
+        assertTrue { testActualResult.eventtype == testExpectedResult.eventtype }
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
+        assertTrue { testActualResult.replyto?.id == testExpectedResult.replyto?.id }
+        assertTrue { testActualResult.replyto?.kind == testExpectedResult.replyto?.kind }
+        assertTrue { testActualResult.replyto?.body == testExpectedResult.replyto?.body }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)
@@ -2156,7 +2149,7 @@ class ChatServiceTest {
                 userid = testCreatedUserData.userid!!
         )
         val testExpectedResult = ExecuteChatCommandResponse(
-                kind = "chat.executecommand",
+                kind = Kind.CHAT_COMMAND,
                 op = "admin",
                 room = null,
                 speech = null,
@@ -2330,11 +2323,11 @@ class ChatServiceTest {
                 eventtype = EventType.ANNOUNCEMENT
         )
         val testExpectedResult = ExecuteChatCommandResponse(
-                kind = "chat.executecommand",
+                kind = Kind.CHAT_COMMAND,
                 op = EventType.SPEECH,
                 room = testCreatedChatRoomData,
                 speech = ChatEvent(
-                        kind = "chat.event",
+                        kind = Kind.CHAT,
                         roomid = testCreatedChatRoomData.id,
                         body = testInputRequest.command,
                         eventtype = EventType.ANNOUNCEMENT,
@@ -2643,7 +2636,7 @@ class ChatServiceTest {
         val testInputUserId = testCreatedUserData.userid!!
         val testInputLimit = 10
         val testExpectedResult = ListMessagesByUser(
-                kind = "list.chatevents",
+                kind = Kind.CHAT_LIST,
                 events = listOf(testSendMessageData)
         )
 
@@ -2825,7 +2818,7 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.deleteEvent(
+        val testActualResult = chatService.permanentlyDeleteEvent(
                 chatRoomId = testInputChatRoomId,
                 eventId = testInputEventId,
                 userid = testInputUserId
@@ -2852,7 +2845,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `T) Remove a Message - Logically Delete`() = runBlocking {
+    fun `T) Flag Message Event as Deleted`() = runBlocking {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2915,7 +2908,7 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.setMessageAsDeleted(
+        val testActualResult = chatService.flagEventLogicallyDeleted(
                 chatRoomId = testInputChatRoomId,
                 eventId = testInputEventId,
                 userid = testInputUserId,
@@ -2925,7 +2918,7 @@ class ChatServiceTest {
 
         // THEN
         println(
-                "`Remove a Message - Logically Delete`() -> testActualResult = \n" +
+                "`Flag Message Event as Deleted`() -> testActualResult = \n" +
                         json.encodeToString(
                                 DeleteEventResponse.serializer(),
                                 testActualResult
@@ -3175,7 +3168,7 @@ class ChatServiceTest {
                 reacted = true
         )
         val testExpectedResult = ChatEvent(
-                kind = "chat.event",
+                kind = Kind.CHAT,
                 roomid = testCreatedChatRoomData.id,
                 body = "",
                 eventtype = "reaction",
@@ -3241,7 +3234,7 @@ class ChatServiceTest {
 
         val users = listOf(
                 User(
-                        kind = "app.user",
+                        kind = Kind.USER,
                         userid = RandomString.make(16),
                         handle = "handle_test1",
                         displayname = "Test 1",
@@ -3249,7 +3242,7 @@ class ChatServiceTest {
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
                 ),
                 User(
-                        kind = "app.user",
+                        kind = Kind.USER,
                         userid = RandomString.make(16),
                         handle = "handle_test2",
                         displayname = "Test 2",
@@ -3257,7 +3250,7 @@ class ChatServiceTest {
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
                 ),
                 User(
-                        kind = "app.user",
+                        kind = Kind.USER,
                         userid = RandomString.make(16),
                         handle = "handle_test3",
                         displayname = "Test 3",
@@ -3265,7 +3258,7 @@ class ChatServiceTest {
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
                 ),
                 User(
-                        kind = "app.user",
+                        kind = Kind.USER,
                         userid = RandomString.make(16),
                         handle = "handle_test3",
                         displayname = "Test 3",
@@ -3279,7 +3272,7 @@ class ChatServiceTest {
                 if (_chatRooms != null) _chatRooms!!
                 else listOf(
                         ChatRoom(
-                                kind = "chat.room",
+                                kind = Kind.ROOM,
                                 id = RandomString.make(16),
                                 appid = appId,
                                 ownerid = null,
@@ -3303,7 +3296,7 @@ class ChatServiceTest {
                                 delaymessageseconds = 0L
                         ),
                         ChatRoom(
-                                kind = "chat.room",
+                                kind = Kind.ROOM,
                                 id = RandomString.make(16),
                                 appid = appId,
                                 ownerid = null,
@@ -3327,7 +3320,7 @@ class ChatServiceTest {
                                 delaymessageseconds = 0L
                         ),
                         ChatRoom(
-                                kind = "chat.room",
+                                kind = Kind.ROOM,
                                 id = RandomString.make(16),
                                 appid = appId,
                                 ownerid = null,
@@ -3351,7 +3344,7 @@ class ChatServiceTest {
                                 delaymessageseconds = 0L
                         ),
                         ChatRoom(
-                                kind = "chat.room",
+                                kind = Kind.ROOM,
                                 id = RandomString.make(16),
                                 appid = appId,
                                 ownerid = null,

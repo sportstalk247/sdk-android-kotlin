@@ -74,28 +74,28 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun shadowBanUser(userId: String, shadowban: Boolean, expireseconds: Long?): Single<User> =
-            service.shadowBanUser(
+    override fun setShadowBanStatus(userId: String, shadowban: Boolean, expireseconds: Long?): Single<User> =
+            service.setShadowBanStatus(
                     appId = appId,
                     userId = userId,
-                    request = ShadowBanUserRequest(
+                    request = SetShadowBanStatusRequest(
                             shadowban = shadowban,
                             expireseconds = expireseconds
                     )
             )
                     .handleSdkResponse(json)
 
-    override fun globalPurge(userId: String, banned: Boolean): Single<GlobalPurgeResponse> =
-            service.globalPurge(
+    override fun globallyPurgeUserContent(userId: String, banned: Boolean): Single<GloballyPurgeUserContentResponse> =
+            service.globallyPurgeUserContent(
                     appId = appId,
                     userId = userId,
-                    request = GlobalPurgeRequest(banned = banned)
+                    request = GloballyPurgeUserContentRequest(banned = banned)
             )
                     .map { response ->
                         val respBody = response.body()
 
                         if (response.isSuccessful) {
-                            GlobalPurgeResponse()
+                            GloballyPurgeUserContentResponse()
                         } else {
                             throw response.errorBody()?.string()?.let { errBodyStr ->
                                 json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
@@ -113,6 +113,25 @@ constructor(
                     appId = appId,
                     userId = userId,
                     request = ReportUserRequest(userid = userId, reporttype = reporttype)
+            )
+                    .handleSdkResponse(json)
+
+    override fun listUserNotifications(userId: String, filterNotificationTypes: List<UserNotification.Type>?, limit: Int, includeread: Boolean): Single<ListUserNotificationsResponse> =
+            service.listUserNotifications(
+                    appId = appId,
+                    userId = userId,
+                    filterNotificationTypes = filterNotificationTypes?.map { _type -> _type.serialName },
+                    limit = limit,
+                    includeread = includeread
+            )
+                    .handleSdkResponse(json)
+
+    override fun setUserNotificationAsRead(userId: String, notificationId: String, read: Boolean): Single<UserNotification> =
+            service.setUserNotificationAsRead(
+                    appId = appId,
+                    userId = userId,
+                    notificationId = notificationId,
+                    read = read
             )
                     .handleSdkResponse(json)
 }

@@ -21,9 +21,22 @@ constructor(
 
     private val service: ChatRetrofitService = mRetrofit.create()
 
-    override val roomSubscriptions: MutableSet<String> = mutableSetOf()
+    private val roomSubscriptions: MutableSet<String> = mutableSetOf()
+    private val chatRoomEventUpdateCursor: HashMap<String, String> = hashMapOf()
 
-    override val chatRoomEventCursor: HashMap<String, String> = hashMapOf()
+    override fun roomSubscriptions(): Set<String> = roomSubscriptions
+
+    override fun getChatRoomEventUpdateCursor(forRoomId: String): String? =
+            if(chatRoomEventUpdateCursor.contains(forRoomId)) chatRoomEventUpdateCursor[forRoomId]
+            else null
+
+    override fun setChatRoomEventUpdateCursor(forRoomId: String, cursor: String) {
+        chatRoomEventUpdateCursor[forRoomId] = cursor
+    }
+
+    override fun clearChatRoomEventUpdateCursor(fromRoomId: String) {
+        chatRoomEventUpdateCursor.remove(fromRoomId)
+    }
 
     override fun startListeningToChatUpdates(forRoomId: String) {
         roomSubscriptions.add(forRoomId)
@@ -142,7 +155,10 @@ constructor(
                         .also { resp ->
                             // Internally store chatroom event cursor
                             val cursor = resp.eventscursor?.cursor ?: ""
-                            chatRoomEventCursor[chatRoomId] = cursor
+                            setChatRoomEventUpdateCursor(
+                                    forRoomId = chatRoomId,
+                                    cursor = cursor
+                            )
                         }
             } catch (err: SportsTalkException) {
                 throw err
@@ -162,10 +178,13 @@ constructor(
                 )
                         .handleSdkResponse(json)
                         .also { resp ->
-                            // Internally store chatroom event cursor
                             val roomId = resp.room?.id ?: return@also
+                            // Internally store chatroom event cursor
                             val cursor = resp.eventscursor?.cursor ?: ""
-                            chatRoomEventCursor[roomId] = cursor
+                            setChatRoomEventUpdateCursor(
+                                    forRoomId = roomId,
+                                    cursor = cursor
+                            )
                         }
             } catch (err: SportsTalkException) {
                 throw err
@@ -185,9 +204,12 @@ constructor(
                 )
                         .handleSdkResponse(json)
                         .also { resp ->
-                            // Internally store chatroom event cursor
                             val cursor = resp.eventscursor?.cursor ?: ""
-                            chatRoomEventCursor[chatRoomCustomId] = cursor
+                            // Internally store chatroom event cursor
+                            setChatRoomEventUpdateCursor(
+                                    forRoomId = chatRoomCustomId,
+                                    cursor = cursor
+                            )
                         }
             } catch (err: SportsTalkException) {
                 throw err
@@ -226,7 +248,7 @@ constructor(
 
             if (response.isSuccessful) {
                 // Remove internally stored event cursor
-                chatRoomEventCursor.remove(chatRoomId)
+                clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
             } else {
                 throw response.errorBody()?.string()?.let { errBodyStr ->
                     json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
@@ -394,7 +416,7 @@ constructor(
                 )
             }
 
-    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ExecuteChatCommandResponse =
+    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ChatEvent =
             try {
                 service.sendThreadedReply(
                         appId = appId,
@@ -471,13 +493,13 @@ constructor(
                 )
             }
 
-    override suspend fun deleteEvent(
+    override suspend fun permanentlyDeleteEvent(
             chatRoomId: String,
             eventId: String,
             userid: String
     ): DeleteEventResponse =
             try {
-                service.deleteEvent(
+                service.permanentlyDeleteEvent(
                         appId = appId,
                         chatRoomId = chatRoomId,
                         eventId = eventId,
@@ -493,9 +515,9 @@ constructor(
                 )
             }
 
-    override suspend fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
+    override suspend fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
             try {
-                service.setMessageAsDeleted(
+                service.flagEventLogicallyDeleted(
                         appId = appId,
                         chatRoomId = chatRoomId,
                         eventId = eventId,

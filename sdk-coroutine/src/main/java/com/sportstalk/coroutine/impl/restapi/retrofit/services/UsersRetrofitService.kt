@@ -47,18 +47,18 @@ interface UsersRetrofitService {
     ): Response<ApiResponse<ListUsersResponse>>
 
     @POST("{appId}/user/users/{userId}/shadowban")
-    suspend fun shadowBanUser(
+    suspend fun setShadowBanStatus(
             @Path("appId") appId: String,
             @Path(value = "userId", encoded = true) userId: String,
-            @Body request: ShadowBanUserRequest
+            @Body request: SetShadowBanStatusRequest
     ): Response<ApiResponse<User>>
 
     @POST("{appId}/user/users/{userId}/globalpurge")
-    suspend fun globalPurge(
+    suspend fun globallyPurgeUserContent(
             @Path("appId") appId: String,
             @Path(value = "userId", encoded = true) userId: String,
-            @Body request: GlobalPurgeRequest
-    ): Response<ApiResponse<GlobalPurgeResponse>>
+            @Body request: GloballyPurgeUserContentRequest
+    ): Response<ApiResponse<GloballyPurgeUserContentResponse>>
 
     @POST("{appId}/user/users/{userId}/report")
     suspend fun reportUser(
@@ -66,5 +66,22 @@ interface UsersRetrofitService {
             @Path(value = "userId", encoded = true) userId: String,
             @Body request: ReportUserRequest
     ): Response<ApiResponse<ReportUserResponse>>
+
+    @GET("{appId}/user/users/{userId}/notification/listnotifications")
+    suspend fun listUserNotifications(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Query("filterNotificationTypes") filterNotificationTypes: List<String>? = null,
+            @Query("limit") limit: Int,
+            @Query("includeread") includeread: Boolean
+    ): Response<ApiResponse<ListUserNotificationsResponse>>
+
+    @PUT("{appId}/user/users/{userId}/notification/notifications/{notificationId}/update")
+    suspend fun setUserNotificationAsRead(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Path(value = "notificationId", encoded = true) notificationId: String,
+            @Query("read") read: Boolean
+    ): Response<ApiResponse<UserNotification>>
 
 }

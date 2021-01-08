@@ -36,11 +36,19 @@ constructor(
             _defaultImageBannerUrl = value
         }
 
-    override val roomSubscriptions: MutableSet<String>
-        get() = chatService.roomSubscriptions
+    override fun roomSubscriptions(): Set<String> =
+            chatService.roomSubscriptions()
 
-    override val chatRoomEventCursor: HashMap<String, String>
-        get() = chatService.chatRoomEventCursor
+    override fun getChatRoomEventUpdateCursor(forRoomId: String): String? =
+            chatService.getChatRoomEventUpdateCursor(forRoomId)
+
+    override fun setChatRoomEventUpdateCursor(forRoomId: String, cursor: String) {
+        chatService.setChatRoomEventUpdateCursor(forRoomId, cursor)
+    }
+
+    override fun clearChatRoomEventUpdateCursor(fromRoomId: String) {
+        chatService.clearChatRoomEventUpdateCursor(fromRoomId)
+    }
 
     override fun startListeningToChatUpdates(forRoomId: String) =
             chatService.startListeningToChatUpdates(forRoomId)
@@ -163,7 +171,7 @@ constructor(
                     request = request
             )
 
-    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ExecuteChatCommandResponse =
+    override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ChatEvent =
             chatService.sendThreadedReply(
                     chatRoomId = chatRoomId,
                     replyTo = replyTo,
@@ -191,15 +199,15 @@ constructor(
                     request = request
             )
 
-    override suspend fun deleteEvent(chatRoomId: String, eventId: String, userid: String): DeleteEventResponse =
-            chatService.deleteEvent(
+    override suspend fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String): DeleteEventResponse =
+            chatService.permanentlyDeleteEvent(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     userid = userid
             )
 
-    override suspend fun setMessageAsDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
-            chatService.setMessageAsDeleted(
+    override suspend fun flagEventLogicallyDeleted(chatRoomId: String, eventId: String, userid: String, deleted: Boolean, permanentifnoreplies: Boolean?): DeleteEventResponse =
+            chatService.flagEventLogicallyDeleted(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     userid = userid,

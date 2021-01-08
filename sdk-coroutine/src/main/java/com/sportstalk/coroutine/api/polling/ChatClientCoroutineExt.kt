@@ -36,20 +36,22 @@ fun ChatService.allEventUpdates(
 ): Flow<List<ChatEvent>> = flow<List<ChatEvent>> {
     do {
         // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-        if (roomSubscriptions.contains(chatRoomId)) {
+        if (roomSubscriptions().contains(chatRoomId)) {
             try {
                 // Perform GET UPDATES operation
                 val response = withContext(Dispatchers.IO) {
                     getUpdates(
                             chatRoomId = chatRoomId,
                             // Apply event cursor
-                            cursor = chatRoomEventCursor[chatRoomId]?.takeIf { it.isNotEmpty() }
+                            cursor = getChatRoomEventUpdateCursor(chatRoomId)?.takeIf { it.isNotEmpty() }
                     )
                 }
 
                 // Emit response value
                 response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
-                    chatRoomEventCursor[chatRoomId] = cursor
+                    setChatRoomEventUpdateCursor(chatRoomId, cursor)
+                } ?: run {
+                    clearChatRoomEventUpdateCursor(chatRoomId)
                 }
                 emit(response.events)
             } catch (err: SportsTalkException) {

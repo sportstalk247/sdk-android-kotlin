@@ -6,14 +6,24 @@ import com.sportstalk.datamodels.chat.*
 interface ChatService {
 
     /**
-    * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates
-    */
-    val roomSubscriptions: MutableSet<String>
+     * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates
+     */
+    fun roomSubscriptions(): Set<String>
 
     /**
-     * Chatroom ID paired with current event cursor
+     * Get current event update cursor for the specified room ID
      */
-    val chatRoomEventCursor: HashMap<String, String>
+    fun getChatRoomEventUpdateCursor(forRoomId: String): String?
+
+    /**
+     * Override current event update cursor
+     */
+    fun setChatRoomEventUpdateCursor(forRoomId: String, cursor: String)
+
+    /**
+     * Clear event update cursor
+     */
+    fun clearChatRoomEventUpdateCursor(fromRoomId: String)
 
     /**
      * Signals the START of event updates being emitted
@@ -205,7 +215,7 @@ interface ChatService {
             chatRoomId: String,
             replyTo: String,
             request: SendThreadedReplyRequest
-    ): ExecuteChatCommandResponse
+    ): ChatEvent
 
     /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{chatEventId}}/quote
@@ -240,7 +250,13 @@ interface ChatService {
             request: BounceUserRequest
     ): BounceUserResponse
 
-    suspend fun deleteEvent(
+    /**
+     * Delete Event
+     * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}?userid={{userid}}
+     * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
+     * - Deletes an event from the room
+     */
+    suspend fun permanentlyDeleteEvent(
             chatRoomId: String,
             eventId: String,
             userid: String
@@ -252,7 +268,7 @@ interface ChatService {
      * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
      * - Removes a message from a room
      */
-    suspend fun setMessageAsDeleted(
+    suspend fun flagEventLogicallyDeleted(
             chatRoomId: String,
             eventId: String,
             userid: String,

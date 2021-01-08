@@ -61,7 +61,7 @@ interface UserService {
      * - https://apiref.sportstalk247.com/?version=latest#211a5696-59ce-4988-82c9-7c614cab3efb
      * - Will toggle the user's shadow banned flag
      */
-    fun shadowBanUser(
+    fun setShadowBanStatus(
             userId: String,
             shadowban: Boolean,
             expireseconds: Long? = null
@@ -72,10 +72,10 @@ interface UserService {
      * - https://apiref.sportstalk247.com/?version=latest#c36d94e2-4fd9-4c9f-8009-f1d8ae9da6f5
      * - Will purge all chat content published by the specified user
      */
-    fun globalPurge(
+    fun globallyPurgeUserContent(
             userId: String,
             banned: Boolean
-    ): Single<GlobalPurgeResponse>
+    ): Single<GloballyPurgeUserContentResponse>
 
     /**
      * [POST] /{{api_appid}}/user/users/{userId}/report
@@ -87,5 +87,28 @@ interface UserService {
             /** [ReportType] */
             reporttype: String,
     ): Single<ReportUserResponse>
+
+    /**
+     * [GET] /{{api_appid}}/user/users/{userId}/notification/listnotifications?filterNotificationTypes=&limit=&includeread=
+     * - https://apiref.sportstalk247.com/?version=latest#f09d36c2-de40-4866-8818-74527b2a6df5
+     * - Returns a list of user notifications
+     */
+    fun listUserNotifications(
+            userId: String,
+            filterNotificationTypes: List<UserNotification.Type>? = null,
+            limit: Int,
+            includeread: Boolean
+    ): Single<ListUserNotificationsResponse>
+
+    /**
+     * [GET] /{{api_appid}}/user/users/{userId}/notification/notifications/{notificationId}/update?read=
+     * - https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a
+     * - This marks a notification as being in READ status.
+     */
+    fun setUserNotificationAsRead(
+            userId: String,
+            notificationId: String,
+            read: Boolean
+    ): Single<UserNotification>
 
 }

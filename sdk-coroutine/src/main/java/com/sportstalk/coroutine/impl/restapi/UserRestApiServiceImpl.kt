@@ -132,16 +132,16 @@ constructor(
                 )
             }
 
-    override suspend fun shadowBanUser(
+    override suspend fun setShadowBanStatus(
             userId: String,
             shadowban: Boolean,
             expireseconds: Long?
     ): User =
             try {
-                service.shadowBanUser(
+                service.setShadowBanStatus(
                         appId = appId,
                         userId = userId,
-                        request = ShadowBanUserRequest(
+                        request = SetShadowBanStatusRequest(
                                 shadowban = shadowban,
                                 expireseconds = expireseconds
                         )
@@ -156,18 +156,18 @@ constructor(
                 )
             }
 
-    override suspend fun globalPurge(userId: String, banned: Boolean): GlobalPurgeResponse =
+    override suspend fun globallyPurgeUserContent(userId: String, banned: Boolean): GloballyPurgeUserContentResponse =
             try {
-                val response = service.globalPurge(
+                val response = service.globallyPurgeUserContent(
                         appId = appId,
                         userId = userId,
-                        request = GlobalPurgeRequest(banned = banned)
+                        request = GloballyPurgeUserContentRequest(banned = banned)
                 )
 
                 val respBody = response.body()
 
                 if (response.isSuccessful) {
-                    GlobalPurgeResponse()
+                    GloballyPurgeUserContentResponse()
                 } else {
                     throw response.errorBody()?.string()?.let { errBodyStr ->
                         json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
@@ -193,6 +193,52 @@ constructor(
                         appId = appId,
                         userId = userId,
                         request = ReportUserRequest(userid = userId, reporttype = reporttype)
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun listUserNotifications(
+            userId: String,
+            filterNotificationTypes: List<UserNotification.Type>?,
+            limit: Int,
+            includeread: Boolean
+    ): ListUserNotificationsResponse =
+            try {
+                service.listUserNotifications(
+                        appId = appId,
+                        userId = userId,
+                        filterNotificationTypes = filterNotificationTypes?.map { _type -> _type.serialName },
+                        limit = limit,
+                        includeread = includeread
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun setUserNotificationAsRead(
+            userId: String,
+            notificationId: String,
+            read: Boolean
+    ): UserNotification =
+            try {
+                service.setUserNotificationAsRead(
+                        appId = appId,
+                        userId = userId,
+                        notificationId = notificationId,
+                        read = read
                 )
                         .handleSdkResponse(json)
             } catch (err: SportsTalkException) {

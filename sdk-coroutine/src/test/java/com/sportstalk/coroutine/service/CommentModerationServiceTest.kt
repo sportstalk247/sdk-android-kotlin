@@ -1,12 +1,10 @@
-package com.sportstalk.api
+package com.sportstalk.coroutine.service
 
 import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.coroutine.ServiceFactory
-import com.sportstalk.coroutine.service.CommentService
-import com.sportstalk.coroutine.service.UserService
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Before
@@ -20,12 +18,13 @@ import org.robolectric.annotation.Config
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.P])
-class CommentServiceTest {
+class CommentModerationServiceTest {
 
     private lateinit var context: Context
     private lateinit var config: com.sportstalk.datamodels.ClientConfig
     private lateinit var userService: UserService
     private lateinit var commentService: CommentService
+    private lateinit var commentModerationService: CommentModerationService
     private lateinit var json: Json
 
     @Before

@@ -10,6 +10,48 @@ val chatClient = SportsTalk247.ChatClient(
 )
 ```
 
+## Room Subscriptions
+
+Invoke this function to see the set of ChatRoom IDs to keep track which rooms are subscribed to get event updates. Room subscriptions gets updated each time `startListeningToChatUpdates(forRoomId: String)` and `stopListeningToChatUpdates(forRoomId: String)` gets invoked.
+
+```kotlin
+    val roomSubscriptions: Set<String> = chatClient.roomSubscriptions()
+```
+
+## Get Chat Room Event Update Cursor
+
+Get current event update cursor for the specified room ID. This gets updated either each time `allEventUpdates()` emits a value, when `joinRoom()`/`joinRoomByCustomId()` are invoked, OR when `setChatRoomEventUpdateCursor()`/`clearChatRoomEventUpdateCursor()` are invoked.
+
+```kotlin
+    val currentRoomId = "<joined-room-id>"
+    val currentEventUpdateCursor: String? = 
+        chatClient.getChatRoomEventUpdateCursor(
+            forRoomId = currentRoomId
+        )  // Could be `null` if not yet set
+```
+
+## Set Chat Room Event Update Cursor
+
+Allows developers to override the event updates cursor to have more control on how paging logic is implemented.
+
+```kotlin
+    val currentRoomId = "<joined-room-id>"
+    val overrideCursor = "<a valid event update cursor>"
+    chatClient.setChatRoomEventUpdateCursor(
+        forRoomId = currentRoomId,
+        cursor = overrideCursor
+    )
+```
+
+## Clear Chat Room Event Update Cursor
+
+Allows developers to clear the event updates cursor(when cleared, the next time `allEventUpdates()` performs REST API operation, it will NOT include a cursor value on the request).
+
+```kotlin
+    val currentRoomId = "<joined-room-id>"
+    chatClient.clearChatRoomEventUpdateCursor(forRoomId = currentRoomId)
+```
+
 ## Create Room
 
 Invoke this function to create a new chat room.
@@ -1507,8 +1549,8 @@ Below is a code sample on how to use this SDK feature:
         // https://developer.android.com/topic/libraries/architecture/coroutines
         lifecycleScope.launch {
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-            val deleteEventResponse = withContext(Dispatchers.IO) {
-                chatClient.setMessageAsDeleted(
+            val logicalDeleteResponse = withContext(Dispatchers.IO) {
+                chatClient.flagEventLogicallyDeleted(
                     chatRoomId = "080001297623242ac002",    // ID of an existing chat room
                     eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
                     userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
@@ -1518,14 +1560,14 @@ Below is a code sample on how to use this SDK feature:
                 )
             }
 
-            // Resolve `deleteEventResponse` from HERE onwards(ex. update UI displaying the response data)...
+            // Resolve `logicalDeleteResponse` from HERE onwards(ex. update UI displaying the response data)...
         }
 
     .. code-tab:: kotlin sdk-reactive-rx2
 
         val rxDisposeBag = CompositeDisposable()
 
-        chatClient.setMessageAsDeleted(
+        chatClient.flagEventLogicallyDeleted(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
@@ -1536,14 +1578,14 @@ Below is a code sample on how to use this SDK feature:
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnSubscribe { rxDisposeBag.add(it) }
-            .subscribe { deleteEventResponse ->
-                // Resolve `deleteEventResponse` (ex. Display prompt OR Update UI)
+            .subscribe { logicalDeleteResponse ->
+                // Resolve `logicalDeleteResponse` (ex. Display prompt OR Update UI)
             }
 ```
 
 ## Delete Event
 
-Invoke this function to deletes an event from the room.
+Invoke this function to delete an event from the room.
 
 Refer to the SportsTalk API Documentation for more details:
 
@@ -1560,13 +1602,11 @@ Below is a code sample on how to use this SDK feature:
         lifecycleScope.launch {
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
             val deleteEventResponse = withContext(Dispatchers.IO) {
-                chatClient.setMessageAsDeleted(
+                chatClient.permanentlyDeleteEvent(
                     chatRoomId = "080001297623242ac002",    // ID of an existing chat room
                     eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
-                    userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                    userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
                     // Assuming user "@nicoleWd" exists
-                    deleted = false,
-                    permanentifnoreplies = true
                 )
             }
 
@@ -1577,13 +1617,11 @@ Below is a code sample on how to use this SDK feature:
 
         val rxDisposeBag = CompositeDisposable()
 
-        chatClient.setMessageAsDeleted(
+        chatClient.permanentlyDeleteEvent(
             chatRoomId = "080001297623242ac002",    // ID of an existing chat room
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
-            userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+            userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
             // Assuming user "@nicoleWd" exists
-            deleted = false,
-            permanentifnoreplies = true
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
