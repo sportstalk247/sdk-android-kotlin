@@ -125,4 +125,13 @@ constructor(
                     includeread = includeread
             )
                     .handleSdkResponse(json)
+
+    override fun setUserNotificationAsRead(userId: String, notificationId: String, read: Boolean): Single<UserNotification> =
+            service.setUserNotificationAsRead(
+                    appId = appId,
+                    userId = userId,
+                    notificationId = notificationId,
+                    read = read
+            )
+                    .handleSdkResponse(json)
 }

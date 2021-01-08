@@ -99,4 +99,15 @@ interface UserService {
         includeread: Boolean
     ): ListUserNotificationsResponse
 
+    /**
+     * [GET] /{{api_appid}}/user/users/{userId}/notification/notifications/{notificationId}/update?read=
+     * - https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a
+     * - This marks a notification as being in READ status.
+     */
+    suspend fun setUserNotificationAsRead(
+        userId: String,
+        notificationId: String,
+        read: Boolean
+    ): UserNotification
+
 }

@@ -227,4 +227,26 @@ constructor(
                         err = err
                 )
             }
+
+    override suspend fun setUserNotificationAsRead(
+            userId: String,
+            notificationId: String,
+            read: Boolean
+    ): UserNotification =
+            try {
+                service.setUserNotificationAsRead(
+                        appId = appId,
+                        userId = userId,
+                        notificationId = notificationId,
+                        read = read
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 }

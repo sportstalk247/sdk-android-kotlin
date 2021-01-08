@@ -77,4 +77,12 @@ interface UsersRetrofitService {
             @Query("includeread") includeread: Boolean
     ): Single<Response<ApiResponse<ListUserNotificationsResponse>>>
 
+    @PUT("{appId}/user/users/{userId}/notification/notifications/{notificationId}/update")
+    fun setUserNotificationAsRead(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Path(value = "notificationId", encoded = true) notificationId: String,
+            @Query("read") read: Boolean
+    ): Single<Response<ApiResponse<UserNotification>>>
+
 }

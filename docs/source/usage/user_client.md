@@ -508,3 +508,49 @@ Below is a code sample on how to use this SDK feature:
                 // Resolve `listUserNotifications` (ex. Display prompt OR Update UI)
             }
 ```
+
+## Set User Notification as Read
+
+This marks a notification as being in READ status. That will prevent the notification from being returned in a call to List User Notifications unless the default filters are overridden. Notifications that are marked as read will be automatically deleted after some time.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val updatedNotification = withContext(Dispatchers.IO) {
+                userClient.setUserNotificationAsRead(
+                    userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+                    notificationId = "070200623280c142a902",    // The ID of notifications about to update
+                    read = true
+                )
+            }
+
+            // Resolve `updatedNotification` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.setUserNotificationAsRead(
+            userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+            notificationId = "070200623280c142a902",    // The ID of notifications about to update
+            read = true
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { updatedNotification ->
+                // Resolve `updatedNotification` (ex. Display prompt OR Update UI)
+            }
+```

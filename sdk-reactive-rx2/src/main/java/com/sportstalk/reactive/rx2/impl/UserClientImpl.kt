@@ -44,4 +44,7 @@ constructor(
 
     override fun listUserNotifications(userId: String, filterNotificationTypes: List<UserNotification.Type>?, limit: Int, includeread: Boolean): Single<ListUserNotificationsResponse> =
             userService.listUserNotifications(userId, filterNotificationTypes, limit, includeread)
+
+    override fun setUserNotificationAsRead(userId: String, notificationId: String, read: Boolean): Single<UserNotification> =
+            userService.setUserNotificationAsRead(userId, notificationId, read)
 }
