@@ -300,6 +300,15 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun updateChatMessage(chatRoomId: String, eventId: String, request: UpdateChatMessageRequest): Single<ChatEvent> =
+            service.updateChatMessage(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    request = request
+            )
+                    .handleSdkResponse(json)
+
     override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String): Single<DeleteEventResponse> =
             service.permanentlyDeleteEvent(
                     appId = appId,
