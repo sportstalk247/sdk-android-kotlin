@@ -90,7 +90,7 @@ object EventType {
     const val REACTION = "reaction"
     const val REPLACE = "replace"
     const val ROOM_CLOSED = "roomclosed"
-    const val ROOM_OPEN = "roomopened"
+    const val ROOM_OPENED = "roomopened"
     const val ACTION = "action"
     const val REPLY = "reply"
     const val QUOTE = "quote"
