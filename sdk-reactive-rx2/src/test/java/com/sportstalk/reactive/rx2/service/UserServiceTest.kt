@@ -1,4 +1,4 @@
-package com.sportstalk.reactive.service
+package com.sportstalk.reactive.rx2.service
 
 import android.app.Activity
 import android.content.Context
@@ -11,8 +11,6 @@ import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.*
 import com.sportstalk.reactive.rx2.ServiceFactory
-import com.sportstalk.reactive.rx2.service.ChatService
-import com.sportstalk.reactive.rx2.service.UserService
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.TestObserver
 import kotlinx.serialization.json.Json

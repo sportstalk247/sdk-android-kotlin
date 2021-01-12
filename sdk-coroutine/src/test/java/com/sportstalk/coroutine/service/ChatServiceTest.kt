@@ -3258,23 +3258,20 @@ class ChatServiceTest {
                 reaction = EventReaction.LIKE,
                 reacted = true
         )
-        val testExpectedResult = ChatEvent(
+        val testExpectedResult = testSendMessageData.copy(
                 kind = Kind.CHAT,
                 roomid = testCreatedChatRoomData.id,
-                body = "",
-                eventtype = "reaction",
+                eventtype = EventType.SPEECH,
                 userid = testInputRequest.userid,
-                replyto = testSendMessageData.copy(
-                        reactions = listOf(
-                                ChatEventReaction(
-                                        type = testInputRequest.reaction,
-                                        count = 1,
-                                        users = listOf(
-                                                User(
-                                                        userid = testCreatedUserData.userid!!,
-                                                        handle = testCreatedUserData.handle!!,
-                                                        displayname = testCreatedUserData.displayname!!
-                                                )
+                reactions = listOf(
+                        ChatEventReaction(
+                                type = testInputRequest.reaction,
+                                count = 1,
+                                users = listOf(
+                                        User(
+                                                userid = testCreatedUserData.userid!!,
+                                                handle = testCreatedUserData.handle!!,
+                                                displayname = testCreatedUserData.displayname!!
                                         )
                                 )
                         )
@@ -3302,11 +3299,10 @@ class ChatServiceTest {
         assertTrue { testActualResult.body == testExpectedResult.body }
         assertTrue { testActualResult.eventtype == testExpectedResult.eventtype }
         assertTrue { testActualResult.userid == testExpectedResult.userid }
-        assertTrue { testActualResult.replyto?.id == testExpectedResult.replyto?.id }
         /* Assert each reaction from event response */
         assertTrue {
-            testActualResult.replyto?.reactions!!.any { rxn ->
-                testExpectedResult.replyto?.reactions!!.any { expectedRxn ->
+            testActualResult.reactions.any { rxn ->
+                testExpectedResult.reactions!!.any { expectedRxn ->
                     rxn.type == expectedRxn.type
                             && rxn.count == expectedRxn.count
                             && rxn.users.any { usr -> expectedRxn.users.any { expectedUsr -> usr.userid == expectedUsr.userid } }
