@@ -157,12 +157,24 @@ constructor(
                     chatRoomId = chatRoomId,
                     request = ExitChatRoomRequest(userid = userId)
             )
-                    .handleSdkResponse(json)
-                    .doOnSuccess {
-                        // Remove internally stored event cursor
-                        clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
+                    .flatMapCompletable { response ->
+                        if (response.isSuccessful) {
+                            // Remove internally stored event cursor
+                            clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
+                            Completable.complete()
+                        } else {
+                            Completable.error(
+                                    response.errorBody()?.string()?.let { errBodyStr ->
+                                        json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                                    }
+                                            ?: SportsTalkException(
+                                                    kind = Kind.API,
+                                                    message = response.message(),
+                                                    code = response.code()
+                                            )
+                            )
+                        }
                     }
-                    .ignoreElement()
 
     override fun getUpdates(chatRoomId: String, cursor: String?): Single<GetUpdatesResponse> =
             service.getUpdates(

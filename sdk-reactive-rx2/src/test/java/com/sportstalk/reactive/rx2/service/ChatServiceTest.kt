@@ -960,28 +960,30 @@ class ChatServiceTest {
                 request = testJoinRoomInputRequest
         ).blockingGet()
 
-        val testExpectedResult = Any()
-
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputUserId = testCreatedUserData.userid!!
 
-        // WHEN
-        val testActualResult = chatService.exitRoom(
-                chatRoomId = testInputChatRoomId,
-                userId = testInputUserId
-        ).blockingGet()
+        try {
+            // WHEN
+            chatService.exitRoom(
+                    chatRoomId = testInputChatRoomId,
+                    userId = testInputUserId
+            ).blockingGet()
 
-        // THEN
-        println(
-                "`Exit a Room`() -> testActualResult"
-        )
+            // THEN
+            println(
+                    "`Exit a Room`() -> testActualResult"
+            )
 
-        assertTrue { testActualResult is Any }
-
-        // Perform Delete Test Chat Room
-        deleteTestChatRooms(testCreatedChatRoomData.id)
-        // Perform Delete Test User
-        deleteTestUsers(testCreatedUserData.userid)
+            assertTrue { true }
+        } catch (err: Throwable) {
+            fail(err.message)
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
     }
 
     @Test
