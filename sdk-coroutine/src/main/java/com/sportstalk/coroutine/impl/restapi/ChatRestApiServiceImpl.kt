@@ -493,6 +493,22 @@ constructor(
                 )
             }
 
+    override suspend fun searchEventHistory(request: SearchEventHistoryRequest): SearchEventHistoryResponse =
+            try {
+                service.searchEventHistory(
+                        appId = appId,
+                        request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
     override suspend fun updateChatMessage(chatRoomId: String, eventId: String, request: UpdateChatMessageRequest): ChatEvent =
             try {
                 service.updateChatMessage(

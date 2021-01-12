@@ -2826,7 +2826,102 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `S) Update Chat Message`() {
+    fun `S) Search Event History`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        ).blockingGet()
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send a message to the created chat room
+        val testSendMessageData = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        )
+                .blockingGet()
+                .speech!!
+
+        val testInputUserId = testSendMessageData.userid!!
+        val testInputEventTypes = listOf(EventType.SPEECH)
+        val testInputRequest = SearchEventHistoryRequest(
+                fromuserid = testInputUserId,
+                types = testInputEventTypes,
+                limit = 10
+        )
+
+        try {
+            // WHEN
+            val testActualResult = chatService.searchEventHistory(
+                    request = testInputRequest
+            ).blockingGet()
+
+            // THEN
+            println(
+                    "`Search Event History`() -> testActualResult = \n" +
+                            json.encodeToString(
+                                    SearchEventHistoryResponse.serializer(),
+                                    testActualResult
+                            )
+            )
+
+            assertTrue { testActualResult.kind == Kind.CHAT_LIST }
+            assertTrue {
+                testActualResult.events.any { _ev ->
+                    _ev.id == testSendMessageData.id
+                }
+            }
+        } catch (err: Throwable) {
+            fail(err.message)
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
+    }
+
+    @Test
+    fun `T) Update Chat Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2923,7 +3018,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `T) Delete Event`() {
+    fun `U) Delete Event`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -3017,7 +3112,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `U) Flag Message Event as Deleted`() {
+    fun `V) Flag Message Event as Deleted`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -3116,7 +3211,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `V) Report a Message`() {
+    fun `W) Report a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -3215,7 +3310,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `V-ERROR-404-EVENT-NOT-FOUND) Report a Message`() {
+    fun `W-ERROR-404-EVENT-NOT-FOUND) Report a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -3304,7 +3399,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `W) React to a Message`() {
+    fun `X) React to a Message`() {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(

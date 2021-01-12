@@ -312,6 +312,13 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun searchEventHistory(request: SearchEventHistoryRequest): Single<SearchEventHistoryResponse> =
+            service.searchEventHistory(
+                    appId = appId,
+                    request = request
+            )
+                    .handleSdkResponse(json)
+
     override fun updateChatMessage(chatRoomId: String, eventId: String, request: UpdateChatMessageRequest): Single<ChatEvent> =
             service.updateChatMessage(
                     appId = appId,

@@ -199,6 +199,9 @@ constructor(
                     request = request
             )
 
+    override suspend fun searchEventHistory(request: SearchEventHistoryRequest): SearchEventHistoryResponse =
+            chatService.searchEventHistory(request)
+
     override suspend fun updateChatMessage(chatRoomId: String, eventId: String, request: UpdateChatMessageRequest): ChatEvent =
             chatService.updateChatMessage(chatRoomId, eventId, request)
 
