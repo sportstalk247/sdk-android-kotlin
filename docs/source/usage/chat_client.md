@@ -1523,6 +1523,150 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## Search Event History
+
+Invoke this function to search the message history applying the specified filters.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#a6b5380c-4e6c-4ded-b0b1-55225bcdea67>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+
+            // Search using User ID
+            val searchEventHistoryByUserIdResponse = withContext(Dispatchers.IO) {
+                chatClient.searchEventHistory(
+                    request = SearchEventHistoryRequest(
+                        fromuserid = "023976080242ac120002", // ID of an existing user
+                        limit = 10,
+                        types = listOf(EventType.SPEECH) // Any EventType constants
+                    )
+                )
+            }
+            // Resolve `searchEventHistoryFromUserIdResponse` from HERE onwards(ex. update UI displaying the response data)...
+
+            // Search using User handle
+            val searchEventHistoryByUserHandleResponse = withContext(Dispatchers.IO) {
+                chatClient.searchEventHistory(
+                    request = SearchEventHistoryRequest(
+                        fromhandle = "@nicoleWD", // Handle of an existing user
+                        limit = 10,
+                        types = listOf(EventType.SPEECH) // Any EventType constants
+                    )
+                )
+            }
+            // Resolve `searchEventHistoryByUserHandleResponse` from HERE onwards(ex. update UI displaying the response data)...
+
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        // Search using User ID
+        chatClient.searchEventHistory(
+            request = SearchEventHistoryRequest(
+                fromuserid = "023976080242ac120002", // ID of an existing user
+                limit = 10,
+                types = listOf(EventType.SPEECH) // Any EventType constants
+            )
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { searchEventHistoryByUserIdResponse ->
+                // Resolve `searchEventHistoryByUserIdResponse` (ex. Display prompt OR Update UI)
+            }
+        
+        // Search using User handle
+        chatClient.searchEventHistory(
+            request = SearchEventHistoryRequest(
+                fromhandle = "@nicoleWD", // Handle of an existing user
+                limit = 10,
+                types = listOf(EventType.SPEECH) // Any EventType constants
+            )
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { searchEventHistoryByUserHandleResponse ->
+                // Resolve `searchEventHistoryByUserHandleResponse` (ex. Display prompt OR Update UI)
+            }
+```
+
+## Update Chat Message
+
+Invoke this function to update the contents of an existing chat event
+
+This API may be used to update the body of an existing Chat Event. It is used to enable the user to edit the message after it is published. This may only be used with MESSAGE event types (speech, quote, reply). When the chat event is updated another event of type "replace" will be emitted with the updated event contents, and the original event will be replaced in future calls to List Event History, Join and List Previous Events. The event will also be flagged as edited by user.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#207a7dfa-5233-4acb-b855-031928941b25>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val updateChatMessageResponse = withContext(Dispatchers.IO) {
+                chatClient.updateChatMessage(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
+                    request = UpdateChatMessageRequest(
+                        userid = "023976080242ac120002", // ID of an existing user from this chat room
+                        body = "[UPDATED] from the original message",
+                        customid = null, // [OPTIONAL]
+                        custompayload = null, // [OPTIONAL]
+                        customfield1 = null, // [OPTIONAL]
+                        customfield2 = null, // [OPTIONAL]
+                        customtags = null, // [OPTIONAL]
+                    )
+                )
+            }
+
+            // Resolve `updateChatMessageResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.updateChatMessage(
+            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+            eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
+            request = UpdateChatMessageRequest(
+                userid = "023976080242ac120002", // ID of an existing user from this chat room
+                body = "[UPDATED] from the original message",
+                customid = null, // [OPTIONAL]
+                custompayload = null, // [OPTIONAL]
+                customfield1 = null, // [OPTIONAL]
+                customfield2 = null, // [OPTIONAL]
+                customtags = null, // [OPTIONAL]
+            )
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { updateChatMessageResponse ->
+                // Resolve `updateChatMessageResponse` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Flag Message Event As Deleted
 
 Invoke this function to set a ChatEvent as logically deleted.
@@ -1555,7 +1699,7 @@ Below is a code sample on how to use this SDK feature:
                     eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
                     userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
                     // Assuming user "@nicoleWd" exists
-                    deleted = false,
+                    deleted = true,
                     permanentifnoreplies = true
                 )
             }
@@ -1572,7 +1716,7 @@ Below is a code sample on how to use this SDK feature:
             eventId = "7620812242ac09300002",    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
             // Assuming user "@nicoleWd" exists
-            deleted = false,
+            deleted = true,
             permanentifnoreplies = true
         )
             .subscribeOn(Schedulers.io())
