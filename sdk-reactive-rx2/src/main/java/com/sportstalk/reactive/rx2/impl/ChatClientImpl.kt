@@ -187,6 +187,16 @@ constructor(
                     request = request
             )
 
+    override fun searchEventHistory(request: SearchEventHistoryRequest): Single<SearchEventHistoryResponse> =
+            chatService.searchEventHistory(request)
+
+    override fun updateChatMessage(chatRoomId: String, eventId: String, request: UpdateChatMessageRequest): Single<ChatEvent> =
+            chatService.updateChatMessage(
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
+                    request = request
+            )
+
     override fun permanentlyDeleteEvent(chatRoomId: String, eventId: String, userid: String): Single<DeleteEventResponse> =
             chatService.permanentlyDeleteEvent(
                     chatRoomId = chatRoomId,

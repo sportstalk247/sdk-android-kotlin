@@ -149,6 +149,20 @@ interface ChatRetrofitService {
             @Body request: BounceUserRequest
     ): Response<ApiResponse<BounceUserResponse>>
 
+    @POST("{appId}/chat/searchevents")
+    suspend fun searchEventHistory(
+            @Path("appId") appId: String,
+            @Body request: SearchEventHistoryRequest
+    ): Response<ApiResponse<SearchEventHistoryResponse>>
+
+    @PUT("{appId}/chat/rooms/{chatroomid}/events/{eventid}")
+    suspend fun updateChatMessage(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("eventid") eventId: String,
+            @Body request: UpdateChatMessageRequest
+    ): Response<ApiResponse<ChatEvent>>
+
     @DELETE("{appId}/chat/rooms/{chatroomid}/events/{eventid}")
     suspend fun permanentlyDeleteEvent(
             @Path("appId") appId: String,

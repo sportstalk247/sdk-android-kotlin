@@ -157,12 +157,24 @@ constructor(
                     chatRoomId = chatRoomId,
                     request = ExitChatRoomRequest(userid = userId)
             )
-                    .handleSdkResponse(json)
-                    .doOnSuccess {
-                        // Remove internally stored event cursor
-                        clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
+                    .flatMapCompletable { response ->
+                        if (response.isSuccessful) {
+                            // Remove internally stored event cursor
+                            clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
+                            Completable.complete()
+                        } else {
+                            Completable.error(
+                                    response.errorBody()?.string()?.let { errBodyStr ->
+                                        json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                                    }
+                                            ?: SportsTalkException(
+                                                    kind = Kind.API,
+                                                    message = response.message(),
+                                                    code = response.code()
+                                            )
+                            )
+                        }
                     }
-                    .ignoreElement()
 
     override fun getUpdates(chatRoomId: String, cursor: String?): Single<GetUpdatesResponse> =
             service.getUpdates(
@@ -296,6 +308,22 @@ constructor(
             service.bounceUser(
                     appId = appId,
                     chatRoomId = chatRoomId,
+                    request = request
+            )
+                    .handleSdkResponse(json)
+
+    override fun searchEventHistory(request: SearchEventHistoryRequest): Single<SearchEventHistoryResponse> =
+            service.searchEventHistory(
+                    appId = appId,
+                    request = request
+            )
+                    .handleSdkResponse(json)
+
+    override fun updateChatMessage(chatRoomId: String, eventId: String, request: UpdateChatMessageRequest): Single<ChatEvent> =
+            service.updateChatMessage(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    eventId = eventId,
                     request = request
             )
                     .handleSdkResponse(json)

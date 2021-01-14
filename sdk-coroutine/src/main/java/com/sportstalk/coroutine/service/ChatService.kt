@@ -251,6 +251,26 @@ interface ChatService {
     ): BounceUserResponse
 
     /**
+     * [POST] /{{api_appid}}/chat/searchevents
+     * - https://apiref.sportstalk247.com/?version=latest#a6b5380c-4e6c-4ded-b0b1-55225bcdea67
+     * - UPDATES the contents of an existing chat event
+     */
+    suspend fun searchEventHistory(
+            request: SearchEventHistoryRequest
+    ): SearchEventHistoryResponse
+
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/bounce
+     * - https://apiref.sportstalk247.com/?version=latest#207a7dfa-5233-4acb-b855-031928941b25
+     * - UPDATES the contents of an existing chat event
+     */
+    suspend fun updateChatMessage(
+            chatRoomId: String,
+            eventId: String,
+            request: UpdateChatMessageRequest
+    ): ChatEvent
+
+    /**
      * Delete Event
      * [DEL] /{{api_appid}}/chat/rooms/{{chatroomid}}/events/{{eventid}}?userid={{userid}}
      * - https://apiref.sportstalk247.com/?version=latest#f2894c8f-acc9-4b14-a8e9-216b28c319de
