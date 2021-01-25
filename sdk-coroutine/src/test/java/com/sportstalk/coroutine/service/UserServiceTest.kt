@@ -1196,11 +1196,13 @@ class UserServiceTest {
     object TestData {
         val ADMIN_PASSWORD = "zola"
 
+        private val USER_HANDLE_RANDOM_NUM = Random(System.currentTimeMillis())
+
         val users = listOf(
                 User(
                         kind = Kind.USER,
                         userid = RandomString.make(16),
-                        handle = "handle_test1",
+                        handle = "handle_test1_${USER_HANDLE_RANDOM_NUM.nextInt(99)}",
                         displayname = "Test 1",
                         pictureurl = "http://www.thepresidentshalloffame.com/media/reviews/photos/original/a9/c7/a6/44-1-george-washington-18-1549729902.jpg",
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
@@ -1208,7 +1210,7 @@ class UserServiceTest {
                 User(
                         kind = Kind.USER,
                         userid = RandomString.make(16),
-                        handle = "handle_test2",
+                        handle = "handle_test2_${USER_HANDLE_RANDOM_NUM.nextInt(99)}",
                         displayname = "Test 2",
                         pictureurl = "http://www.thepresidentshalloffame.com/media/reviews/photos/original/a9/c7/a6/44-1-george-washington-18-1549729902.jpg",
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
@@ -1216,7 +1218,7 @@ class UserServiceTest {
                 User(
                         kind = Kind.USER,
                         userid = RandomString.make(16),
-                        handle = "handle_test3",
+                        handle = "handle_test3_${USER_HANDLE_RANDOM_NUM.nextInt(99)}",
                         displayname = "Test 3",
                         pictureurl = "http://www.thepresidentshalloffame.com/media/reviews/photos/original/a9/c7/a6/44-1-george-washington-18-1549729902.jpg",
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
@@ -1224,8 +1226,8 @@ class UserServiceTest {
                 User(
                         kind = Kind.USER,
                         userid = RandomString.make(16),
-                        handle = "handle_test3",
-                        displayname = "Test 3",
+                        handle = "handle_test4_${USER_HANDLE_RANDOM_NUM.nextInt(99)}",
+                        displayname = "Test 4",
                         pictureurl = "http://www.thepresidentshalloffame.com/media/reviews/photos/original/a9/c7/a6/44-1-george-washington-18-1549729902.jpg",
                         profileurl = "http://www.thepresidentshalloffame.com/1-george-washington"
                 )
