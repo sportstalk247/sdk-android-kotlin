@@ -120,6 +120,5 @@ dependencies {
 configurations.all {
     resolutionStrategy{
         cacheChangingModulesFor 0, 'seconds'
-        force "net.sf.proguard:proguard-gradle:$proguardVersion"
     }
 }

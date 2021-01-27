@@ -6,8 +6,6 @@ ext {
     compileSdkVersion = 29
     buildToolsVersion = '29.0.3'
 
-    proguardVersion = '6.2.2'
-
     retrofutureVersion = '1.7.2'
 
     // App dependencies
@@ -42,6 +40,7 @@ buildscript {
     ext.kotlinx_serialization_version = '1.0.1'/*'0.20.0'*/
     ext.buildGradleToolVersion = '4.1.2'
     ext.dokkaVersion = /*'0.10.1'*/'1.4.20'
+    ext.proguardVersion = '6.2.2'
 
     repositories {
         google()
@@ -56,6 +55,14 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            dependencySubstitution {
+                substitute module('net.sf.proguard:proguard-gradle') with module("net.sf.proguard:proguard-gradle:$proguardVersion")
+            }
+        }
     }
 }
 
