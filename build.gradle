@@ -6,6 +6,8 @@ ext {
     compileSdkVersion = 29
     buildToolsVersion = '29.0.3'
 
+    proguardVersion = '6.2.2'
+
     retrofutureVersion = '1.7.2'
 
     // App dependencies

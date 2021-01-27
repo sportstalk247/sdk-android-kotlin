@@ -109,3 +109,10 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:$rxjava2xVersion"
 
 }
+
+configurations.all {
+    resolutionStrategy{
+        cacheChangingModulesFor 0, 'seconds'
+        force "net.sf.proguard:proguard-gradle:$proguardVersion"
+    }
+}
