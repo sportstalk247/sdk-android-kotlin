@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class ReportUserRequest(
         val userid: String? = null,
         /** [ReportType] */
-        val reporttype: String? = null, // ex. "abuse", "spam"
+        val reporttype: String? = null // ex. "abuse", "spam"
 )

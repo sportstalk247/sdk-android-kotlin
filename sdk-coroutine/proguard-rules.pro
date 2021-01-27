@@ -20,6 +20,8 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+-dontwarn module-info
+
 -dontwarn com.sportstalk.coroutine.**
 -keep class com.sportstalk.coroutine.** {*;}
 

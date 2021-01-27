@@ -27,11 +27,11 @@ data class UserNotification(
         val commentconversationid: String? = null,
         val commentconversationcustomid: String? = null,
         val chateventid: String? = null,
-        val commentid: String? = null,
+        val commentid: String? = null
 ): Parcelable {
     @Serializable
     enum class Type(val serialName: String) {
         @SerialName("chatreply") CHAT_REPLY("chatreply"),
-        @SerialName("chatquote") CHAT_QUOTE("chatquote"),
+        @SerialName("chatquote") CHAT_QUOTE("chatquote")
     }
 }

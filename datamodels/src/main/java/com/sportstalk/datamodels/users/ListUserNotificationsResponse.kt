@@ -9,5 +9,5 @@ data class ListUserNotificationsResponse(
         val cursor: String? = null,
         val more: Boolean? = null,
         val itemcount: Int? = null,
-        val notifications: List<UserNotification> = listOf(),
+        val notifications: List<UserNotification> = listOf()
 )
