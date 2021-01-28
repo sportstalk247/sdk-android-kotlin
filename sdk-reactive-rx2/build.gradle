@@ -23,6 +23,7 @@ android {
     buildTypes {
         debug {
             debuggable true
+            minifyEnabled true
 
             manifestPlaceholders = [
                     // TODO:: When multiple environments are setup(i.e. DEV Environment), change this value accordingly
@@ -57,7 +58,8 @@ android {
         jvmTarget = "1.8"
         freeCompilerArgs += [
                 "-Xuse-experimental=kotlinx.serialization.UnstableDefault",
-                "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
+                "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi",
+                "-Xuse-experimental=kotlinx.serialization.ImplicitReflectionSerializer"
         ]
     }
 
@@ -86,7 +88,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
+    /*implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"*/
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinx_serialization_version"
 
     implementation "androidx.annotation:annotation:$androidXAnnotation"
 
@@ -108,4 +111,10 @@ dependencies {
     // RxJava 2.x
     implementation "io.reactivex.rxjava2:rxjava:$rxjava2xVersion"
 
+}
+
+configurations.all {
+    resolutionStrategy{
+        cacheChangingModulesFor 0, 'seconds'
+    }
 }

@@ -98,7 +98,7 @@ constructor(
                             GloballyPurgeUserContentResponse()
                         } else {
                             throw response.errorBody()?.string()?.let { errBodyStr ->
-                                json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                                json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
                             }
                                     ?: SportsTalkException(
                                             kind = respBody?.kind ?: Kind.API,
@@ -116,11 +116,11 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun listUserNotifications(userId: String, filterNotificationTypes: List<UserNotification.Type>?, limit: Int, includeread: Boolean): Single<ListUserNotificationsResponse> =
+    override fun listUserNotifications(userId: String, filterNotificationTypes: List<UserNotificationType>?, limit: Int, includeread: Boolean): Single<ListUserNotificationsResponse> =
             service.listUserNotifications(
                     appId = appId,
                     userId = userId,
-                    filterNotificationTypes = filterNotificationTypes?.map { _type -> _type.serialName },
+                    filterNotificationTypes = filterNotificationTypes/*?.map { _type -> _type.serialName }*/,
                     limit = limit,
                     includeread = includeread
             )

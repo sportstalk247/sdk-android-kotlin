@@ -10,5 +10,5 @@ data class UpdateChatMessageRequest(
         val custompayload: String? = null,
         val customfield1: String? = null,
         val customfield2: String? = null,
-        val customtags: String? = null,
+        val customtags: String? = null
 )

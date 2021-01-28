@@ -23,6 +23,7 @@ android {
 
     buildTypes {
         debug {
+            minifyEnabled true
             debuggable true
 
             manifestPlaceholders = [
@@ -60,7 +61,8 @@ android {
                 "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
                 "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
                 "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi",
-                "-Xuse-experimental=kotlinx.serialization.UnstableDefault"
+                "-Xuse-experimental=kotlinx.serialization.UnstableDefault",
+                "-Xuse-experimental=kotlinx.serialization.ImplicitReflectionSerializer"
         ]
     }
 
@@ -88,7 +90,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
+    /*implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"*/
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinx_serialization_version"
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
@@ -118,5 +121,7 @@ dependencies {
 }
 
 configurations.all {
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    resolutionStrategy{
+        cacheChangingModulesFor 0, 'seconds'
+    }
 }

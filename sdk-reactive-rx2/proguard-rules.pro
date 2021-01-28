@@ -20,6 +20,8 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+-dontwarn module-info
+
 -dontwarn com.sportstalk.reactive.**
 -keep class com.sportstalk.reactive.** {*;}
 
@@ -78,3 +80,11 @@
 ######################################
 
 -dontwarn java.util.concurrent.Flow*
+
+######################################
+## Unit Test
+######################################
+-dontwarn org.mockito.**
+-dontwarn sun.reflect.**
+-dontwarn android.test.**
+-dontwarn org.junit.**

@@ -17,7 +17,7 @@ fun <T> Single<Response<ApiResponse<T>>>.handleSdkResponse(
                 response.body()!!.data!!
             } else {
                 throw response.errorBody()?.string()?.let { errBodyStr ->
-                    json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                    json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
                 }
                         ?: SportsTalkException(
                                 kind = Kind.API,

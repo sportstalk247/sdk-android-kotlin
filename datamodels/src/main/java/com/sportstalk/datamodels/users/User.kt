@@ -18,7 +18,7 @@ data class User(
         val shadowbanned: Boolean? = null,
         val shadowbanexpires: String? = null,   // ISODate ex. "2020-11-11T11:35:07.657812Z"
         val moderation: String? = null,   // "unknown"
-        val reports: List<UserReport> = listOf(),
+        val reports: List<UserReport> = listOf()
 ): Parcelable
 
 @Parcelize
@@ -26,5 +26,5 @@ data class User(
 data class UserReport(
         val userid: String? = null,
         /** [ReportType] */
-        val reason: String? = null,
+        val reason: String? = null
 ): Parcelable
