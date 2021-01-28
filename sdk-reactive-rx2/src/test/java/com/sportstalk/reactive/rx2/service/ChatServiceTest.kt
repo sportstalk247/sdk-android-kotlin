@@ -15,7 +15,8 @@ import com.sportstalk.reactive.rx2.ServiceFactory
 import com.sportstalk.reactive.rx2.api.polling.allEventUpdates
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.TestObserver
-import kotlinx.serialization.builtins.ArraySerializer
+import kotlinx.serialization.internal.ArrayListSerializer
+// import kotlinx.serialization.builtins.ArraySerializer
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
 import org.junit.After
@@ -1250,8 +1251,8 @@ class ChatServiceTest {
                     println(
                             "`All Event Updates[0]`() -> response = \n" +
                                     json.stringify/*encodeToString*/(
-                                            ArraySerializer(ChatEvent.serializer()),
-                                            testActualResult.toTypedArray()
+                                            ArrayListSerializer/*ArraySerializer*/(ChatEvent.serializer()),
+                                            testActualResult/*.toTypedArray()*/
                                     )
                     )
 
@@ -1261,8 +1262,8 @@ class ChatServiceTest {
                     println(
                             "`All Event Updates[1]`() -> response = \n" +
                                     json.stringify/*encodeToString*/(
-                                            ArraySerializer(ChatEvent.serializer()),
-                                            testActualResult.toTypedArray()
+                                            ArrayListSerializer/*ArraySerializer*/(ChatEvent.serializer()),
+                                            testActualResult/*.toTypedArray()*/
                                     )
                     )
 

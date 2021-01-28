@@ -1266,7 +1266,7 @@ class ChatServiceTest {
                     println(
                             "`All Event Updates[$index]`() -> response = \n" +
                                     json.stringify/*encodeToString*/(
-                                            ArrayListSerializer(ChatEvent.serializer()),
+                                            ArrayListSerializer/*ArraySerializer*/(ChatEvent.serializer()),
                                             testActualResult/*.toTypedArray()*/
                                     )
                     )
