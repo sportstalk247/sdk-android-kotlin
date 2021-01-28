@@ -80,3 +80,11 @@
 ######################################
 
 -dontwarn java.util.concurrent.Flow*
+
+######################################
+## Unit Test
+######################################
+-dontwarn org.mockito.**
+-dontwarn sun.reflect.**
+-dontwarn android.test.**
+-dontwarn org.junit.**
