@@ -25,8 +25,9 @@ object ServiceFactory {
             Json {
                 encodeDefaults = false
                 prettyPrint = true
-                isLenient = true
-                ignoreUnknownKeys = true
+                strictMode = false
+//                isLenient = true
+//                ignoreUnknownKeys = true
             }
         }
 

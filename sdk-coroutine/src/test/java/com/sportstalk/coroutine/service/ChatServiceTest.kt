@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
-import kotlinx.serialization.builtins.ArraySerializer
+import kotlinx.serialization.internal.ArrayListSerializer
+//import kotlinx.serialization.builtins.ArraySerializer
+import kotlinx.serialization.list
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
 import org.junit.*
@@ -1264,8 +1266,8 @@ class ChatServiceTest {
                     println(
                             "`All Event Updates[$index]`() -> response = \n" +
                                     json.stringify/*encodeToString*/(
-                                            ArraySerializer(ChatEvent.serializer()),
-                                            testActualResult.toTypedArray()
+                                            ArrayListSerializer(ChatEvent.serializer()),
+                                            testActualResult/*.toTypedArray()*/
                                     )
                     )
 
