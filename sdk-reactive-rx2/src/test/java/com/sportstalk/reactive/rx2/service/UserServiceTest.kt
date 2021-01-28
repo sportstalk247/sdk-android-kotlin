@@ -119,7 +119,7 @@ class UserServiceTest {
 
                     println(
                             "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
-                                    json.encodeToString(
+                                    json.stringify/*encodeToString*/(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -155,7 +155,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Create or Update User`() -> testActualResult = \n" +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -193,7 +193,7 @@ class UserServiceTest {
 
                     println(
                             "`ERROR-400 - Create or Update User`() -> testActualResult = \n" +
-                                    json.encodeToString(
+                                    json.stringify/*encodeToString*/(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -231,7 +231,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Delete User`() -> testActualResult = \n" +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 DeleteUserResponse.serializer(),
                                 testActualResult
                         )
@@ -266,7 +266,7 @@ class UserServiceTest {
 
                     println(
                             "`ERROR-404 - Delete User`() -> testActualResult = \n" +
-                                    json.encodeToString(
+                                    json.stringify/*encodeToString*/(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -302,7 +302,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Get User Details`() -> testActualResult = \n" +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -339,7 +339,7 @@ class UserServiceTest {
 
                     println(
                             "`ERROR-404 - Get User Details`() -> testActualResult = \n" +
-                                    json.encodeToString(
+                                    json.stringify/*encodeToString*/(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -394,14 +394,14 @@ class UserServiceTest {
         // THEN
         println(
                 "`List Users`() -> testActualResult1 = " +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 ListUsersResponse.serializer(),
                                 testActualResult1
                         )
         )
         println(
                 "`List Users`() -> testActualResult2 = " +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 ListUsersResponse.serializer(),
                                 testActualResult2
                         )
@@ -443,7 +443,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Ban User`() -> testActualResult = \n" +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -485,7 +485,7 @@ class UserServiceTest {
 
                     println(
                             "`ERROR-404 - Ban User`() -> testActualResult = \n" +
-                                    json.encodeToString(
+                                    json.stringify/*encodeToString*/(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -528,7 +528,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Restore User`() -> testActualResult = \n" +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -569,7 +569,7 @@ class UserServiceTest {
 
                     println(
                             "`ERROR-404 - Restore User`() -> testActualResult = \n" +
-                                    json.encodeToString(
+                                    json.stringify/*encodeToString*/(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -610,7 +610,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Search Users`() -> testActualResult1 = " +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 ListUsersResponse.serializer(),
                                 testActualResult1
                         )
@@ -653,7 +653,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Search Users`() -> testActualResult1 = " +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 ListUsersResponse.serializer(),
                                 testActualResult1
                         )
@@ -696,7 +696,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Search Users`() -> testActualResult1 = " +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 ListUsersResponse.serializer(),
                                 testActualResult1
                         )
@@ -732,7 +732,7 @@ class UserServiceTest {
 
                     println(
                             "`ERROR-400 - Search Users`() -> testActualResult = \n" +
-                                    json.encodeToString(
+                                    json.stringify/*encodeToString*/(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -770,7 +770,7 @@ class UserServiceTest {
         // THEN
         println(
                 "`Set Shadow Ban Status`() -> testActualResult = \n" +
-                        json.encodeToString(
+                        json.stringify/*encodeToString*/(
                                 User.serializer(),
                                 testActualResult
                         )
@@ -811,7 +811,7 @@ class UserServiceTest {
             // THEN
             println(
                     "`Globally Purge User Content`() -> testActualResult = \n" +
-                            json.encodeToString(
+                            json.stringify/*encodeToString*/(
                                     GloballyPurgeUserContentResponse.serializer(),
                                     testActualResult
                             )
@@ -863,7 +863,7 @@ class UserServiceTest {
             // THEN
             println(
                     "`Report User`() -> testActualResult = \n" +
-                            json.encodeToString(
+                            json.stringify/*encodeToString*/(
                                     User.serializer(),
                                     testActualResult
                             )
@@ -975,7 +975,7 @@ class UserServiceTest {
             // THEN
             println(
                     "`List User Notifications - Chat Reply`() -> testActualResult = \n" +
-                            json.encodeToString(
+                            json.stringify/*encodeToString*/(
                                     ListUserNotificationsResponse.serializer(),
                                     testActualResult
                             )
@@ -1088,7 +1088,7 @@ class UserServiceTest {
             // THEN
             println(
                     "`List User Notifications - Chat Quote`() -> testActualResult = \n" +
-                            json.encodeToString(
+                            json.stringify/*encodeToString*/(
                                     ListUserNotificationsResponse.serializer(),
                                     testActualResult
                             )
@@ -1208,7 +1208,7 @@ class UserServiceTest {
             // THEN
             println(
                     "`Set User Notification As Read`() -> testActualResult = \n" +
-                            json.encodeToString(
+                            json.stringify/*encodeToString*/(
                                     UserNotification.serializer(),
                                     testActualResult
                             )

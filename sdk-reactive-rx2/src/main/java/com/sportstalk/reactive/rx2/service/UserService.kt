@@ -85,7 +85,7 @@ interface UserService {
     fun reportUser(
             userId: String,
             /** [ReportType] */
-            reporttype: String,
+            reporttype: String
     ): Single<ReportUserResponse>
 
     /**
@@ -95,7 +95,7 @@ interface UserService {
      */
     fun listUserNotifications(
             userId: String,
-            filterNotificationTypes: List<UserNotification.Type>? = null,
+            filterNotificationTypes: List<UserNotificationType>? = null,
             limit: Int,
             includeread: Boolean
     ): Single<ListUserNotificationsResponse>

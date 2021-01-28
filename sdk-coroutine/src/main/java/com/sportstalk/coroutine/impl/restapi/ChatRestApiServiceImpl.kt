@@ -251,7 +251,7 @@ constructor(
                 clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
             } else {
                 throw response.errorBody()?.string()?.let { errBodyStr ->
-                    json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                    json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
                 }
                         ?: SportsTalkException(
                                 kind = Kind.API,
@@ -285,7 +285,7 @@ constructor(
                 respBody.data!!
             } else {
                 throw response.errorBody()?.string()?.let { errBodyStr ->
-                    json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                    json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
                 }
                         ?: SportsTalkException(
                                 kind = respBody?.kind ?: Kind.API,
@@ -391,7 +391,7 @@ constructor(
                         )
                     } else {
                         throw response.errorBody()?.string()?.let { errBodyStr ->
-                            json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
+                            json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
                         }
                                 ?: SportsTalkException(
                                         kind = Kind.API,

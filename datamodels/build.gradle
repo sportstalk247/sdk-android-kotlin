@@ -24,6 +24,7 @@ android {
     buildTypes {
         debug {
             debuggable true
+            minifyEnabled true
         }
 
         release {
@@ -66,7 +67,8 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
+    /*implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"*/
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinx_serialization_version"
 
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
 

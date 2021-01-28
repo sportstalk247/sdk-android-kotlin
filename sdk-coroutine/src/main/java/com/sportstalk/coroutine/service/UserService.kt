@@ -84,7 +84,7 @@ interface UserService {
     suspend fun reportUser(
             userId: String,
             /** [ReportType] */
-            reporttype: String,
+            reporttype: String
     ): ReportUserResponse
 
     /**
@@ -94,7 +94,7 @@ interface UserService {
      */
     suspend fun listUserNotifications(
         userId: String,
-        filterNotificationTypes: List<UserNotification.Type>? = null,
+        filterNotificationTypes: List<UserNotificationType>? = null,
         limit: Int,
         includeread: Boolean
     ): ListUserNotificationsResponse
