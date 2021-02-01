@@ -392,6 +392,25 @@ constructor(
                 )
             }
 
+    override suspend fun listEventsByTimestamp(chatRoomId: String, timestamp: Long, limitolder: Int?, limitnewer: Int?): ListEventsByTimestamp =
+            try {
+                service.listEventsByTimestamp(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        timestamp = timestamp,
+                        limitolder = limitolder,
+                        limitnewer = limitnewer
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
     override suspend fun executeChatCommand(
             chatRoomId: String,
             request: ExecuteChatCommandRequest

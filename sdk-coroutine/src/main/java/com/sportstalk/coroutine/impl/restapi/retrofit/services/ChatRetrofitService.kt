@@ -119,6 +119,15 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null /* eventId */
     ): Response<ApiResponse<ListEvents>>
 
+    @GET("{appId}/chat/rooms/{chatroomid}/eventsbytimestamp/list/{timestamp}")
+    suspend fun listEventsByTimestamp(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("timestamp") timestamp: Long,
+            @Query("limitolder") limitolder: Int? = null,
+            @Query("limitnewer") limitnewer: Int? = null
+    ): Response<ApiResponse<ListEventsByTimestamp>>
+
     @POST("{appId}/chat/rooms/{chatroomid}/command")
     suspend fun executeChatCommand(
             @Path("appId") appId: String,
