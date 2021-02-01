@@ -1247,6 +1247,117 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## List Events By Type
+
+Invoke this function to list events by type.
+
+* This method enables you to retrieve a small list of recent events by type. This is useful for things like fetching a list of recent announcements or custom event types without the need to scroll through the entire chat history.
+* This method returns a list of events sorted from newest to oldest.
+* This method returns only active events.
+* If you specify eventtype = customtype, you must pass the customtype value, a string of your choosing for your custom type.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#68a36454-bf36-41e0-b8ef-6bcb2a13dd36>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listEventsByType = withContext(Dispatchers.IO) {
+                chatClient.listEventsByType(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    eventType = EventType.ANNOUNCEMENT, // "announcement"
+                    limit = 20, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of events.
+                )
+            }
+
+            // Resolve `listEventsByType` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.listEventsByType(
+            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+            eventType = EventType.ANNOUNCEMENT, // "announcement"
+            limit = 20, /* Defaults to 200 on backend API server */
+            cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of events.
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listEventsByType ->
+                // Resolve `listEventsByType` (ex. Display prompt OR Update UI)
+            }
+```
+
+## List Events By Timestamp
+
+Invoke this function to list events by timestamp.
+
+* This method enables you to retrieve an event using a timestamp.
+* You can optionally retrieve a small number of displayable events before and after the message at the requested timestamp.
+* This method returns a list of events sorted from oldest to newest.
+* This method returns only active events.
+* The timestamp is a high resolution timestamp accurate to the thousanth of a second. It is possible, but very unlikely, for two messages to have the same timestamp.
+* The method returns "timestampolder". This can be passed as the timestamp value when calling functions like this which accept a timestamp to retrieve data.
+* The method returns "timestampnewer". This can be passed as the timestamp value when calling this function again.
+* The method returns "cursorpolder". This can be passed as the cursor to ethods that accept an events-sorted-by-time cursor.
+* The method returns "cursornewer". This can be passed as the cursor to methods that accept an events-sorted-by-time cursor.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#fe87c58e-2fd3-4e59-80fa-07ffaed94ee0>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listEventsByTimestamp = withContext(Dispatchers.IO) {
+                chatClient.listEventsByTimestamp(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    timestamp = 637464818548698844, // Timestamp criteria
+                    limitolder = 5, 
+                    limitolder = 5
+                )
+            }
+
+            // Resolve `listEventsByTimestamp` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.listEventsByTimestamp(
+            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+            timestamp = 637464818548698844, // Timestamp criteria
+            limitolder = 5, 
+            limitolder = 5
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listEventsByTimestamp ->
+                // Resolve `listEventsByTimestamp` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Message is Reported
 
 Invoke this function to check if the current user has already reported a message.
