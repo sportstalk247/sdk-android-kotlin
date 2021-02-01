@@ -189,6 +189,21 @@ interface ChatService {
     ): ListEvents
 
     /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/listeventsbytype?eventtype=&limit=&cursor=
+     * - https://apiref.sportstalk247.com/?version=latest#68a36454-bf36-41e0-b8ef-6bcb2a13dd36
+     * - List Events By Type
+     */
+    suspend fun listEventsByType(
+            chatRoomId: String,
+            /**
+             * [EventType]
+             */
+            eventType: String,
+            limit: Int? = null,
+            cursor: String? = null
+    ): ListEvents
+
+    /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
      * - https://apiref.sportstalk247.com/?version=latest#c81e90fc-1a54-40bb-a75b-2fc935c12b59
      * - Executes a command in a chat room

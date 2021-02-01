@@ -165,6 +165,14 @@ constructor(
                     cursor = cursor
             )
 
+    override suspend fun listEventsByType(chatRoomId: String, eventType: String, limit: Int?, cursor: String?): ListEvents =
+            chatService.listEventsByType(
+                    chatRoomId = chatRoomId,
+                    eventType = eventType,
+                    limit = limit,
+                    cursor = cursor
+            )
+
     override suspend fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): ExecuteChatCommandResponse =
             chatService.executeChatCommand(
                     chatRoomId = chatRoomId,

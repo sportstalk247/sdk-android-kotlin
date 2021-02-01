@@ -111,6 +111,15 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null /* eventId */
     ): Single<Response<ApiResponse<ListEvents>>>
 
+    @GET("{appId}/chat/rooms/{chatroomid}/listeventsbytype")
+    fun listEventsByType(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Query("eventtype") eventtype: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null /* eventId */
+    ): Single<Response<ApiResponse<ListEvents>>>
+
     @POST("{appId}/chat/rooms/{chatroomid}/command")
     fun executeChatCommand(
             @Path("appId") appId: String,

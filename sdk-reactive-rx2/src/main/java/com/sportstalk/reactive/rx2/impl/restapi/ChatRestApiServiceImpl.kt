@@ -241,6 +241,16 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun listEventsByType(chatRoomId: String, eventtype: String, limit: Int?, cursor: String?): Single<ListEvents> =
+            service.listEventsByType(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    eventtype = eventtype,
+                    limit = limit,
+                    cursor = cursor
+            )
+                    .handleSdkResponse(json)
+
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): Single<ExecuteChatCommandResponse> =
             if(request.command.contains("purge")) {
                 service.executeChatCommand(

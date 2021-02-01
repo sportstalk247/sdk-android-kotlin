@@ -153,6 +153,14 @@ constructor(
                     cursor = cursor
             )
 
+    override fun listEventsByType(chatRoomId: String, eventtype: String, limit: Int?, cursor: String?): Single<ListEvents> =
+            chatService.listEventsByType(
+                    chatRoomId = chatRoomId,
+                    eventtype = eventtype,
+                    limit = limit,
+                    cursor = cursor
+            )
+
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): Single<ExecuteChatCommandResponse> =
             chatService.executeChatCommand(
                     chatRoomId = chatRoomId,
