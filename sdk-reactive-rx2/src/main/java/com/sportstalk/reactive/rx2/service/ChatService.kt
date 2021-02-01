@@ -193,6 +193,31 @@ interface ChatService {
     ): Single<ListEvents>
 
     /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/listeventsbytype?eventtype=&limit=&cursor=
+     * - https://apiref.sportstalk247.com/?version=latest#68a36454-bf36-41e0-b8ef-6bcb2a13dd36
+     * - List Events By Type
+     */
+    fun listEventsByType(
+            chatRoomId: String,
+            /** [EventType] */
+            eventtype: String,
+            limit: Int? = null,
+            cursor: String? = null
+    ): Single<ListEvents>
+
+    /**
+     * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/eventsbytimestamp/list/{timestamp}?limitolder=&limitnewer=&
+     * - https://apiref.sportstalk247.com/?version=latest#fe87c58e-2fd3-4e59-80fa-07ffaed94ee0
+     * - List Events By Timestamp
+     */
+    fun listEventsByTimestamp(
+            chatRoomId: String,
+            timestamp: Long,
+            limitolder: Int? = null,
+            limitnewer: Int? = null
+    ): Single<ListEventsByTimestamp>
+
+    /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/command
      * - https://apiref.sportstalk247.com/?version=latest#c81e90fc-1a54-40bb-a75b-2fc935c12b59
      * - Executes a command in a chat room

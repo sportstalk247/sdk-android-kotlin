@@ -20,6 +20,7 @@ object Kind {
     const val CONVERSATION_LIST = "list.commentconversations"
     const val CHAT_PARTICIPANT = "chat.participant"
     const val CHAT_LIST = "list.chatevents"
+    const val CHAT_LIST_BY_TIMESTAMP = "list.chateventsbytimestamp"
     const val CHAT_LIST_PARTICIPANTS = "chat.list.participants"
     const val JOIN_ROOM = "chat.joinroom"
     const val ROOM_LIST = "list.chatrooms"

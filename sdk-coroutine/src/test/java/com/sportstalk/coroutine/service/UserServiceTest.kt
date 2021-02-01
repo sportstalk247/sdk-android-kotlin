@@ -179,7 +179,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `A-ERROR-400) Create or Update User`() = runBlocking {
+    fun `A-ERROR-405) Create or Update User`() = runBlocking {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
                 userid = RandomString.make(16),
@@ -197,15 +197,15 @@ class UserServiceTest {
             }
         } catch (err: SportsTalkException) {
             println(
-                    "`ERROR-400 - Create or Update User`() -> testActualResult = \n" +
+                    "`ERROR-405 - Create or Update User`() -> testActualResult = \n" +
                             json.stringify/*encodeToString*/(
                                     SportsTalkException.serializer(),
                                     err
                             )
             )
             assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The handle requested (\"${testInputRequest.handle!!}\") contains characters that are not allowed.  Use only [abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_]" }
-            assertTrue { err.code == 400 }
+            assertTrue { err.message == "The handle requested (${testInputRequest.handle!!}) contains characters that are not allowed.  Use only [abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890_]" }
+            assertTrue { err.code == 405 }
 
             throw err
         }

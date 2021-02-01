@@ -165,6 +165,22 @@ constructor(
                     cursor = cursor
             )
 
+    override suspend fun listEventsByType(chatRoomId: String, eventType: String, limit: Int?, cursor: String?): ListEvents =
+            chatService.listEventsByType(
+                    chatRoomId = chatRoomId,
+                    eventType = eventType,
+                    limit = limit,
+                    cursor = cursor
+            )
+
+    override suspend fun listEventsByTimestamp(chatRoomId: String, timestamp: Long, limitolder: Int?, limitnewer: Int?): ListEventsByTimestamp =
+            chatService.listEventsByTimestamp(
+                    chatRoomId = chatRoomId,
+                    timestamp = timestamp,
+                    limitolder = limitolder,
+                    limitnewer = limitnewer
+            )
+
     override suspend fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): ExecuteChatCommandResponse =
             chatService.executeChatCommand(
                     chatRoomId = chatRoomId,
