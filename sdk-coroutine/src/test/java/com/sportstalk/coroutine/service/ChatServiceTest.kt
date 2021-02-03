@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.coroutine.ServiceFactory
+import com.sportstalk.coroutine.SportsTalk247
 import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.coroutine.api.polling.allEventUpdates
 import com.sportstalk.datamodels.*
@@ -2755,6 +2756,94 @@ class ChatServiceTest {
             assertTrue { err.code == 404 }
             assertTrue { err.data?.get("kind") == Kind.CHAT_COMMAND }
             assertTrue { err.data?.get("op") == "speech" }
+
+            throw err
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
+
+        return@runBlocking
+    }
+
+    @Test
+    fun `R-ERROR-405-NOT-ALLOWED) Execute Chat Command`() = runBlocking {
+        // GIVEN
+        val userClient = SportsTalk247.UserClient(config)
+        val chatClient = SportsTalk247.ChatClient(config)
+
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userClient.createOrUpdateUser(request = testCreateUserInputRequest)
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatClient.createRoom(testCreateChatRoomInputRequest)
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatClient.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        )
+
+        val testInputRequest = ExecuteChatCommandRequest(
+                command = "Yow error test",
+                userid = testCreatedUserData.userid!!
+        )
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            // Execute Chat Command in quick succession
+            withContext(Dispatchers.IO) {
+                chatClient.executeChatCommand(
+                        chatRoomId = testCreatedChatRoomData.id!!,
+                        request = testInputRequest
+                )
+            }
+            withContext(Dispatchers.IO) {
+                chatClient.executeChatCommand(
+                        chatRoomId = testCreatedChatRoomData.id!!,
+                        request = testInputRequest
+                )
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-405-NOT-ALLOWED - Execute Chat Command`() -> testActualResult = \n" +
+                            json.stringify/*encodeToString*/(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.message == "405 - Not Allowed. Please wait to send this message again." }
+            assertTrue { err.code == 405 }
 
             throw err
         } finally {
