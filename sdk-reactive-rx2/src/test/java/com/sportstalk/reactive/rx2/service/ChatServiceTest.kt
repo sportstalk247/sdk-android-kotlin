@@ -12,7 +12,10 @@ import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
 import com.sportstalk.reactive.rx2.ServiceFactory
+import com.sportstalk.reactive.rx2.SportsTalk247
 import com.sportstalk.reactive.rx2.api.polling.allEventUpdates
+import io.reactivex.Observable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.TestObserver
 import kotlinx.serialization.internal.ArrayListSerializer
@@ -1883,7 +1886,7 @@ class ChatServiceTest {
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
         val testInputTimestampt = testSendMessageData.ts!!
-        val testInputLimit = 0
+        val testInputLimit = 1
         val testExpectedResult = ListEvents(
                 kind = Kind.CHAT_LIST_BY_TIMESTAMP,
                 events = listOf(testSendMessageData)
@@ -2835,6 +2838,102 @@ class ChatServiceTest {
                             && err.code == 404
                             && err.data?.get("kind") == Kind.CHAT_COMMAND
                             && err.data?.get("op") == "speech"
+                }
+    }
+
+    @Test
+    fun `R-ERROR-405-REPLY-NOT-FOUND) Execute Chat Command`() {
+        // GIVEN
+        val userClient = SportsTalk247.UserClient(config)
+        val chatClient = SportsTalk247.ChatClient(config)
+        
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userClient
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatClient
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatClient.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        ).blockingGet()
+
+        val testInputRequest = ExecuteChatCommandRequest(
+                command = "Yow error test",
+                userid = testCreatedUserData.userid!!
+        )
+
+        val executeChatCommand = TestObserver<ExecuteChatCommandResponse>()
+
+        // WHEN
+        Single.merge(
+                chatClient.executeChatCommand(
+                        chatRoomId = testCreatedChatRoomData.id!!,
+                        request = testInputRequest
+                ),
+                chatClient.executeChatCommand(
+                        chatRoomId = testCreatedChatRoomData.id!!,
+                        request = testInputRequest
+                )
+                        .delay(100L, TimeUnit.MILLISECONDS)
+        ).toObservable()
+                .skip(1)
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .doOnDispose {
+                    // Perform Delete Test Chat Room
+                    deleteTestChatRooms(testCreatedChatRoomData.id)
+                    // Perform Delete Test User
+                    deleteTestUsers(testCreatedUserData.userid)
+                }
+                .subscribe(executeChatCommand)
+
+        // THEN
+        executeChatCommand
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
+
+                    println(
+                            "`ERROR-405-NOT-ALLOWED - Execute Chat Command`() -> testActualResult = \n" +
+                                    json.stringify/*encodeToString*/(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.message == "405 - Not Allowed. Please wait to send this message again."
+                            && err.code == 405
                 }
     }
 

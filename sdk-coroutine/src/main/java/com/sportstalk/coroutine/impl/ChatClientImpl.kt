@@ -36,6 +36,9 @@ constructor(
             _defaultImageBannerUrl = value
         }
 
+    // Throttle timestamp for execute chat command
+    private var _lastExecuteCommandTimestamp: Long = 0L
+
     override fun roomSubscriptions(): Set<String> =
             chatService.roomSubscriptions()
 
@@ -86,6 +89,8 @@ constructor(
                     request = request
             ).also { resp ->
                 _currentRoom = resp.room
+                // Reset execute command throttle
+                _lastExecuteCommandTimestamp = 0L
             }
 
     override suspend fun joinRoom(chatRoomIdOrLabel: String): JoinChatRoomResponse =
@@ -95,6 +100,8 @@ constructor(
                     .also { resp ->
                         // Set current chat room
                         _currentRoom = resp.room
+                        // Reset execute command throttle
+                        _lastExecuteCommandTimestamp = 0L
                     }
 
     override suspend fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
@@ -105,6 +112,8 @@ constructor(
                     .also { resp ->
                         // Set current chat room
                         _currentRoom = resp.room
+                        // Reset execute command throttle
+                        _lastExecuteCommandTimestamp = 0L
                     }
 
     override suspend fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): ListChatRoomParticipantsResponse =
@@ -122,6 +131,8 @@ constructor(
                     .also { resp ->
                         // Unset currently active chat room
                         _currentRoom = null
+                        // Reset execute command throttle
+                        _lastExecuteCommandTimestamp = 0L
                     }
 
     override suspend fun getUpdates(chatRoomId: String, cursor: String?): GetUpdatesResponse =
@@ -182,24 +193,47 @@ constructor(
             )
 
     override suspend fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): ExecuteChatCommandResponse =
-            chatService.executeChatCommand(
-                    chatRoomId = chatRoomId,
-                    request = request
-            )
+            if(Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+                chatService.executeChatCommand(
+                        chatRoomId = chatRoomId,
+                        request = request
+                ).also {
+                    _lastExecuteCommandTimestamp = System.currentTimeMillis()
+                }
+            } else {
+                throw SportsTalkException(
+                        code = 405,
+                        message = "405 - Not Allowed. Please wait to send this message again."
+                )
+            }
 
     override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ChatEvent =
-            chatService.sendThreadedReply(
-                    chatRoomId = chatRoomId,
-                    replyTo = replyTo,
-                    request = request
-            )
+            if(Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+                chatService.sendThreadedReply(
+                        chatRoomId = chatRoomId,
+                        replyTo = replyTo,
+                        request = request
+                )
+            } else {
+                throw SportsTalkException(
+                        code = 405,
+                        message = "405 - Not Allowed. Please wait to send this message again."
+                )
+            }
 
     override suspend fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): ChatEvent =
-            chatService.sendQuotedReply(
-                    chatRoomId = chatRoomId,
-                    replyTo = replyTo,
-                    request = request
-            )
+            if(Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+                chatService.sendQuotedReply(
+                        chatRoomId = chatRoomId,
+                        replyTo = replyTo,
+                        request = request
+                )
+            } else {
+                throw SportsTalkException(
+                        code = 405,
+                        message = "405 - Not Allowed. Please wait to send this message again."
+                )
+            }
 
     override suspend fun listMessagesByUser(chatRoomId: String, userId: String, limit: Int?, cursor: String?): ListMessagesByUser =
             chatService.listMessagesByUser(
@@ -263,4 +297,8 @@ constructor(
                     limit = limit,
                     cursor = cursor
             )
+
+    companion object {
+        private const val DURATION_EXECUTE_COMMAND = 3000L
+    }
 }
