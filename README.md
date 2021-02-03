@@ -55,7 +55,7 @@ Then sync again. The gradle build should now be successful.
 * [sdk-coroutine](sdk-coroutine/README.md) - Provides [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) implementation of the SDK, using suspend functions.
    * The project implementing this artifact must at least have the following dependencies:
    ```groovy
-   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.0-M1"
+   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.50"
    ```
 
 * [reactive-rx2](sdk-reactive-rx2/README.md) - Provides [RxJava 2.x](https://github.com/ReactiveX/RxJava/tree/2.x) implementation of the SDK, using RxJava return types.
