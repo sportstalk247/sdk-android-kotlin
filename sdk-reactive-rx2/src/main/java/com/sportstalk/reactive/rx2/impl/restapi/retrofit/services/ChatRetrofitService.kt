@@ -103,6 +103,14 @@ interface ChatRetrofitService {
             @Path("eventId") eventId: String
     ): Single<Response<ApiResponse<ChatEvent>>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/users/{userId}/report")
+    fun reportUserInRoom(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("userId") userId: String,
+            @Body request: ReportUserInRoomRequest
+    ): Single<Response<ApiResponse<ChatRoom>>>
+
     @GET("{appId}/chat/rooms/{chatroomid}/listeventshistory")
     fun listEventsHistory(
             @Path("appId") appId: String,

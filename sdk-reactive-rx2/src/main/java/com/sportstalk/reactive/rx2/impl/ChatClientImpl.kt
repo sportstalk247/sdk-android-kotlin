@@ -158,6 +158,12 @@ constructor(
                     eventId = eventId
             )
 
+    override fun reportUserInRoom(chatRoomId: String, request: ReportUserInRoomRequest): Single<ChatRoom> =
+            chatService.reportUserInRoom(
+                    chatRoomId = chatRoomId,
+                    request = request
+            )
+
     override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): Single<ListEvents> =
             chatService.listEventsHistory(
                     chatRoomId = chatRoomId,
