@@ -182,6 +182,16 @@ interface ChatService {
     ): Single<ChatEvent>
 
     /**
+     * [POST] /{{api_appid}}/chat/rooms/{chatroomid}/users/{userId}/report
+     * - https://apiref.sportstalk247.com/?version=latest#94fdf593-06b6-41a2-80f6-79b8eb989b8b
+     * - REPORTS a USER in the room
+     */
+    fun reportUserInRoom(
+            chatRoomId: String,
+            request: ReportUserInRoomRequest
+    ): Single<ChatRoom>
+
+    /**
      * [GET] /{{api_appid}}/chat/rooms/{{chatroomid}}/listeventshistory
      * - https://apiref.sportstalk247.com/?version=latest#b8ca9766-ab07-4c8c-8e25-002a24a8feaa
      * - LIST EVENTS HISTORY

@@ -102,6 +102,14 @@ interface ChatRetrofitService {
             @Path("eventId") eventId: String
     ): Response<ApiResponse<ChatEvent>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/users/{userId}/report")
+    suspend fun reportUserInRoom(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("userId") userId: String,
+            @Body request: ReportUserInRoomRequest
+    ): Response<ApiResponse<ChatRoom>>
+
     @GET("{appId}/chat/rooms/{chatroomid}/listeventshistory")
     suspend fun listEventsHistory(
             @Path("appId") appId: String,

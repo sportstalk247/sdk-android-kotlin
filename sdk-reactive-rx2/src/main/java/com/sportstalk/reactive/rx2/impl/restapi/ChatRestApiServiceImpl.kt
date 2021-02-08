@@ -232,6 +232,15 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun reportUserInRoom(chatRoomId: String, request: ReportUserInRoomRequest): Single<ChatRoom> =
+            service.reportUserInRoom(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    userId = request.userid,
+                    request = request
+            )
+                    .handleSdkResponse(json)
+
     override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): Single<ListEvents> =
             service.listEventsHistory(
                     appId = appId,

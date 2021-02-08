@@ -1522,6 +1522,62 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## Report User In Room
+
+Invoke this function to enable users to report other users who exhibit abusive behaviors. It enables users to silence another user when a moderator is not present. If the user receives too many reports in a trailing 24 hour period, the user will become flagged at the room level.
+
+This API moderates users on the ROOM LEVEL. If a There is an API method that enable reporting users at the global user level which impacts all rooms. This API impacts only the experience for the specified userid within the specified room.
+
+This API will return an error (see responses below) if user reporting is not enabled for your application in the application settings by setting User Reports limit to a value > 0.
+
+A user who is flagged will have the shadowban effect applied.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#94fdf593-06b6-41a2-80f6-79b8eb989b8b>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val reportUserInRoomResponse = withContext(Dispatchers.IO) {
+                chatClient.reportUserInRoom(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    request = ReportUserInRoomRequest(
+                        userid = "023976080242ac120002", // ID of an existing user from the chat room
+                        reporttype = ReportType.ABUSE   // either ReportType.ABUSE("abuse") or ReportType.SPAM("spam")
+                    )
+                )
+            }
+
+            // Resolve `reportUserInRoomResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.reportUserInRoom(
+            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+            request = ReportUserInRoomRequest(
+                userid = "023976080242ac120002", // ID of an existing user from the chat room
+                reporttype = ReportType.ABUSE   // either ReportType.ABUSE("abuse") or ReportType.SPAM("spam")
+            )
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { reportUserInRoomResponse ->
+                // Resolve `reportUserInRoomResponse` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Purge User Messages
 
 Invoke this function to execute a command in a chat room to purge all messages for a user.
