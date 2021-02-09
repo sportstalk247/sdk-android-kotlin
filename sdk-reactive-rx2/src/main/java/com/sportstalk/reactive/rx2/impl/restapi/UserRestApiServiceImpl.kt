@@ -7,6 +7,7 @@ import com.sportstalk.datamodels.users.*
 import com.sportstalk.reactive.rx2.impl.handleSdkResponse
 import com.sportstalk.reactive.rx2.impl.restapi.retrofit.services.UsersRetrofitService
 import com.sportstalk.reactive.rx2.service.UserService
+import io.reactivex.Completable
 import io.reactivex.Single
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
@@ -137,4 +138,28 @@ constructor(
                     read = read
             )
                     .handleSdkResponse(json)
+
+    override fun markAllUserNotificationsAsRead(userid: String, delete: Boolean): Completable =
+            service.markAllUserNotificationsAsRead(
+                    appId = appId,
+                    userid = userid,
+                    delete = delete
+            )
+                    .flatMapCompletable { response ->
+                        if(response.isSuccessful) {
+                            // No more additional step(s)
+                            Completable.complete()
+                        } else {
+                            Completable.error(
+                                    response.errorBody()?.string()?.let { errBodyStr ->
+                                        json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                                    }
+                                            ?: SportsTalkException(
+                                                    kind = Kind.API,
+                                                    message = response.message(),
+                                                    code = response.code()
+                                            )
+                            )
+                        }
+                    }
 }

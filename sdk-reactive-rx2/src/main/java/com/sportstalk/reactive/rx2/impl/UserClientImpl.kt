@@ -5,6 +5,7 @@ import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.users.*
 import com.sportstalk.reactive.rx2.ServiceFactory
 import com.sportstalk.reactive.rx2.api.UserClient
+import io.reactivex.Completable
 import io.reactivex.Single
 
 class UserClientImpl
@@ -47,4 +48,7 @@ constructor(
 
     override fun setUserNotificationAsRead(userId: String, notificationId: String, read: Boolean): Single<UserNotification> =
             userService.setUserNotificationAsRead(userId, notificationId, read)
+
+    override fun markAllUserNotificationsAsRead(userid: String, delete: Boolean): Completable =
+            userService.markAllUserNotificationsAsRead(userid, delete)
 }

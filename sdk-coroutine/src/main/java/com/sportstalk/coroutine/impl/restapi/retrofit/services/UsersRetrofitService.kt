@@ -87,4 +87,11 @@ interface UsersRetrofitService {
             @Query("read") read: Boolean
     ): Response<ApiResponse<UserNotification>>
 
+    @PUT("{appId}/user/users/{userId}/notification/notifications_all/markread")
+    suspend fun markAllUserNotificationsAsRead(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userid: String,
+            @Query("delete") delete: Boolean
+    ): Response<ApiResponse<String>>
+
 }

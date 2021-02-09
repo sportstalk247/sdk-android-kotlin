@@ -1,6 +1,12 @@
 package com.sportstalk.coroutine.service
 
+import com.sportstalk.datamodels.ApiResponse
+import com.sportstalk.datamodels.chat.ExitChatRoomRequest
 import com.sportstalk.datamodels.users.*
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.POST
+import retrofit2.http.Path
 
 interface UserService {
 
@@ -112,5 +118,15 @@ interface UserService {
         notificationId: String,
         read: Boolean
     ): UserNotification
+
+    /**
+     * [GET] /{{api_appid}}/user/users/{userId}/notification/notifications_all/markread?delete=
+     * - https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a
+     * - This marks a notification as being in READ status. That will prevent the notification from being returned in a call to List User Notifications unless the default filters are overridden. Notifications that are marked as read will be automatically deleted after some time.
+     */
+    suspend fun markAllUserNotificationsAsRead(
+            userid: String,
+            delete: Boolean
+    )
 
 }

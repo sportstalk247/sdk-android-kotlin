@@ -247,4 +247,33 @@ constructor(
                         err = err
                 )
             }
+
+    override suspend fun markAllUserNotificationsAsRead(userid: String, delete: Boolean) =
+            try {
+                val response = service.markAllUserNotificationsAsRead(
+                        appId = appId,
+                        userid = userid,
+                        delete = delete
+                )
+
+                if (response.isSuccessful) {
+                    // No more additional step(s)
+                } else {
+                    throw response.errorBody()?.string()?.let { errBodyStr ->
+                        json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                    }
+                            ?: SportsTalkException(
+                                    kind = Kind.API,
+                                    message = response.message(),
+                                    code = response.code()
+                            )
+                }
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 }

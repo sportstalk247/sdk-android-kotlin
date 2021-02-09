@@ -521,7 +521,7 @@ This marks a notification as being in READ status. That will prevent the notific
 
 Refer to the SportsTalk API Documentation for more details:
 
-<https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a>
+<https://apiref.sportstalk247.com/?version=latest#073d5ec4-cef6-46cc-8b52-72083db6f310>
 
 Below is a code sample on how to use this SDK feature:
 
@@ -558,5 +558,47 @@ Below is a code sample on how to use this SDK feature:
             .doOnSubscribe { rxDisposeBag.add(it) }
             .subscribe { updatedNotification ->
                 // Resolve `updatedNotification` (ex. Display prompt OR Update UI)
+            }
+```
+
+## Mark All User Notifications as Read
+
+This marks a all notifications of the user as being in READ status. If delete is set to true, notifications are deleted instead of updated.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            withContext(Dispatchers.IO) {
+                userClient.markAllUserNotificationsAsRead(
+                    userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+                    delete = true
+                )
+            }
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.markAllUserNotificationsAsRead(
+            userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+            delete = true
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe {
+                // Do something afterwards...
             }
 ```
