@@ -1,6 +1,7 @@
 package com.sportstalk.reactive.rx2.service
 
 import com.sportstalk.datamodels.users.*
+import io.reactivex.Completable
 import io.reactivex.Single
 
 interface UserService {
@@ -95,9 +96,12 @@ interface UserService {
      */
     fun listUserNotifications(
             userId: String,
-            filterNotificationTypes: List<UserNotificationType>? = null,
             limit: Int,
-            includeread: Boolean
+            filterNotificationTypes: List<UserNotificationType>? = null,
+            cursor: String? = null,
+            includeread: Boolean? = null,
+            filterChatRoomId: String? = null,
+            filterChatRoomCustomId: String? = null
     ): Single<ListUserNotificationsResponse>
 
     /**
@@ -110,5 +114,15 @@ interface UserService {
             notificationId: String,
             read: Boolean
     ): Single<UserNotification>
+
+    /**
+     * [GET] /{{api_appid}}/user/users/{userId}/notification/notifications_all/markread?delete=
+     * - https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a
+     * - This marks a notification as being in READ status. That will prevent the notification from being returned in a call to List User Notifications unless the default filters are overridden. Notifications that are marked as read will be automatically deleted after some time.
+     */
+    fun markAllUserNotificationsAsRead(
+            userid: String,
+            delete: Boolean
+    ): Completable
 
 }

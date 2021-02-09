@@ -204,19 +204,17 @@ constructor(
                 )
             }
 
-    override suspend fun listUserNotifications(
-            userId: String,
-            filterNotificationTypes: List<UserNotificationType>?,
-            limit: Int,
-            includeread: Boolean
-    ): ListUserNotificationsResponse =
+    override suspend fun listUserNotifications(userId: String, limit: Int, filterNotificationTypes: List<UserNotificationType>?, cursor: String?, includeread: Boolean?, filterChatRoomId: String?, filterChatRoomCustomId: String?): ListUserNotificationsResponse =
             try {
                 service.listUserNotifications(
                         appId = appId,
                         userId = userId,
                         filterNotificationTypes = filterNotificationTypes/*?.map { _type -> _type.serialName }*/,
+                        cursor = cursor,
                         limit = limit,
-                        includeread = includeread
+                        includeread = includeread,
+                        filterChatRoomId = filterChatRoomId,
+                        filterChatRoomCustomId = filterChatRoomCustomId
                 )
                         .handleSdkResponse(json)
             } catch (err: SportsTalkException) {
@@ -241,6 +239,35 @@ constructor(
                         read = read
                 )
                         .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun markAllUserNotificationsAsRead(userid: String, delete: Boolean) =
+            try {
+                val response = service.markAllUserNotificationsAsRead(
+                        appId = appId,
+                        userid = userid,
+                        delete = delete
+                )
+
+                if (response.isSuccessful) {
+                    // No more additional step(s)
+                } else {
+                    throw response.errorBody()?.string()?.let { errBodyStr ->
+                        json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                    }
+                            ?: SportsTalkException(
+                                    kind = Kind.API,
+                                    message = response.message(),
+                                    code = response.code()
+                            )
+                }
             } catch (err: SportsTalkException) {
                 throw err
             } catch (err: Throwable) {

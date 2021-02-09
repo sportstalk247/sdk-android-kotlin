@@ -41,9 +41,12 @@ constructor(
     override suspend fun reportUser(userId: String, reporttype: String): ReportUserResponse =
             userService.reportUser(userId, reporttype)
 
-    override suspend fun listUserNotifications(userId: String, filterNotificationTypes: List<UserNotificationType>?, limit: Int, includeread: Boolean): ListUserNotificationsResponse =
-            userService.listUserNotifications(userId, filterNotificationTypes, limit, includeread)
+    override suspend fun listUserNotifications(userId: String, limit: Int, filterNotificationTypes: List<UserNotificationType>?, cursor: String?, includeread: Boolean?, filterChatRoomId: String?, filterChatRoomCustomId: String?): ListUserNotificationsResponse =
+            userService.listUserNotifications(userId, limit, filterNotificationTypes, cursor, includeread, filterChatRoomId, filterChatRoomCustomId)
 
     override suspend fun setUserNotificationAsRead(userId: String, notificationId: String, read: Boolean): UserNotification =
             userService.setUserNotificationAsRead(userId, notificationId, read)
+
+    override suspend fun markAllUserNotificationsAsRead(userid: String, delete: Boolean) =
+            userService.markAllUserNotificationsAsRead(userid, delete)
 }
