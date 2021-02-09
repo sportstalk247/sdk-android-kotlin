@@ -937,9 +937,11 @@ class UserServiceTest {
             // WHEN
             val testActualResult = userService.listUserNotifications(
                     userId = testInputChatReplyThreadedRequest.userid,
-                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY),
                     limit = 10,
-                    includeread = false
+                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY),
+                    cursor = null,
+                    includeread = false,
+                    filterChatRoomId = testCreatedChatRoomData.id
             )
 
             // THEN
@@ -1045,9 +1047,11 @@ class UserServiceTest {
             // WHEN
             val testActualResult = userService.listUserNotifications(
                     userId = testInputChatQuoteRequest.userid,
-                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_QUOTE),
                     limit = 10,
-                    includeread = false
+                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_QUOTE),
+                    cursor = null,
+                    includeread = false,
+                    filterChatRoomId = testCreatedChatRoomData.id
             )
 
             // THEN

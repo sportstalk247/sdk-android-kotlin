@@ -116,13 +116,16 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun listUserNotifications(userId: String, filterNotificationTypes: List<UserNotificationType>?, limit: Int, includeread: Boolean): Single<ListUserNotificationsResponse> =
+    override fun listUserNotifications(userId: String, limit: Int, filterNotificationTypes: List<UserNotificationType>?, cursor: String?, includeread: Boolean?, filterChatRoomId: String?, filterChatRoomCustomId: String?): Single<ListUserNotificationsResponse> =
             service.listUserNotifications(
                     appId = appId,
                     userId = userId,
-                    filterNotificationTypes = filterNotificationTypes/*?.map { _type -> _type.serialName }*/,
                     limit = limit,
-                    includeread = includeread
+                    filterNotificationTypes = filterNotificationTypes/*?.map { _type -> _type.serialName }*/,
+                    cursor = cursor,
+                    includeread = includeread,
+                    filterChatRoomId = filterChatRoomId,
+                    filterChatRoomCustomId = filterChatRoomCustomId
             )
                     .handleSdkResponse(json)
 

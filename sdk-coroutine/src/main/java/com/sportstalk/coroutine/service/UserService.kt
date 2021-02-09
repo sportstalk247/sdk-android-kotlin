@@ -94,9 +94,12 @@ interface UserService {
      */
     suspend fun listUserNotifications(
         userId: String,
-        filterNotificationTypes: List<UserNotificationType>? = null,
         limit: Int,
-        includeread: Boolean
+        filterNotificationTypes: List<UserNotificationType>? = null,
+        cursor: String? = null,
+        includeread: Boolean? = null,
+        filterChatRoomId: String? = null,
+        filterChatRoomCustomId: String? = null
     ): ListUserNotificationsResponse
 
     /**

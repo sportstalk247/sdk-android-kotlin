@@ -482,9 +482,12 @@ Below is a code sample on how to use this SDK feature:
             val listUserNotifications = withContext(Dispatchers.IO) {
                 userClient.listUserNotifications(
                     userid = "023976080242ac120002",
-                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY, UserNotification.Type.CHAT_QUOTE), // [OPTIONAL] List could also have either `CHAT_REPLY` or `CHAT_QUOTE` ONLY
                     limit = 10, // Can be any arbitrary number
-                    includeread = false // If [true], will only return a list of user notifications whose value `isread = true`. Otherwise, returns a list of user notifications whose value `isread = false`.
+                    filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY, UserNotification.Type.CHAT_QUOTE), // [OPTIONAL] List could also have either `CHAT_REPLY` or `CHAT_QUOTE` ONLY
+                    cursor = null,
+                    includeread = false, // If [true], will only return a list of user notifications whose value `isread = true`. Otherwise, returns a list of user notifications whose value `isread = false`.
+                    filterChatRoomId = "080001297623242ac002", // ID of an existing chat room
+                    filterChatRoomCustomId = null   // OR you may also use an existing chat room's custom ID
                 )
             }
 
@@ -497,9 +500,12 @@ Below is a code sample on how to use this SDK feature:
 
         userClient.listUserNotifications(
             userid = "023976080242ac120002",
-            filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY, UserNotification.Type.CHAT_QUOTE), // [OPTIONAL] List could also have either `CHAT_REPLY` or `CHAT_QUOTE` ONLY
             limit = 10, // Can be any arbitrary number
-            includeread = false // If [true], will only return a list of user notifications whose value `isread = true`. Otherwise, returns a list of user notifications whose value `isread = false`.
+            filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY, UserNotification.Type.CHAT_QUOTE), // [OPTIONAL] List could also have either `CHAT_REPLY` or `CHAT_QUOTE` ONLY
+            cursor = null,
+            includeread = false, // If [true], will only return a list of user notifications whose value `isread = true`. Otherwise, returns a list of user notifications whose value `isread = false`.
+            filterChatRoomId = "080001297623242ac002", // ID of an existing chat room
+            filterChatRoomCustomId = null   // OR you may also use an existing chat room's custom ID
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

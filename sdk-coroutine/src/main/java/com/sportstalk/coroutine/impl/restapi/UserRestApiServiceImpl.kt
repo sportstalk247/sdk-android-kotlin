@@ -204,19 +204,17 @@ constructor(
                 )
             }
 
-    override suspend fun listUserNotifications(
-            userId: String,
-            filterNotificationTypes: List<UserNotificationType>?,
-            limit: Int,
-            includeread: Boolean
-    ): ListUserNotificationsResponse =
+    override suspend fun listUserNotifications(userId: String, limit: Int, filterNotificationTypes: List<UserNotificationType>?, cursor: String?, includeread: Boolean?, filterChatRoomId: String?, filterChatRoomCustomId: String?): ListUserNotificationsResponse =
             try {
                 service.listUserNotifications(
                         appId = appId,
                         userId = userId,
                         filterNotificationTypes = filterNotificationTypes/*?.map { _type -> _type.serialName }*/,
+                        cursor = cursor,
                         limit = limit,
-                        includeread = includeread
+                        includeread = includeread,
+                        filterChatRoomId = filterChatRoomId,
+                        filterChatRoomCustomId = filterChatRoomCustomId
                 )
                         .handleSdkResponse(json)
             } catch (err: SportsTalkException) {

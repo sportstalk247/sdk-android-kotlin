@@ -71,9 +71,12 @@ interface UsersRetrofitService {
     suspend fun listUserNotifications(
             @Path("appId") appId: String,
             @Path(value = "userId", encoded = true) userId: String,
-            @Query("filterNotificationTypes") filterNotificationTypes: List<String>? = null,
             @Query("limit") limit: Int,
-            @Query("includeread") includeread: Boolean
+            @Query("filterNotificationTypes") filterNotificationTypes: List<String>? = null,
+            @Query("cursor") cursor: String? = null,
+            @Query("includeread") includeread: Boolean? = null,
+            @Query("filterChatRoomId") filterChatRoomId: String? = null,
+            @Query("filterChatRoomCustomId") filterChatRoomCustomId: String? = null
     ): Response<ApiResponse<ListUserNotificationsResponse>>
 
     @PUT("{appId}/user/users/{userId}/notification/notifications/{notificationId}/update")
