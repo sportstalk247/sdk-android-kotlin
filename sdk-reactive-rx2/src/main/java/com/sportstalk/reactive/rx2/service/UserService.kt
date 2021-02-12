@@ -127,6 +127,16 @@ interface UserService {
     ): Single<UserNotification>
 
     /**
+     * [DEL] /{{api_appid}}/user/users/{userId}/notification/notifications/{notificationId}
+     * - https://apiref.sportstalk247.com/?version=latest#7cbb108d-8b72-4c59-8537-fa9ea4a71364
+     * - Deletes a User Notification
+     */
+    fun deleteUserNotification(
+            userId: String,
+            notificationId: String
+    ): Single<UserNotification>
+
+    /**
      * [GET] /{{api_appid}}/user/users/{userId}/notification/notifications_all/markread?delete=
      * - https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a
      * - This marks a notification as being in READ status. That will prevent the notification from being returned in a call to List User Notifications unless the default filters are overridden. Notifications that are marked as read will be automatically deleted after some time.

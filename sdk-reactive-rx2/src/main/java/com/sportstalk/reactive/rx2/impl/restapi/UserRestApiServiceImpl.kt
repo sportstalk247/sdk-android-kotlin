@@ -148,6 +148,14 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun deleteUserNotification(userId: String, notificationId: String): Single<UserNotification> =
+            service.deleteUserNotification(
+                    appId = appId,
+                    userId = userId,
+                    notificationId = notificationId
+            )
+                    .handleSdkResponse(json)
+
     override fun markAllUserNotificationsAsRead(userid: String, delete: Boolean): Completable =
             service.markAllUserNotificationsAsRead(
                     appId = appId,

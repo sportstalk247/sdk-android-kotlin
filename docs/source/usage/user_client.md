@@ -607,6 +607,50 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## Delete User Notification
+
+This function immediately deletes a user notification. Unless your workflow specifically implements access to read notifications, you should delete notifications after they are consumed.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#7cbb108d-8b72-4c59-8537-fa9ea4a71364>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val deletedNotification = withContext(Dispatchers.IO) {
+                userClient.deleteUserNotification(
+                    userid = "023976080242ac120002",    // The ID of user who owns the notification about to delete
+                    notificationId = "070200623280c142a902"    // The ID of notifications about to delete
+                )
+            }
+
+            // Resolve `deletedNotification` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.deleteUserNotification(
+            userid = "023976080242ac120002",    // The ID of user who owns the notification about to delete
+            notificationId = "070200623280c142a902"    // The ID of notifications about to delete
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { deletedNotification ->
+                // Resolve `deletedNotification` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Mark All User Notifications as Read
 
 This marks a all notifications of the user as being in READ status. If delete is set to true, notifications are deleted instead of updated.

@@ -109,7 +109,7 @@ interface UserService {
     ): ListUserNotificationsResponse
 
     /**
-     * [GET] /{{api_appid}}/user/users/{userId}/notification/notifications/{notificationId}/update?read=
+     * [PUT] /{{api_appid}}/user/users/{userId}/notification/notifications/{notificationId}/update?read=
      * - https://apiref.sportstalk247.com/?version=latest#e0c669ff-4722-46b0-ab3e-d1d74d9d340a
      * - This marks a notification as being in READ status.
      */
@@ -120,7 +120,7 @@ interface UserService {
     ): UserNotification
 
     /**
-     * [GET] /{{api_appid}}/user/users/{userId}/notification/notificationsbyid/chateventid/{chatEventId}/update?read=
+     * [PUT] /{{api_appid}}/user/users/{userId}/notification/notificationsbyid/chateventid/{chatEventId}/update?read=
      * - https://apiref.sportstalk247.com/?version=latest#4172ba35-f6e1-472d-8442-03dc1d3eda10
      * - This marks a notification as being in READ status.
      */
@@ -128,6 +128,16 @@ interface UserService {
         userId: String,
         chatEventId: String,
         read: Boolean
+    ): UserNotification
+
+    /**
+     * [DEL] /{{api_appid}}/user/users/{userId}/notification/notifications/{notificationId}
+     * - https://apiref.sportstalk247.com/?version=latest#7cbb108d-8b72-4c59-8537-fa9ea4a71364
+     * - Deletes a User Notification
+     */
+    suspend fun deleteUserNotification(
+            userId: String,
+            notificationId: String
     ): UserNotification
 
     /**
