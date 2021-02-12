@@ -176,10 +176,11 @@ constructor(
                         }
                     }
 
-    override fun getUpdates(chatRoomId: String, cursor: String?): Single<GetUpdatesResponse> =
+    override fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): Single<GetUpdatesResponse> =
             service.getUpdates(
                     appId = appId,
                     chatRoomId = chatRoomId,
+                    limit = limit,
                     cursor = cursor
             )
                     .map { response ->

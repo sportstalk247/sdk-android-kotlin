@@ -24,6 +24,7 @@ fun ChatService.allEventUpdates(
         chatRoomId: String,
         /* Polling Frequency */
         frequency: Long = 500L,
+        limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
         /*
         * The following are placeholder/convenience functions should they opt to provide custom callbacks
         */
@@ -42,6 +43,7 @@ fun ChatService.allEventUpdates(
                 val response = withContext(Dispatchers.IO) {
                     getUpdates(
                             chatRoomId = chatRoomId,
+                            limit = limit,
                             // Apply event cursor
                             cursor = getChatRoomEventUpdateCursor(chatRoomId)?.takeIf { it.isNotEmpty() }
                     )

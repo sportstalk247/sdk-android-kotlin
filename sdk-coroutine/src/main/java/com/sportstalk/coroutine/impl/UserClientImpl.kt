@@ -47,6 +47,15 @@ constructor(
     override suspend fun setUserNotificationAsRead(userId: String, notificationId: String, read: Boolean): UserNotification =
             userService.setUserNotificationAsRead(userId, notificationId, read)
 
+    override suspend fun setUserNotificationAsReadByChatEvent(userId: String, chatEventId: String, read: Boolean): UserNotification =
+            userService.setUserNotificationAsReadByChatEvent(userId, chatEventId, read)
+
+    override suspend fun deleteUserNotification(userId: String, notificationId: String): UserNotification =
+            userService.deleteUserNotification(userId, notificationId)
+
+    override suspend fun deleteUserNotificationByChatEvent(userId: String, chatEventId: String): UserNotification =
+            userService.deleteUserNotificationByChatEvent(userId, chatEventId)
+
     override suspend fun markAllUserNotificationsAsRead(userid: String, delete: Boolean) =
             userService.markAllUserNotificationsAsRead(userid, delete)
 }

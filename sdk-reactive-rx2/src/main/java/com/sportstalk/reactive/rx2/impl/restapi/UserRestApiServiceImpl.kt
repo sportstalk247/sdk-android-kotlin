@@ -139,6 +139,31 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun setUserNotificationAsReadByChatEvent(userId: String, chatEventId: String, read: Boolean): Single<UserNotification> =
+            service.setUserNotificationAsReadByChatEvent(
+                    appId = appId,
+                    userId = userId,
+                    chatEventId = chatEventId,
+                    read = read
+            )
+                    .handleSdkResponse(json)
+
+    override fun deleteUserNotification(userId: String, notificationId: String): Single<UserNotification> =
+            service.deleteUserNotification(
+                    appId = appId,
+                    userId = userId,
+                    notificationId = notificationId
+            )
+                    .handleSdkResponse(json)
+
+    override fun deleteUserNotificationByChatEvent(userId: String, chatEventId: String): Single<UserNotification> =
+            service.deleteUserNotificationByChatEvent(
+                    appId = appId,
+                    userId = userId,
+                    chatEventId = chatEventId
+            )
+                    .handleSdkResponse(json)
+
     override fun markAllUserNotificationsAsRead(userid: String, delete: Boolean): Completable =
             service.markAllUserNotificationsAsRead(
                     appId = appId,

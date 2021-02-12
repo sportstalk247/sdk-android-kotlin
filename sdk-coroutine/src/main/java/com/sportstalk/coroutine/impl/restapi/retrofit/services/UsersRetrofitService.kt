@@ -87,6 +87,28 @@ interface UsersRetrofitService {
             @Query("read") read: Boolean
     ): Response<ApiResponse<UserNotification>>
 
+    @PUT("{appId}/user/users/{userId}/notification/notificationsbyid/chateventid/{chatEventId}/update")
+    suspend fun setUserNotificationAsReadByChatEvent(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Path(value = "chatEventId", encoded = true) chatEventId: String,
+            @Query("read") read: Boolean
+    ): Response<ApiResponse<UserNotification>>
+
+    @DELETE("{appId}/user/users/{userId}/notification/notifications/{notificationId}")
+    suspend fun deleteUserNotification(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Path(value = "notificationId", encoded = true) notificationId: String
+    ): Response<ApiResponse<UserNotification>>
+
+    @DELETE("{appId}/user/users/{userId}/notification/notificationsbyid/chateventid/{chatEventId}")
+    suspend fun deleteUserNotificationByChatEvent(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Path(value = "chatEventId", encoded = true) chatEventId: String
+    ): Response<ApiResponse<UserNotification>>
+
     @PUT("{appId}/user/users/{userId}/notification/notifications_all/markread")
     suspend fun markAllUserNotificationsAsRead(
             @Path("appId") appId: String,

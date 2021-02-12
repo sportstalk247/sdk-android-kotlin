@@ -995,6 +995,7 @@ Below is a code sample on how to use this SDK feature:
                 chatClient.allEventUpdates(
                     chatRoomId = testChatRoom.id!!,
                     frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
+                    limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
                     /*
                     * The following are placeholder/convenience functions should the developers want to implement it
                     * in a callback-oriented way. (Invoked as subscription's side-effect. In coroutine flow, these are invoked via .onEach { ... })
@@ -1052,6 +1053,7 @@ Below is a code sample on how to use this SDK feature:
             chatRoomId = testChatRoom.id!!,
             lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
             frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
+            limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
             /*
             * The following are placeholder/convenience functions should the developers want to implement it
             * in a callback-oriented way. (Invoked as subscription's side-effect.)
@@ -1105,6 +1107,7 @@ Below is a code sample on how to use this SDK feature:
             chatRoomId = testChatRoom.id!!,
             lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
             frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
+            limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
             /*
             * The following are placeholder/convenience functions should the developers want to implement it
             * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }.)

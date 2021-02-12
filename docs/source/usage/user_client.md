@@ -561,6 +561,140 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## Set User Notification as Read by Chat Event
+
+This marks a notification as being in READ status. That will prevent the notification from being returned in a call to List User Notifications unless the default filters are overridden. Notifications that are marked as read will be automatically deleted after some time.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#073d5ec4-cef6-46cc-8b52-72083db6f310>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val updatedNotification = withContext(Dispatchers.IO) {
+                userClient.setUserNotificationAsReadByChatEvent(
+                    userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+                    chatEventId = "070200623280c142a902",    // The ID of chatevent for which the notification was generated from, about to update
+                    read = true
+                )
+            }
+
+            // Resolve `updatedNotification` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.setUserNotificationAsReadByChatEvent(
+            userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+            chatEventId = "070200623280c142a902",    // The ID of chatevent for which the notification was generated from, about to update
+            read = true
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { updatedNotification ->
+                // Resolve `updatedNotification` (ex. Display prompt OR Update UI)
+            }
+```
+
+## Delete User Notification
+
+This function immediately deletes a user notification. Unless your workflow specifically implements access to read notifications, you should delete notifications after they are consumed.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#7cbb108d-8b72-4c59-8537-fa9ea4a71364>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val deletedNotification = withContext(Dispatchers.IO) {
+                userClient.deleteUserNotification(
+                    userid = "023976080242ac120002",    // The ID of user who owns the notification about to delete
+                    notificationId = "070200623280c142a902"    // The ID of notifications about to delete
+                )
+            }
+
+            // Resolve `deletedNotification` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.deleteUserNotification(
+            userid = "023976080242ac120002",    // The ID of user who owns the notification about to delete
+            notificationId = "070200623280c142a902"    // The ID of notifications about to delete
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { deletedNotification ->
+                // Resolve `deletedNotification` (ex. Display prompt OR Update UI)
+            }
+```
+
+## Delete User Notification by Chat Event
+
+This function immediately deletes a user notification. Unless your workflow specifically implements access to read notifications, you should delete notifications after they are consumed.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#073d5ec4-cef6-46cc-8b52-72083db6f310>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val deletedNotification = withContext(Dispatchers.IO) {
+                userClient.deleteUserNotificationByChatEvent(
+                    userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+                    chatEventId = "070200623280c142a902"    // The ID of chatevent for which the notification was generated from, about to delete
+                )
+            }
+
+            // Resolve `deletedNotification` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.deleteUserNotificationByChatEvent(
+            userid = "023976080242ac120002",    // The ID of user who owns the notification about to update
+            chatEventId = "070200623280c142a902"    // The ID of chatevent for which the notification was generated from, about to delete
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { deletedNotification ->
+                // Resolve `deletedNotification` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Mark All User Notifications as Read
 
 This marks a all notifications of the user as being in READ status. If delete is set to true, notifications are deleted instead of updated.

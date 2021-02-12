@@ -133,9 +133,10 @@ constructor(
                         _lastExecuteCommandTimestamp = 0L
                     }
 
-    override fun getUpdates(chatRoomId: String, cursor: String?): Single<GetUpdatesResponse> =
+    override fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): Single<GetUpdatesResponse> =
             chatService.getUpdates(
                     chatRoomId = chatRoomId,
+                    limit = limit,
                     cursor = cursor
             )
 
