@@ -55,6 +55,9 @@ constructor(
     override fun deleteUserNotification(userId: String, notificationId: String): Single<UserNotification> =
             userService.deleteUserNotification(userId, notificationId)
 
+    override fun deleteUserNotificationByChatEvent(userId: String, chatEventId: String): Single<UserNotification> =
+            userService.deleteUserNotificationByChatEvent(userId, chatEventId)
+
     override fun markAllUserNotificationsAsRead(userid: String, delete: Boolean): Completable =
             userService.markAllUserNotificationsAsRead(userid, delete)
 }
