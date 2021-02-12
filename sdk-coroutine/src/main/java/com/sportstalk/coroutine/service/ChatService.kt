@@ -126,9 +126,9 @@ interface ChatService {
      * - https://apiref.sportstalk247.com/?version=latest#be93067d-562e-41b2-97b2-b2bf177f1282
      * - Get the Recent Updates to a Room
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun getUpdates(
             chatRoomId: String,
+            limit: Int? = null, // (optional) Number of events to return. Default is 100, maximum is 500.
             cursor: String? = null /* eventId */
     ): GetUpdatesResponse
 

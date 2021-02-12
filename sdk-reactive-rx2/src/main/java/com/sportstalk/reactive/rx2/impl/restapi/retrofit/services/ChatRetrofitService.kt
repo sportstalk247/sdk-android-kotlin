@@ -85,6 +85,7 @@ interface ChatRetrofitService {
     fun getUpdates(
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
+            @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null /* eventId */
     ): Single<Response<ApiResponse<GetUpdatesResponse>>>
 

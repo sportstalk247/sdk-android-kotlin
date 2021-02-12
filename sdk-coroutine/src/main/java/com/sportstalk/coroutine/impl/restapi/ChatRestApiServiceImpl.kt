@@ -269,39 +269,36 @@ constructor(
         }
     }
 
-    override suspend fun getUpdates(
-            chatRoomId: String,
-            cursor: String?
-    ): GetUpdatesResponse {
-        try {
-            val response = service.getUpdates(
-                    appId = appId,
-                    chatRoomId = chatRoomId,
-                    cursor = cursor
-            )
+    override suspend fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): GetUpdatesResponse =
+            try {
+                val response = service.getUpdates(
+                        appId = appId,
+                        chatRoomId = chatRoomId,
+                        limit = limit,
+                        cursor = cursor
+                )
 
-            val respBody = response.body()
-            return if (response.isSuccessful && respBody?.data != null) {
-                respBody.data!!
-            } else {
-                throw response.errorBody()?.string()?.let { errBodyStr ->
-                    json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                val respBody = response.body()
+                if (response.isSuccessful && respBody?.data != null) {
+                    respBody.data!!
+                } else {
+                    throw response.errorBody()?.string()?.let { errBodyStr ->
+                        json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                    }
+                            ?: SportsTalkException(
+                                    kind = respBody?.kind ?: Kind.API,
+                                    message = respBody?.message ?: response.message(),
+                                    code = respBody?.code ?: response.code()
+                            )
                 }
-                        ?: SportsTalkException(
-                                kind = respBody?.kind ?: Kind.API,
-                                message = respBody?.message ?: response.message(),
-                                code = respBody?.code ?: response.code()
-                        )
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
             }
-        } catch (err: SportsTalkException) {
-            throw err
-        } catch (err: Throwable) {
-            throw SportsTalkException(
-                    message = err.message,
-                    err = err
-            )
-        }
-    }
 
     override suspend fun messageIsReported(which: ChatEvent, userid: String): Boolean =
             which.reports.any { _report -> _report.userid == userid }

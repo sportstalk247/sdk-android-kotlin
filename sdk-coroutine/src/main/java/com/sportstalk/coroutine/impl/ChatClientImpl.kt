@@ -135,10 +135,11 @@ constructor(
                         _lastExecuteCommandTimestamp = 0L
                     }
 
-    override suspend fun getUpdates(chatRoomId: String, cursor: String?): GetUpdatesResponse =
+    override suspend fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): GetUpdatesResponse =
             try {
                 chatService.getUpdates(
                         chatRoomId = chatRoomId,
+                        limit = limit,
                         cursor = cursor
                 )
             } catch (err: SportsTalkException) {

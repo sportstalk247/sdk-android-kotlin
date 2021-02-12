@@ -1129,9 +1129,12 @@ class ChatServiceTest {
                 events = listOf(testSendMessageData)
         )
 
+        val testInputLimit = 10
+
         // WHEN
         val testActualResult = chatService.getUpdates(
-                chatRoomId = testCreatedChatRoomData.id!!/*,
+                chatRoomId = testCreatedChatRoomData.id!!,
+                limit = testInputLimit/*,
                 cursor = null*/
         )
 
@@ -1147,6 +1150,7 @@ class ChatServiceTest {
         assertTrue { testActualResult.kind == testExpectedResult.kind }
         assertTrue { testActualResult.itemcount!! >= testExpectedResult.itemcount!! }
         assertTrue { testActualResult.more == testExpectedResult.more }
+        assertTrue { testActualResult.events.size <= testInputLimit }
         assertTrue {
             testActualResult.events.any { ev ->
                 ev.id == testSendMessageData.id
