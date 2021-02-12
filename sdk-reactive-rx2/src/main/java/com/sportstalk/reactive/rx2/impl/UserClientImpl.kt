@@ -49,6 +49,9 @@ constructor(
     override fun setUserNotificationAsRead(userId: String, notificationId: String, read: Boolean): Single<UserNotification> =
             userService.setUserNotificationAsRead(userId, notificationId, read)
 
+    override fun setUserNotificationAsReadByChatEvent(userId: String, chatEventId: String, read: Boolean): Single<UserNotification> =
+            userService.setUserNotificationAsReadByChatEvent(userId, chatEventId, read)
+
     override fun markAllUserNotificationsAsRead(userid: String, delete: Boolean): Completable =
             userService.markAllUserNotificationsAsRead(userid, delete)
 }

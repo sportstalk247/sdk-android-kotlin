@@ -88,6 +88,14 @@ interface UsersRetrofitService {
             @Query("read") read: Boolean
     ): Single<Response<ApiResponse<UserNotification>>>
 
+    @PUT("{appId}/user/users/{userId}/notification/notificationsbyid/chateventid/{chatEventId}/update")
+    fun setUserNotificationAsReadByChatEvent(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Path(value = "chatEventId", encoded = true) chatEventId: String,
+            @Query("read") read: Boolean
+    ): Single<Response<ApiResponse<UserNotification>>>
+
     @PUT("{appId}/user/users/{userId}/notification/notifications_all/markread")
     fun markAllUserNotificationsAsRead(
             @Path("appId") appId: String,

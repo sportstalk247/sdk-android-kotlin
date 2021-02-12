@@ -248,6 +248,24 @@ constructor(
                 )
             }
 
+    override suspend fun setUserNotificationAsReadByChatEvent(userId: String, chatEventId: String, read: Boolean): UserNotification =
+            try {
+                service.setUserNotificationAsReadByChatEvent(
+                        appId = appId,
+                        userId = userId,
+                        chatEventId = chatEventId,
+                        read = read
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
     override suspend fun markAllUserNotificationsAsRead(userid: String, delete: Boolean) =
             try {
                 val response = service.markAllUserNotificationsAsRead(
