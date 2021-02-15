@@ -431,7 +431,7 @@ constructor(
             request: ExecuteChatCommandRequest
     ): ExecuteChatCommandResponse =
             try {
-                if(request.command.contains("purge")) {
+                if(request.command.startsWith("*purge")) {
                     val response = service.executeChatCommand(
                             appId = appId,
                             chatRoomId = chatRoomId,

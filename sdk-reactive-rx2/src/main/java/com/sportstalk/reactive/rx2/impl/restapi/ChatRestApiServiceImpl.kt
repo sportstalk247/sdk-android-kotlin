@@ -272,7 +272,7 @@ constructor(
                     .handleSdkResponse(json)
 
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): Single<ExecuteChatCommandResponse> =
-            if(request.command.contains("purge")) {
+            if(request.command.startsWith("*purge")) {
                 service.executeChatCommand(
                         appId = appId,
                         chatRoomId = chatRoomId,
