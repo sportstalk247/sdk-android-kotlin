@@ -20,7 +20,7 @@ data class User(
         val role: String? = null,
         val customtags: List<String> = listOf(),
         val banned: Boolean? = null,
-        val bannedexpires?: String = null, // ISODate ex. "2020-11-11T11:35:07.657812Z"
+        val banexpires: String? = null, // ISODate ex. "2020-11-11T11:35:07.657812Z"
         val shadowbanned: Boolean? = null,
         val shadowbanexpires: String? = null,   // ISODate ex. "2020-11-11T11:35:07.657812Z"
         val muted: Boolean? = null,
