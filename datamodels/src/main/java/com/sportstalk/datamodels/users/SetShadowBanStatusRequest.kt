@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SetShadowBanStatusRequest(
-        val shadowban: Boolean,
+        val applyeffect: Boolean,
         val expireseconds: Long? = null     // in seconds
 )

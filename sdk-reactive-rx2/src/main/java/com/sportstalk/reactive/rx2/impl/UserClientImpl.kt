@@ -34,8 +34,8 @@ constructor(
     override fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): Single<ListUsersResponse> =
             userService.searchUsers(handle, name, userid, limit, cursor)
 
-    override fun setShadowBanStatus(userId: String, shadowban: Boolean, expireseconds: Long?): Single<User> =
-            userService.setShadowBanStatus(userId, shadowban, expireseconds)
+    override fun setShadowBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): Single<User> =
+            userService.setShadowBanStatus(userId, applyeffect, expireseconds)
 
     override fun globallyPurgeUserContent(userId: String, banned: Boolean): Single<GloballyPurgeUserContentResponse> =
             userService.globallyPurgeUserContent(userId, banned)

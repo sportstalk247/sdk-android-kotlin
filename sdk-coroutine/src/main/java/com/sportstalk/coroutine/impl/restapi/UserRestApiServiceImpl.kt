@@ -137,7 +137,7 @@ constructor(
 
     override suspend fun setShadowBanStatus(
             userId: String,
-            shadowban: Boolean,
+            applyeffect: Boolean,
             expireseconds: Long?
     ): User =
             try {
@@ -145,7 +145,7 @@ constructor(
                         appId = appId,
                         userId = userId,
                         request = SetShadowBanStatusRequest(
-                                shadowban = shadowban,
+                                applyeffect = applyeffect,
                                 expireseconds = expireseconds
                         )
                 )

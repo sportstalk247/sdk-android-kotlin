@@ -767,7 +767,8 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.setShadowBanStatus(
                 userId = testCreatedUser.userid!!,
-                shadowban = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         ).blockingGet()
 
         // THEN

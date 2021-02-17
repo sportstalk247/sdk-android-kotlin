@@ -78,12 +78,12 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun setShadowBanStatus(userId: String, shadowban: Boolean, expireseconds: Long?): Single<User> =
+    override fun setShadowBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): Single<User> =
             service.setShadowBanStatus(
                     appId = appId,
                     userId = userId,
                     request = SetShadowBanStatusRequest(
-                            shadowban = shadowban,
+                            applyeffect = applyeffect,
                             expireseconds = expireseconds
                     )
             )

@@ -72,7 +72,7 @@ interface UserService {
      */
     suspend fun setShadowBanStatus(
             userId: String,
-            shadowban: Boolean,
+            applyeffect: Boolean,
             expireseconds: Long? = null
     ): User
 
