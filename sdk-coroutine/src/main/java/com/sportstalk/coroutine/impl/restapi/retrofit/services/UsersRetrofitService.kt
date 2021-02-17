@@ -116,4 +116,11 @@ interface UsersRetrofitService {
             @Query("delete") delete: Boolean
     ): Response<ApiResponse<String>>
 
+    @POST("{appId}/user/users/{userId}/mute")
+    suspend fun muteUser(
+            @Path("appId") appId: String,
+            @Path(value = "userId", encoded = true) userId: String,
+            @Body request: MuteUserRequest
+    ): Response<ApiResponse<User>>
+
 }

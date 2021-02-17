@@ -1621,6 +1621,82 @@ class UserServiceTest {
         return@runBlocking
     }
 
+    @Test
+    fun `P) Mute User`() = runBlocking {
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
+                displayname = "Test 1"
+        )
+        // Should create a test user first
+        val testCreatedUser = userService.createOrUpdateUser(request = testInputRequest)
+
+        val testExpectedResult = testCreatedUser.copy()
+
+        // WHEN
+        val testActualResult = userService.muteUser(
+                userId = testCreatedUser.userid!!,
+                applyeffect = true,
+                expireseconds = 3_000_000L
+        )
+
+        // THEN
+        println(
+                "`Mute User`() -> testActualResult = \n" +
+                        json.stringify/*encodeToString*/(
+                                User.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        // "@handle_test1 was banned"
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.handle == testExpectedResult.handle!! }
+        assertTrue { testActualResult.handlelowercase == testExpectedResult.handlelowercase!! }
+        assertTrue { testActualResult.displayname == testExpectedResult.displayname }
+        assertTrue { testActualResult.muted == true }
+
+        // Perform Delete Test User
+        deleteTestUsers(testActualResult.userid)
+    }
+
+    @Test
+    fun `P-ERROR-404) Mute User`() = runBlocking {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                userService.muteUser(
+                        userId = testInputUserId,
+                        applyeffect = true,
+                        expireseconds = 3_000_000L
+                )
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-404 - Mute User`() -> testActualResult = \n" +
+                            json.stringify/*encodeToString*/(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The specified user ($testInputUserId) was not found." }
+            assertTrue { err.code == 404 }
+
+            throw err
+        }
+
+        return@runBlocking
+    }
+
     object TestData {
         val ADMIN_PASSWORD = "zola"
 

@@ -190,4 +190,15 @@ constructor(
                             )
                         }
                     }
+
+    override fun muteUser(userId: String, applyeffect: Boolean, expireseconds: Long?): Single<User> =
+            service.muteUser(
+                    appId = appId,
+                    userId = URLEncoder.encode(userId, Charsets.UTF_8.name()),
+                    request = MuteUserRequest(
+                            applyeffect = applyeffect,
+                            expireseconds = expireseconds
+                    )
+            )
+                    .handleSdkResponse(json)
 }

@@ -58,4 +58,7 @@ constructor(
 
     override suspend fun markAllUserNotificationsAsRead(userid: String, delete: Boolean) =
             userService.markAllUserNotificationsAsRead(userid, delete)
+
+    override suspend fun muteUser(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
+            userService.muteUser(userId, applyeffect, expireseconds)
 }

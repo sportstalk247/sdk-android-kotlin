@@ -60,4 +60,7 @@ constructor(
 
     override fun markAllUserNotificationsAsRead(userid: String, delete: Boolean): Completable =
             userService.markAllUserNotificationsAsRead(userid, delete)
+
+    override fun muteUser(userId: String, applyeffect: Boolean, expireseconds: Long?): Single<User> =
+            userService.muteUser(userId, applyeffect, expireseconds)
 }

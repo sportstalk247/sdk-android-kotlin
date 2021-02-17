@@ -160,4 +160,15 @@ interface UserService {
             delete: Boolean
     ): Completable
 
+    /**
+     * [GET] /{{api_appid}}/user/users/{userId}/mute
+     * - https://apiref.sportstalk247.com/?version=latest#0d4c6409-18c6-41f4-9a61-7e2445c5bc0d
+     * - Will toggle the user's mute effect
+     */
+    fun muteUser(
+            userId: String,
+            applyeffect: Boolean,
+            expireseconds: Long? = null
+    ): Single<User>
+
 }
