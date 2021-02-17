@@ -225,4 +225,11 @@ interface ChatRetrofitService {
             @Body request: ReactToAMessageRequest
     ): Single<Response<ApiResponse<ChatEvent>>>
 
+    @POST("{appId}/chat/rooms/{chatroomId}/shadowban")
+    fun shadowBanUser(
+            @Path("appId") appId: String,
+            @Path(value = "chatroomId", encoded = true) chatroomId: String,
+            @Body request: ShadowBanUserInRoomRequest
+    ): Single<Response<ApiResponse<ChatRoom>>>
+
 }

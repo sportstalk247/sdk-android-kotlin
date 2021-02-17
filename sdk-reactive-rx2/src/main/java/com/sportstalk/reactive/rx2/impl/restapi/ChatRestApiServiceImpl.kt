@@ -395,4 +395,16 @@ constructor(
                     request = request
             )
                     .handleSdkResponse(json)
+
+    override fun shadowBanUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): Single<ChatRoom> =
+            service.shadowBanUser(
+                    appId = appId,
+                    chatroomId = chatRoomId,
+                    request = ShadowBanUserInRoomRequest(
+                            userid = userid,
+                            applyeffect = applyeffect,
+                            expireseconds = expireseconds
+                    )
+            )
+                    .handleSdkResponse(json)
 }

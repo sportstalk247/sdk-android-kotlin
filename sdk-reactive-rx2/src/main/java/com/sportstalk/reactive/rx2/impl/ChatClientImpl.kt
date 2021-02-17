@@ -295,6 +295,9 @@ constructor(
                     request = request
             )
 
+    override fun shadowBanUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): Single<ChatRoom> =
+            chatService.shadowBanUser(chatRoomId, userid, applyeffect, expireseconds)
+
     companion object {
         private const val DURATION_EXECUTE_COMMAND = 3000L
     }

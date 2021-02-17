@@ -665,4 +665,25 @@ constructor(
                         err = err
                 )
             }
+
+    override suspend fun shadowBanUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): ChatRoom =
+            try {
+                service.shadowBanUser(
+                        appId = appId,
+                        chatroomId = chatRoomId,
+                        request = ShadowBanUserInRoomRequest(
+                                userid = userid,
+                                applyeffect = applyeffect,
+                                expireseconds = expireseconds
+                        )
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 }

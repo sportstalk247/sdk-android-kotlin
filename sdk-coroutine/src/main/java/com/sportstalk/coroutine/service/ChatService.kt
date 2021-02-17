@@ -355,4 +355,16 @@ interface ChatService {
             request: ReactToAMessageRequest
     ): ChatEvent
 
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/shadowban
+     * - https://apiref.sportstalk247.com/?version=latest#c4a83dfa-9e83-4eb8-b371-e105463f3a52
+     * - Will toggle the user's shadow banned flag
+     */
+    suspend fun shadowBanUser(
+            chatRoomId: String,
+            userid: String,
+            applyeffect: Boolean,
+            expireseconds: Long? = null
+    ): ChatRoom
+
 }
