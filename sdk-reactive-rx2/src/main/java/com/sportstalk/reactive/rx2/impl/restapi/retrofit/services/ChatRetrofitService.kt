@@ -232,4 +232,11 @@ interface ChatRetrofitService {
             @Body request: ShadowBanUserInRoomRequest
     ): Single<Response<ApiResponse<ChatRoom>>>
 
+    @POST("{appId}/chat/rooms/{chatroomId}/mute")
+    fun muteUser(
+            @Path("appId") appId: String,
+            @Path(value = "chatroomId", encoded = true) chatroomId: String,
+            @Body request: MuteUserInRoomRequest
+    ): Single<Response<ApiResponse<ChatRoom>>>
+
 }

@@ -295,6 +295,9 @@ constructor(
     override suspend fun shadowBanUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): ChatRoom =
             chatService.shadowBanUser(chatRoomId, userid, applyeffect, expireseconds)
 
+    override suspend fun muteUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): ChatRoom =
+            chatService.muteUser(chatRoomId, userid, applyeffect, expireseconds)
+
     override suspend fun approveMessage(eventId: String, approve: Boolean): ChatEvent =
             moderationService.approveMessage(
                     eventId = eventId,

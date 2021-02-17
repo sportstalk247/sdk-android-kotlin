@@ -369,4 +369,16 @@ interface ChatService {
             expireseconds: Long? = null
     ): Single<ChatRoom>
 
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/mute
+     * - https://apiref.sportstalk247.com/?version=latest#67d66190-eb25-4f19-9d65-c127ed368233
+     * - Will toggle the user's mute effect
+     */
+    fun muteUser(
+            chatRoomId: String,
+            userid: String,
+            applyeffect: Boolean,
+            expireseconds: Long? = null
+    ): Single<ChatRoom>
+
 }

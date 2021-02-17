@@ -686,4 +686,25 @@ constructor(
                         err = err
                 )
             }
+
+    override suspend fun muteUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): ChatRoom =
+            try {
+                service.muteUser(
+                        appId = appId,
+                        chatroomId = chatRoomId,
+                        request = MuteUserInRoomRequest(
+                                userid = userid,
+                                applyeffect = applyeffect,
+                                expireseconds = expireseconds
+                        )
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
 }

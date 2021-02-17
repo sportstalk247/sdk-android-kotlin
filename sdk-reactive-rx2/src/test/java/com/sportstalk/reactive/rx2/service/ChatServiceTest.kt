@@ -3983,7 +3983,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `AC-ERROR-404) Shadow Ban User In Room`() {
+    fun `AC-ERROR-404) Shadow Ban User In Room - Room Does NOT Exist`() {
         // GIVEN
         val testInputRoomId = "NON-Existing-Room-ID"
         val testInputUserId = "NON-Existing-User-ID"
@@ -4009,7 +4009,7 @@ class ChatServiceTest {
                     }
 
                     println(
-                            "`ERROR-404 - Shadow Ban User In Room`() -> testActualResult = \n" +
+                            "`ERROR-404 - Shadow Ban User In Room - Room Does NOT Exist`() -> testActualResult = \n" +
                                     json.stringify/*encodeToString*/(
                                             SportsTalkException.serializer(),
                                             err
@@ -4018,6 +4018,239 @@ class ChatServiceTest {
 
                     return@assertError err.kind == Kind.API
                             && err.message == "The specified Room does not exist."
+                            && err.code == 404
+                }
+    }
+
+    @Test
+    fun `AC-ERROR-404) Shadow Ban User In Room - User Does NOT Exist`() {
+        // GIVEN
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
+
+        val testInputRoomId = testCreatedChatRoomData.id!!
+        val testInputUserId = "NON-Existing-User-ID"
+        val testInputApplyEffect = true
+        val testInputExpireSeconds = 3_000L
+
+        val shadowBanUserInRoom = TestObserver<ChatRoom>()
+
+        // WHEN
+        chatService.shadowBanUser(
+                chatRoomId = testInputRoomId,
+                userid = testInputUserId,
+                applyeffect = testInputApplyEffect,
+                expireseconds = testInputExpireSeconds
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(shadowBanUserInRoom)
+
+        // THEN
+        shadowBanUserInRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
+
+                    println(
+                            "`ERROR-404 - Shadow Ban User In Room - User Does NOT Exist`() -> testActualResult = \n" +
+                                    json.stringify/*encodeToString*/(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified User does not exist."
+                            && err.code == 404
+                }
+    }
+
+    @Test
+    fun `AD) Mute User In Room`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        ).blockingGet()
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputUserId = testCreatedUserData.userid!!
+        val testInputApplyEffect = true
+        val testInputExpireSeconds = 3_000L
+
+        val testExpectedResult = testCreatedChatRoomData.copy()
+
+        // WHEN
+        val testActualResult = chatService.muteUser(
+                chatRoomId = testInputChatRoomId,
+                userid = testInputUserId,
+                applyeffect = testInputApplyEffect,
+                expireseconds = testInputExpireSeconds
+        ).blockingGet()
+
+        // THEN
+        println(
+                "`Mute User In Room`() -> testActualResult = \n" +
+                        json.stringify/*encodeToString*/(
+                                ChatRoom.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.id == testExpectedResult.id }
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `AD-ERROR-404) Mute User In Room - Room Does NOT Exist`() {
+        // GIVEN
+        val testInputRoomId = "NON-Existing-Room-ID"
+        val testInputUserId = "NON-Existing-User-ID"
+        val testInputApplyEffect = true
+        val testInputExpireSeconds = 3_000L
+        val shadowBanUserInRoom = TestObserver<ChatRoom>()
+
+        // WHEN
+        chatService.muteUser(
+                chatRoomId = testInputRoomId,
+                userid = testInputUserId,
+                applyeffect = testInputApplyEffect,
+                expireseconds = testInputExpireSeconds
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(shadowBanUserInRoom)
+
+        // THEN
+        shadowBanUserInRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
+
+                    println(
+                            "`ERROR-404 - Mute User In Room - Room Does NOT Exist`() -> testActualResult = \n" +
+                                    json.stringify/*encodeToString*/(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified Room does not exist."
+                            && err.code == 404
+                }
+    }
+
+    @Test
+    fun `AD-ERROR-404) Mute User In Room - User Does NOT Exist`() {
+        // GIVEN
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
+
+        val testInputRoomId = testCreatedChatRoomData.id!!
+        val testInputUserId = "NON-Existing-User-ID"
+        val testInputApplyEffect = true
+        val testInputExpireSeconds = 3_000L
+
+        val shadowBanUserInRoom = TestObserver<ChatRoom>()
+
+        // WHEN
+        chatService.muteUser(
+                chatRoomId = testInputRoomId,
+                userid = testInputUserId,
+                applyeffect = testInputApplyEffect,
+                expireseconds = testInputExpireSeconds
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(shadowBanUserInRoom)
+
+        // THEN
+        shadowBanUserInRoom
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
+
+                    println(
+                            "`ERROR-404 - Mute User In Room - User Does NOT Exist`() -> testActualResult = \n" +
+                                    json.stringify/*encodeToString*/(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified User does not exist."
                             && err.code == 404
                 }
     }

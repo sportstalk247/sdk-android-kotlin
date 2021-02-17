@@ -407,4 +407,16 @@ constructor(
                     )
             )
                     .handleSdkResponse(json)
+
+    override fun muteUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): Single<ChatRoom> =
+            service.muteUser(
+                    appId = appId,
+                    chatroomId = chatRoomId,
+                    request = MuteUserInRoomRequest(
+                            userid = userid,
+                            applyeffect = applyeffect,
+                            expireseconds = expireseconds
+                    )
+            )
+                    .handleSdkResponse(json)
 }
