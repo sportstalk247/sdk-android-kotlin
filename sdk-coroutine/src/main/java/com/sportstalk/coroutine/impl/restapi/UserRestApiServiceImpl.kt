@@ -87,12 +87,15 @@ constructor(
                 )
             }
 
-    override suspend fun setBanStatus(userId: String, banned: Boolean): User =
+    override suspend fun setBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
             try {
                 service.setBanStatus(
                         appId = appId,
                         userId = URLEncoder.encode(userId, Charsets.UTF_8.name()),
-                        request = BanUserRequest(banned)
+                        request = BanUserRequest(
+                                applyeffect = applyeffect,
+                                expireseconds = expireseconds
+                        )
                 )
                         .handleSdkResponse(json)
             } catch (err: SportsTalkException) {

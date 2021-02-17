@@ -432,7 +432,8 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         )
 
         // THEN
@@ -469,7 +470,8 @@ class UserServiceTest {
             withContext(Dispatchers.IO) {
                 userService.setBanStatus(
                         userId = testInputUserId,
-                        banned = true
+                        applyeffect = true,
+                        expireseconds = 3_000_000L
                 )
             }
         } catch (err: SportsTalkException) {
@@ -481,7 +483,7 @@ class UserServiceTest {
                             )
             )
             assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified user is not found." }
+            assertTrue { err.message == "The specified user ($testInputUserId) was not found." }
             assertTrue { err.code == 404 }
 
             throw err
@@ -504,7 +506,8 @@ class UserServiceTest {
         // The test user should be BANNED first
         userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         )
 
         val testExpectedResult = testCreatedUser.copy()
@@ -512,7 +515,7 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = false
+                applyeffect = false
         )
 
         // THEN
@@ -549,7 +552,7 @@ class UserServiceTest {
             withContext(Dispatchers.IO) {
                 userService.setBanStatus(
                         userId = testInputUserId,
-                        banned = false
+                        applyeffect = false
                 )
             }
         } catch (err: SportsTalkException) {
@@ -561,7 +564,7 @@ class UserServiceTest {
                             )
             )
             assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified user is not found." }
+            assertTrue { err.message == "The specified user ($testInputUserId) was not found." }
             assertTrue { err.code == 404 }
 
             throw err

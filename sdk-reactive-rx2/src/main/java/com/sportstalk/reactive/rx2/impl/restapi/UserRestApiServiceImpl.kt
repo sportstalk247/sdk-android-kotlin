@@ -54,11 +54,14 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun setBanStatus(userId: String, banned: Boolean): Single<User> =
+    override fun setBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): Single<User> =
             service.setBanStatus(
                     appId = appId,
                     userId = URLEncoder.encode(userId, Charsets.UTF_8.name()),
-                    request = BanUserRequest(banned)
+                    request = BanUserRequest(
+                            applyeffect = applyeffect,
+                            expireseconds = expireseconds
+                    )
             )
                     .handleSdkResponse(json)
 

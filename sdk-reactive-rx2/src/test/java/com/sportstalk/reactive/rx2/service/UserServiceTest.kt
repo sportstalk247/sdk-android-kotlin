@@ -437,7 +437,8 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         ).blockingGet()
 
         // THEN
@@ -471,7 +472,8 @@ class UserServiceTest {
         // WHEN
         userService.setBanStatus(
                 userId = testInputUserId,
-                banned = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         )
                 .doOnSubscribe { rxDisposeBag.add(it) }
                 .subscribe(setBanStatus)
@@ -492,7 +494,7 @@ class UserServiceTest {
                     )
 
                     return@assertError err.kind == Kind.API
-                            && err.message == "The specified user is not found."
+                            && err.message == "The specified user ($testInputUserId) was not found."
                             && err.code == 404
 
                 }
@@ -514,7 +516,8 @@ class UserServiceTest {
         // The test user should be BANNED first
         userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         ).blockingGet()
 
         val testExpectedResult = testCreatedUser.copy()
@@ -522,7 +525,7 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = false
+                applyeffect = false
         ).blockingGet()
 
         // THEN
@@ -555,7 +558,7 @@ class UserServiceTest {
         // WHEN
         userService.setBanStatus(
                 userId = testInputUserId,
-                banned = false
+                applyeffect = false
         )
                 .doOnSubscribe { rxDisposeBag.add(it) }
                 .subscribe(setBanStatus)
@@ -576,7 +579,7 @@ class UserServiceTest {
                     )
 
                     return@assertError err.kind == Kind.API
-                            && err.message == "The specified user is not found."
+                            && err.message == "The specified user ($testInputUserId) was not found."
                             && err.code == 404
                 }
     }

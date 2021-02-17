@@ -26,8 +26,8 @@ constructor(
     override suspend fun listUsers(limit: Int?, cursor: String?): ListUsersResponse =
             userService.listUsers(limit)
 
-    override suspend fun setBanStatus(userId: String, banned: Boolean): User =
-            userService.setBanStatus(userId, banned)
+    override suspend fun setBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
+            userService.setBanStatus(userId, applyeffect, expireseconds)
 
     override suspend fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): ListUsersResponse =
             userService.searchUsers(handle, name, userid, limit, cursor)

@@ -28,8 +28,8 @@ constructor(
     override fun listUsers(limit: Int?, cursor: String?): Single<ListUsersResponse> =
             userService.listUsers(limit)
 
-    override fun setBanStatus(userId: String, banned: Boolean): Single<User> =
-            userService.setBanStatus(userId, banned)
+    override fun setBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): Single<User> =
+            userService.setBanStatus(userId, applyeffect, expireseconds)
 
     override fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): Single<ListUsersResponse> =
             userService.searchUsers(handle, name, userid, limit, cursor)

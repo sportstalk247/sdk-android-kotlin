@@ -45,4 +45,4 @@ data class ReportedUser(
         /** [ReportType] */
         val reason: String? = null,
         val added: String? = null /* ISODateTime Format */
-)
+): Parcelable

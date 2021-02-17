@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BanUserRequest(
-        val banned: Boolean
+        val applyeffect: Boolean,
+        val expireseconds: Long? = null
 )
