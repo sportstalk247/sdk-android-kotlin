@@ -2,6 +2,8 @@ package com.sportstalk.coroutine.impl.restapi.retrofit.services
 
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.ApiResponse
+import com.sportstalk.datamodels.users.SetShadowBanStatusRequest
+import com.sportstalk.datamodels.users.User
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -223,5 +225,19 @@ interface ChatRetrofitService {
             @Path("eventid") eventId: String,
             @Body request: ReactToAMessageRequest
     ): Response<ApiResponse<ChatEvent>>
+
+    @POST("{appId}/chat/rooms/{chatroomId}/shadowban")
+    suspend fun shadowBanUser(
+            @Path("appId") appId: String,
+            @Path(value = "chatroomId", encoded = true) chatroomId: String,
+            @Body request: ShadowBanUserInRoomRequest
+    ): Response<ApiResponse<ChatRoom>>
+
+    @POST("{appId}/chat/rooms/{chatroomId}/mute")
+    suspend fun muteUser(
+            @Path("appId") appId: String,
+            @Path(value = "chatroomId", encoded = true) chatroomId: String,
+            @Body request: MuteUserInRoomRequest
+    ): Response<ApiResponse<ChatRoom>>
 
 }

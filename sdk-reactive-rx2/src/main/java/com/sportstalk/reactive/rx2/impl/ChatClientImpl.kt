@@ -159,10 +159,12 @@ constructor(
                     eventId = eventId
             )
 
-    override fun reportUserInRoom(chatRoomId: String, request: ReportUserInRoomRequest): Single<ChatRoom> =
+    override fun reportUserInRoom(chatRoomId: String, userid: String, reporterid: String, reporttype: String): Single<ChatRoom> =
             chatService.reportUserInRoom(
                     chatRoomId = chatRoomId,
-                    request = request
+                    userid = userid,
+                    reporterid = reporterid,
+                    reporttype = reporttype
             )
 
     override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): Single<ListEvents> =
@@ -294,6 +296,12 @@ constructor(
                     eventId = eventId,
                     request = request
             )
+
+    override fun shadowBanUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): Single<ChatRoom> =
+            chatService.shadowBanUser(chatRoomId, userid, applyeffect, expireseconds)
+
+    override fun muteUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): Single<ChatRoom> =
+            chatService.muteUser(chatRoomId, userid, applyeffect, expireseconds)
 
     companion object {
         private const val DURATION_EXECUTE_COMMAND = 3000L

@@ -26,14 +26,14 @@ constructor(
     override suspend fun listUsers(limit: Int?, cursor: String?): ListUsersResponse =
             userService.listUsers(limit)
 
-    override suspend fun setBanStatus(userId: String, banned: Boolean): User =
-            userService.setBanStatus(userId, banned)
+    override suspend fun setBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
+            userService.setBanStatus(userId, applyeffect, expireseconds)
 
     override suspend fun searchUsers(handle: String?, name: String?, userid: String?, limit: Int?, cursor: String?): ListUsersResponse =
             userService.searchUsers(handle, name, userid, limit, cursor)
 
-    override suspend fun setShadowBanStatus(userId: String, shadowban: Boolean, expireseconds: Long?): User =
-            userService.setShadowBanStatus(userId, shadowban, expireseconds)
+    override suspend fun setShadowBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
+            userService.setShadowBanStatus(userId, applyeffect, expireseconds)
 
     override suspend fun globallyPurgeUserContent(userId: String, banned: Boolean): GloballyPurgeUserContentResponse =
             userService.globallyPurgeUserContent(userId, banned)
@@ -58,4 +58,7 @@ constructor(
 
     override suspend fun markAllUserNotificationsAsRead(userid: String, delete: Boolean) =
             userService.markAllUserNotificationsAsRead(userid, delete)
+
+    override suspend fun muteUser(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
+            userService.muteUser(userId, applyeffect, expireseconds)
 }

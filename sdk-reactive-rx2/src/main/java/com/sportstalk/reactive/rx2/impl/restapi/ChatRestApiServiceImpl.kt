@@ -233,12 +233,15 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun reportUserInRoom(chatRoomId: String, request: ReportUserInRoomRequest): Single<ChatRoom> =
+    override fun reportUserInRoom(chatRoomId: String, userid: String, reporterid: String, reporttype: String): Single<ChatRoom> =
             service.reportUserInRoom(
                     appId = appId,
                     chatRoomId = chatRoomId,
-                    userId = request.userid,
-                    request = request
+                    userId = userid,
+                    request = ReportUserInRoomRequest(
+                            reporterid = reporterid,
+                            reporttype = reporttype
+                    )
             )
                     .handleSdkResponse(json)
 
@@ -393,6 +396,30 @@ constructor(
                     chatRoomId = chatRoomId,
                     eventId = eventId,
                     request = request
+            )
+                    .handleSdkResponse(json)
+
+    override fun shadowBanUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): Single<ChatRoom> =
+            service.shadowBanUser(
+                    appId = appId,
+                    chatroomId = chatRoomId,
+                    request = ShadowBanUserInRoomRequest(
+                            userid = userid,
+                            applyeffect = applyeffect,
+                            expireseconds = expireseconds
+                    )
+            )
+                    .handleSdkResponse(json)
+
+    override fun muteUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): Single<ChatRoom> =
+            service.muteUser(
+                    appId = appId,
+                    chatroomId = chatRoomId,
+                    request = MuteUserInRoomRequest(
+                            userid = userid,
+                            applyeffect = applyeffect,
+                            expireseconds = expireseconds
+                    )
             )
                     .handleSdkResponse(json)
 }

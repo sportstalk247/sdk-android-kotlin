@@ -188,7 +188,12 @@ interface ChatService {
      */
     fun reportUserInRoom(
             chatRoomId: String,
-            request: ReportUserInRoomRequest
+            /** the person being reported */
+            userid: String,
+            /** the userid of the person doing the report */
+            reporterid: String,
+            /* [ReportType] */
+            reporttype: String
     ): Single<ChatRoom>
 
     /**
@@ -356,5 +361,29 @@ interface ChatService {
             eventId: String,
             request: ReactToAMessageRequest
     ): Single<ChatEvent>
+
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/shadowban
+     * - https://apiref.sportstalk247.com/?version=latest#c4a83dfa-9e83-4eb8-b371-e105463f3a52
+     * - Will toggle the user's shadow banned flag
+     */
+    fun shadowBanUser(
+            chatRoomId: String,
+            userid: String,
+            applyeffect: Boolean,
+            expireseconds: Long? = null
+    ): Single<ChatRoom>
+
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/mute
+     * - https://apiref.sportstalk247.com/?version=latest#67d66190-eb25-4f19-9d65-c127ed368233
+     * - Will toggle the user's mute effect
+     */
+    fun muteUser(
+            chatRoomId: String,
+            userid: String,
+            applyeffect: Boolean,
+            expireseconds: Long? = null
+    ): Single<ChatRoom>
 
 }

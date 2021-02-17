@@ -3,7 +3,7 @@ package com.sportstalk.datamodels.users
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SetShadowBanStatusRequest(
+data class MuteUserRequest(
         val applyeffect: Boolean,
-        val expireseconds: Long? = null     // in seconds
+        val expireseconds: Long? = null
 )

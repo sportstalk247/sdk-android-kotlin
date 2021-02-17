@@ -352,13 +352,16 @@ constructor(
                 )
             }
 
-    override suspend fun reportUserInRoom(chatRoomId: String, request: ReportUserInRoomRequest): ChatRoom =
+    override suspend fun reportUserInRoom(chatRoomId: String, userid: String, reporterid: String, reporttype: String): ChatRoom =
             try {
                 service.reportUserInRoom(
                         appId = appId,
                         chatRoomId = chatRoomId,
-                        userId = request.userid,
-                        request = request
+                        userId = userid,
+                        request = ReportUserInRoomRequest(
+                                reporterid = reporterid,
+                                reporttype = reporttype
+                        )
                 )
                         .handleSdkResponse(json)
             } catch (err: SportsTalkException) {
@@ -655,6 +658,48 @@ constructor(
                         chatRoomId = chatRoomId,
                         eventId = eventId,
                         request = request
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun shadowBanUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): ChatRoom =
+            try {
+                service.shadowBanUser(
+                        appId = appId,
+                        chatroomId = chatRoomId,
+                        request = ShadowBanUserInRoomRequest(
+                                userid = userid,
+                                applyeffect = applyeffect,
+                                expireseconds = expireseconds
+                        )
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun muteUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): ChatRoom =
+            try {
+                service.muteUser(
+                        appId = appId,
+                        chatroomId = chatRoomId,
+                        request = MuteUserInRoomRequest(
+                                userid = userid,
+                                applyeffect = applyeffect,
+                                expireseconds = expireseconds
+                        )
                 )
                         .handleSdkResponse(json)
             } catch (err: SportsTalkException) {

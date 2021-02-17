@@ -437,7 +437,8 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         ).blockingGet()
 
         // THEN
@@ -471,7 +472,8 @@ class UserServiceTest {
         // WHEN
         userService.setBanStatus(
                 userId = testInputUserId,
-                banned = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         )
                 .doOnSubscribe { rxDisposeBag.add(it) }
                 .subscribe(setBanStatus)
@@ -492,7 +494,7 @@ class UserServiceTest {
                     )
 
                     return@assertError err.kind == Kind.API
-                            && err.message == "The specified user is not found."
+                            && err.message == "The specified user ($testInputUserId) was not found."
                             && err.code == 404
 
                 }
@@ -514,7 +516,8 @@ class UserServiceTest {
         // The test user should be BANNED first
         userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         ).blockingGet()
 
         val testExpectedResult = testCreatedUser.copy()
@@ -522,7 +525,7 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.setBanStatus(
                 userId = testCreatedUser.userid!!,
-                banned = false
+                applyeffect = false
         ).blockingGet()
 
         // THEN
@@ -555,7 +558,7 @@ class UserServiceTest {
         // WHEN
         userService.setBanStatus(
                 userId = testInputUserId,
-                banned = false
+                applyeffect = false
         )
                 .doOnSubscribe { rxDisposeBag.add(it) }
                 .subscribe(setBanStatus)
@@ -576,7 +579,7 @@ class UserServiceTest {
                     )
 
                     return@assertError err.kind == Kind.API
-                            && err.message == "The specified user is not found."
+                            && err.message == "The specified user ($testInputUserId) was not found."
                             && err.code == 404
                 }
     }
@@ -764,7 +767,8 @@ class UserServiceTest {
         // WHEN
         val testActualResult = userService.setShadowBanStatus(
                 userId = testCreatedUser.userid!!,
-                shadowban = true
+                applyeffect = true,
+                expireseconds = 3_000_000L
         ).blockingGet()
 
         // THEN
@@ -1660,6 +1664,87 @@ class UserServiceTest {
             // Perform Delete Test User
             deleteTestUsers(testCreatedUserData?.userid)
         }
+    }
+
+    @Test
+    fun `P) Mute User`() {
+        // GIVEN
+        val testInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "handle_test1_${Random.nextInt(100, 999)}",
+                displayname = "Test 1"
+        )
+        // Should create a test user first
+        val testCreatedUser = userService
+                .createOrUpdateUser(request = testInputRequest)
+                .blockingGet()
+
+        val testExpectedResult = testCreatedUser.copy()
+
+        // WHEN
+        val testActualResult = userService.muteUser(
+                userId = testCreatedUser.userid!!,
+                applyeffect = true,
+                expireseconds = 3_000_000L
+        ).blockingGet()
+
+        // THEN
+        println(
+                "`Mute User`() -> testActualResult = \n" +
+                        json.stringify/*encodeToString*/(
+                                User.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        // "@handle_test1 was banned"
+        assertTrue { testActualResult.userid == testExpectedResult.userid }
+        assertTrue { testActualResult.handle == testExpectedResult.handle!! }
+        assertTrue { testActualResult.handlelowercase == testExpectedResult.handlelowercase!! }
+        assertTrue { testActualResult.displayname == testExpectedResult.displayname }
+        assertTrue { testActualResult.muted == true }
+
+        // Perform Delete Test User
+        deleteTestUsers(testActualResult.userid)
+    }
+
+    @Test
+    fun `P-ERROR-404) Mute User`() {
+        // GIVEN
+        val testInputUserId = "non-existing-ID-1234"
+
+        val setBanStatus = TestObserver<User>()
+
+        // WHEN
+        userService.muteUser(
+                userId = testInputUserId,
+                applyeffect = true,
+                expireseconds = 3_000_000L
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(setBanStatus)
+
+        // THEN
+        setBanStatus
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
+
+                    println(
+                            "`ERROR-404 - Mute User`() -> testActualResult = \n" +
+                                    json.stringify/*encodeToString*/(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "The specified user ($testInputUserId) was not found."
+                            && err.code == 404
+
+                }
     }
 
     object TestData {

@@ -42,7 +42,11 @@ interface UserService {
      * - https://apiref.sportstalk247.com/?version=latest#211d5614-b251-4815-bf76-d8f6f66f97ab
      * - Will toggle the user's banned flag
      */
-    fun setBanStatus(userId: String, banned: Boolean): Single<User>
+    fun setBanStatus(
+            userId: String,
+            applyeffect: Boolean,
+            expireseconds: Long? = null
+    ): Single<User>
 
     /**
      * [POST] /{{api_appid}}/user/search
@@ -64,7 +68,7 @@ interface UserService {
      */
     fun setShadowBanStatus(
             userId: String,
-            shadowban: Boolean,
+            applyeffect: Boolean,
             expireseconds: Long? = null
     ): Single<User>
 
@@ -155,5 +159,16 @@ interface UserService {
             userid: String,
             delete: Boolean
     ): Completable
+
+    /**
+     * [GET] /{{api_appid}}/user/users/{userId}/mute
+     * - https://apiref.sportstalk247.com/?version=latest#0d4c6409-18c6-41f4-9a61-7e2445c5bc0d
+     * - Will toggle the user's mute effect
+     */
+    fun muteUser(
+            userId: String,
+            applyeffect: Boolean,
+            expireseconds: Long? = null
+    ): Single<User>
 
 }

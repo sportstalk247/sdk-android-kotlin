@@ -87,12 +87,15 @@ constructor(
                 )
             }
 
-    override suspend fun setBanStatus(userId: String, banned: Boolean): User =
+    override suspend fun setBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
             try {
                 service.setBanStatus(
                         appId = appId,
                         userId = URLEncoder.encode(userId, Charsets.UTF_8.name()),
-                        request = BanUserRequest(banned)
+                        request = BanUserRequest(
+                                applyeffect = applyeffect,
+                                expireseconds = expireseconds
+                        )
                 )
                         .handleSdkResponse(json)
             } catch (err: SportsTalkException) {
@@ -134,7 +137,7 @@ constructor(
 
     override suspend fun setShadowBanStatus(
             userId: String,
-            shadowban: Boolean,
+            applyeffect: Boolean,
             expireseconds: Long?
     ): User =
             try {
@@ -142,7 +145,7 @@ constructor(
                         appId = appId,
                         userId = userId,
                         request = SetShadowBanStatusRequest(
-                                shadowban = shadowban,
+                                applyeffect = applyeffect,
                                 expireseconds = expireseconds
                         )
                 )
@@ -320,6 +323,26 @@ constructor(
                                     code = response.code()
                             )
                 }
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
+    override suspend fun muteUser(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
+            try {
+                service.muteUser(
+                        appId = appId,
+                        userId = URLEncoder.encode(userId, Charsets.UTF_8.name()),
+                        request = MuteUserRequest(
+                                applyeffect = applyeffect,
+                                expireseconds = expireseconds
+                        )
+                )
+                        .handleSdkResponse(json)
             } catch (err: SportsTalkException) {
                 throw err
             } catch (err: Throwable) {

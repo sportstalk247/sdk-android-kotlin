@@ -33,5 +33,16 @@ data class ChatRoom(
         val maxreports: Long? = null,
         val enableprofanityfilter: Boolean? = null,
         val delaymessageseconds: Long? = null,
-        val bouncedusers: List<String>? = null       // List of user IDs
+        val bouncedusers: List<String>? = null,       // List of user IDs
+        val reportedusers: List<ReportedUser>? = null
+): Parcelable
+
+@Parcelize
+@Serializable
+data class ReportedUser(
+        val userid: String? = null,
+        val reportedbyuserid: String? = null,
+        /** [ReportType] */
+        val reason: String? = null,
+        val added: String? = null /* ISODateTime Format */
 ): Parcelable
