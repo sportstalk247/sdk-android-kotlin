@@ -188,7 +188,12 @@ interface ChatService {
      */
     fun reportUserInRoom(
             chatRoomId: String,
-            request: ReportUserInRoomRequest
+            /** the person being reported */
+            userid: String,
+            /** the userid of the person doing the report */
+            reporterid: String,
+            /* [ReportType] */
+            reporttype: String
     ): Single<ChatRoom>
 
     /**

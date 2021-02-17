@@ -352,13 +352,16 @@ constructor(
                 )
             }
 
-    override suspend fun reportUserInRoom(chatRoomId: String, request: ReportUserInRoomRequest): ChatRoom =
+    override suspend fun reportUserInRoom(chatRoomId: String, userid: String, reporterid: String, reporttype: String): ChatRoom =
             try {
                 service.reportUserInRoom(
                         appId = appId,
                         chatRoomId = chatRoomId,
-                        userId = request.userid,
-                        request = request
+                        userId = userid,
+                        request = ReportUserInRoomRequest(
+                                reporterid = reporterid,
+                                reporttype = reporttype
+                        )
                 )
                         .handleSdkResponse(json)
             } catch (err: SportsTalkException) {

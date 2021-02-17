@@ -170,11 +170,8 @@ constructor(
                     eventId = eventId
             )
 
-    override suspend fun reportUserInRoom(chatRoomId: String, request: ReportUserInRoomRequest): ChatRoom =
-            chatService.reportUserInRoom(
-                    chatRoomId = chatRoomId,
-                    request = request
-            )
+    override suspend fun reportUserInRoom(chatRoomId: String, userid: String, reporterid: String, reporttype: String): ChatRoom =
+            chatService.reportUserInRoom(chatRoomId, userid, reporterid, reporttype)
 
     override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
             chatService.listEventsHistory(

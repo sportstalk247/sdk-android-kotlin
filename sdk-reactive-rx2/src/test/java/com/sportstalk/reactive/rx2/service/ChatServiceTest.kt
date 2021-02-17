@@ -1655,6 +1655,19 @@ class ChatServiceTest {
                 .createOrUpdateUser(request = testCreateUserInputRequest)
                 .blockingGet()
 
+        val testAnotherUserData = TestData.users.last()
+        val testAnotherCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testAnotherUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testAnotherUserData.displayname,
+                pictureurl = testAnotherUserData.pictureurl,
+                profileurl = testAnotherUserData.profileurl
+        )
+        // Should create ANOTHER test user first
+        val testAnotherCreatedUserData = userService
+                .createOrUpdateUser(request = testAnotherCreateUserInputRequest)
+                .blockingGet()
+
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
                 name = testChatRoomData.name!!,
@@ -1683,6 +1696,15 @@ class ChatServiceTest {
                 request = testJoinRoomInputRequest
         ).blockingGet()
 
+        val testAnotherJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testAnotherCreatedUserData.userid!!
+        )
+        // Test Another Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testAnotherJoinRoomInputRequest
+        ).blockingGet()
+
         val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
@@ -1696,16 +1718,18 @@ class ChatServiceTest {
                 .speech!!
 
         val testInputChatRoomId = testCreatedChatRoomData.id!!
-        val testInputRequest = ReportUserInRoomRequest(
-                userid = testCreatedUserData.userid!!,
-                reporttype = ReportType.ABUSE
-        )
+        val testInputUserId = testCreatedUserData.userid!!
+        val testInputReporterId = testAnotherCreatedUserData.userid!!
+        val testInputReportType = ReportType.ABUSE
+
         val testExpectedResult = testCreatedChatRoomData.copy()
 
         // WHEN
         val testActualResult = chatService.reportUserInRoom(
                 chatRoomId = testInputChatRoomId,
-                request = testInputRequest
+                userid = testInputUserId,
+                reporterid = testInputReporterId,
+                reporttype = testInputReportType
         ).blockingGet()
 
         // THEN
@@ -1719,6 +1743,12 @@ class ChatServiceTest {
 
         assertTrue { testActualResult.id == testExpectedResult.id }
         assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue {
+            testActualResult.reportedusers?.any { report ->
+                report.userid == testInputUserId
+                        && report.reportedbyuserid == testInputReporterId
+            } == true
+        }
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)
