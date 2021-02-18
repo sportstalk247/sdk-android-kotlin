@@ -2867,8 +2867,9 @@ class ChatServiceTest {
             assertTrue { err.kind == Kind.API }
             assertTrue { err.message == "The message you want to reply to can't be found." }
             assertTrue { err.code == 404 }
-            assertTrue { err.data?.get("kind") == Kind.CHAT_COMMAND }
-            assertTrue { err.data?.get("op") == "speech" }
+            assertTrue { err.data?.getPrimitiveOrNull("kind")?.contentOrNull == Kind.CHAT_COMMAND }
+
+            assertTrue { err.data?.getPrimitiveOrNull("op")?.contentOrNull == "speech" }
 
             throw err
         } finally {
@@ -3666,7 +3667,7 @@ class ChatServiceTest {
             assertTrue { err.kind == Kind.API }
             assertTrue { err.message == "The specified event was not found." }
             assertTrue { err.code == 404 }
-            assertTrue { err.data?.get("eventId") == testChatIdNonExisting }
+            assertTrue { err.data?.getPrimitive("eventId")?.contentOrNull == testChatIdNonExisting }
 
             throw err
         } finally {

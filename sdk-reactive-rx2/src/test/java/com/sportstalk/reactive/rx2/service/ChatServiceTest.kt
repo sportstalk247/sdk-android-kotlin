@@ -21,6 +21,7 @@ import io.reactivex.observers.TestObserver
 import kotlinx.serialization.internal.ArrayListSerializer
 // import kotlinx.serialization.builtins.ArraySerializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonLiteral
 import net.bytebuddy.utility.RandomString
 import org.junit.After
 import org.junit.Before
@@ -2957,8 +2958,8 @@ class ChatServiceTest {
                     return@assertError err.kind == Kind.API
                             && err.message == "The message you want to reply to can't be found."
                             && err.code == 404
-                            && err.data?.get("kind") == Kind.CHAT_COMMAND
-                            && err.data?.get("op") == "speech"
+                            && err.data?.getPrimitiveOrNull("kind")?.contentOrNull == Kind.CHAT_COMMAND
+                            && err.data?.getPrimitiveOrNull("op")?.contentOrNull == "speech"
                 }
     }
 
@@ -3811,7 +3812,7 @@ class ChatServiceTest {
                     return@assertError err.kind == Kind.API
                             && err.message == "The specified event was not found."
                             && err.code == 404
-                            && err.data?.get("eventId") == testChatIdNonExisting
+                            && err.data?.getPrimitive("eventId")?.contentOrNull == testChatIdNonExisting
                 }
     }
 
