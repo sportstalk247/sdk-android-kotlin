@@ -331,6 +331,6 @@ constructor(
             chatService.muteUser(chatRoomId, userid, applyeffect, expireseconds)
 
     companion object {
-        private const val DURATION_EXECUTE_COMMAND = 3000L
+        private const val DURATION_EXECUTE_COMMAND = 20000L
     }
 }
