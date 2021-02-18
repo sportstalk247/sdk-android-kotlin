@@ -92,45 +92,83 @@ constructor(
                     cursor = cursor
             )
 
-    override suspend fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
-            chatService.joinRoom(
-                    chatRoomId = chatRoomId,
-                    request = request
-            ).also { resp ->
-                // Set current user
-                _currentUser = resp.user
-                // Set current chat room
-                _currentRoom = resp.room
-                // Reset execute command throttle
-                _lastExecuteCommandTimestamp = 0L
-            }
+    override suspend fun joinRoom(chatRoomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse {
+        val response = chatService.joinRoom(
+                chatRoomId = chatRoomId,
+                request = request
+        ).also { resp ->
+            // Set current user
+            _currentUser = resp.user
+            // Set current chat room
+            _currentRoom = resp.room
+            // Reset execute command throttle
+            _lastExecuteCommandTimestamp = 0L
+        }
+        val filteredEvents = (response.eventscursor?.events ?: listOf())
+                // Filter out shadowban events for shadowbanned user
+                .filterNot { ev ->
+                    ev.shadowban == true && ev.userid != currentUser?.userid
+                }
 
-    override suspend fun joinRoom(chatRoomIdOrLabel: String): JoinChatRoomResponse =
-            chatService.joinRoom(
-                    chatRoomIdOrLabel = chatRoomIdOrLabel
-            )
-                    .also { resp ->
-                        // Set current user
-                        _currentUser = resp.user
-                        // Set current chat room
-                        _currentRoom = resp.room
-                        // Reset execute command throttle
-                        _lastExecuteCommandTimestamp = 0L
-                    }
+        return response.copy(
+                eventscursor = response.eventscursor?.copy(
+                        events = filteredEvents
+                )
+        )
+    }
 
-    override suspend fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse =
-            chatService.joinRoomByCustomId(
-                    chatRoomCustomId = chatRoomCustomId,
-                    request = request
-            )
-                    .also { resp ->
-                        // Set current user
-                        _currentUser = resp.user
-                        // Set current chat room
-                        _currentRoom = resp.room
-                        // Reset execute command throttle
-                        _lastExecuteCommandTimestamp = 0L
-                    }
+    override suspend fun joinRoom(chatRoomIdOrLabel: String): JoinChatRoomResponse {
+        val response = chatService.joinRoom(
+                chatRoomIdOrLabel = chatRoomIdOrLabel
+        )
+                .also { resp ->
+                    // Set current user
+                    _currentUser = resp.user
+                    // Set current chat room
+                    _currentRoom = resp.room
+                    // Reset execute command throttle
+                    _lastExecuteCommandTimestamp = 0L
+                }
+
+        val filteredEvents = (response.eventscursor?.events ?: listOf())
+                // Filter out shadowban events for shadowbanned user
+                .filterNot { ev ->
+                    ev.shadowban == true && ev.userid != currentUser?.userid
+                }
+
+        return response.copy(
+                eventscursor = response.eventscursor?.copy(
+                        events = filteredEvents
+                )
+        )
+    }
+
+    override suspend fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): JoinChatRoomResponse {
+        val response = chatService.joinRoomByCustomId(
+                chatRoomCustomId = chatRoomCustomId,
+                request = request
+        )
+                .also { resp ->
+                    // Set current user
+                    _currentUser = resp.user
+                    // Set current chat room
+                    _currentRoom = resp.room
+                    // Reset execute command throttle
+                    _lastExecuteCommandTimestamp = 0L
+                }
+
+        val filteredEvents = (response.eventscursor?.events ?: listOf())
+                // Filter out shadowban events for shadowbanned user
+                .filterNot { ev ->
+                    ev.shadowban == true && ev.userid != currentUser?.userid
+                }
+
+        return response.copy(
+                eventscursor = response.eventscursor?.copy(
+                        events = filteredEvents
+                )
+        )
+    }
 
     override suspend fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): ListChatRoomParticipantsResponse =
             chatService.listRoomParticipants(
@@ -183,12 +221,21 @@ constructor(
     override suspend fun messageIsReactedTo(which: ChatEvent, userid: String, reaction: String): Boolean =
             chatService.messageIsReactedTo(which, userid, reaction)
 
-    override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
-            chatService.listPreviousEvents(
-                    chatRoomId = chatRoomId,
-                    limit = limit,
-                    cursor = cursor
-            )
+    override suspend fun listPreviousEvents(chatRoomId: String, limit: Int?, cursor: String?): ListEvents {
+        val response = chatService.listPreviousEvents(
+                chatRoomId = chatRoomId,
+                limit = limit,
+                cursor = cursor
+        )
+
+        return response.copy(
+                events = response.events
+                        // Filter out shadowban events for shadowbanned user
+                        .filterNot { ev ->
+                            ev.shadowban == true && ev.userid != currentUser?.userid
+                        }
+        )
+    }
 
     override suspend fun getEventById(chatRoomId: String, eventId: String): ChatEvent =
             chatService.getEventById(
@@ -199,28 +246,55 @@ constructor(
     override suspend fun reportUserInRoom(chatRoomId: String, userid: String, reporterid: String, reporttype: String): ChatRoom =
             chatService.reportUserInRoom(chatRoomId, userid, reporterid, reporttype)
 
-    override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents =
-            chatService.listEventsHistory(
-                    chatRoomId = chatRoomId,
-                    limit = limit,
-                    cursor = cursor
-            )
+    override suspend fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): ListEvents {
+        val response = chatService.listEventsHistory(
+                chatRoomId = chatRoomId,
+                limit = limit,
+                cursor = cursor
+        )
 
-    override suspend fun listEventsByType(chatRoomId: String, eventType: String, limit: Int?, cursor: String?): ListEvents =
-            chatService.listEventsByType(
-                    chatRoomId = chatRoomId,
-                    eventType = eventType,
-                    limit = limit,
-                    cursor = cursor
-            )
+        return response.copy(
+                events = response.events
+                        // Filter out shadowban events for shadowbanned user
+                        .filterNot { ev ->
+                            ev.shadowban == true && ev.userid != currentUser?.userid
+                        }
+        )
+    }
 
-    override suspend fun listEventsByTimestamp(chatRoomId: String, timestamp: Long, limitolder: Int?, limitnewer: Int?): ListEventsByTimestamp =
-            chatService.listEventsByTimestamp(
-                    chatRoomId = chatRoomId,
-                    timestamp = timestamp,
-                    limitolder = limitolder,
-                    limitnewer = limitnewer
-            )
+    override suspend fun listEventsByType(chatRoomId: String, eventType: String, limit: Int?, cursor: String?): ListEvents {
+        val response = chatService.listEventsByType(
+                chatRoomId = chatRoomId,
+                eventType = eventType,
+                limit = limit,
+                cursor = cursor
+        )
+
+        return response.copy(
+                events = response.events
+                        // Filter out shadowban events for shadowbanned user
+                        .filterNot { ev ->
+                            ev.shadowban == true && ev.userid != currentUser?.userid
+                        }
+        )
+    }
+
+    override suspend fun listEventsByTimestamp(chatRoomId: String, timestamp: Long, limitolder: Int?, limitnewer: Int?): ListEventsByTimestamp {
+        val response = chatService.listEventsByTimestamp(
+                chatRoomId = chatRoomId,
+                timestamp = timestamp,
+                limitolder = limitolder,
+                limitnewer = limitnewer
+        )
+
+        return response.copy(
+                events = response.events
+                        // Filter out shadowban events for shadowbanned user
+                        .filterNot { ev ->
+                            ev.shadowban == true && ev.userid != currentUser?.userid
+                        }
+        )
+    }
 
     override suspend fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): ExecuteChatCommandResponse =
             if(Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
@@ -279,8 +353,17 @@ constructor(
                     request = request
             )
 
-    override suspend fun searchEventHistory(request: SearchEventHistoryRequest): SearchEventHistoryResponse =
-            chatService.searchEventHistory(request)
+    override suspend fun searchEventHistory(request: SearchEventHistoryRequest): SearchEventHistoryResponse {
+        val response = chatService.searchEventHistory(request)
+
+        return response.copy(
+                events = response.events
+                        // Filter out shadowban events for shadowbanned user
+                        .filterNot { ev ->
+                            ev.shadowban == true && ev.userid != currentUser?.userid
+                        }
+        )
+    }
 
     override suspend fun updateChatMessage(chatRoomId: String, eventId: String, request: UpdateChatMessageRequest): ChatEvent =
             chatService.updateChatMessage(chatRoomId, eventId, request)
