@@ -5,9 +5,13 @@ import io.reactivex.Completable
 import io.reactivex.Single
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.ListUserNotificationsResponse
+import com.sportstalk.datamodels.users.User
 import com.sportstalk.datamodels.users.UserNotification
 
 interface ChatService {
+
+    /** Current user who joined the [ChatRoom]. Sets to null upon exit [ChatRoom] */
+    var currentUser: User?
 
     /**
      * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates

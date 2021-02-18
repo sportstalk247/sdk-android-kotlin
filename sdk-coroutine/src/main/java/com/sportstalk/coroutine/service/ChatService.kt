@@ -2,8 +2,12 @@ package com.sportstalk.coroutine.service
 
 import androidx.annotation.RestrictTo
 import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.users.User
 
 interface ChatService {
+
+    /** Current user who joined the [ChatRoom]. Sets to null upon exit [ChatRoom] */
+    var currentUser: User?
 
     /**
      * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates

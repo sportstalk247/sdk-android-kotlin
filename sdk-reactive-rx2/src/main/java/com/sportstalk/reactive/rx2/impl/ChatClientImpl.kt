@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.users.User
 import com.sportstalk.reactive.rx2.ServiceFactory
 import com.sportstalk.reactive.rx2.api.ChatClient
 import com.sportstalk.reactive.rx2.service.ChatService
@@ -17,6 +18,14 @@ constructor(
 ): ChatClient {
 
     private val chatService: ChatService = ServiceFactory.Chat.get(config)
+
+    // Current User state tracking
+    private var _currentUser: User? = null
+    override var currentUser: User?
+        get() = _currentUser
+        set(value) {
+            _currentUser = value
+        }
 
     // Room state tracking
     private var _currentRoom: ChatRoom? = null
@@ -86,6 +95,9 @@ constructor(
                     chatRoomId = chatRoomId,
                     request = request
             ).doOnSuccess { resp ->
+                // Set current user
+                _currentUser = resp.user
+                // Set current chat room
                 _currentRoom = resp.room
                 // Reset execute command throttle
                 _lastExecuteCommandTimestamp = 0L
@@ -96,6 +108,8 @@ constructor(
                     chatRoomIdOrLabel = chatRoomIdOrLabel
             )
                     .doOnSuccess { resp ->
+                        // Set current user
+                        _currentUser = resp.user
                         // Set current chat room
                         _currentRoom = resp.room
                         // Reset execute command throttle
@@ -108,6 +122,8 @@ constructor(
                     request = request
             )
                     .doOnSuccess { resp ->
+                        // Set current user
+                        _currentUser = resp.user
                         // Set current chat room
                         _currentRoom = resp.room
                         // Reset execute command throttle
@@ -127,6 +143,8 @@ constructor(
                     userId = userId
             )
                     .doOnComplete {
+                        // Unset current user
+                        _currentUser = null
                         // Unset currently active chat room
                         _currentRoom = null
                         // Reset execute command throttle
@@ -139,6 +157,15 @@ constructor(
                     limit = limit,
                     cursor = cursor
             )
+                    .map { response ->
+                        response.copy(
+                                events = response.events
+                                        // Filter out shadowban events for shadowbanned user
+                                        .filterNot { ev ->
+                                            ev.shadowban == true && ev.userid != currentUser?.userid
+                                        }
+                        )
+                    }
 
     override fun messageIsReported(which: ChatEvent, userid: String): Boolean =
             chatService.messageIsReported(which, userid)

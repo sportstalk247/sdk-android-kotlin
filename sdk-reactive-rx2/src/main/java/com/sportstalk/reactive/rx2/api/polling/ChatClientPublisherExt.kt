@@ -52,7 +52,13 @@ fun ChatService.allEventUpdates(
                     Flowable.empty()
                 }
             }
-            .map { it.events }
+            .map {
+                it.events
+                        // Filter out shadowban events for shadowbanned user
+                        .filterNot { ev ->
+                            ev.shadowban == true && ev.userid != currentUser?.userid
+                        }
+            }
             .doOnNext { events ->
                 events.forEach { chatEvent ->
                     when (chatEvent.eventtype) {
