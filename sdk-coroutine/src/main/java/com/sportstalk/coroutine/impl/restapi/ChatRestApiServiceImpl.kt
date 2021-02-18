@@ -6,6 +6,7 @@ import com.sportstalk.coroutine.impl.handleSdkResponse
 import com.sportstalk.coroutine.impl.restapi.retrofit.services.ChatRetrofitService
 import com.sportstalk.datamodels.*
 import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.users.User
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.create
@@ -21,6 +22,12 @@ constructor(
 
     private val service: ChatRetrofitService = mRetrofit.create()
 
+    private var _currentUser: User? = null
+    override var currentUser: User?
+        get() = _currentUser
+        set(value) {
+            _currentUser = value
+        }
     private val roomSubscriptions: MutableSet<String> = mutableSetOf()
     private val chatRoomEventUpdateCursor: HashMap<String, String> = hashMapOf()
 
@@ -153,6 +160,7 @@ constructor(
                 )
                         .handleSdkResponse(json)
                         .also { resp ->
+                            _currentUser = resp.user
                             // Internally store chatroom event cursor
                             val cursor = resp.eventscursor?.cursor ?: ""
                             setChatRoomEventUpdateCursor(
@@ -178,6 +186,7 @@ constructor(
                 )
                         .handleSdkResponse(json)
                         .also { resp ->
+                            _currentUser = resp.user
                             val roomId = resp.room?.id ?: return@also
                             // Internally store chatroom event cursor
                             val cursor = resp.eventscursor?.cursor ?: ""
@@ -204,6 +213,7 @@ constructor(
                 )
                         .handleSdkResponse(json)
                         .also { resp ->
+                            _currentUser = resp.user
                             val cursor = resp.eventscursor?.cursor ?: ""
                             // Internally store chatroom event cursor
                             setChatRoomEventUpdateCursor(
@@ -247,6 +257,7 @@ constructor(
             )
 
             if (response.isSuccessful) {
+                _currentUser = null
                 // Remove internally stored event cursor
                 clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
             } else {

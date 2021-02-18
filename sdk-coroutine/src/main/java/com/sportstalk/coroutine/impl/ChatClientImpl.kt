@@ -9,6 +9,7 @@ import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.chat.moderation.*
+import com.sportstalk.datamodels.users.User
 
 
 class ChatClientImpl
@@ -19,6 +20,14 @@ constructor(
 
     private val chatService: ChatService = ServiceFactory.Chat.get(config)
     private val moderationService: ChatModerationService = ServiceFactory.ChatModeration.get(config)
+
+    // Current User state tracking
+    private var _currentUser: User? = null
+    override var currentUser: User?
+        get() = _currentUser
+        set(value) {
+            _currentUser = value
+        }
 
     // Room state tracking
     private var _currentRoom: ChatRoom? = null
@@ -88,6 +97,9 @@ constructor(
                     chatRoomId = chatRoomId,
                     request = request
             ).also { resp ->
+                // Set current user
+                _currentUser = resp.user
+                // Set current chat room
                 _currentRoom = resp.room
                 // Reset execute command throttle
                 _lastExecuteCommandTimestamp = 0L
@@ -98,6 +110,8 @@ constructor(
                     chatRoomIdOrLabel = chatRoomIdOrLabel
             )
                     .also { resp ->
+                        // Set current user
+                        _currentUser = resp.user
                         // Set current chat room
                         _currentRoom = resp.room
                         // Reset execute command throttle
@@ -110,6 +124,8 @@ constructor(
                     request = request
             )
                     .also { resp ->
+                        // Set current user
+                        _currentUser = resp.user
                         // Set current chat room
                         _currentRoom = resp.room
                         // Reset execute command throttle
@@ -129,6 +145,8 @@ constructor(
                     userId = userId
             )
                     .also { resp ->
+                        // Unset current user
+                        _currentUser = null
                         // Unset currently active chat room
                         _currentRoom = null
                         // Reset execute command throttle
@@ -137,10 +155,18 @@ constructor(
 
     override suspend fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): GetUpdatesResponse =
             try {
-                chatService.getUpdates(
+                val response = chatService.getUpdates(
                         chatRoomId = chatRoomId,
                         limit = limit,
                         cursor = cursor
+                )
+
+                response.copy(
+                        events = response.events
+                                // Filter out shadowban events for shadowbanned user
+                                .filterNot { ev ->
+                                    ev.shadowban == true && ev.userid != currentUser?.userid
+                                }
                 )
             } catch (err: SportsTalkException) {
                 throw err

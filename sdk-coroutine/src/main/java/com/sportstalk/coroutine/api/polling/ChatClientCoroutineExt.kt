@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
@@ -69,6 +70,12 @@ fun ChatService.allEventUpdates(
         delay(frequency)
     } while (true)
 }
+        // Filter out shadowban events for shadowbanned user
+        .map { events ->
+            events.filterNot { ev ->
+                ev.shadowban == true && ev.userid != currentUser?.userid
+            }
+        }
         // Trigger callbacks based on event type
         .onEach { events ->
             events.forEach { chatEvent ->

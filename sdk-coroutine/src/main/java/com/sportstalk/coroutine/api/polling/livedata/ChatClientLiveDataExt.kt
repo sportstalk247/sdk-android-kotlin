@@ -12,6 +12,7 @@ import com.sportstalk.datamodels.chat.GetUpdatesResponse
 import com.sportstalk.datamodels.chat.polling.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
 
 /**
  * Returns an instance of reactive LiveData which emits Event Updates received at
@@ -46,6 +47,10 @@ fun ChatService.allEventUpdates(
 
                     // Emit transform into List<ChatEvent>
                     val events = response.events
+                            // Filter out shadowban events for shadowbanned user
+                            .filterNot { ev ->
+                                ev.shadowban == true && ev.userid != currentUser?.userid
+                            }
                     emit(events)
 
                     // Trigger callbacks based on event type
