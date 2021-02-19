@@ -17,6 +17,7 @@ import com.sportstalk.reactive.rx2.api.polling.allEventUpdates
 import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.functions.BiFunction
 import io.reactivex.observers.TestObserver
 import kotlinx.serialization.internal.ArrayListSerializer
 // import kotlinx.serialization.builtins.ArraySerializer
@@ -2050,6 +2051,10 @@ class ChatServiceTest {
 
     @Test
     fun `T-1) Execute Chat Command - Speech`() {
+
+        val userClient = SportsTalk247.UserClient(config)
+        val chatClient = SportsTalk247.ChatClient(config)
+
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2060,7 +2065,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService
+        val testCreatedUserData = userClient
                 .createOrUpdateUser(request = testCreateUserInputRequest)
                 .blockingGet()
 
@@ -2078,7 +2083,7 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService
+        val testCreatedChatRoomData = chatClient
                 .createRoom(testCreateChatRoomInputRequest)
                 .blockingGet()
 
@@ -2087,7 +2092,7 @@ class ChatServiceTest {
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatService.joinRoom(
+        chatClient.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
         ).blockingGet()
@@ -2112,34 +2117,33 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.executeChatCommand(
+        val executeChatCommand = TestObserver<ExecuteChatCommandResponse>()
+
+        chatClient.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData.id!!,
                 request = testInputRequest
-        ).blockingGet()
+        )
+                .toObservable()
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .doOnDispose {
+                    // Perform Delete Test Chat Room
+                    deleteTestChatRooms(testCreatedChatRoomData.id)
+                    // Perform Delete Test User
+                    deleteTestUsers(testCreatedUserData.userid)
+                }
+                .subscribe(executeChatCommand)
 
         // THEN
-        println(
-                "`Execute Chat Command - Speech`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
-                                ExecuteChatCommandResponse.serializer(),
-                                testActualResult
-                        )
-        )
-
-        assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.op == testExpectedResult.op }
-        assertTrue { testActualResult.speech?.kind == testExpectedResult.speech?.kind }
-        assertTrue { testActualResult.speech?.roomid == testExpectedResult.speech?.roomid }
-        assertTrue { testActualResult.speech?.body == testExpectedResult.speech?.body }
-        assertTrue { testActualResult.speech?.eventtype == testExpectedResult.speech?.eventtype }
-        assertTrue { testActualResult.speech?.userid == testExpectedResult.speech?.userid }
-        assertTrue { testActualResult.speech?.user?.userid == testExpectedResult.speech?.user?.userid }
-        assertTrue { testActualResult.action == testExpectedResult.action }
-
-        // Perform Delete Test Chat Room
-        deleteTestChatRooms(testCreatedChatRoomData.id)
-        // Perform Delete Test User
-        deleteTestUsers(testCreatedUserData.userid)
+        executeChatCommand
+                .assertValue { testActualResult -> testActualResult.kind == testExpectedResult.kind }
+                .assertValue { testActualResult -> testActualResult.op == testExpectedResult.op }
+                .assertValue { testActualResult -> testActualResult.speech?.kind == testExpectedResult.speech?.kind }
+                .assertValue { testActualResult -> testActualResult.speech?.roomid == testExpectedResult.speech?.roomid }
+                .assertValue { testActualResult -> testActualResult.speech?.body == testExpectedResult.speech?.body }
+                .assertValue { testActualResult -> testActualResult.speech?.eventtype == testExpectedResult.speech?.eventtype }
+                .assertValue { testActualResult -> testActualResult.speech?.userid == testExpectedResult.speech?.userid }
+                .assertValue { testActualResult -> testActualResult.speech?.user?.userid == testExpectedResult.speech?.user?.userid }
+                .assertValue { testActualResult -> testActualResult.action == testExpectedResult.action }
     }
 
     @Test
@@ -2964,7 +2968,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `T-ERROR-405-REPLY-NOT-FOUND) Execute Chat Command`() {
+    fun `T-ERROR-405-NOT-ALLOWED) Execute Chat Command`() {
         // GIVEN
         val userClient = SportsTalk247.UserClient(config)
         val chatClient = SportsTalk247.ChatClient(config)
@@ -3015,21 +3019,25 @@ class ChatServiceTest {
                 userid = testCreatedUserData.userid!!
         )
 
+        // WHEN
         val executeChatCommand = TestObserver<ExecuteChatCommandResponse>()
 
-        // WHEN
-        Single.merge(
-                chatClient.executeChatCommand(
-                        chatRoomId = testCreatedChatRoomData.id!!,
-                        request = testInputRequest
-                ),
-                chatClient.executeChatCommand(
-                        chatRoomId = testCreatedChatRoomData.id!!,
-                        request = testInputRequest
-                )
-                        .delay(100L, TimeUnit.MILLISECONDS)
-        ).toObservable()
-                .skip(1)
+        chatClient.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInputRequest
+        )
+                .toObservable()
+                .compose { firstAttempt ->
+                    chatClient.executeChatCommand(
+                            chatRoomId = testCreatedChatRoomData.id!!,
+                            request = testInputRequest
+                    )
+                            /*.delay(3400L, TimeUnit.MILLISECONDS)*/
+                            .toObservable()
+                            .withLatestFrom(firstAttempt, BiFunction<ExecuteChatCommandResponse, ExecuteChatCommandResponse, ExecuteChatCommandResponse> { _, t2 ->
+                                return@BiFunction t2
+                            })
+                }
                 .doOnSubscribe { rxDisposeBag.add(it) }
                 .doOnDispose {
                     // Perform Delete Test Chat Room

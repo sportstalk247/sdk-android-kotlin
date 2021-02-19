@@ -2019,6 +2019,10 @@ class ChatServiceTest {
 
     @Test
     fun `T-1) Execute Chat Command - Speech`() = runBlocking {
+
+        val userClient = SportsTalk247.UserClient(config)
+        val chatClient = SportsTalk247.ChatClient(config)
+
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -2029,7 +2033,7 @@ class ChatServiceTest {
                 profileurl = testUserData.profileurl
         )
         // Should create a test user first
-        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+        val testCreatedUserData = userClient.createOrUpdateUser(request = testCreateUserInputRequest)
 
         val testChatRoomData = TestData.chatRooms(config.appId).first()
         val testCreateChatRoomInputRequest = CreateChatRoomRequest(
@@ -2045,14 +2049,14 @@ class ChatServiceTest {
                 maxreports = testChatRoomData.maxreports
         )
         // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+        val testCreatedChatRoomData = chatClient.createRoom(testCreateChatRoomInputRequest)
 
         val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
         val testJoinRoomInputRequest = JoinChatRoomRequest(
                 userid = testCreatedUserData.userid!!
         )
         // Test Created User Should join test created chat room
-        chatService.joinRoom(
+        chatClient.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testJoinRoomInputRequest
         )
@@ -2077,34 +2081,38 @@ class ChatServiceTest {
         )
 
         // WHEN
-        val testActualResult = chatService.executeChatCommand(
-                chatRoomId = testCreatedChatRoomData.id!!,
-                request = testInputRequest
-        )
+        try {
+            val testActualResult = chatClient.executeChatCommand(
+                    chatRoomId = testCreatedChatRoomData.id!!,
+                    request = testInputRequest
+            )
 
-        // THEN
-        println(
-                "`Execute Chat Command - Speech`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
-                                ExecuteChatCommandResponse.serializer(),
-                                testActualResult
-                        )
-        )
+            // THEN
+            println(
+                    "`Execute Chat Command - Speech`() -> testActualResult = \n" +
+                            json.stringify/*encodeToString*/(
+                                    ExecuteChatCommandResponse.serializer(),
+                                    testActualResult
+                            )
+            )
 
-        assertTrue { testActualResult.kind == testExpectedResult.kind }
-        assertTrue { testActualResult.op == testExpectedResult.op }
-        assertTrue { testActualResult.speech?.kind == testExpectedResult.speech?.kind }
-        assertTrue { testActualResult.speech?.roomid == testExpectedResult.speech?.roomid }
-        assertTrue { testActualResult.speech?.body == testExpectedResult.speech?.body }
-        assertTrue { testActualResult.speech?.eventtype == testExpectedResult.speech?.eventtype }
-        assertTrue { testActualResult.speech?.userid == testExpectedResult.speech?.userid }
-        assertTrue { testActualResult.speech?.user?.userid == testExpectedResult.speech?.user?.userid }
-        assertTrue { testActualResult.action == testExpectedResult.action }
-
-        // Perform Delete Test Chat Room
-        deleteTestChatRooms(testCreatedChatRoomData.id)
-        // Perform Delete Test User
-        deleteTestUsers(testCreatedUserData.userid)
+            assertTrue { testActualResult.kind == testExpectedResult.kind }
+            assertTrue { testActualResult.op == testExpectedResult.op }
+            assertTrue { testActualResult.speech?.kind == testExpectedResult.speech?.kind }
+            assertTrue { testActualResult.speech?.roomid == testExpectedResult.speech?.roomid }
+            assertTrue { testActualResult.speech?.body == testExpectedResult.speech?.body }
+            assertTrue { testActualResult.speech?.eventtype == testExpectedResult.speech?.eventtype }
+            assertTrue { testActualResult.speech?.userid == testExpectedResult.speech?.userid }
+            assertTrue { testActualResult.speech?.user?.userid == testExpectedResult.speech?.user?.userid }
+            assertTrue { testActualResult.action == testExpectedResult.action }
+        } catch (err: SportsTalkException) {
+            fail(err.message)
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
     }
 
     @Test
@@ -2942,12 +2950,15 @@ class ChatServiceTest {
                         request = testInputRequest
                 )
             }
+
             withContext(Dispatchers.IO) {
                 chatClient.executeChatCommand(
                         chatRoomId = testCreatedChatRoomData.id!!,
                         request = testInputRequest
                 )
             }
+
+            fail("Must throttle executeChatCommand() calls in quick succession")
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-405-NOT-ALLOWED - Execute Chat Command`() -> testActualResult = \n" +

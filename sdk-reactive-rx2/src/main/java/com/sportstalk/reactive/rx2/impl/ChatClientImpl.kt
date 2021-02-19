@@ -43,6 +43,8 @@ constructor(
             _defaultImageBannerUrl = value
         }
 
+    // Throttle message body for execute chat command
+    private var _lastExecuteCommandMessage: String? = null
     // Throttle timestamp for execute chat command
     private var _lastExecuteCommandTimestamp: Long = 0L
 
@@ -114,6 +116,7 @@ constructor(
                         // Set current chat room
                         _currentRoom = resp.room
                         // Reset execute command throttle
+                        _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
                     }
 
@@ -140,6 +143,7 @@ constructor(
                         // Set current chat room
                         _currentRoom = resp.room
                         // Reset execute command throttle
+                        _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
                     }
 
@@ -167,6 +171,7 @@ constructor(
                         // Set current chat room
                         _currentRoom = resp.room
                         // Reset execute command throttle
+                        _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
                     }
 
@@ -188,6 +193,7 @@ constructor(
                         // Unset currently active chat room
                         _currentRoom = null
                         // Reset execute command throttle
+                        _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
                     }
 
@@ -294,13 +300,16 @@ constructor(
                     }
 
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): Single<ExecuteChatCommandResponse> =
-            if(Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+            if(_lastExecuteCommandMessage != request.command
+                    || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+
+                _lastExecuteCommandMessage = request.command
+                _lastExecuteCommandTimestamp = System.currentTimeMillis()
+
                 chatService.executeChatCommand(
                         chatRoomId = chatRoomId,
                         request = request
-                ).also {
-                    _lastExecuteCommandTimestamp = System.currentTimeMillis()
-                }
+                )
             } else {
                 Single.error<ExecuteChatCommandResponse>(
                         SportsTalkException(
@@ -311,14 +320,17 @@ constructor(
             }
 
     override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): Single<ChatEvent> =
-            if(Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+            if(_lastExecuteCommandMessage != request.body
+                    || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+
+                _lastExecuteCommandMessage = request.body
+                _lastExecuteCommandTimestamp = System.currentTimeMillis()
+
                 chatService.sendThreadedReply(
                         chatRoomId = chatRoomId,
                         replyTo = replyTo,
                         request = request
-                ).also {
-                    _lastExecuteCommandTimestamp = System.currentTimeMillis()
-                }
+                )
             } else {
                 Single.error<ChatEvent>(
                         SportsTalkException(
@@ -329,14 +341,17 @@ constructor(
             }
 
     override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): Single<ChatEvent> =
-            if(Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+            if(_lastExecuteCommandMessage != request.body
+                    || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
+
+                _lastExecuteCommandMessage = request.body
+                _lastExecuteCommandTimestamp = System.currentTimeMillis()
+
                 chatService.sendQuotedReply(
                         chatRoomId = chatRoomId,
                         replyTo = replyTo,
                         request = request
-                ).also {
-                    _lastExecuteCommandTimestamp = System.currentTimeMillis()
-                }
+                )
             } else {
                 Single.error<ChatEvent>(
                         SportsTalkException(
@@ -416,6 +431,6 @@ constructor(
             chatService.muteUser(chatRoomId, userid, applyeffect, expireseconds)
 
     companion object {
-        private const val DURATION_EXECUTE_COMMAND = 20000L
+        private const val DURATION_EXECUTE_COMMAND = 20_000L
     }
 }
