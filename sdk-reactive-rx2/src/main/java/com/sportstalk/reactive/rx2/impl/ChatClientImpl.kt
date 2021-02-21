@@ -97,6 +97,15 @@ constructor(
                     chatRoomId = chatRoomId,
                     request = request
             )
+                    .doOnSuccess { resp ->
+                        // Set current user
+                        _currentUser = resp.user
+                        // Set current chat room
+                        _currentRoom = resp.room
+                        // Reset execute command throttle
+                        _lastExecuteCommandMessage = null
+                        _lastExecuteCommandTimestamp = 0L
+                    }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
                                 // Filter out shadowban events for shadowbanned user
@@ -109,21 +118,21 @@ constructor(
                                         events = filteredEvents
                                 )
                         )
-                    }
-                    .doOnSuccess { resp ->
-                        // Set current user
-                        _currentUser = resp.user
-                        // Set current chat room
-                        _currentRoom = resp.room
-                        // Reset execute command throttle
-                        _lastExecuteCommandMessage = null
-                        _lastExecuteCommandTimestamp = 0L
                     }
 
     override fun joinRoom(chatRoomIdOrLabel: String): Single<JoinChatRoomResponse> =
             chatService.joinRoom(
                     chatRoomIdOrLabel = chatRoomIdOrLabel
             )
+                    .doOnSuccess { resp ->
+                        // Set current user
+                        _currentUser = resp.user
+                        // Set current chat room
+                        _currentRoom = resp.room
+                        // Reset execute command throttle
+                        _lastExecuteCommandMessage = null
+                        _lastExecuteCommandTimestamp = 0L
+                    }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
                                 // Filter out shadowban events for shadowbanned user
@@ -136,15 +145,6 @@ constructor(
                                         events = filteredEvents
                                 )
                         )
-                    }
-                    .doOnSuccess { resp ->
-                        // Set current user
-                        _currentUser = resp.user
-                        // Set current chat room
-                        _currentRoom = resp.room
-                        // Reset execute command throttle
-                        _lastExecuteCommandMessage = null
-                        _lastExecuteCommandTimestamp = 0L
                     }
 
     override fun joinRoomByCustomId(chatRoomCustomId: String, request: JoinChatRoomRequest): Single<JoinChatRoomResponse> =
@@ -152,6 +152,15 @@ constructor(
                     chatRoomCustomId = chatRoomCustomId,
                     request = request
             )
+                    .doOnSuccess { resp ->
+                        // Set current user
+                        _currentUser = resp.user
+                        // Set current chat room
+                        _currentRoom = resp.room
+                        // Reset execute command throttle
+                        _lastExecuteCommandMessage = null
+                        _lastExecuteCommandTimestamp = 0L
+                    }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
                                 // Filter out shadowban events for shadowbanned user
@@ -164,15 +173,6 @@ constructor(
                                         events = filteredEvents
                                 )
                         )
-                    }
-                    .doOnSuccess { resp ->
-                        // Set current user
-                        _currentUser = resp.user
-                        // Set current chat room
-                        _currentRoom = resp.room
-                        // Reset execute command throttle
-                        _lastExecuteCommandMessage = null
-                        _lastExecuteCommandTimestamp = 0L
                     }
 
     override fun listRoomParticipants(chatRoomId: String, limit: Int?, cursor: String?): Single<ListChatRoomParticipantsResponse> =
