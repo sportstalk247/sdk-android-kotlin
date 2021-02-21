@@ -105,6 +105,13 @@ constructor(
                         // Reset execute command throttle
                         _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
+
+                        // Internally store chatroom event cursor
+                        val cursor = resp.eventscursor?.cursor ?: ""
+                        setChatRoomEventUpdateCursor(
+                                forRoomId = chatRoomId,
+                                cursor = cursor
+                        )
                     }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -132,6 +139,13 @@ constructor(
                         // Reset execute command throttle
                         _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
+
+                        // Internally store chatroom event cursor
+                        val cursor = resp.eventscursor?.cursor ?: ""
+                        setChatRoomEventUpdateCursor(
+                                forRoomId = chatRoomIdOrLabel,
+                                cursor = cursor
+                        )
                     }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -160,6 +174,13 @@ constructor(
                         // Reset execute command throttle
                         _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
+
+                        // Internally store chatroom event cursor
+                        val cursor = resp.eventscursor?.cursor ?: ""
+                        setChatRoomEventUpdateCursor(
+                                forRoomId = chatRoomCustomId,
+                                cursor = cursor
+                        )
                     }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -195,6 +216,9 @@ constructor(
                         // Reset execute command throttle
                         _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
+
+                        // Remove internally stored event cursor
+                        clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
                     }
 
     override fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): Single<GetUpdatesResponse> =
