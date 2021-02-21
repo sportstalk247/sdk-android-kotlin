@@ -106,6 +106,13 @@ constructor(
             // Reset execute command throttle
             _lastExecuteCommandMessage = null
             _lastExecuteCommandTimestamp = 0L
+
+            // Internally store chatroom event cursor
+            val cursor = resp.eventscursor?.cursor ?: ""
+            setChatRoomEventUpdateCursor(
+                    forRoomId = chatRoomId,
+                    cursor = cursor
+            )
         }
         val filteredEvents = (response.eventscursor?.events ?: listOf())
                 // Filter out shadowban events for shadowbanned user
@@ -132,6 +139,13 @@ constructor(
                     // Reset execute command throttle
                     _lastExecuteCommandMessage = null
                     _lastExecuteCommandTimestamp = 0L
+
+                    // Internally store chatroom event cursor
+                    val cursor = resp.eventscursor?.cursor ?: ""
+                    setChatRoomEventUpdateCursor(
+                            forRoomId = chatRoomIdOrLabel,
+                            cursor = cursor
+                    )
                 }
 
         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -160,6 +174,13 @@ constructor(
                     // Reset execute command throttle
                     _lastExecuteCommandMessage = null
                     _lastExecuteCommandTimestamp = 0L
+
+                    // Internally store chatroom event cursor
+                    val cursor = resp.eventscursor?.cursor ?: ""
+                    setChatRoomEventUpdateCursor(
+                            forRoomId = chatRoomCustomId,
+                            cursor = cursor
+                    )
                 }
 
         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -195,6 +216,9 @@ constructor(
                         // Reset execute command throttle
                         _lastExecuteCommandMessage = null
                         _lastExecuteCommandTimestamp = 0L
+
+                        // Remove internally stored event cursor
+                        clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
                     }
 
     override suspend fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): GetUpdatesResponse =
