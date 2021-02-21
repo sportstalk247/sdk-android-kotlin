@@ -143,7 +143,7 @@ constructor(
                     // Internally store chatroom event cursor
                     val cursor = resp.eventscursor?.cursor ?: ""
                     setChatRoomEventUpdateCursor(
-                            forRoomId = chatRoomId,
+                            forRoomId = chatRoomIdOrLabel,
                             cursor = cursor
                     )
                 }
