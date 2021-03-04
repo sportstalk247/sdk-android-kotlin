@@ -218,6 +218,7 @@ interface ChatService {
              * [EventType]
              */
             eventType: String,
+            customtype: String? = null,
             limit: Int? = null,
             cursor: String? = null
     ): ListEvents

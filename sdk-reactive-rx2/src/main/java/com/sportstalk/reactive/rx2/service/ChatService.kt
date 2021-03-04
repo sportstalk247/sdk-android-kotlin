@@ -220,6 +220,7 @@ interface ChatService {
             chatRoomId: String,
             /** [EventType] */
             eventtype: String,
+            customtype: String? = null,
             limit: Int? = null,
             cursor: String? = null
     ): Single<ListEvents>

@@ -427,12 +427,13 @@ constructor(
                 )
             }
 
-    override suspend fun listEventsByType(chatRoomId: String, eventType: String, limit: Int?, cursor: String?): ListEvents =
+    override suspend fun listEventsByType(chatRoomId: String, eventType: String, customtype: String?, limit: Int?, cursor: String?): ListEvents =
             try {
                 service.listEventsByType(
                         appId = appId,
                         chatRoomId = chatRoomId,
                         eventtype = eventType,
+                        customtype = customtype,
                         limit = limit,
                         cursor = cursor
                 )

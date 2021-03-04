@@ -292,10 +292,11 @@ constructor(
         )
     }
 
-    override suspend fun listEventsByType(chatRoomId: String, eventType: String, limit: Int?, cursor: String?): ListEvents {
+    override suspend fun listEventsByType(chatRoomId: String, eventType: String, customtype: String?, limit: Int?, cursor: String?): ListEvents {
         val response = chatService.listEventsByType(
                 chatRoomId = chatRoomId,
                 eventType = eventType,
+                customtype = customtype,
                 limit = limit,
                 cursor = cursor
         )

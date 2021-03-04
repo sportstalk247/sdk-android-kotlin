@@ -291,11 +291,12 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun listEventsByType(chatRoomId: String, eventtype: String, limit: Int?, cursor: String?): Single<ListEvents> =
+    override fun listEventsByType(chatRoomId: String, eventtype: String, customtype: String?, limit: Int?, cursor: String?): Single<ListEvents> =
             service.listEventsByType(
                     appId = appId,
                     chatRoomId = chatRoomId,
                     eventtype = eventtype,
+                    customtype = customtype,
                     limit = limit,
                     cursor = cursor
             )
