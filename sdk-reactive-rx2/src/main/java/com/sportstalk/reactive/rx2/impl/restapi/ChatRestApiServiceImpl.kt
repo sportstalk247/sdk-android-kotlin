@@ -254,7 +254,33 @@ constructor(
                             reporttype = reporttype
                     )
             )
-                    .handleSdkResponse(json)
+                    .map { response ->
+                        val code = response.code()
+                        val message = response.message()
+                        val body = response.body()
+                        when {
+                            code == 200 && body != null -> {
+                                return@map body!!.data!!
+                            }
+                            code == 200 && body == null -> {
+                                throw SportsTalkException(
+                                        kind = Kind.API,
+                                        message = message,
+                                        code = code
+                                )
+                            }
+                            else -> {
+                                throw response.errorBody()?.string()?.let { errBodyStr ->
+                                    json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                                }
+                                        ?: SportsTalkException(
+                                                kind = Kind.API,
+                                                message = response.message(),
+                                                code = response.code()
+                                        )
+                            }
+                        }
+                    }
 
     override fun listEventsHistory(chatRoomId: String, limit: Int?, cursor: String?): Single<ListEvents> =
             service.listEventsHistory(
@@ -265,11 +291,12 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun listEventsByType(chatRoomId: String, eventtype: String, limit: Int?, cursor: String?): Single<ListEvents> =
+    override fun listEventsByType(chatRoomId: String, eventtype: String, customtype: String?, limit: Int?, cursor: String?): Single<ListEvents> =
             service.listEventsByType(
                     appId = appId,
                     chatRoomId = chatRoomId,
                     eventtype = eventtype,
+                    customtype = customtype,
                     limit = limit,
                     cursor = cursor
             )

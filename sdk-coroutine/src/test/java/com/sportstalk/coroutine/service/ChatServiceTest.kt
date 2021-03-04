@@ -1745,6 +1745,118 @@ class ChatServiceTest {
     }
 
     @Test
+    fun `P-ERROR-403) Report User In Room`() = runBlocking {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+        val testAnotherUserData = TestData.users.last()
+        val testAnotherCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testAnotherUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testAnotherUserData.displayname,
+                pictureurl = testAnotherUserData.pictureurl,
+                profileurl = testAnotherUserData.profileurl
+        )
+        // Should create ANOTHER test user first
+        val testAnotherCreatedUserData = userService.createOrUpdateUser(request = testAnotherCreateUserInputRequest)
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        )
+
+        val testAnotherJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testAnotherCreatedUserData.userid!!
+        )
+        // Test Another Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testAnotherJoinRoomInputRequest
+        )
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should send a message to the created chat room
+        val testSendMessageData = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        ).speech!!
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputUserId = testCreatedUserData.userid!!
+        val testInputReporterId = testAnotherCreatedUserData.userid!!
+        val testInputReportType = ReportType.ABUSE
+
+        // Should make sure that this user is shadow banned to ensure that the request is rejected, and that no changes will be made.
+        userService.setBanStatus(
+                userId = testInputReporterId,
+                applyeffect = true,
+                expireseconds = 3_000L
+        )
+
+        // WHEN
+        try {
+            chatService.reportUserInRoom(
+                    chatRoomId = testInputChatRoomId,
+                    userid = testInputUserId,
+                    reporterid = testInputReporterId,
+                    reporttype = testInputReportType
+            )
+
+            fail("Report User In Room operation must fail...")
+        } catch (err: SportsTalkException) {
+            // THEN
+            println(
+                    "`ERROR-403) Report User In Room`() -> testActualResult = \n" +
+                            json.stringify/*encodeToString*/(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+
+            assertTrue { err.code == 403 }
+            assertTrue { err.message == "The user doing the reporting ($testInputReporterId) is suspended from talk experiences by Banned or Muted users." }
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
+    }
+
+    @Test
     fun `Q) List Events History`() = runBlocking {
         // GIVEN
         val testUserData = TestData.users.first()
@@ -1915,6 +2027,103 @@ class ChatServiceTest {
                         && ev.kind == testSendMessageData.kind
                         && ev.roomid == testSendMessageData.roomid
                         && ev.eventtype == testSendMessageData.eventtype
+                        && ev.body == testSendMessageData.body
+            }
+        }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `R) List Events By Type - Custom Type`() = runBlocking {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+        val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+        val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+        )
+        // Test Created User Should join test created chat room
+        chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+        )
+
+        val testInputEventtype = EventType.CUSTOM
+        val testInputCustomType = "specialcustomtype"
+
+        val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, ANNOUNCEMENT how are you doin'?",
+                userid = testCreatedUserData.userid!!,
+                eventtype = testInputEventtype,
+                customtype = testInputCustomType
+        )
+        // Test Created User Should send a message to the created chat room
+        val testSendMessageData = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testInitialSendMessageInputRequest
+        ).speech!!
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputLimit = 10
+        val testExpectedResult = ListEvents(
+                kind = Kind.CHAT_LIST,
+                events = listOf(testSendMessageData)
+        )
+
+        // WHEN
+        val testActualResult = chatService.listEventsByType(
+                chatRoomId = testInputChatRoomId,
+                eventType = testInputEventtype,
+                customtype = testInputCustomType,
+                limit = testInputLimit
+        )
+
+        // THEN
+        println(
+                "`List Events By Type - Custom Type`() -> testActualResult = \n" +
+                        json.stringify/*encodeToString*/(
+                                ListEvents.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue {
+            testActualResult.events.any { ev ->
+                ev.id == testSendMessageData.id
+                        && ev.kind == testSendMessageData.kind
+                        && ev.roomid == testSendMessageData.roomid
+                        && ev.eventtype == testSendMessageData.eventtype
+                        && ev.customtype == testInputCustomType
                         && ev.body == testSendMessageData.body
             }
         }

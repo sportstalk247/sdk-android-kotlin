@@ -289,10 +289,11 @@ constructor(
                         )
                     }
 
-    override fun listEventsByType(chatRoomId: String, eventtype: String, limit: Int?, cursor: String?): Single<ListEvents> =
+    override fun listEventsByType(chatRoomId: String, eventtype: String, customtype: String?, limit: Int?, cursor: String?): Single<ListEvents> =
             chatService.listEventsByType(
                     chatRoomId = chatRoomId,
                     eventtype = eventtype,
+                    customtype = customtype,
                     limit = limit,
                     cursor = cursor
             )

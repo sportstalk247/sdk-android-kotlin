@@ -365,7 +365,7 @@ constructor(
 
     override suspend fun reportUserInRoom(chatRoomId: String, userid: String, reporterid: String, reporttype: String): ChatRoom =
             try {
-                service.reportUserInRoom(
+                val response = service.reportUserInRoom(
                         appId = appId,
                         chatRoomId = chatRoomId,
                         userId = userid,
@@ -374,7 +374,32 @@ constructor(
                                 reporttype = reporttype
                         )
                 )
-                        .handleSdkResponse(json)
+
+                val code = response.code()
+                val message = response.message()
+                val body = response.body()
+                when {
+                    code == 200 && body != null -> {
+                        body!!.data!!
+                    }
+                    code == 200 && body == null -> {
+                        throw SportsTalkException(
+                                kind = Kind.API,
+                                message = message,
+                                code = code
+                        )
+                    }
+                    else -> {
+                        throw response.errorBody()?.string()?.let { errBodyStr ->
+                            json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                        }
+                                ?: SportsTalkException(
+                                        kind = Kind.API,
+                                        message = response.message(),
+                                        code = response.code()
+                                )
+                    }
+                }
             } catch (err: SportsTalkException) {
                 throw err
             } catch (err: Throwable) {
@@ -402,12 +427,13 @@ constructor(
                 )
             }
 
-    override suspend fun listEventsByType(chatRoomId: String, eventType: String, limit: Int?, cursor: String?): ListEvents =
+    override suspend fun listEventsByType(chatRoomId: String, eventType: String, customtype: String?, limit: Int?, cursor: String?): ListEvents =
             try {
                 service.listEventsByType(
                         appId = appId,
                         chatRoomId = chatRoomId,
                         eventtype = eventType,
+                        customtype = customtype,
                         limit = limit,
                         cursor = cursor
                 )

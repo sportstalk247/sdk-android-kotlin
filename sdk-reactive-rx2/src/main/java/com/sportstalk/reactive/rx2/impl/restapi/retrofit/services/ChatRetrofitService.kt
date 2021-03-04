@@ -125,6 +125,7 @@ interface ChatRetrofitService {
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Query("eventtype") eventtype: String,
+            @Query("customtype") customtype: String? = null,
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null /* eventId */
     ): Single<Response<ApiResponse<ListEvents>>>
