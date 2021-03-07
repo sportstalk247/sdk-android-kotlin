@@ -3100,7 +3100,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `T-ERROR-405-NOT-ALLOWED) Execute Chat Command`() = runBlocking {
+    fun `T-ERROR-418-NOT-ALLOWED) Execute Chat Command`() = runBlocking {
         // GIVEN
         val userClient = SportsTalk247.UserClient(config)
         val chatClient = SportsTalk247.ChatClient(config)
@@ -3170,14 +3170,14 @@ class ChatServiceTest {
             fail("Must throttle executeChatCommand() calls in quick succession")
         } catch (err: SportsTalkException) {
             println(
-                    "`ERROR-405-NOT-ALLOWED - Execute Chat Command`() -> testActualResult = \n" +
+                    "`ERROR-418-NOT-ALLOWED - Execute Chat Command`() -> testActualResult = \n" +
                             json.stringify/*encodeToString*/(
                                     SportsTalkException.serializer(),
                                     err
                             )
             )
-            assertTrue { err.message == "405 - Not Allowed. Please wait to send this message again." }
-            assertTrue { err.code == 405 }
+            assertTrue { err.message == "418 - Not Allowed. Please wait to send this message again." }
+            assertTrue { err.code == 418 }
 
             throw err
         } finally {
