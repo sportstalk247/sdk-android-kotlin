@@ -340,8 +340,8 @@ constructor(
                 )
             } else {
                 throw SportsTalkException(
-                        code = 405,
-                        message = "405 - Not Allowed. Please wait to send this message again."
+                        code = 418,
+                        message = "418 - Not Allowed. Please wait to send this message again."
                 )
             }
 
@@ -359,8 +359,8 @@ constructor(
                 )
             } else {
                 throw SportsTalkException(
-                        code = 405,
-                        message = "405 - Not Allowed. Please wait to send this message again."
+                        code = 418,
+                        message = "418 - Not Allowed. Please wait to send this message again."
                 )
             }
 
@@ -378,8 +378,8 @@ constructor(
                 )
             } else {
                 throw SportsTalkException(
-                        code = 405,
-                        message = "405 - Not Allowed. Please wait to send this message again."
+                        code = 418,
+                        message = "418 - Not Allowed. Please wait to send this message again."
                 )
             }
 
