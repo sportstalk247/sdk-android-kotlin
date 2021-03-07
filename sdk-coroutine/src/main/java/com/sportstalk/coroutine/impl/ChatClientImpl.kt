@@ -334,10 +334,17 @@ constructor(
                 _lastExecuteCommandMessage = request.command
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
-                chatService.executeChatCommand(
-                        chatRoomId = chatRoomId,
-                        request = request
-                )
+                try {
+                    chatService.executeChatCommand(
+                            chatRoomId = chatRoomId,
+                            request = request
+                    )
+                } catch (err: Throwable) {
+                    // Bypass anti-flood feature if API or Internal error encountered
+                    _lastExecuteCommandMessage = null
+                    throw err
+                }
+
             } else {
                 throw SportsTalkException(
                         code = 418,
@@ -352,11 +359,17 @@ constructor(
                 _lastExecuteCommandMessage = request.body
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
-                chatService.sendThreadedReply(
-                        chatRoomId = chatRoomId,
-                        replyTo = replyTo,
-                        request = request
-                )
+                try {
+                    chatService.sendThreadedReply(
+                            chatRoomId = chatRoomId,
+                            replyTo = replyTo,
+                            request = request
+                    )
+                } catch (err: Throwable) {
+                    // Bypass anti-flood feature if API or Internal error encountered
+                    _lastExecuteCommandMessage = null
+                    throw err
+                }
             } else {
                 throw SportsTalkException(
                         code = 418,
@@ -371,11 +384,17 @@ constructor(
                 _lastExecuteCommandMessage = request.body
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
-                chatService.sendQuotedReply(
-                        chatRoomId = chatRoomId,
-                        replyTo = replyTo,
-                        request = request
-                )
+                try {
+                    chatService.sendQuotedReply(
+                            chatRoomId = chatRoomId,
+                            replyTo = replyTo,
+                            request = request
+                    )
+                } catch (err: Throwable) {
+                    // Bypass anti-flood feature if API or Internal error encountered
+                    _lastExecuteCommandMessage = null
+                    throw err
+                }
             } else {
                 throw SportsTalkException(
                         code = 418,

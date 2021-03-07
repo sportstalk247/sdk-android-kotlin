@@ -335,6 +335,10 @@ constructor(
                         chatRoomId = chatRoomId,
                         request = request
                 )
+                        // Bypass anti-flood feature if API or Internal error encountered
+                        .doOnError {
+                            _lastExecuteCommandMessage = null
+                        }
             } else {
                 Single.error<ExecuteChatCommandResponse>(
                         SportsTalkException(
@@ -356,6 +360,10 @@ constructor(
                         replyTo = replyTo,
                         request = request
                 )
+                        // Bypass anti-flood feature if API or Internal error encountered
+                        .doOnError {
+                            _lastExecuteCommandMessage = null
+                        }
             } else {
                 Single.error<ChatEvent>(
                         SportsTalkException(
@@ -377,6 +385,10 @@ constructor(
                         replyTo = replyTo,
                         request = request
                 )
+                        // Bypass anti-flood feature if API or Internal error encountered
+                        .doOnError {
+                            _lastExecuteCommandMessage = null
+                        }
             } else {
                 Single.error<ChatEvent>(
                         SportsTalkException(
