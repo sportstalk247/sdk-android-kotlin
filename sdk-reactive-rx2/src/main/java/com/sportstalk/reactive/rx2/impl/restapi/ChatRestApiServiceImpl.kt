@@ -9,6 +9,7 @@ import com.sportstalk.reactive.rx2.impl.handleSdkResponse
 import com.sportstalk.reactive.rx2.impl.restapi.retrofit.services.ChatRetrofitService
 import com.sportstalk.reactive.rx2.service.ChatService
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
@@ -33,6 +34,16 @@ constructor(
         }
     private val roomSubscriptions: MutableSet<String> = mutableSetOf()
     private val chatRoomEventUpdateCursor: HashMap<String, String> = hashMapOf()
+
+    /**
+     * Only used if event smoothing is enabled.
+     * Keeps a list of messages we already rendered so we can ignore them in getUpdates
+     */
+    override var preRenderedMessages: MutableSet<String> = mutableSetOf()
+
+    override var chatEventsEmitter: Flowable<List<ChatEvent>>
+        get() = Flowable.empty()
+        set(value) {}
 
     override fun roomSubscriptions(): Set<String> = roomSubscriptions
 

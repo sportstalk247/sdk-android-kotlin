@@ -7,11 +7,24 @@ import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.ListUserNotificationsResponse
 import com.sportstalk.datamodels.users.User
 import com.sportstalk.datamodels.users.UserNotification
+import io.reactivex.Flowable
 
 interface ChatService {
 
     /** Current user who joined the [ChatRoom]. Sets to null upon exit [ChatRoom] */
     var currentUser: User?
+
+    /**
+     * Only used if event smoothing is enabled.
+     * Keeps a list of messages we already rendered so we can ignore them in getUpdates
+     */
+    var preRenderedMessages: MutableSet<String>
+
+    /**
+     * A coroutine Flow to which Execute Chat Command Response SPEECH is immediately emitted
+     * to achieve smooth event update.
+     */
+    var chatEventsEmitter: Flowable<List<ChatEvent>>
 
     /**
      * A set of ChatRoom IDs to keep track which rooms are subscribed to get event updates

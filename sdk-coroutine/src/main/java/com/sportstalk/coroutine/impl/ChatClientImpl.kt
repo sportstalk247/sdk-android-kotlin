@@ -10,6 +10,10 @@ import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.chat.moderation.*
 import com.sportstalk.datamodels.users.User
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
 
 
 class ChatClientImpl
@@ -49,6 +53,18 @@ constructor(
     private var _lastExecuteCommandMessage: String? = null
     // Throttle timestamp for execute chat command
     private var _lastExecuteCommandTimestamp: Long = 0L
+
+    /**
+     * Only used if event smoothing is enabled.
+     * Keeps a list of messages we already rendered so we can ignore them in getUpdates
+     */
+    override var preRenderedMessages: MutableSet<String> = chatService.preRenderedMessages
+
+    private var _chatEventsEmitter = BroadcastChannel<List<ChatEvent>>(Channel.BUFFERED)
+    override var chatEventsEmitter: Flow<List<ChatEvent>>
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        get() = _chatEventsEmitter.asFlow()
+        set(value) {}
 
     override fun roomSubscriptions(): Set<String> =
             chatService.roomSubscriptions()
@@ -338,7 +354,15 @@ constructor(
                     chatService.executeChatCommand(
                             chatRoomId = chatRoomId,
                             request = request
-                    )
+                    ).also { execCommandResponse ->
+                        // [Anti-flood Feature] Add to preRenderedMessages
+                        execCommandResponse.speech?.let { chatEvent ->
+                            // Emit/Trigger Event Update
+                            _chatEventsEmitter.send(listOf(chatEvent))
+                            // Add to Pre-Rendered Messages
+                            chatEvent.id?.let { id -> preRenderedMessages.add(id) }
+                        }
+                    }
                 } catch (err: Throwable) {
                     // Bypass anti-flood feature if API or Internal error encountered
                     _lastExecuteCommandMessage = null
