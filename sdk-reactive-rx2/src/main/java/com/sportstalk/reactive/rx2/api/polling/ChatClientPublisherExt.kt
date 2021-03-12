@@ -89,7 +89,7 @@ fun ChatService.allEventUpdates(
                             // Emit spaced event updates(i.e. emit per batch list of chat events)
                             var startIndex = 0
                             // Each batch will contain atmost N items
-                            val stepSize = 3
+                            val stepSize = 1
                             val batchListFlowable = mutableListOf<Flowable<List<ChatEvent>>>()
                             do {
                                 val batchList = allEventUpdates.subList(
