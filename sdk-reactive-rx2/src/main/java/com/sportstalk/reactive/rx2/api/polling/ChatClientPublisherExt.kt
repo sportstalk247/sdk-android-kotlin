@@ -20,7 +20,7 @@ fun ChatService.allEventUpdates(
          * If [true], render events with some spacing.
          * - However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
          */
-        smoothEventUpdates: Boolean = false,
+        smoothEventUpdates: Boolean = true,
         /**
          * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
          * This defines how long to pause before emitting the next event in a batch.
