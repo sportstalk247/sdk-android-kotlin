@@ -77,59 +77,32 @@ fun ChatService.allEventUpdates(
                         // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
                         if(smoothEventUpdates && allEventUpdates.size < maxEventBufferSize) {
                             // Emit spaced event updates(i.e. emit per batch list of chat events)
-                            var startIndex = 0
-                            // Each batch will contain atmost N items
-                            val stepSize = 1
-                            do {
-                                val batchList = allEventUpdates.subList(
-                                        startIndex,
-                                        if((startIndex + stepSize) <= allEventUpdates.size) {
-                                            stepSize
-                                        } else allEventUpdates.size
-                                )
-                                // Emit Batch of Chat Event Items
-                                emit(
-                                        batchList
-                                                .apply {
-                                                    // Trigger callbacks based on event type
-                                                    forEach { chatEvent ->
-                                                        when (chatEvent.eventtype) {
-                                                            EventType.GOAL -> onGoalEvent?.invoke(chatEvent)
-                                                            EventType.ADVERTISEMENT -> onAdEvent?.invoke(chatEvent)
-                                                            EventType.REPLY -> onReply?.invoke(chatEvent)
-                                                            EventType.REACTION -> onReaction?.invoke(chatEvent)
-                                                            EventType.PURGE -> onPurgeEvent?.invoke(chatEvent)
-                                                            else -> onChatEvent?.invoke(chatEvent)
-                                                        }
-                                                    }
-                                                }
-                                )
-
-                                // Apply spaced delay for each batch list being emitted
+                            for(chatEvent in allEventUpdates) {
+                                // Emit each Chat Event Items
+                                emit(listOf(chatEvent))
+                                // Apply spaced delay for each chat event item being emitted
                                 delay(eventSpacingMs)
-
-                                startIndex += stepSize
-                            } while(startIndex < allEventUpdates.size)
+                            }
                         } else {
                             // Just emit all events as-is
-                            emit(
-                                    allEventUpdates
-                                            .apply {
-                                                // Trigger callbacks based on event type
-                                                forEach { chatEvent ->
-                                                    when (chatEvent.eventtype) {
-                                                        EventType.GOAL -> onGoalEvent?.invoke(chatEvent)
-                                                        EventType.ADVERTISEMENT -> onAdEvent?.invoke(chatEvent)
-                                                        EventType.REPLY -> onReply?.invoke(chatEvent)
-                                                        EventType.REACTION -> onReaction?.invoke(chatEvent)
-                                                        EventType.PURGE -> onPurgeEvent?.invoke(chatEvent)
-                                                        else -> onChatEvent?.invoke(chatEvent)
-                                                    }
-                                                }
-                                            }
-                            )
+                            emit(allEventUpdates)
                         }
                     }
+                            .map { events ->
+                                events.apply {
+                                    // Trigger callbacks based on event type
+                                    forEach { chatEvent ->
+                                        when (chatEvent.eventtype) {
+                                            EventType.GOAL -> onGoalEvent?.invoke(chatEvent)
+                                            EventType.ADVERTISEMENT -> onAdEvent?.invoke(chatEvent)
+                                            EventType.REPLY -> onReply?.invoke(chatEvent)
+                                            EventType.REACTION -> onReaction?.invoke(chatEvent)
+                                            EventType.PURGE -> onPurgeEvent?.invoke(chatEvent)
+                                            else -> onChatEvent?.invoke(chatEvent)
+                                        }
+                                    }
+                                }
+                            }
                 }
             )
     )

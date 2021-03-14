@@ -87,30 +87,19 @@ fun ChatService.allEventUpdates(
                         // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
                         if(smoothEventUpdates && allEventUpdates.size < maxEventBufferSize) {
                             // Emit spaced event updates(i.e. emit per batch list of chat events)
-                            var startIndex = 0
-                            // Each batch will contain atmost N items
-                            val stepSize = 1
-                            val batchListFlowable = mutableListOf<Flowable<List<ChatEvent>>>()
-                            do {
-                                val batchList = allEventUpdates.subList(
-                                        startIndex,
-                                        if((startIndex + stepSize) <= allEventUpdates.size) {
-                                            stepSize
-                                        } else allEventUpdates.size
+                            val batchListFlowable = allEventUpdates.mapIndexed { index, chatEvent ->
+                                Flowable.just(
+                                        // Emit each Chat Event Items
+                                        listOf(chatEvent)
                                 )
-                                // Partition the entire list into batch of event lists wrapped in Rx Flowable
-                                batchListFlowable.add(
-                                        Flowable.just(batchList)
-                                                .apply {
-                                                    // Apply Delay(eventSpacing) in between emits
-                                                    if(startIndex > 0) {
-                                                        delay(eventSpacingMs, TimeUnit.MILLISECONDS)
-                                                    }
-                                                }
-                                )
+                                        .apply {
+                                            // Apply Delay(eventSpacing) in between emits
+                                            if(index > 0) {
+                                                delay(eventSpacingMs, TimeUnit.MILLISECONDS)
+                                            }
+                                        }
+                            }
 
-                                startIndex += stepSize
-                            } while(startIndex < allEventUpdates.size)
 
                             Flowable.merge(batchListFlowable)
                         } else {
