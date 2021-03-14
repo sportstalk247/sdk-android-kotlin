@@ -25,7 +25,7 @@ fun ChatService.allEventUpdates(
          * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
          * This defines how long to pause before emitting the next event in a batch.
          */
-        eventSpacingMs: Long = 200L,
+        eventSpacingMs: Long = 100L,
         /**
          * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
          * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
@@ -41,6 +41,12 @@ fun ChatService.allEventUpdates(
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
 ): Flowable<List<ChatEvent>> {
+
+    val delayEventSpacingMs = when {
+        eventSpacingMs >= 0 -> eventSpacingMs
+        else -> 100L
+    }
+
     return Flowable.merge(
             chatEventsEmitter,  // Execute Chat Command SPEECH event emitter
             Flowable.interval(0, frequency, TimeUnit.MILLISECONDS)
@@ -95,7 +101,7 @@ fun ChatService.allEventUpdates(
                                         .apply {
                                             // Apply Delay(eventSpacing) in between emits
                                             if(index > 0) {
-                                                delay(eventSpacingMs, TimeUnit.MILLISECONDS)
+                                                delay(delayEventSpacingMs, TimeUnit.MILLISECONDS)
                                             }
                                         }
                             }

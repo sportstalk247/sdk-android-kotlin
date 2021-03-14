@@ -38,7 +38,7 @@ fun ChatService.allEventUpdates(
          * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
          * This defines how long to pause before emitting the next event in a batch.
          */
-        eventSpacingMs: Long = 200L,
+        eventSpacingMs: Long = 100L,
         /**
          * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
          * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
@@ -58,6 +58,12 @@ fun ChatService.allEventUpdates(
         merge(
             chatEventsEmitter,  // Execute Chat Command SPEECH event emitter
             flow<List<ChatEvent>> {
+                // Insanity check, event spacing delay must have a valid value.
+                val delayEventSpacingMs = when {
+                    eventSpacingMs >= 0 -> eventSpacingMs
+                    else -> 100L
+                }
+
                 do {
                     // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
                     if (roomSubscriptions().contains(chatRoomId)) {
@@ -96,7 +102,7 @@ fun ChatService.allEventUpdates(
                                     // Emit each Chat Event Items
                                     emit(listOf(chatEvent))
                                     // Apply spaced delay for each chat event item being emitted
-                                    delay(eventSpacingMs)
+                                    delay(delayEventSpacingMs)
                                 }
                             } else {
                                 // Just emit all events as-is
