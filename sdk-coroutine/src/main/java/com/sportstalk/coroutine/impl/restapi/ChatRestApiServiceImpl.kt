@@ -7,6 +7,11 @@ import com.sportstalk.coroutine.impl.restapi.retrofit.services.ChatRetrofitServi
 import com.sportstalk.datamodels.*
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.User
+import kotlinx.coroutines.channels.BroadcastChannel
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.create
@@ -30,6 +35,18 @@ constructor(
         }
     private val roomSubscriptions: MutableSet<String> = mutableSetOf()
     private val chatRoomEventUpdateCursor: HashMap<String, String> = hashMapOf()
+
+    /**
+     * Only used if event smoothing is enabled.
+     * Keeps a list of messages we already rendered so we can ignore them in getUpdates
+     */
+    override var preRenderedMessages: MutableSet<String> = mutableSetOf()
+
+    internal var _chatEventEmitter = BroadcastChannel<List<ChatEvent>>(Channel.BUFFERED)
+    override var chatEventsEmitter: Flow<List<ChatEvent>>
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        get() = _chatEventEmitter.asFlow()
+        set(value) {}
 
     override fun roomSubscriptions(): Set<String> = roomSubscriptions
 

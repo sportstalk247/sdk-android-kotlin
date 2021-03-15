@@ -8,8 +8,11 @@ import com.sportstalk.datamodels.users.User
 import com.sportstalk.reactive.rx2.ServiceFactory
 import com.sportstalk.reactive.rx2.api.ChatClient
 import com.sportstalk.reactive.rx2.service.ChatService
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
+import io.reactivex.Flowable
 import io.reactivex.Single
+import io.reactivex.subjects.BehaviorSubject
 
 class ChatClientImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -47,6 +50,17 @@ constructor(
     private var _lastExecuteCommandMessage: String? = null
     // Throttle timestamp for execute chat command
     private var _lastExecuteCommandTimestamp: Long = 0L
+
+    /**
+     * Only used if event smoothing is enabled.
+     * Keeps a list of messages we already rendered so we can ignore them in getUpdates
+     */
+    override var preRenderedMessages: MutableSet<String> = chatService.preRenderedMessages
+
+    private var _chatEventsEmitter = BehaviorSubject.create<List<ChatEvent>>()
+    override var chatEventsEmitter: Flowable<List<ChatEvent>>
+        get() = _chatEventsEmitter.toFlowable(BackpressureStrategy.LATEST)
+        set(value) {}
 
     override fun roomSubscriptions(): Set<String> =
             chatService.roomSubscriptions()
@@ -112,6 +126,9 @@ constructor(
                                 forRoomId = chatRoomId,
                                 cursor = cursor
                         )
+
+                        // Clear Pre-rendered events
+                        preRenderedMessages.clear()
                     }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -146,6 +163,9 @@ constructor(
                                 forRoomId = chatRoomIdOrLabel,
                                 cursor = cursor
                         )
+
+                        // Clear Pre-rendered events
+                        preRenderedMessages.clear()
                     }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -181,6 +201,9 @@ constructor(
                                 forRoomId = chatRoomCustomId,
                                 cursor = cursor
                         )
+
+                        // Clear Pre-rendered events
+                        preRenderedMessages.clear()
                     }
                     .map { response ->
                         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -219,6 +242,8 @@ constructor(
 
                         // Remove internally stored event cursor
                         clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
+                        // Clear Pre-rendered events
+                        preRenderedMessages.clear()
                     }
 
     override fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): Single<GetUpdatesResponse> =
@@ -335,6 +360,15 @@ constructor(
                         chatRoomId = chatRoomId,
                         request = request
                 )
+                        .doOnSuccess { execCommandResponse ->
+                            // [Anti-flood Feature] Add to preRenderedMessages
+                            execCommandResponse.speech?.let { chatEvent ->
+                                // Emit/Trigger Event Update
+                                _chatEventsEmitter.onNext(listOf(chatEvent))
+                                // Add to Pre-Rendered Messages
+                                chatEvent.id?.let { id -> preRenderedMessages.add(id) }
+                            }
+                        }
                         // Bypass anti-flood feature if API or Internal error encountered
                         .doOnError {
                             _lastExecuteCommandMessage = null

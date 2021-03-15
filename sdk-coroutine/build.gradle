@@ -23,7 +23,7 @@ android {
 
     buildTypes {
         debug {
-            minifyEnabled true
+            minifyEnabled false
             debuggable true
 
             manifestPlaceholders = [
