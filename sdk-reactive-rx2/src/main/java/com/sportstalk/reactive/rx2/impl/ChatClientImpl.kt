@@ -12,7 +12,7 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
-import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 
 class ChatClientImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -57,7 +57,7 @@ constructor(
      */
     override var preRenderedMessages: MutableSet<String> = chatService.preRenderedMessages
 
-    private var _chatEventsEmitter = BehaviorSubject.create<List<ChatEvent>>()
+    private var _chatEventsEmitter = PublishSubject.create<List<ChatEvent>>()
     override var chatEventsEmitter: Flowable<List<ChatEvent>>
         get() = _chatEventsEmitter.toFlowable(BackpressureStrategy.LATEST)
         set(value) {}
