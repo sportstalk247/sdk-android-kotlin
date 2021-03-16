@@ -1265,7 +1265,7 @@ class ChatServiceTest {
                 chatRoomId = chatRoomId,
                 frequency = 500
         )
-                .take(2)
+                .take(1)
                 .withIndex()
                 .onEach { (index, testActualResult) ->
                     println(
@@ -1276,11 +1276,7 @@ class ChatServiceTest {
                                     )
                     )
 
-                    if(index == 0) {
-                        assertTrue { testActualResult.size == testExpectedResult.itemcount!!.toInt() }
-                    } else {
-                        assertTrue { testActualResult.isEmpty() }
-                    }
+                    assertTrue { testActualResult.size == testExpectedResult.itemcount!!.toInt() }
                 }
                 .onCompletion {
                     chatService.stopListeningToChatUpdates(chatRoomId)

@@ -1216,21 +1216,6 @@ class ChatServiceTest {
                 command = "Yow Jessy, how are you doin'?",
                 userid = testCreatedUserData.userid!!
         )
-        // Test Created User Should send an initial message to the created chat room
-        val testSendMessageData = chatService.executeChatCommand(
-                chatRoomId = testCreatedChatRoomData.id!!,
-                request = testSendMessageInputRequest
-        )
-                .blockingGet()
-                .speech!!
-
-        val testExpectedResult = GetUpdatesResponse(
-                kind = Kind.CHAT_LIST,
-                /*cursor = "",*/
-                more = false,
-                itemcount = 1,
-                events = listOf(testSendMessageData)
-        )
 
         val allEventUpdates = TestObserver<List<ChatEvent>>()
         val chatRoomId = testCreatedChatRoomData.id!!
@@ -1253,10 +1238,26 @@ class ChatServiceTest {
                 }
                 .subscribe(allEventUpdates)
 
+        // Test Created User Should send an initial message to the created chat room
+        val testSendMessageData = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData.id!!,
+                request = testSendMessageInputRequest
+        )
+                .blockingGet()
+                .speech!!
+
+        val testExpectedResult = GetUpdatesResponse(
+                kind = Kind.CHAT_LIST,
+                /*cursor = "",*/
+                more = false,
+                itemcount = 1,
+                events = listOf(testSendMessageData)
+        )
+
         // THEN
         allEventUpdates
                 .awaitCount(2)
-                .assertValueCount(2)
+                .assertValueCount(1)
                 .assertValueAt(0) { testActualResult ->
                     println(
                             "`All Event Updates[0]`() -> response = \n" +
@@ -1267,17 +1268,6 @@ class ChatServiceTest {
                     )
 
                     return@assertValueAt testActualResult.size == testExpectedResult.itemcount!!.toInt()
-                }
-                .assertValueAt(1) { testActualResult ->
-                    println(
-                            "`All Event Updates[1]`() -> response = \n" +
-                                    json.stringify/*encodeToString*/(
-                                            ArrayListSerializer/*ArraySerializer*/(ChatEvent.serializer()),
-                                            testActualResult/*.toTypedArray()*/
-                                    )
-                    )
-
-                    return@assertValueAt testActualResult.isEmpty()
                 }
     }
 
