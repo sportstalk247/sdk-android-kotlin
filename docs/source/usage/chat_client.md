@@ -977,6 +977,8 @@ Refer to the SportsTalk API Documentation for more details:
 
 <https://apiref.sportstalk247.com/?version=latest#be93067d-562e-41b2-97b2-b2bf177f1282>
 
+If `smoothEventUpdates` is set to `true`, smooth event updates feature is applied. Smooth event updates feature emits event updates with space delay(denoted by `eventSpacingMs`) in between each item if item count is less than `maxEventBufferSize` to avoid overwhelming the receiver from consuming a list of event updates in small quantity. However, if item count exceeds `maxEventBufferSize`, all items are emitted as-is without space delay in between.
+
 Below is a code sample on how to use this SDK feature:
 
 ``` tabs::
@@ -996,6 +998,21 @@ Below is a code sample on how to use this SDK feature:
                     chatRoomId = testChatRoom.id!!,
                     frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
                     limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
+                    /**
+                    * If [true], render events with some spacing.
+                    * - However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+                    */
+                    smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
+                    /**
+                    * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+                    * This defines how long to pause before emitting the next event in a batch.
+                    */
+                    eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+                    /**
+                    * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
+                    * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
+                    */
+                    maxEventBufferSize: Int = 30,
                     /*
                     * The following are placeholder/convenience functions should the developers want to implement it
                     * in a callback-oriented way. (Invoked as subscription's side-effect. In coroutine flow, these are invoked via .onEach { ... })
@@ -1054,6 +1071,21 @@ Below is a code sample on how to use this SDK feature:
             lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
             frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
             limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
+            /**
+            * If [true], render events with some spacing.
+            * - However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+            */
+            smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
+            /**
+            * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+            * This defines how long to pause before emitting the next event in a batch.
+            */
+            eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+            /**
+            * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
+            * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
+            */
+            maxEventBufferSize: Int = 30,
             /*
             * The following are placeholder/convenience functions should the developers want to implement it
             * in a callback-oriented way. (Invoked as subscription's side-effect.)
@@ -1108,6 +1140,21 @@ Below is a code sample on how to use this SDK feature:
             lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
             frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
             limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
+            /**
+            * If [true], render events with some spacing.
+            * - However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+            */
+            smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
+            /**
+            * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+            * This defines how long to pause before emitting the next event in a batch.
+            */
+            eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+            /**
+            * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
+            * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
+            */
+            maxEventBufferSize: Int = 30,
             /*
             * The following are placeholder/convenience functions should the developers want to implement it
             * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }.)
