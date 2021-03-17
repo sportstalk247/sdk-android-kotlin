@@ -1736,6 +1736,60 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## Mute User (In Room Only)
+
+Invoke this function toggles the specified user's mute effect.
+
+There is a global user mute effect and local room level user mute effect.
+
+A muted user is in a read-only state. The muted user cannot communicate. This method applies mute from within the specified Chat room ONLY. You can optionally specify an expiration time. If the expiration time is specified, then each time the muted user tries to send a message the API will check if the effect has expired and will lift the user's mute effect.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#67d66190-eb25-4f19-9d65-c127ed368233>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val muteUserResponse = withContext(Dispatchers.IO) {
+                chatClient.muteUser(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    // Assuming user "@nicoleWd" exists
+                    userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                    applyeffect = true, // If set to true, user will be set to muted state. Otherwise, will be set to non-banned state.
+                    expireseconds = 3600 // [OPTIONAL]: Duration of mute in seconds. If specified, the mute will be lifted when this time is reached. If not specified, mute effect remains until explicitly lifted. Maximum seconds is a double byte value.
+                )
+            }
+
+            // Resolve `muteUserResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.muteUser(
+            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+            // Assuming user "@nicoleWd" exists
+            userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+            applyeffect = true, // If set to true, user will be set to muted state. Otherwise, will be set to non-banned state.
+            expireseconds = 3600 // [OPTIONAL]: Duration of mute in seconds. If specified, the mute will be lifted when this time is reached. If not specified, mute effect remains until explicitly lifted. Maximum seconds is a double byte value.
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { muteUserResponse ->
+                // Resolve `muteUserResponse` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Bounce User
 
 Invoke this function to remove the user from the room and prevent the user from reentering.
