@@ -977,6 +977,8 @@ Refer to the SportsTalk API Documentation for more details:
 
 <https://apiref.sportstalk247.com/?version=latest#be93067d-562e-41b2-97b2-b2bf177f1282>
 
+If `smoothEventUpdates` is set to `true`, smooth event updates feature is applied. Smooth event updates feature emits event updates with space delay(denoted by `eventSpacingMs`) in between each item if item count is less than `maxEventBufferSize` to avoid overwhelming the receiver from consuming a list of event updates in small quantity. However, if item count exceeds `maxEventBufferSize`, all items are emitted as-is without space delay in between.
+
 Below is a code sample on how to use this SDK feature:
 
 ``` tabs::
@@ -996,6 +998,21 @@ Below is a code sample on how to use this SDK feature:
                     chatRoomId = testChatRoom.id!!,
                     frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
                     limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
+                    /**
+                    * If [true], render events with some spacing.
+                    * - However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+                    */
+                    smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
+                    /**
+                    * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+                    * This defines how long to pause before emitting the next event in a batch.
+                    */
+                    eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+                    /**
+                    * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
+                    * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
+                    */
+                    maxEventBufferSize: Int = 30,
                     /*
                     * The following are placeholder/convenience functions should the developers want to implement it
                     * in a callback-oriented way. (Invoked as subscription's side-effect. In coroutine flow, these are invoked via .onEach { ... })
@@ -1054,6 +1071,21 @@ Below is a code sample on how to use this SDK feature:
             lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
             frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
             limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
+            /**
+            * If [true], render events with some spacing.
+            * - However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+            */
+            smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
+            /**
+            * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+            * This defines how long to pause before emitting the next event in a batch.
+            */
+            eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+            /**
+            * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
+            * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
+            */
+            maxEventBufferSize: Int = 30,
             /*
             * The following are placeholder/convenience functions should the developers want to implement it
             * in a callback-oriented way. (Invoked as subscription's side-effect.)
@@ -1108,6 +1140,21 @@ Below is a code sample on how to use this SDK feature:
             lifecycleOwner = viewLifecycleOwner /* Already provided by androidx.Fragment */,
             frequency = 1000L /* Polling Frequency. Defaults to 500 milliseconds if not explicitly provided */,
             limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
+            /**
+            * If [true], render events with some spacing.
+            * - However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+            */
+            smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
+            /**
+            * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+            * This defines how long to pause before emitting the next event in a batch.
+            */
+            eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+            /**
+            * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
+            * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
+            */
+            maxEventBufferSize: Int = 30,
             /*
             * The following are placeholder/convenience functions should the developers want to implement it
             * in a callback-oriented way. (Invoked as subscription's side-effect. In RxJava, these are invoked via .doOnNext { ... }.)
@@ -1632,6 +1679,114 @@ Below is a code sample on how to use this SDK feature:
             .doOnSubscribe { rxDisposeBag.add(it) }
             .subscribe { chatEventResponse ->
                 // Resolve `chatEventResponse` (ex. Display prompt OR Update UI)
+            }
+```
+
+## Shadow Ban User (In Room Only)
+
+Invoke this function to toggle the user's shadow banned flag from within the specified Chatroom.
+
+There is a user level shadow ban (global) and local room level shadow ban.
+
+A Shadow Banned user can send messages into a chat room, however those messages are flagged as shadow banned. This enables the application to show those messags only to the shadow banned user, so that that person may not know they were shadow banned. This method shadow bans the user on the global level (or you can use this method to lift the ban). You can optionally specify an expiration time. If the expiration time is specified, then each time the shadow banned user tries to send a message the API will check if the shadow ban has expired and will lift the ban.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#c4a83dfa-9e83-4eb8-b371-e105463f3a52>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val shadowBanUserResponse = withContext(Dispatchers.IO) {
+                chatClient.shadowBanUser(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    // Assuming user "@nicoleWd" exists
+                    userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                    applyeffect = true, // If set to true, user will be set to banned state. Otherwise, will be set to non-banned state.
+                    expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
+                )
+            }
+
+            // Resolve `shadowBanUserResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.shadowBanUser(
+            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+            // Assuming user "@nicoleWd" exists
+            userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+            applyeffect = true, // If set to true, user will be set to banned state. Otherwise, will be set to non-banned state.
+            expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { shadowBanUserResponse ->
+                // Resolve `shadowBanUserResponse` (ex. Display prompt OR Update UI)
+            }
+```
+
+## Mute User (In Room Only)
+
+Invoke this function toggles the specified user's mute effect.
+
+There is a global user mute effect and local room level user mute effect.
+
+A muted user is in a read-only state. The muted user cannot communicate. This method applies mute from within the specified Chat room ONLY. You can optionally specify an expiration time. If the expiration time is specified, then each time the muted user tries to send a message the API will check if the effect has expired and will lift the user's mute effect.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#67d66190-eb25-4f19-9d65-c127ed368233>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val muteUserResponse = withContext(Dispatchers.IO) {
+                chatClient.muteUser(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    // Assuming user "@nicoleWd" exists
+                    userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                    applyeffect = true, // If set to true, user will be set to muted state. Otherwise, will be set to non-banned state.
+                    expireseconds = 3600 // [OPTIONAL]: Duration of mute in seconds. If specified, the mute will be lifted when this time is reached. If not specified, mute effect remains until explicitly lifted. Maximum seconds is a double byte value.
+                )
+            }
+
+            // Resolve `muteUserResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.muteUser(
+            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+            // Assuming user "@nicoleWd" exists
+            userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+            applyeffect = true, // If set to true, user will be set to muted state. Otherwise, will be set to non-banned state.
+            expireseconds = 3600 // [OPTIONAL]: Duration of mute in seconds. If specified, the mute will be lifted when this time is reached. If not specified, mute effect remains until explicitly lifted. Maximum seconds is a double byte value.
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { muteUserResponse ->
+                // Resolve `muteUserResponse` (ex. Display prompt OR Update UI)
             }
 ```
 
