@@ -1682,6 +1682,60 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## Shadow Ban User (In Room Only)
+
+Invoke this function to toggle the user's shadow banned flag from within the specified Chatroom.
+
+There is a user level shadow ban (global) and local room level shadow ban.
+
+A Shadow Banned user can send messages into a chat room, however those messages are flagged as shadow banned. This enables the application to show those messags only to the shadow banned user, so that that person may not know they were shadow banned. This method shadow bans the user on the global level (or you can use this method to lift the ban). You can optionally specify an expiration time. If the expiration time is specified, then each time the shadow banned user tries to send a message the API will check if the shadow ban has expired and will lift the ban.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#c4a83dfa-9e83-4eb8-b371-e105463f3a52>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val shadowBanUserResponse = withContext(Dispatchers.IO) {
+                chatClient.shadowBanUser(
+                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                    // Assuming user "@nicoleWd" exists
+                    userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+                    applyeffect = true, // If set to true, user will be set to banned state. Otherwise, will be set to non-banned state.
+                    expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
+                )
+            }
+
+            // Resolve `shadowBanUserResponse` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.shadowBanUser(
+            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+            // Assuming user "@nicoleWd" exists
+            userid = "023976080242ac120002", // ID of an existing user "@nicoleWd" from this chatroom
+            applyeffect = true, // If set to true, user will be set to banned state. Otherwise, will be set to non-banned state.
+            expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { shadowBanUserResponse ->
+                // Resolve `shadowBanUserResponse` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Bounce User
 
 Invoke this function to remove the user from the room and prevent the user from reentering.
