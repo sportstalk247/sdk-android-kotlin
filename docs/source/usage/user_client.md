@@ -171,7 +171,9 @@ Below is a code sample on how to use this SDK feature:
             val bannedUser = withContext(Dispatchers.IO) {
                 userClient.setBanStatus(
                     userid = "023976080242ac120002",
-                    banned = true // If set to true, attempt to ban the user. If set to false, attempt to remove the ban from user
+                    applyeffect = true, // If set to true, attempt to ban the user. If set to false, attempt to remove the ban from user
+                    expireseconds = 3600 // [Optional] if not specified, the ban is permanent until user is restored. If specified, then the ban will be temporarily applied for the specified number of seconds.
+
                 )
             }
 
@@ -184,7 +186,8 @@ Below is a code sample on how to use this SDK feature:
 
         userClient.setBanStatus(
             userid = "023976080242ac120002",
-            banned = true // If set to true, attempt to ban the user. If set to false, attempt to remove the ban from user
+            applyeffect = true, // If set to true, attempt to ban the user. If set to false, attempt to remove the ban from user
+            expireseconds = 3600 // [Optional] if not specified, the ban is permanent until user is restored. If specified, then the ban will be temporarily applied for the specified number of seconds.
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -259,7 +262,7 @@ Below is a code sample on how to use this SDK feature:
             val shadowBannedUser = withContext(Dispatchers.IO) {
                 userClient.setShadowBanStatus(
                     userId = "023976080242ac120002",
-                    shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
+                    applyeffect = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
                     expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
 
                 )
@@ -274,7 +277,7 @@ Below is a code sample on how to use this SDK feature:
 
         userClient.setShadowBanStatus(
             userId = "023976080242ac120002",
-            shadowban = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
+            applyeffect = true, // If set to true, user can send messages into a chat room, however those messages are flagged as shadow banned.
             expireseconds = 3600 // [OPTIONAL]: Duration of shadowban value in seconds. If specified, the shadow ban will be lifted when this time is reached. If not specified, shadowban remains until explicitly lifted. Maximum seconds is a double byte value.
 
         )
