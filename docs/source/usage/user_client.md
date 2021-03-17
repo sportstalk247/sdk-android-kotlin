@@ -241,6 +241,54 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## Mute User
+
+This function toggles the specified user's mute effect.
+
+A muted user is in a read-only state. The muted user can join chat rooms and observe but cannot communicate. This method applies mute on the global level (applies to all talk contexts). You can optionally specify an expiration time. If the expiration time is specified, then each time the shadow banned user tries to send a message the API will check if the shadow ban has expired and will lift the ban.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#0d4c6409-18c6-41f4-9a61-7e2445c5bc0d>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val mutedUser = withContext(Dispatchers.IO) {
+                userClient.muteUser(
+                    userId = "023976080242ac120002",
+                    applyeffect = true, // If set to true, user will be set to muted state. Otherwise, will be set to non-banned state.
+                    expireseconds = 3600 // [OPTIONAL]: Duration of mute in seconds. If specified, the mute will be lifted when this time is reached. If not specified, mute effect remains until explicitly lifted. Maximum seconds is a double byte value.
+                )
+            }
+
+            // Resolve `mutedUser` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        userClient.muteUser(
+            userId = "023976080242ac120002",
+            applyeffect = true, // If set to true, user will be set to muted state. Otherwise, will be set to non-banned state.
+            expireseconds = 3600 // [OPTIONAL]: Duration of mute in seconds. If specified, the mute will be lifted when this time is reached. If not specified, mute effect remains until explicitly lifted. Maximum seconds is a double byte value.
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { mutedUser ->
+                // Resolve `mutedUser` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Set Shadow Ban Status
 
 This function toggles the specified user's `shadowbanned` flag.
