@@ -92,6 +92,9 @@ constructor(
     override suspend fun getRoomDetails(chatRoomId: String): ChatRoom =
             chatService.getRoomDetails(chatRoomId = chatRoomId)
 
+    override suspend fun getRoomDetailsExtendedBatch(entityTypes: List<RoomDetailEntityType>, roomIds: List<String>, customIds: List<String>): GetRoomDetailsExtendedBatchResponse =
+            chatService.getRoomDetailsExtendedBatch(entityTypes, roomIds, customIds)
+
     override suspend fun getRoomDetailsByCustomId(chatRoomCustomId: String): ChatRoom =
             chatService.getRoomDetailsByCustomId(chatRoomCustomId = chatRoomCustomId)
 

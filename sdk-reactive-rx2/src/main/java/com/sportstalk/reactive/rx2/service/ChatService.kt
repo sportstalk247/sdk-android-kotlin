@@ -70,6 +70,17 @@ interface ChatService {
     fun getRoomDetails(chatRoomId: String): Single<ChatRoom>
 
     /**
+     * [GET] /{{api_appid}}/chat/rooms/batch/details?entity={$0}&entity={$1}&entity={$2}&roomid={$0}&roomid={$1}&customid={$0}&customid={$1}
+     * - https://apiref.sportstalk247.com/?version=latest#f9417096-7eac-44e1-846b-9a4782fb8279
+     * - Get the extended details for a room
+     */
+    fun getRoomDetailsExtendedBatch(
+            entityTypes: List<RoomDetailEntityType>,
+            roomIds: List<String> = listOf(),
+            customIds: List<String> = listOf()
+    ): Single<GetRoomDetailsExtendedBatchResponse>
+
+    /**
      * [GET] /{{api_appid}}/chat/roomsbycustomid/{{chat_create_room_customid}}
      * - https://apiref.sportstalk247.com/?version=latest#0fd07be5-f8d5-43d9-bf0f-8fb9829c172c
      * - Get the details for a room

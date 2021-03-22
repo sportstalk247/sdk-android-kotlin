@@ -321,7 +321,89 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `B - 2) Get Room Details - By Custom ID`() = runBlocking {
+    fun `B - 2) Get Room Extended Details Batch`() = runBlocking {
+        // GIVEN
+        val testData = TestData.chatRooms(config.appId).first()
+        val testInputRequest = CreateChatRoomRequest(
+                name = testData.name!!,
+                customid = testData.customid,
+                description = testData.description,
+                moderation = testData.moderation,
+                enableactions = testData.enableactions,
+                enableenterandexit = testData.enableenterandexit,
+                enableprofanityfilter = testData.enableprofanityfilter,
+                delaymessageseconds = testData.delaymessageseconds,
+                roomisopen = testData.open,
+                maxreports = testData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testInputRequest)
+
+        // WHEN
+        val testActualResult = chatService.getRoomDetailsExtendedBatch(
+                entityTypes = listOf(
+                        RoomDetailEntityType.ROOM,
+                        RoomDetailEntityType.NUM_PARTICIPANTS,
+                        RoomDetailEntityType.LAST_MESSAGE_TIME
+                ),
+                roomIds = listOf(testCreatedChatRoomData.id!!)
+        )
+
+        // THEN
+        println(
+                "`Get Room Extended Details Batch`() -> testActualResult = \n" +
+                        json.stringify/*encodeToString*/(
+                                GetRoomDetailsExtendedBatchResponse.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == Kind.ROOM_EXTENDED_DETAILS }
+        assertTrue { testActualResult.details.first().room != null }
+        assertTrue { testActualResult.details.first()?.inroom != null }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+    }
+
+    @Test
+    fun `B-ERROR-404) Get Room Extended Details Batch`() = runBlocking {
+        // GIVEN
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+
+        // WHEN
+        try {
+            withContext(Dispatchers.IO) {
+                chatService.getRoomDetailsExtendedBatch(
+                        entityTypes = listOf(
+                                RoomDetailEntityType.ROOM,
+                                RoomDetailEntityType.NUM_PARTICIPANTS,
+                                RoomDetailEntityType.LAST_MESSAGE_TIME
+                        )
+                )
+            }
+        } catch (err: SportsTalkException) {
+            println(
+                    "`ERROR-404 - Get Room Extended Details Batch`() -> testActualResult = \n" +
+                            json.stringify/*encodeToString*/(
+                                    SportsTalkException.serializer(),
+                                    err
+                            )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "You must specify at least one roomid or customid" }
+            assertTrue { err.code == 400 }
+
+            throw err
+        }
+
+        return@runBlocking
+    }
+
+    @Test
+    fun `B - 3) Get Room Details - By Custom ID`() = runBlocking {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         // Should create a test chat room first

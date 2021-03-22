@@ -88,6 +88,13 @@ constructor(
     override fun getRoomDetails(chatRoomId: String): Single<ChatRoom> =
             chatService.getRoomDetails(chatRoomId = chatRoomId)
 
+    override fun getRoomDetailsExtendedBatch(entityTypes: List<RoomDetailEntityType>, roomIds: List<String>, customIds: List<String>): Single<GetRoomDetailsExtendedBatchResponse> =
+            chatService.getRoomDetailsExtendedBatch(
+                    entityTypes = entityTypes,
+                    roomIds = roomIds,
+                    customIds = customIds
+            )
+
     override fun getRoomDetailsByCustomId(chatRoomCustomId: String): Single<ChatRoom> =
             chatService.getRoomDetailsByCustomId(chatRoomCustomId = chatRoomCustomId)
 
