@@ -158,6 +158,60 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## Get Room Extended Details Batch
+
+Invoke this function to get the extended details for a room.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#f9417096-7eac-44e1-846b-9a4782fb8279>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val chatRoomExtendedDetails = withContext(Dispatchers.IO) {
+                chatClient.getRoomDetailsExtendedBatch(
+                    entityTypes = listOf(
+                        RoomDetailEntityType.ROOM,
+                        RoomDetailEntityType.NUM_PARTICIPANTS,
+                        RoomDetailEntityType.LAST_MESSAGE_TIME
+                    ),  // Must have atleast 1 of the RoomDetailEntityType enum constant.
+                    roomIds = listOf("080001297623242ac002", "702242ac000086230129"),  // Must have atleast 1 entry for roomIds or customIds combined.
+                    customIds = listOf("test-custom-room-id-01", "test-custom-room-id-02")
+                )
+            }
+
+            // Resolve `chatRoomExtendedDetails` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.getRoomDetailsExtendedBatch(
+            entityTypes = listOf(
+                RoomDetailEntityType.ROOM,
+                RoomDetailEntityType.NUM_PARTICIPANTS,
+                RoomDetailEntityType.LAST_MESSAGE_TIME
+            ),  // Must have atleast 1 of the RoomDetailEntityType enum constant.
+            roomIds = listOf("080001297623242ac002", "702242ac000086230129"),  // Must have atleast 1 entry for roomIds or customIds combined.
+            customIds = listOf("test-custom-room-id-01", "test-custom-room-id-02")
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { chatRoomExtendedDetails ->
+                // Resolve `chatRoomExtendedDetails` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Get Room Details By CustomId
 
 Invoke this function to get the details for a room, using custom ID.
