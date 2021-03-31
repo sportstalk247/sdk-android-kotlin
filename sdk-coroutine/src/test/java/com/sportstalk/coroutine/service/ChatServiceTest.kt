@@ -1365,7 +1365,7 @@ class ChatServiceTest {
                 }
                 .launchIn(GlobalScope)
 
-        delay(1000)
+        delay(1500)
 
         job.cancelAndJoin()
 

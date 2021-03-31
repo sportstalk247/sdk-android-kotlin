@@ -10,12 +10,7 @@ import com.sportstalk.datamodels.chat.polling.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.flattenMerge
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import kotlin.collections.filterNot
 
@@ -54,22 +49,23 @@ fun ChatService.allEventUpdates(
         onReply: OnReply? = null,
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
-): Flow<List<ChatEvent>> =
-        merge(
+): Flow<List<ChatEvent>> {
+
+    // Insanity check, event spacing delay must have a valid value.
+    val delayEventSpacingMs = when {
+        eventSpacingMs >= 0 -> eventSpacingMs
+        else -> 100L
+    }
+
+    return merge(
             chatEventsEmitter,  // Execute Chat Command SPEECH event emitter
             flow<List<ChatEvent>> {
-                // Insanity check, event spacing delay must have a valid value.
-                val delayEventSpacingMs = when {
-                    eventSpacingMs >= 0 -> eventSpacingMs
-                    else -> 100L
-                }
-
                 do {
                     // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
                     if (roomSubscriptions().contains(chatRoomId)) {
                         try {
                             // Perform GET UPDATES operation
-                            val response = withContext(Dispatchers.IO) {
+                            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
                                 getUpdates(
                                         chatRoomId = chatRoomId,
                                         limit = limit,
@@ -94,20 +90,7 @@ fun ChatService.allEventUpdates(
                                         alreadyPreRendered
                                     }
 
-                            // If smoothing is enabled, render events with some spacing.
-                            // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
-                            if(smoothEventUpdates && allEventUpdates.size < maxEventBufferSize) {
-                                // Emit spaced event updates(i.e. emit per batch list of chat events)
-                                for(chatEvent in allEventUpdates) {
-                                    // Emit each Chat Event Items
-                                    emit(listOf(chatEvent))
-                                    // Apply spaced delay for each chat event item being emitted
-                                    delay(delayEventSpacingMs)
-                                }
-                            } else {
-                                // Just emit all events as-is
-                                emit(allEventUpdates)
-                            }
+                            emit(allEventUpdates)
                         } catch (err: SportsTalkException) {
                             err.printStackTrace()
                         } catch (err: CancellationException) {
@@ -121,22 +104,32 @@ fun ChatService.allEventUpdates(
                     delay(frequency)
                 } while (true)
             }
-                    // Skip pre-rendered messages
-                    .map { events ->
-                        events
-                                .filterNot { ev ->
-                                    val isPreRendered = preRenderedMessages.contains(ev.id!!)
-                                    if(isPreRendered) preRenderedMessages.remove(ev.id!!)
-                                    isPreRendered
-                                }
-                    }
-        )
+    )
             // Filter out shadowban events for shadowbanned user
             .map { events ->
                 events
                         .filterNot { ev ->
                             ev.shadowban == true && ev.userid != currentUser?.userid
                         }
+            }
+            .flatMapMerge { allEventUpdates ->
+                // If smoothing is enabled, render events with some spacing.
+                // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+                if(smoothEventUpdates && allEventUpdates.isNotEmpty() && allEventUpdates.size < maxEventBufferSize) {
+
+                    // Emit spaced event updates(i.e. emit per batch list of chat events)
+                    flow<List<ChatEvent>> {
+                        for(chatEvent in allEventUpdates) {
+                            // Emit each Chat Event Items
+                            emit(listOf(chatEvent))
+                            // Apply spaced delay for each chat event item being emitted
+                            delay(delayEventSpacingMs)
+                        }
+                    }
+                } else {
+                    // Just emit all events as-is
+                    flowOf(allEventUpdates)
+                }
             }
             // Trigger callbacks based on event type
             .onEach { events ->
@@ -151,6 +144,7 @@ fun ChatService.allEventUpdates(
                     }
                 }
             }
+}
 
 fun <T> merge(vararg flows: Flow<T>): Flow<T> =
         flowOf(*flows).flattenMerge(concurrency = flows.size)

@@ -75,8 +75,8 @@ fun ChatService.allEventUpdates(
                             Flowable.empty()
                         }
                     }
-                    .flatMap { resp ->
-                        val allEventUpdates = resp.events
+                    .map {
+                        it.events
                                 .filterNot { ev ->
                                     // We already rendered this on send.
                                     val eventId = ev.id ?: ""
@@ -84,35 +84,37 @@ fun ChatService.allEventUpdates(
                                     if(alreadyPreRendered) preRenderedMessages.remove(eventId)
                                     alreadyPreRendered
                                 }
-                                // Filter out shadowban events for shadowbanned user
-                                .filterNot { ev ->
-                                    ev.shadowban == true && ev.userid != currentUser?.userid
-                                }
-
-                        // If smoothing is enabled, render events with some spacing.
-                        // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
-                        if(smoothEventUpdates && allEventUpdates.size < maxEventBufferSize) {
-                            // Emit spaced event updates(i.e. emit per batch list of chat events)
-                            val batchListFlowable = allEventUpdates.mapIndexed { index, chatEvent ->
-                                Flowable.just(
-                                        // Emit each Chat Event Items
-                                        listOf(chatEvent)
-                                )
-                                        .apply {
-                                            // Apply Delay(eventSpacing) in between emits
-                                            if(index > 0) {
-                                                delay(delayEventSpacingMs, TimeUnit.MILLISECONDS)
-                                            }
-                                        }
-                            }
-
-
-                            Flowable.merge(batchListFlowable)
-                        } else {
-                            Flowable.just(allEventUpdates)
-                        }
                     }
     )
+            .map { allEventUpdates ->
+                allEventUpdates
+                        // Filter out shadowban events for shadowbanned user
+                        .filterNot { ev ->
+                            ev.shadowban == true && ev.userid != currentUser?.userid
+                        }
+            }
+            .flatMap { allEventUpdates ->
+                // If smoothing is enabled, render events with some spacing.
+                // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+                if(smoothEventUpdates && allEventUpdates.isNotEmpty() && allEventUpdates.size < maxEventBufferSize) {
+                    // Emit spaced event updates(i.e. emit per batch list of chat events)
+                    val batchListFlowable = allEventUpdates
+                            .asSequence()
+                            .mapIndexed { index, chatEvent ->
+                        Flowable.just(
+                                // Emit each Chat Event Items
+                                listOf(chatEvent)
+                        )
+                    }
+                            .asIterable()
+
+                    Flowable.merge(batchListFlowable)
+                            // Apply Delay(eventSpacing) in between emits
+                            .delay(delayEventSpacingMs, TimeUnit.MILLISECONDS)
+                } else {
+                    Flowable.just(allEventUpdates)
+                }
+            }
             .doOnNext { events ->
                 events.forEach { chatEvent ->
                     when (chatEvent.eventtype) {

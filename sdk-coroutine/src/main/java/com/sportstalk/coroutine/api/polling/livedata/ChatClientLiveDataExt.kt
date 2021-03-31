@@ -64,52 +64,58 @@ fun ChatService.allEventUpdates(
                             setChatRoomEventUpdateCursor(chatRoomId, cursor)
                         }
 
-                        // Emit transform into List<ChatEvent>
-                        val allEventUpdates = response.events
-                                // Filter out shadowban events for shadowbanned user
-                                .filterNot { ev ->
-                                    ev.shadowban == true && ev.userid != currentUser?.userid
-                                }
-                                .filterNot { ev ->
-                                    // We already rendered this on send.
-                                    val eventId = ev.id ?: ""
-                                    val alreadyPreRendered = preRenderedMessages.contains(eventId)
-                                    if(alreadyPreRendered) preRenderedMessages.remove(eventId)
-                                    alreadyPreRendered
-                                }
-
-                        // If smoothing is enabled, render events with some spacing.
-                        // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
-                        if(smoothEventUpdates && allEventUpdates.size < maxEventBufferSize) {
-                            // Emit spaced event updates(i.e. emit per batch list of chat events)
-                            for(chatEvent in allEventUpdates) {
-                                // Emit each Chat Event Items
-                                emit(listOf(chatEvent))
-                                // Apply spaced delay for each chat event item being emitted
-                                delay(delayEventSpacingMs)
-                            }
-                        } else {
-                            // Just emit all events as-is
-                            emit(allEventUpdates)
-                        }
+                        emit(response.events)
                     }
-                            .map { events ->
-                                events.apply {
-                                    // Trigger callbacks based on event type
-                                    forEach { chatEvent ->
-                                        when (chatEvent.eventtype) {
-                                            EventType.GOAL -> onGoalEvent?.invoke(chatEvent)
-                                            EventType.ADVERTISEMENT -> onAdEvent?.invoke(chatEvent)
-                                            EventType.REPLY -> onReply?.invoke(chatEvent)
-                                            EventType.REACTION -> onReaction?.invoke(chatEvent)
-                                            EventType.PURGE -> onPurgeEvent?.invoke(chatEvent)
-                                            else -> onChatEvent?.invoke(chatEvent)
-                                        }
-                                    }
-                                }
-                            }
+
                 }
             )
+                    .switchMap { events ->
+                        liveData<List<ChatEvent>> {
+                            // Emit transform into List<ChatEvent>
+                            val allEventUpdates = events
+                                    // Filter out shadowban events for shadowbanned user
+                                    .filterNot { ev ->
+                                        ev.shadowban == true && ev.userid != currentUser?.userid
+                                    }
+                                    .filterNot { ev ->
+                                        // We already rendered this on send.
+                                        val eventId = ev.id ?: ""
+                                        val alreadyPreRendered = preRenderedMessages.contains(eventId)
+                                        if(alreadyPreRendered) preRenderedMessages.remove(eventId)
+                                        alreadyPreRendered
+                                    }
+
+                            // If smoothing is enabled, render events with some spacing.
+                            // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
+                            if(smoothEventUpdates && allEventUpdates.size < maxEventBufferSize) {
+                                // Emit spaced event updates(i.e. emit per batch list of chat events)
+                                for(chatEvent in allEventUpdates) {
+                                    // Emit each Chat Event Items
+                                    emit(listOf(chatEvent))
+                                    // Apply spaced delay for each chat event item being emitted
+                                    delay(delayEventSpacingMs)
+                                }
+                            } else {
+                                // Just emit all events as-is
+                                emit(allEventUpdates)
+                            }
+                        }
+                    }
+                    .map { events ->
+                        events.apply {
+                            // Trigger callbacks based on event type
+                            forEach { chatEvent ->
+                                when (chatEvent.eventtype) {
+                                    EventType.GOAL -> onGoalEvent?.invoke(chatEvent)
+                                    EventType.ADVERTISEMENT -> onAdEvent?.invoke(chatEvent)
+                                    EventType.REPLY -> onReply?.invoke(chatEvent)
+                                    EventType.REACTION -> onReaction?.invoke(chatEvent)
+                                    EventType.PURGE -> onPurgeEvent?.invoke(chatEvent)
+                                    else -> onChatEvent?.invoke(chatEvent)
+                                }
+                            }
+                        }
+                    }
     )
 
     do {

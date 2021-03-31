@@ -1321,6 +1321,7 @@ class ChatServiceTest {
                     // Perform Delete Test User
                     deleteTestUsers(testCreatedUserData.userid)
                 }
+                .filter { it.isNotEmpty() }
                 .subscribe(allEventUpdates)
 
         // Test Created User Should send an initial message to the created chat room
@@ -1341,8 +1342,7 @@ class ChatServiceTest {
 
         // THEN
         allEventUpdates
-                .awaitCount(2)
-                .assertValueCount(1)
+                .awaitDone(1500L, TimeUnit.MILLISECONDS)
                 .assertValueAt(0) { testActualResult ->
                     println(
                             "`All Event Updates[0]`() -> response = \n" +
