@@ -98,19 +98,10 @@ fun ChatService.allEventUpdates(
                 // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
                 if(smoothEventUpdates && allEventUpdates.isNotEmpty() && allEventUpdates.size < maxEventBufferSize) {
                     // Emit spaced event updates(i.e. emit per batch list of chat events)
-                    val batchListFlowable = allEventUpdates
-                            .asSequence()
-                            .mapIndexed { index, chatEvent ->
-                        Flowable.just(
-                                // Emit each Chat Event Items
-                                listOf(chatEvent)
-                        )
-                    }
-                            .asIterable()
-
-                    Flowable.merge(batchListFlowable)
-                            // Apply Delay(eventSpacing) in between emits
-                            .delay(delayEventSpacingMs, TimeUnit.MILLISECONDS)
+                    Flowable.fromIterable(allEventUpdates)
+                        .map { listOf(it) }
+                        // Apply Delay(eventSpacing) in between emits
+                        .delay(delayEventSpacingMs, TimeUnit.MILLISECONDS)
                 } else {
                     Flowable.just(allEventUpdates)
                 }
