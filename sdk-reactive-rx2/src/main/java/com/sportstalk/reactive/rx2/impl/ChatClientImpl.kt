@@ -357,10 +357,10 @@ constructor(
                     }
 
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): Single<ExecuteChatCommandResponse> =
-            if(_lastExecuteCommandMessage != request.command
+            if(_lastExecuteCommandMessage != request.command.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.command
+                _lastExecuteCommandMessage = request.command.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 chatService.executeChatCommand(
@@ -390,10 +390,10 @@ constructor(
             }
 
     override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): Single<ChatEvent> =
-            if(_lastExecuteCommandMessage != request.body
+            if(_lastExecuteCommandMessage != request.body.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.body
+                _lastExecuteCommandMessage = request.body.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 chatService.sendThreadedReply(
@@ -415,10 +415,10 @@ constructor(
             }
 
     override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): Single<ChatEvent> =
-            if(_lastExecuteCommandMessage != request.body
+            if(_lastExecuteCommandMessage != request.body.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.body
+                _lastExecuteCommandMessage = request.body.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 chatService.sendQuotedReply(
