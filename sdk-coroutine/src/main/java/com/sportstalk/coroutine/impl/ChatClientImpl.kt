@@ -92,6 +92,9 @@ constructor(
     override suspend fun getRoomDetails(chatRoomId: String): ChatRoom =
             chatService.getRoomDetails(chatRoomId = chatRoomId)
 
+    override suspend fun getRoomDetailsExtendedBatch(entityTypes: List<RoomDetailEntityType>, roomIds: List<String>, customIds: List<String>): GetRoomDetailsExtendedBatchResponse =
+            chatService.getRoomDetailsExtendedBatch(entityTypes, roomIds, customIds)
+
     override suspend fun getRoomDetailsByCustomId(chatRoomCustomId: String): ChatRoom =
             chatService.getRoomDetailsByCustomId(chatRoomCustomId = chatRoomCustomId)
 
@@ -344,10 +347,10 @@ constructor(
     }
 
     override suspend fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): ExecuteChatCommandResponse =
-            if(_lastExecuteCommandMessage != request.command
+            if(_lastExecuteCommandMessage != request.command.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.command
+                _lastExecuteCommandMessage = request.command.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 try {
@@ -377,10 +380,10 @@ constructor(
             }
 
     override suspend fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): ChatEvent =
-            if(_lastExecuteCommandMessage != request.body
+            if(_lastExecuteCommandMessage != request.body.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.body
+                _lastExecuteCommandMessage = request.body.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 try {
@@ -402,10 +405,10 @@ constructor(
             }
 
     override suspend fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): ChatEvent =
-            if(_lastExecuteCommandMessage != request.body
+            if(_lastExecuteCommandMessage != request.body.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.body
+                _lastExecuteCommandMessage = request.body.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 try {

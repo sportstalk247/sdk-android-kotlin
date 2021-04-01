@@ -102,6 +102,24 @@ constructor(
                 )
             }
 
+    override suspend fun getRoomDetailsExtendedBatch(entityTypes: List<RoomDetailEntityType>, roomIds: List<String>, customIds: List<String>): GetRoomDetailsExtendedBatchResponse =
+            try {
+                service.getRoomDetailsExtendedBatch(
+                        appId = appId,
+                        entityTypes = entityTypes.map { it.keyword },
+                        roomIds = roomIds,
+                        customIds = customIds
+                )
+                        .handleSdkResponse(json)
+            } catch (err: SportsTalkException) {
+                throw err
+            } catch (err: Throwable) {
+                throw SportsTalkException(
+                        message = err.message,
+                        err = err
+                )
+            }
+
     override suspend fun getRoomDetailsByCustomId(chatRoomCustomId: String): ChatRoom =
             try {
                 service.getRoomDetailsByCustomId(

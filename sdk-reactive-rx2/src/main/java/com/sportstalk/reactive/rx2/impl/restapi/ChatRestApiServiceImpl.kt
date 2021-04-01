@@ -81,6 +81,15 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun getRoomDetailsExtendedBatch(entityTypes: List<RoomDetailEntityType>, roomIds: List<String>, customIds: List<String>): Single<GetRoomDetailsExtendedBatchResponse> =
+            service.getRoomDetailsExtendedBatch(
+                    appId = appId,
+                    entityTypes = entityTypes.map { it.keyword },
+                    roomIds = roomIds,
+                    customIds = customIds
+            )
+                    .handleSdkResponse(json)
+
     override fun getRoomDetailsByCustomId(chatRoomCustomId: String): Single<ChatRoom> =
             service.getRoomDetailsByCustomId(
                     appId = appId,

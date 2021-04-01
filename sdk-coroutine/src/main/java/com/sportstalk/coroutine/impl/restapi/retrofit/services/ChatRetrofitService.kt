@@ -21,6 +21,14 @@ interface ChatRetrofitService {
             @Path("chatroomid") chatRoomId: String
     ): Response<ApiResponse<ChatRoom>>
 
+    @GET("{appId}/chat/rooms/batch/details")
+    suspend fun getRoomDetailsExtendedBatch(
+            @Path("appId") appId: String,
+            @Query("entity") entityTypes: List<String>,
+            @Query("roomid", encoded = true) roomIds: List<String>,
+            @Query("customid", encoded = true) customIds: List<String>
+    ): Response<ApiResponse<GetRoomDetailsExtendedBatchResponse>>
+
     @GET("{appId}/chat/roomsbycustomid/{chatroom_customid}")
     suspend fun getRoomDetailsByCustomId(
             @Path("appId") appId: String,

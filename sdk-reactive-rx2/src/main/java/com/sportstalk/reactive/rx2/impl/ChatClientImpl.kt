@@ -88,6 +88,13 @@ constructor(
     override fun getRoomDetails(chatRoomId: String): Single<ChatRoom> =
             chatService.getRoomDetails(chatRoomId = chatRoomId)
 
+    override fun getRoomDetailsExtendedBatch(entityTypes: List<RoomDetailEntityType>, roomIds: List<String>, customIds: List<String>): Single<GetRoomDetailsExtendedBatchResponse> =
+            chatService.getRoomDetailsExtendedBatch(
+                    entityTypes = entityTypes,
+                    roomIds = roomIds,
+                    customIds = customIds
+            )
+
     override fun getRoomDetailsByCustomId(chatRoomCustomId: String): Single<ChatRoom> =
             chatService.getRoomDetailsByCustomId(chatRoomCustomId = chatRoomCustomId)
 
@@ -350,10 +357,10 @@ constructor(
                     }
 
     override fun executeChatCommand(chatRoomId: String, request: ExecuteChatCommandRequest): Single<ExecuteChatCommandResponse> =
-            if(_lastExecuteCommandMessage != request.command
+            if(_lastExecuteCommandMessage != request.command.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.command
+                _lastExecuteCommandMessage = request.command.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 chatService.executeChatCommand(
@@ -383,10 +390,10 @@ constructor(
             }
 
     override fun sendThreadedReply(chatRoomId: String, replyTo: String, request: SendThreadedReplyRequest): Single<ChatEvent> =
-            if(_lastExecuteCommandMessage != request.body
+            if(_lastExecuteCommandMessage != request.body.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.body
+                _lastExecuteCommandMessage = request.body.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 chatService.sendThreadedReply(
@@ -408,10 +415,10 @@ constructor(
             }
 
     override fun sendQuotedReply(chatRoomId: String, replyTo: String, request: SendQuotedReplyRequest): Single<ChatEvent> =
-            if(_lastExecuteCommandMessage != request.body
+            if(_lastExecuteCommandMessage != request.body.trim()
                     || Math.abs(System.currentTimeMillis() - _lastExecuteCommandTimestamp) > DURATION_EXECUTE_COMMAND) {
 
-                _lastExecuteCommandMessage = request.body
+                _lastExecuteCommandMessage = request.body.trim()
                 _lastExecuteCommandTimestamp = System.currentTimeMillis()
 
                 chatService.sendQuotedReply(

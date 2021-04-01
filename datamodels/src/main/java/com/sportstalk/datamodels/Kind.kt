@@ -3,6 +3,7 @@ package com.sportstalk.datamodels
 object Kind {
     const val CHAT = "chat.event"
     const val ROOM = "chat.room"
+    const val ROOM_EXTENDED_DETAILS = "chat.room.list.extendeddetails"
     const val USER = "app.user"
     const val NOTIFICATION = "notification"
     const val LIST_USER_NOTIFICATIONS = "list.usernotifications"

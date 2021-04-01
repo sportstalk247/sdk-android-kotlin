@@ -330,7 +330,92 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `B - 2) Get Room Details - By Custom ID`() {
+    fun `B - 2) Get Room Extended Details Batch`() {
+        // GIVEN
+        val testData = TestData.chatRooms(config.appId).first()
+        val testInputRequest = CreateChatRoomRequest(
+                name = testData.name!!,
+                customid = testData.customid,
+                description = testData.description,
+                moderation = testData.moderation,
+                enableactions = testData.enableactions,
+                enableenterandexit = testData.enableenterandexit,
+                enableprofanityfilter = testData.enableprofanityfilter,
+                delaymessageseconds = testData.delaymessageseconds,
+                roomisopen = testData.open,
+                maxreports = testData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService
+                .createRoom(testInputRequest)
+                .blockingGet()
+
+        // WHEN
+        val testActualResult = chatService.getRoomDetailsExtendedBatch(
+                entityTypes = listOf(
+                        RoomDetailEntityType.ROOM,
+                        RoomDetailEntityType.NUM_PARTICIPANTS,
+                        RoomDetailEntityType.LAST_MESSAGE_TIME
+                ),
+                roomIds = listOf(testCreatedChatRoomData.id!!)
+        ).blockingGet()
+
+        // THEN
+        println(
+                "`Get Room Extended Details Batch`() -> testActualResult = \n" +
+                        json.stringify/*encodeToString*/(
+                                GetRoomDetailsExtendedBatchResponse.serializer(),
+                                testActualResult
+                        )
+        )
+
+        assertTrue { testActualResult.kind == Kind.ROOM_EXTENDED_DETAILS }
+        assertTrue { testActualResult.details.firstOrNull()?.room != null }
+        assertTrue { testActualResult.details.firstOrNull()?.inroom != null }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+    }
+
+    @Test
+    fun `B-ERROR-404) Get Room Extended Details Batch`() {
+        // GIVEN
+        val getRoomExtendedDetailsBatch = TestObserver<GetRoomDetailsExtendedBatchResponse>()
+
+        // WHEN
+        chatService.getRoomDetailsExtendedBatch(
+                entityTypes = listOf(
+                        RoomDetailEntityType.ROOM,
+                        RoomDetailEntityType.NUM_PARTICIPANTS,
+                        RoomDetailEntityType.LAST_MESSAGE_TIME
+                )
+        )
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .subscribe(getRoomExtendedDetailsBatch)
+
+        // THEN
+        getRoomExtendedDetailsBatch
+                .assertError {
+                    val err = it as? SportsTalkException ?: run {
+                        fail()
+                    }
+
+                    println(
+                            "`ERROR-404 - Get Room Extended Details Batch`() -> testActualResult = \n" +
+                                    json.stringify/*encodeToString*/(
+                                            SportsTalkException.serializer(),
+                                            err
+                                    )
+                    )
+
+                    return@assertError err.kind == Kind.API
+                            && err.message == "You must specify at least one roomid or customid"
+                            && err.code == 400
+                }
+    }
+
+    @Test
+    fun `B - 3) Get Room Details - By Custom ID`() {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         // Should create a test chat room first
@@ -1236,6 +1321,7 @@ class ChatServiceTest {
                     // Perform Delete Test User
                     deleteTestUsers(testCreatedUserData.userid)
                 }
+                .filter { it.isNotEmpty() }
                 .subscribe(allEventUpdates)
 
         // Test Created User Should send an initial message to the created chat room
@@ -1256,8 +1342,7 @@ class ChatServiceTest {
 
         // THEN
         allEventUpdates
-                .awaitCount(2)
-                .assertValueCount(1)
+                .awaitDone(1500L, TimeUnit.MILLISECONDS)
                 .assertValueAt(0) { testActualResult ->
                     println(
                             "`All Event Updates[0]`() -> response = \n" +
