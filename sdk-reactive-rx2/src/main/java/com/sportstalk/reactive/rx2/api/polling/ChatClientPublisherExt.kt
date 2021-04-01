@@ -5,6 +5,9 @@ import com.sportstalk.datamodels.chat.EventType
 import com.sportstalk.datamodels.chat.polling.*
 import com.sportstalk.reactive.rx2.service.ChatService
 import io.reactivex.Flowable
+import io.reactivex.functions.Function
+import io.reactivex.schedulers.Schedulers
+import org.reactivestreams.Publisher
 import java.util.concurrent.TimeUnit
 
 /**
@@ -98,10 +101,15 @@ fun ChatService.allEventUpdates(
                 // However, if we have a massive batch, we want to catch up, so we do not put spacing and just jump ahead.
                 if(smoothEventUpdates && allEventUpdates.isNotEmpty() && allEventUpdates.size < maxEventBufferSize) {
                     // Emit spaced event updates(i.e. emit per batch list of chat events)
-                    Flowable.fromIterable(allEventUpdates)
-                        .map { listOf(it) }
-                        // Apply Delay(eventSpacing) in between emits
-                        .delay(delayEventSpacingMs, TimeUnit.MILLISECONDS)
+                    Flowable.merge(
+                            allEventUpdates
+                                    .mapIndexed { index, ev ->
+                                        val appliedDelay = index * delayEventSpacingMs
+                                        Flowable.just(listOf(ev))
+                                                // Apply Delay(eventSpacing) in between emits
+                                                .delay(appliedDelay, TimeUnit.MILLISECONDS)
+                                    }
+                    )
                 } else {
                     Flowable.just(allEventUpdates)
                 }
