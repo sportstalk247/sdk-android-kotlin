@@ -30,7 +30,7 @@ fun ChatService.allEventUpdates(
          */
         smoothEventUpdates: Boolean = true,
         /**
-         * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+         * (optional, 200ms by default) This only applies if `smoothEventUpdates` = true.
          * This defines how long to pause before emitting the next event in a batch.
          */
         eventSpacingMs: Long = 200L,
