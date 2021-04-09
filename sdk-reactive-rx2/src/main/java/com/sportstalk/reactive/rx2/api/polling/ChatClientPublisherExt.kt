@@ -28,7 +28,7 @@ fun ChatService.allEventUpdates(
          * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
          * This defines how long to pause before emitting the next event in a batch.
          */
-        eventSpacingMs: Long = 100L,
+        eventSpacingMs: Long = 200L,
         /**
          * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
          * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
