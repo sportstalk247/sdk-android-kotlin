@@ -1058,10 +1058,10 @@ Below is a code sample on how to use this SDK feature:
                     */
                     smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
                     /**
-                    * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+                    * (optional, 200ms by default) This only applies if `smoothEventUpdates` = true.
                     * This defines how long to pause before emitting the next event in a batch.
                     */
-                    eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+                    eventSpacingMs: Long = 200L, // If not specified or if negative number was provided, defaults to 200ms
                     /**
                     * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
                     * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
@@ -1131,10 +1131,10 @@ Below is a code sample on how to use this SDK feature:
             */
             smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
             /**
-            * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+            * (optional, 200ms by default) This only applies if `smoothEventUpdates` = true.
             * This defines how long to pause before emitting the next event in a batch.
             */
-            eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+            eventSpacingMs: Long = 200L, // If not specified or if negative number was provided, defaults to 200ms
             /**
             * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
             * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
@@ -1200,10 +1200,10 @@ Below is a code sample on how to use this SDK feature:
             */
             smoothEventUpdates: Boolean = true, // If not specified, defaults to [true]
             /**
-            * (optional, 100ms by default) This only applies if `smoothEventUpdates` = true.
+            * (optional, 200ms by default) This only applies if `smoothEventUpdates` = true.
             * This defines how long to pause before emitting the next event in a batch.
             */
-            eventSpacingMs: Long = 100L, // If not specified or if negative number was provided, defaults to 100ms
+            eventSpacingMs: Long = 200L, // If not specified or if negative number was provided, defaults to 200ms
             /**
             * (optional, 30 by default) This only applies if `smoothEventUpdates` = true.
             * Holds the size of the event buffer we will accept before displaying everything in order to catch up.
