@@ -50,12 +50,15 @@ fun ChatService.allEventUpdates(
         else -> 100L
     }
 
+    var getUpdatesInProgress = false
+
     return Flowable.merge(
             chatEventsEmitter,  // Execute Chat Command SPEECH event emitter
             Flowable.interval(0, frequency, TimeUnit.MILLISECONDS)
                     .switchMap {
                         // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-                        return@switchMap if(roomSubscriptions().contains(chatRoomId)) {
+                        return@switchMap if(roomSubscriptions().contains(chatRoomId) && !getUpdatesInProgress) {
+                            getUpdatesInProgress = true // Set fetch state in progress...
                             getUpdates(
                                     chatRoomId = chatRoomId,
                                     limit = limit,
@@ -63,6 +66,8 @@ fun ChatService.allEventUpdates(
                                     cursor = getChatRoomEventUpdateCursor(forRoomId = chatRoomId)?.takeIf { it.isNotEmpty() }
                             )
                                     .doOnSuccess { response ->
+                                        getUpdatesInProgress = false     // Set fetch state DONE...
+
                                         // Update internally stored chatroom event cursor
                                         response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
                                             setChatRoomEventUpdateCursor(
