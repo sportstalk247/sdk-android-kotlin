@@ -1,5 +1,6 @@
 package com.sportstalk.reactive.rx2.api.polling
 
+import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
 import com.sportstalk.datamodels.chat.polling.*
@@ -16,8 +17,11 @@ import java.util.concurrent.TimeUnit
  */
 fun ChatService.allEventUpdates(
         chatRoomId: String,
-        /* Polling Frequency */
-        frequency: Long = 500L,
+        /*
+         * Polling Frequency
+         * - If provided value is below 1000ms, throw a SportstalkException to indicate that frequency must be equal to or greater than 1000ms.
+         */
+        frequency: Long = 1000L,
         limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
         /**
          * If [true], render events with some spacing.
@@ -45,17 +49,29 @@ fun ChatService.allEventUpdates(
         onPurgeEvent: OnPurgeEvent? = null
 ): Flowable<List<ChatEvent>> {
 
+    // Frequency check
+    if(frequency < 1000L) {
+        throw SportsTalkException(
+                code = 500,
+                err = kotlin.IllegalArgumentException("Frequency must be equal to or greater than 1000ms.")
+        )
+    }
+
+    // Insanity check, event spacing delay must have a valid value.
     val delayEventSpacingMs = when {
         eventSpacingMs >= 0 -> eventSpacingMs
         else -> 100L
     }
+
+    var getUpdatesInProgress = false
 
     return Flowable.merge(
             chatEventsEmitter,  // Execute Chat Command SPEECH event emitter
             Flowable.interval(0, frequency, TimeUnit.MILLISECONDS)
                     .switchMap {
                         // Attempt operation call ONLY IF `startListeningToChatUpdates(roomId)` is called.
-                        return@switchMap if(roomSubscriptions().contains(chatRoomId)) {
+                        return@switchMap if(roomSubscriptions().contains(chatRoomId) && !getUpdatesInProgress) {
+                            getUpdatesInProgress = true // Set fetch state in progress...
                             getUpdates(
                                     chatRoomId = chatRoomId,
                                     limit = limit,
@@ -63,6 +79,8 @@ fun ChatService.allEventUpdates(
                                     cursor = getChatRoomEventUpdateCursor(forRoomId = chatRoomId)?.takeIf { it.isNotEmpty() }
                             )
                                     .doOnSuccess { response ->
+                                        getUpdatesInProgress = false     // Set fetch state DONE...
+
                                         // Update internally stored chatroom event cursor
                                         response.cursor?.takeIf { it.isNotEmpty() }?.let { cursor ->
                                             setChatRoomEventUpdateCursor(

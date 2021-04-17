@@ -1309,7 +1309,7 @@ class ChatServiceTest {
         // WHEN
         chatService.allEventUpdates(
                 chatRoomId = chatRoomId,
-                frequency = 500
+                frequency = 1000
         )
                 .toObservable()
                 .doOnSubscribe { rxDisposeBag.add(it) }

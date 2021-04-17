@@ -1345,7 +1345,7 @@ class ChatServiceTest {
         // WHEN
         val job = chatService.allEventUpdates(
                 chatRoomId = chatRoomId,
-                frequency = 500
+                frequency = 1000
         )
                 .take(1)
                 .withIndex()
