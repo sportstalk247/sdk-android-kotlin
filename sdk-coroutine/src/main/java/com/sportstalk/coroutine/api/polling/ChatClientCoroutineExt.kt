@@ -21,8 +21,11 @@ import kotlin.collections.filterNot
  */
 fun ChatService.allEventUpdates(
         chatRoomId: String,
-        /* Polling Frequency */
-        frequency: Long = 500L,
+        /*
+         * Polling Frequency
+         * - If provided value is below 1000ms, throw a SportstalkException to indicate that frequency must be equal to or greater than 1000ms.
+         */
+        frequency: Long = 1000L,
         limit: Int? = null, // (optional) Number of events to return for each poll. Default is 100, maximum is 500.
         /**
          * If [true], render events with some spacing.
@@ -50,6 +53,14 @@ fun ChatService.allEventUpdates(
         onReaction: OnReaction? = null,
         onPurgeEvent: OnPurgeEvent? = null
 ): Flow<List<ChatEvent>> {
+
+    // Frequency check
+    if(frequency < 1000L) {
+        throw SportsTalkException(
+                code = 500,
+                err = kotlin.IllegalArgumentException("Frequency must be equal to or greater than 1000ms.")
+        )
+    }
 
     // Insanity check, event spacing delay must have a valid value.
     val delayEventSpacingMs = when {
