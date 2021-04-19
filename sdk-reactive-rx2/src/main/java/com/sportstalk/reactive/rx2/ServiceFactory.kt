@@ -47,8 +47,8 @@ object ServiceFactory {
                                             .build()
                             )
                         }
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .readTimeout(5, TimeUnit.SECONDS)
+                        .connectTimeout(10, TimeUnit.SECONDS)
+                        .readTimeout(10, TimeUnit.SECONDS)
                         .build()
         }
 
