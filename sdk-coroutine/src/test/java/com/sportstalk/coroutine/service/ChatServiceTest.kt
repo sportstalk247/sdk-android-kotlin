@@ -154,6 +154,7 @@ class ChatServiceTest {
                 enableactions = testExpectedData.enableactions,
                 enableenterandexit = testExpectedData.enableenterandexit,
                 enableprofanityfilter = testExpectedData.enableprofanityfilter,
+                enableautoexpiresessions = testExpectedData.enableautoexpiresessions,
                 delaymessageseconds = testExpectedData.delaymessageseconds,
                 roomisopen = testExpectedData.open,
                 maxreports = testExpectedData.maxreports
@@ -169,6 +170,7 @@ class ChatServiceTest {
                 enableactions = testExpectedData.enableactions,
                 enableenterandexit = testExpectedData.enableenterandexit,
                 enableprofanityfilter = testExpectedData.enableprofanityfilter,
+                enableautoexpiresessions = testExpectedData.enableautoexpiresessions,
                 delaymessageseconds = testExpectedData.delaymessageseconds,
                 open = testExpectedData.open,
                 maxreports = testExpectedData.maxreports
@@ -196,6 +198,7 @@ class ChatServiceTest {
         assertTrue { testActualResult.moderation == testExpectedResult.moderation }
         assertTrue { testActualResult.enableactions == testExpectedResult.enableactions }
         assertTrue { testActualResult.enableenterandexit == testExpectedResult.enableenterandexit }
+        assertTrue { testActualResult.enableautoexpiresessions == testExpectedResult.enableautoexpiresessions }
         assertTrue { testActualResult.enableprofanityfilter == testExpectedResult.enableprofanityfilter }
         assertTrue { testActualResult.delaymessageseconds == testExpectedResult.delaymessageseconds }
         assertTrue { testActualResult.open == testExpectedResult.open }
@@ -560,6 +563,7 @@ class ChatServiceTest {
                         enableactions = testData.enableactions,
                         enableenterandexit = testData.enableenterandexit,
                         enableprofanityfilter = testData.enableprofanityfilter,
+                        enableautoexpiresessions = testData.enableautoexpiresessions,
                         delaymessageseconds = testData.delaymessageseconds,
                         roomisopen = testData.open,
                         maxreports = testData.maxreports
@@ -573,6 +577,7 @@ class ChatServiceTest {
                 description = "${testData.description}-updated",
                 enableactions = !testData.enableactions!!,
                 enableenterandexit = !testData.enableenterandexit!!,
+                enableautoexpiresessions = !testData.enableautoexpiresessions!!,
                 maxreports = 30L
         )
 
@@ -582,6 +587,7 @@ class ChatServiceTest {
                 description = testInputRequest.description,
                 enableactions = testInputRequest.enableactions,
                 enableenterandexit = testInputRequest.enableenterandexit,
+                enableautoexpiresessions = testInputRequest.enableautoexpiresessions,
                 maxreports = testInputRequest.maxreports
         )
 
@@ -607,6 +613,7 @@ class ChatServiceTest {
         assertTrue { testActualResult.description == testExpectedResult.description }
         assertTrue { testActualResult.enableactions == testExpectedResult.enableactions }
         assertTrue { testActualResult.enableenterandexit == testExpectedResult.enableenterandexit }
+        assertTrue { testActualResult.enableautoexpiresessions == testExpectedResult.enableautoexpiresessions }
         assertTrue { testActualResult.maxreports == testExpectedResult.maxreports }
 
         // Perform Delete Test Chat Room
@@ -4559,6 +4566,7 @@ class ChatServiceTest {
                                 whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
+                                enableautoexpiresessions = true,
                                 enableprofanityfilter = true,
                                 delaymessageseconds = 0L
                         ),
@@ -4583,6 +4591,7 @@ class ChatServiceTest {
                                 whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
+                                enableautoexpiresessions = false,
                                 enableprofanityfilter = false,
                                 delaymessageseconds = 0L
                         ),
@@ -4607,6 +4616,7 @@ class ChatServiceTest {
                                 whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
+                                enableautoexpiresessions = true,
                                 enableprofanityfilter = false,
                                 delaymessageseconds = 0L
                         ),
@@ -4631,6 +4641,7 @@ class ChatServiceTest {
                                 whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
+                                enableautoexpiresessions = false,
                                 enableprofanityfilter = true,
                                 delaymessageseconds = 0L
                         )
