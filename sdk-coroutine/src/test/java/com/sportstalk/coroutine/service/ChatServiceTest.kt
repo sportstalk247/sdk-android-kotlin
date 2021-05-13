@@ -657,7 +657,76 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `E) List Rooms`() = runBlocking {
+    fun `E) Touch Session`() = runBlocking {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${RandomString.make(6)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+        val testExpectedResult = JoinChatRoomResponse(
+                kind = Kind.JOIN_ROOM,
+                user = testCreatedUserData,
+                room = testCreatedChatRoomData.copy(inroom = testCreatedChatRoomData.inroom!! + 1)
+        )
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle!!
+        )
+
+        // Attempt join room
+        chatService.joinRoom(
+                chatRoomId = testInputChatRoomId,
+                request = testInputRequest
+        )
+
+        // WHEN
+        try {
+            // Perform touch session
+            chatService.touchSession(chatRoomId = testInputChatRoomId, userId = testCreatedUserData.userid!!)
+
+            // THEN
+            println("`Touch Session`()")
+
+            assertTrue { true }
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
+
+    }
+
+    @Test
+    fun `F) List Rooms`() = runBlocking {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -703,7 +772,7 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `F) Join Room - Authenticated User`() = runBlocking {
+    fun `G) Join Room - Authenticated User`() = runBlocking {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(

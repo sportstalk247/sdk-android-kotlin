@@ -112,6 +112,29 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun touchSession(chatRoomId: String, userId: String): Completable =
+            service.touchSession(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    userId = userId
+            )
+                    .flatMapCompletable { response ->
+                        if (response.isSuccessful) {
+                            Completable.complete()
+                        } else {
+                            Completable.error(
+                                    response.errorBody()?.string()?.let { errBodyStr ->
+                                        json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                                    }
+                                            ?: SportsTalkException(
+                                                    kind = Kind.API,
+                                                    message = response.message(),
+                                                    code = response.code()
+                                            )
+                            )
+                        }
+                    }
+
     override fun listRooms(limit: Int?, cursor: String?): Single<ListRoomsResponse> =
             service.listRooms(
                     appId = appId,

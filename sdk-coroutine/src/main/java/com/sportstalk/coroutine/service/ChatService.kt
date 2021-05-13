@@ -100,6 +100,15 @@ interface ChatService {
     suspend fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): ChatRoom
 
     /**
+     * [POST] /{{appId}}/chat/rooms/{{chatroomid}}/sessions/{{userid}}/touch
+     * - https://apiref.sportstalk247.com/?version=latest#42670550-5400-4df4-8b5f-07d504d560a4
+     * - This is an INTERNAL-ONLY api.
+     * - Touch a Session to keep it alive. Users who are not active will automatically exit the room. This method lets the room know that the user is still active so the user doesn't need to rejoin. The SDKs will do this for you automatically.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun touchSession(chatRoomId: String, userId: String)
+
+    /**
      * [GET] /{{api_appid}}/chat/rooms/
      * - https://apiref.sportstalk247.com/?version=latest#0580f06e-a58e-447a-aa1c-6071f3cfe1cf
      * - List all the available public chat rooms

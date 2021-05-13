@@ -7,11 +7,8 @@ import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
 import com.sportstalk.datamodels.chat.polling.*
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
 import kotlin.collections.filterNot
 
 /**
@@ -114,6 +111,35 @@ fun ChatService.allEventUpdates(
 
                     delay(frequency)
                 } while (true)
+            },
+            /*
+            * Upon start listen to event updates, dispatch call to Touch Session API every 60 seconds to keep user session alive.
+            * Add a flow that does NOT EMIT anything, but will just continuously dispatch call to Touch Session API.
+            */
+            callbackFlow<List<ChatEvent>> {
+                do {
+                    try {
+                        this.ensureActive()
+                        currentUser?.userid?.let { userid ->
+                            if(this.isActive) {
+                                kotlinx.coroutines.withContext(Dispatchers.IO) {
+                                    this.coroutineContext.ensureActive()
+                                    if(this.coroutineContext.isActive) {
+                                        touchSession(
+                                                chatRoomId = chatRoomId,
+                                                userId = userid
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (err: CancellationException) { err.printStackTrace() }
+                    catch (err: Throwable) { err.printStackTrace() }
+                    finally {
+                        delay(60_000L)
+                    }
+                } while(true)
             }
     )
             // Filter out shadowban events for shadowbanned user

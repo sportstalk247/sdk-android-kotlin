@@ -105,6 +105,20 @@ fun ChatService.allEventUpdates(
                                     if(alreadyPreRendered) preRenderedMessages.remove(eventId)
                                     alreadyPreRendered
                                 }
+                    },
+            /*
+            * Upon start listen to event updates, dispatch call to Touch Session API every 60 seconds to keep user session alive.
+            * Add a flow that does NOT EMIT anything, but will just continuously dispatch call to Touch Session API.
+            */
+            Flowable.interval(0, 60, TimeUnit.SECONDS)
+                    .switchMap {
+                        return@switchMap currentUser?.userid?.let { userid ->
+                            touchSession(
+                                    chatRoomId = chatRoomId,
+                                    userId = userid
+                            )
+                                    .toFlowable<List<ChatEvent>>()
+                        } ?: Flowable.empty<List<ChatEvent>>()
                     }
     )
             .map { allEventUpdates ->

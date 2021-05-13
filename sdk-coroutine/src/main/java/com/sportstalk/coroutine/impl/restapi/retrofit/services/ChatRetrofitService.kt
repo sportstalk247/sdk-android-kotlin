@@ -48,6 +48,13 @@ interface ChatRetrofitService {
             @Body request: UpdateChatRoomRequest
     ): Response<ApiResponse<ChatRoom>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/sessions/{userid}/touch")
+    suspend fun touchSession(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("userid") userId: String
+    ): Response<ApiResponse<String>>
+
     @GET("{appId}/chat/rooms/")
     suspend fun listRooms(
             @Path("appId") appId: String,
