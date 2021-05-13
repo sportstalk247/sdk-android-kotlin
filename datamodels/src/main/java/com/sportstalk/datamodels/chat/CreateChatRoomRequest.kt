@@ -12,6 +12,7 @@ data class CreateChatRoomRequest(
         val enableactions: Boolean? = null,
         val enableenterandexit: Boolean? = null,
         val enableprofanityfilter: Boolean? = null,
+        val enableautoexpiresessions: Boolean? = null,
         val delaymessageseconds: Long? = null,
         val roomisopen: Boolean? = null,
         val maxreports: Long? = null

@@ -4,9 +4,7 @@ import androidx.annotation.RestrictTo
 import io.reactivex.Completable
 import io.reactivex.Single
 import com.sportstalk.datamodels.chat.*
-import com.sportstalk.datamodels.users.ListUserNotificationsResponse
 import com.sportstalk.datamodels.users.User
-import com.sportstalk.datamodels.users.UserNotification
 import io.reactivex.Flowable
 
 interface ChatService {
@@ -100,6 +98,15 @@ interface ChatService {
      * - Updates an existing room
      */
     fun updateRoom(chatRoomId: String, request: UpdateChatRoomRequest): Single<ChatRoom>
+
+    /**
+     * [POST] /{{appId}}/chat/rooms/{{chatroomid}}/sessions/{{userid}}/touch
+     * - https://apiref.sportstalk247.com/?version=latest#42670550-5400-4df4-8b5f-07d504d560a4
+     * - This is an INTERNAL-ONLY api.
+     * - Touch a Session to keep it alive. Users who are not active will automatically exit the room. This method lets the room know that the user is still active so the user doesn't need to rejoin. The SDKs will do this for you automatically.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun touchSession(chatRoomId: String, userId: String): Completable
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/

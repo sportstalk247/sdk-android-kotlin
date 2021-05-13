@@ -47,6 +47,13 @@ interface ChatRetrofitService {
             @Body request: UpdateChatRoomRequest
     ): Single<Response<ApiResponse<ChatRoom>>>
 
+    @POST("{appId}/chat/rooms/{chatroomid}/sessions/{userid}/touch")
+    fun touchSession(
+            @Path("appId") appId: String,
+            @Path("chatroomid") chatRoomId: String,
+            @Path("userid") userId: String
+    ): Single<Response<ApiResponse<String>>>
+
     @GET("{appId}/chat/rooms/")
     fun listRooms(
             @Path("appId") appId: String,

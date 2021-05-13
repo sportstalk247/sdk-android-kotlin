@@ -107,6 +107,12 @@ constructor(
                     request = request
             )
 
+    override fun touchSession(chatRoomId: String, userId: String): Completable =
+            chatService.touchSession(
+                    chatRoomId = chatRoomId,
+                    userId = userId
+            )
+
     override fun listRooms(limit: Int?, cursor: String?): Single<ListRoomsResponse> =
             chatService.listRooms(
                     limit = limit,

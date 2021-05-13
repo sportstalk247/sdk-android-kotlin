@@ -158,6 +158,7 @@ class ChatServiceTest {
                 enableactions = testExpectedData.enableactions,
                 enableenterandexit = testExpectedData.enableenterandexit,
                 enableprofanityfilter = testExpectedData.enableprofanityfilter,
+                enableautoexpiresessions = testExpectedData.enableautoexpiresessions,
                 delaymessageseconds = testExpectedData.delaymessageseconds,
                 roomisopen = testExpectedData.open,
                 maxreports = testExpectedData.maxreports
@@ -173,6 +174,7 @@ class ChatServiceTest {
                 enableactions = testExpectedData.enableactions,
                 enableenterandexit = testExpectedData.enableenterandexit,
                 enableprofanityfilter = testExpectedData.enableprofanityfilter,
+                enableautoexpiresessions = testExpectedData.enableautoexpiresessions,
                 delaymessageseconds = testExpectedData.delaymessageseconds,
                 open = testExpectedData.open,
                 maxreports = testExpectedData.maxreports
@@ -200,6 +202,7 @@ class ChatServiceTest {
         assertTrue { testActualResult.moderation == testExpectedResult.moderation }
         assertTrue { testActualResult.enableactions == testExpectedResult.enableactions }
         assertTrue { testActualResult.enableenterandexit == testExpectedResult.enableenterandexit }
+        assertTrue { testActualResult.enableautoexpiresessions == testExpectedResult.enableautoexpiresessions }
         assertTrue { testActualResult.enableprofanityfilter == testExpectedResult.enableprofanityfilter }
         assertTrue { testActualResult.delaymessageseconds == testExpectedResult.delaymessageseconds }
         assertTrue { testActualResult.open == testExpectedResult.open }
@@ -576,6 +579,7 @@ class ChatServiceTest {
                         enableactions = testData.enableactions,
                         enableenterandexit = testData.enableenterandexit,
                         enableprofanityfilter = testData.enableprofanityfilter,
+                        enableautoexpiresessions = testData.enableautoexpiresessions,
                         delaymessageseconds = testData.delaymessageseconds,
                         roomisopen = testData.open,
                         maxreports = testData.maxreports
@@ -589,6 +593,7 @@ class ChatServiceTest {
                 description = "${testData.description}-updated",
                 enableactions = !testData.enableactions!!,
                 enableenterandexit = !testData.enableenterandexit!!,
+                enableautoexpiresessions = !testData.enableautoexpiresessions!!,
                 maxreports = 30L
         )
 
@@ -598,6 +603,7 @@ class ChatServiceTest {
                 description = testInputRequest.description,
                 enableactions = testInputRequest.enableactions,
                 enableenterandexit = testInputRequest.enableenterandexit,
+                enableautoexpiresessions = testInputRequest.enableautoexpiresessions,
                 maxreports = testInputRequest.maxreports
         )
 
@@ -623,6 +629,7 @@ class ChatServiceTest {
         assertTrue { testActualResult.description == testExpectedResult.description }
         assertTrue { testActualResult.enableactions == testExpectedResult.enableactions }
         assertTrue { testActualResult.enableenterandexit == testExpectedResult.enableenterandexit }
+        assertTrue { testActualResult.enableautoexpiresessions == testExpectedResult.enableautoexpiresessions }
         assertTrue { testActualResult.maxreports == testExpectedResult.maxreports }
 
         // Perform Delete Test Chat Room
@@ -674,7 +681,80 @@ class ChatServiceTest {
     }
 
     @Test
-    fun `E) List Rooms`() {
+    fun `E) Touch Session`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${RandomString.make(6)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
+
+        // WHEN
+
+        val testExpectedResult = JoinChatRoomResponse(
+                kind = Kind.JOIN_ROOM,
+                user = testCreatedUserData,
+                room = testCreatedChatRoomData.copy(inroom = testCreatedChatRoomData.inroom!! + 1)
+        )
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle!!
+        )
+
+        chatService.joinRoom(
+                chatRoomId = testInputChatRoomId,
+                request = testInputRequest
+        ).blockingGet()
+
+        try {
+            // WHEN
+            // Perform touch session
+            chatService.touchSession(chatRoomId = testInputChatRoomId, userId = testCreatedUserData.userid!!).blockingAwait()
+
+            // THEN
+            println("`Touch Session`()")
+
+            assertTrue { true }
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
+    }
+
+    @Test
+    fun `F) List Rooms`() {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()
         val testInputRequest = CreateChatRoomRequest(
@@ -719,6 +799,91 @@ class ChatServiceTest {
 
         // Perform Delete Test Chat Room
         deleteTestChatRooms(testCreatedChatRoomData.id)
+    }
+
+    @Test
+    fun `G) Join Room - Authenticated User`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+                userid = RandomString.make(16),
+                handle = "${testUserData.handle}_${RandomString.make(6)}",
+                displayname = testUserData.displayname,
+                pictureurl = testUserData.pictureurl,
+                profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+        )
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
+
+        // WHEN
+
+        val testExpectedResult = JoinChatRoomResponse(
+                kind = Kind.JOIN_ROOM,
+                user = testCreatedUserData,
+                room = testCreatedChatRoomData.copy(inroom = testCreatedChatRoomData.inroom!! + 1)
+        )
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle!!
+        )
+
+        try {
+            // WHEN
+            val testActualResult = chatService.joinRoom(
+                    chatRoomId = testInputChatRoomId,
+                    request = testInputRequest
+            ).blockingGet()
+
+            // THEN
+            println(
+                    "`Join Room - Authenticated User`() -> testActualResult = \n" +
+                            json.stringify/*encodeToString*/(
+                                    JoinChatRoomResponse.serializer(),
+                                    testActualResult
+                            )
+            )
+
+            assertTrue { testActualResult.kind == testExpectedResult.kind }
+            assertTrue { testActualResult.user?.userid == testExpectedResult.user?.userid }
+            assertTrue { testActualResult.user?.handle == testExpectedResult.user?.handle }
+            assertTrue { testActualResult.room?.id == testExpectedResult.room?.id }
+            assertTrue { testActualResult.room?.name == testExpectedResult.room?.name }
+            assertTrue { testActualResult.room?.description == testExpectedResult.room?.description }
+
+            // Also, assert that ChatRoomEventCursor is currently stored
+            assertTrue { testActualResult.eventscursor?.cursor ==
+                    chatService.getChatRoomEventUpdateCursor(testInputChatRoomId) }
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
     }
 
 //  Join Room - Anonymous User No Longer Supported
@@ -4666,6 +4831,7 @@ class ChatServiceTest {
                                 whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
+                                enableautoexpiresessions = true,
                                 enableprofanityfilter = true,
                                 delaymessageseconds = 0L
                         ),
@@ -4690,6 +4856,7 @@ class ChatServiceTest {
                                 whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
+                                enableautoexpiresessions = false,
                                 enableprofanityfilter = false,
                                 delaymessageseconds = 0L
                         ),
@@ -4714,6 +4881,7 @@ class ChatServiceTest {
                                 whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
+                                enableautoexpiresessions = true,
                                 enableprofanityfilter = false,
                                 delaymessageseconds = 0L
                         ),
@@ -4738,6 +4906,7 @@ class ChatServiceTest {
                                 whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
                                 moderation = "post",
                                 maxreports = 0L,
+                                enableautoexpiresessions = false,
                                 enableprofanityfilter = true,
                                 delaymessageseconds = 0L
                         )

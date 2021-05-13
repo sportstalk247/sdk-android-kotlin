@@ -7,8 +7,8 @@ import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.EventType
 import com.sportstalk.datamodels.chat.GetUpdatesResponse
 import com.sportstalk.datamodels.chat.polling.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.map
 
 /**
@@ -80,7 +80,36 @@ fun ChatService.allEventUpdates(
                         emit(response.events)
                     }
 
-                }
+                },
+                    /*
+                * Upon start listen to event updates, dispatch call to Touch Session API every 60 seconds to keep user session alive.
+                * Add a flow that does NOT EMIT anything, but will just continuously dispatch call to Touch Session API.
+                */
+                callbackFlow<List<ChatEvent>> {
+                    do {
+                        try {
+                            this.ensureActive()
+                            currentUser?.userid?.let { userid ->
+                                if(this.isActive) {
+                                    withContext(Dispatchers.IO) {
+                                        this.coroutineContext.ensureActive()
+                                        if(this.coroutineContext.isActive) {
+                                            touchSession(
+                                                    chatRoomId = chatRoomId,
+                                                    userId = userid
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (err: CancellationException) { err.printStackTrace() }
+                        catch (err: Throwable) { err.printStackTrace() }
+                        finally {
+                            delay(60_000L)
+                        }
+                    } while(true)
+                }.asLiveData()
             )
                     .switchMap { events ->
                         liveData<List<ChatEvent>> {
@@ -160,24 +189,18 @@ fun ChatService.allEventUpdates(
 }
 
 internal class MergeLiveData<T> internal constructor(
-        source1: LiveData<T>,
-        source2: LiveData<T>
+        vararg source: LiveData<T>
 ) : MediatorLiveData<T>() {
 
-    private var data1: T? = null
-    private var data2: T? = null
-
-    init {
-        super.addSource(source1) {
-            data1 = it
-            value = data1!!
-        }
-        super.addSource(source2) {
-            data2 = it
-            value = data2!!
+    private val data: List<T?> = mutableListOf<T?>().apply {
+        source.forEachIndexed { index, src ->
+            super.addSource(src) {
+                add(index, it)
+                value = this[index]!!
+            }
         }
     }
 }
 
-internal fun <T> mergeLiveData(source1: LiveData<T>, source2: LiveData<T>): LiveData<T> =
-        MergeLiveData(source1, source2)
+internal fun <T> mergeLiveData(vararg source: LiveData<T>): LiveData<T> =
+        MergeLiveData(*source)
