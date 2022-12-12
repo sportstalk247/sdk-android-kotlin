@@ -2,11 +2,15 @@ package com.sportstalk.coroutine
 
 import com.sportstalk.coroutine.api.ChatClient
 import com.sportstalk.coroutine.api.CommentClient
+import com.sportstalk.coroutine.api.JWTRefreshManager
 import com.sportstalk.coroutine.api.UserClient
 import com.sportstalk.coroutine.impl.ChatClientImpl
 import com.sportstalk.coroutine.impl.CommentClientImpl
 import com.sportstalk.coroutine.impl.UserClientImpl
 import com.sportstalk.datamodels.ClientConfig
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.Flow
 
 object SportsTalk247 {
     /**
@@ -29,4 +33,21 @@ object SportsTalk247 {
     @JvmStatic
     fun CommentClient(config: ClientConfig): CommentClient =
             CommentClientImpl(config)
+
+    /**
+     * Setter method to implement JWT Refresh callback.
+     */
+    @JvmStatic
+    var jwtRefreshManager: JWTRefreshManager? = null
+    @JvmStatic
+    fun JWTRefreshCallback(
+        callbackFlow: Flow<String>,
+        coroutineScope: CoroutineScope = GlobalScope
+    ) {
+        jwtRefreshManager = JWTRefreshManager(
+            refreshCallbackFlow = callbackFlow,
+            coroutineScope = coroutineScope
+        )
+    }
+
 }

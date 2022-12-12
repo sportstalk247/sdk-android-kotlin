@@ -1,0 +1,582 @@
+package com.sportstalk.coroutine
+
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import com.sportstalk.coroutine.service.ChatService
+import com.sportstalk.coroutine.service.ChatServiceTest
+import com.sportstalk.coroutine.service.UserService
+import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.Kind
+import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.users.CreateUpdateUserRequest
+import com.sportstalk.datamodels.users.User
+import com.sportstalk.datamodels.users.UserNotification
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.setMain
+import kotlinx.serialization.json.Json
+import net.bytebuddy.utility.RandomString
+import org.junit.*
+import org.junit.rules.ExpectedException
+import org.junit.runner.RunWith
+import org.junit.runners.MethodSorters
+import org.robolectric.Robolectric
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+import kotlin.test.fail
+
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.KITKAT])
+class JWTRefreshCallbackTest {
+
+    private lateinit var context: Context
+    private lateinit var config: ClientConfig
+    private lateinit var userService: UserService
+    private lateinit var chatService: ChatService
+    private lateinit var json: Json
+
+    private val testDispatcher = TestCoroutineDispatcher()
+
+    @get:Rule
+    val thrown = ExpectedException.none()
+
+    @Before
+    fun setup() {
+        context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
+        val appInfo =
+            try {
+                context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
+            } catch (err: Throwable) {
+                err.printStackTrace()
+                null
+            }
+
+        config = ClientConfig(
+            appId = appInfo?.metaData?.getString("sportstalk.api.app_id")!!,
+            apiToken = appInfo.metaData?.getString("sportstalk.api.auth_token")!!,
+            endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
+        )
+
+        SportsTalk247.JWTRefreshCallback(
+            callbackFlow = flow {
+                val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
+                // ... Derive JWT using SECRET
+                val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
+                emit(jwt)
+            },
+            coroutineScope = GlobalScope
+        )
+
+        userService = ServiceFactory.User.get(config)
+        chatService = ServiceFactory.Chat.get(config)
+        json = ServiceFactory.RestApi.json
+
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @After
+    fun cleanUp() {
+        testDispatcher.cleanupTestCoroutines()
+        Dispatchers.resetMain()
+    }
+
+    /**
+     * Helper function to clean up Test Users from the Backend Server
+     */
+    private suspend fun deleteTestUsers(vararg userIds: String?) {
+        for (id in userIds) {
+            id ?: continue
+            try {
+                userService.deleteUser(userId = id)
+            } catch (err: Throwable) {
+            }
+        }
+    }
+
+    /**
+     * Helper function to clean up Test Users from the Backend Server
+     */
+    private suspend fun deleteTestChatRooms(vararg chatRoomIds: String?) {
+        for (id in chatRoomIds) {
+            id ?: continue
+            try {
+                chatService.deleteRoom(chatRoomId = id)
+            } catch (err: Throwable) {
+            }
+        }
+    }
+
+    @Test
+    fun `A) Signed User`() = runBlocking {
+        // GIVEN
+        val testUserData = ChatServiceTest.TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${RandomString.make(6)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+        val testChatRoomData = ChatServiceTest.TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+            name = testChatRoomData.name!!,
+            customid = testChatRoomData.customid,
+            description = testChatRoomData.description,
+            moderation = testChatRoomData.moderation,
+            enableactions = testChatRoomData.enableactions,
+            enableenterandexit = testChatRoomData.enableenterandexit,
+            enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+            delaymessageseconds = testChatRoomData.delaymessageseconds,
+            roomisopen = testChatRoomData.open,
+            maxreports = testChatRoomData.maxreports
+        )
+
+        delay(250)
+
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+        // WHEN
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputRequest = JoinChatRoomRequest(
+            userid = testCreatedUserData.userid!!,
+            handle = testCreatedUserData.handle!!
+        )
+
+        delay(250)
+
+        // THEN
+        chatService.joinRoom(
+            chatRoomId = testInputChatRoomId,
+            request = testInputRequest
+        )
+        assert(true)    // Passed! No Error encountered.
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `B) Unsigned User`() = runBlocking {
+        // GIVEN
+        val testUserData = ChatServiceTest.TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${RandomString.make(6)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+        val testChatRoomData = ChatServiceTest.TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+            name = testChatRoomData.name!!,
+            customid = testChatRoomData.customid,
+            description = testChatRoomData.description,
+            moderation = testChatRoomData.moderation,
+            enableactions = testChatRoomData.enableactions,
+            enableenterandexit = testChatRoomData.enableenterandexit,
+            enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+            delaymessageseconds = testChatRoomData.delaymessageseconds,
+            roomisopen = testChatRoomData.open,
+            maxreports = testChatRoomData.maxreports
+        )
+
+        delay(250)
+
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+        val testExpectedResult = JoinChatRoomResponse(
+            kind = Kind.JOIN_ROOM,
+            user = testCreatedUserData,
+            room = testCreatedChatRoomData.copy(inroom = testCreatedChatRoomData.inroom!! + 1)
+        )
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val testInputRequest = JoinChatRoomRequest(
+            userid = testCreatedUserData.userid!!,
+            handle = testCreatedUserData.handle!!
+        )
+
+        delay(250)
+
+        // Set INVALID JWT
+        SportsTalk247.JWTRefreshCallback(
+            callbackFlow = flow {
+                // Just emit an INVALID JWT
+                val jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJ0ZXN0dXNlcjEiLCJyb2xlIjoidXNlciJ9.L43SmGmnKwVyPTMzLLIcY3EUb83A4YPBc0l6778Od_0"
+                emit(jwt)
+            },
+            coroutineScope = GlobalScope
+        )
+
+        // EXPECT
+        thrown.expect(SportsTalkException::class.java)
+        // WHEN
+        try {
+            chatService.joinRoom(
+                chatRoomId = testInputChatRoomId,
+                request = testInputRequest
+            )
+        } catch(err: SportsTalkException) {
+            println("Unsigned User -> testActualResult = \n" +
+                    json.stringify/*encodeToString*/(
+                        SportsTalkException.serializer(),
+                        err
+                    )
+            )
+
+            throw err
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData.userid)
+        }
+
+        return@runBlocking
+    }
+
+    @Test
+    fun `C) User chats`() = runBlocking {
+        // GIVEN
+        val testUserData = ChatServiceTest.TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${RandomString.make(6)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+        // Should create a test user first
+        val testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+        val testChatRoomData = ChatServiceTest.TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+            name = testChatRoomData.name!!,
+            customid = testChatRoomData.customid,
+            description = testChatRoomData.description,
+            moderation = testChatRoomData.moderation,
+            enableactions = testChatRoomData.enableactions,
+            enableenterandexit = testChatRoomData.enableenterandexit,
+            enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+            delaymessageseconds = testChatRoomData.delaymessageseconds,
+            roomisopen = testChatRoomData.open,
+            maxreports = testChatRoomData.maxreports
+        )
+
+        delay(250)
+
+        // Should create a test chat room first
+        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+        val testExpectedResult = JoinChatRoomResponse(
+            kind = Kind.JOIN_ROOM,
+            user = testCreatedUserData,
+            room = testCreatedChatRoomData.copy(inroom = testCreatedChatRoomData.inroom!! + 1)
+        )
+
+        val testInputChatRoomId = testCreatedChatRoomData.id!!
+        val joinChatRoomInput = JoinChatRoomRequest(
+            userid = testCreatedUserData.userid!!,
+            handle = testCreatedUserData.handle!!
+        )
+
+        delay(250)
+
+        val joinRoomResponse = chatService.joinRoom(
+            chatRoomId = testInputChatRoomId,
+            request = joinChatRoomInput
+        )
+
+        delay(250)
+
+        val testInputRequest = ExecuteChatCommandRequest(
+            command = "Yow Jessy, how are you doin'?",
+            userid = testCreatedUserData.userid!!
+        )
+
+        // WHEN
+        chatService.executeChatCommand(
+            chatRoomId = testCreatedChatRoomData.id!!,
+            request = testInputRequest
+        )
+
+        // THEN
+        assert(true)    // Passed! No Error encountered.
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testCreatedChatRoomData.id)
+        // Perform Delete Test User
+        deleteTestUsers(testCreatedUserData.userid)
+    }
+
+    @Test
+    fun `D) Notifications`() = runBlocking {
+        // GIVEN
+        val testUserData = ChatServiceTest.TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${RandomString.make(6)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+
+        // Should create a test chat room first
+        var testCreatedUserData: User? = null
+        var testCreatedChatRoomData: ChatRoom? = null
+
+        try {
+            // Should create a test user first
+            testCreatedUserData =
+                userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+            val testChatRoomData = ChatServiceTest.TestData.chatRooms(config.appId).first()
+            val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+            )
+
+            delay(250)
+
+            // Should create a test chat room first
+            testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+            val testInputJoinChatRoomId = testCreatedChatRoomData?.id!!
+            val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData?.userid!!
+            )
+
+            delay(250)
+
+            // Test Created User Should join test created chat room
+            chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+            )
+
+            val testInitialSendMessageInputRequest = ExecuteChatCommandRequest(
+                command = "Yow Jessy, how are you doin'?",
+                userid = testCreatedUserData?.userid!!
+            )
+
+            delay(250)
+
+            // Test Created User Should send an initial message to the created chat room
+            val testInitialSendMessage = chatService.executeChatCommand(
+                chatRoomId = testCreatedChatRoomData?.id!!,
+                request = testInitialSendMessageInputRequest
+            ).speech!!
+
+            val testInputChatReplyThreadedRequest = SendThreadedReplyRequest(
+                body = "This is Jessy, replying to your greetings yow!!!",
+                userid = testCreatedUserData?.userid!!
+            )
+
+            delay(250)
+
+            // Perform Chat Reply - Threaded
+            val testChatReplyThreaded = chatService.sendThreadedReply(
+                chatRoomId = testCreatedChatRoomData?.id!!,
+                replyTo = testInitialSendMessage.id!!,
+                request = testInputChatReplyThreadedRequest
+            )
+
+            delay(250)
+
+            // WHEN
+            userService.listUserNotifications(
+                userId = testInputChatReplyThreadedRequest.userid,
+                limit = 10,
+                filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY),
+                cursor = null,
+                includeread = false,
+                filterChatRoomId = testCreatedChatRoomData.id
+            )
+
+            // THEN
+            assert(true)    // Passed! No Error encountered.
+
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Room
+            deleteTestChatRooms(testCreatedChatRoomData?.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData?.userid)
+        }
+
+        return@runBlocking
+    }
+
+    @Test
+    fun `E) Leave Room`() = runBlocking {
+        // GIVEN
+        val testUserData = ChatServiceTest.TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${RandomString.make(6)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+
+        // Should create a test chat room first
+        var testCreatedUserData: User? = null
+        var testCreatedChatRoomData: ChatRoom? = null
+
+        try {
+            // Should create a test user first
+            testCreatedUserData =
+                userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+            val testChatRoomData = ChatServiceTest.TestData.chatRooms(config.appId).first()
+            val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+            )
+
+            delay(250)
+
+            // Should create a test chat room first
+            testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+            val testInputJoinChatRoomId = testCreatedChatRoomData?.id!!
+            val testInputUserId = testCreatedUserData?.userid!!
+            val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testInputUserId
+            )
+
+            delay(250)
+
+            // Test Created User Should join test created chat room
+            chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+            )
+
+            delay(250)
+
+            // WHEN
+            chatService.exitRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                userId = testInputUserId
+            )
+
+            // THEN
+            assert(true)    // Passed! No Error encountered.
+
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Room
+            deleteTestChatRooms(testCreatedChatRoomData?.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData?.userid)
+        }
+
+        return@runBlocking
+    }
+
+    @Test
+    fun `F) Delete Room`() = runBlocking {
+        // GIVEN
+        val testUserData = ChatServiceTest.TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${RandomString.make(6)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+
+        // Should create a test chat room first
+        var testCreatedUserData: User? = null
+        var testCreatedChatRoomData: ChatRoom? = null
+
+        try {
+            // Should create a test user first
+            testCreatedUserData =
+                userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+            delay(250)
+
+            val testChatRoomData = ChatServiceTest.TestData.chatRooms(config.appId).first()
+            val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+            )
+
+            // Should create a test chat room first
+            testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+            val testInputDeleteChatRoomId = testCreatedChatRoomData?.id!!
+            val testInputUserId = testCreatedUserData?.userid!!
+
+            delay(250)
+
+            // WHEN
+            chatService.deleteRoom(chatRoomId = testInputDeleteChatRoomId)
+
+            // THEN
+            assert(true)    // Passed! No Error encountered.
+
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData?.userid)
+        }
+
+        return@runBlocking
+    }
+
+
+
+
+}
