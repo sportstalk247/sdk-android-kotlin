@@ -43,8 +43,8 @@ object ServiceFactory {
                                 chain.request().newBuilder()
                                     .addHeader("x-api-token", config.apiToken)
                                     .apply {
-                                        val jwtRefreshManager = SportsTalk247.jwtRefreshManager
-                                        val customJWT = jwtRefreshManager?.customJWT
+                                        val jwtProvider = SportsTalk247.getJWTProvider(config)
+                                        val customJWT = jwtProvider?.getToken()
                                         customJWT?.trim()?.takeIf { it.isNotEmpty() }?.let { jwt ->
                                             addHeader("Authorization", "Bearer $jwt")
                                         }

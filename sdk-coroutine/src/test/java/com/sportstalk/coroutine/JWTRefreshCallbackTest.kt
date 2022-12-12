@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
+import com.sportstalk.coroutine.api.JWTProvider
 import com.sportstalk.coroutine.service.ChatService
 import com.sportstalk.coroutine.service.ChatServiceTest
 import com.sportstalk.coroutine.service.UserService
@@ -40,6 +41,7 @@ class JWTRefreshCallbackTest {
 
     private lateinit var context: Context
     private lateinit var config: ClientConfig
+    private lateinit var jwtProvider: JWTProvider
     private lateinit var userService: UserService
     private lateinit var chatService: ChatService
     private lateinit var json: Json
@@ -66,14 +68,16 @@ class JWTRefreshCallbackTest {
             endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
         )
 
-        SportsTalk247.JWTRefreshCallback(
-            callbackFlow = flow {
-                val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
-                // ... Derive JWT using SECRET
-                val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
-                emit(jwt)
-            },
-            coroutineScope = GlobalScope
+        jwtProvider = JWTProvider().apply {
+            val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
+            // ... Derive JWT using SECRET
+            val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
+            setToken(jwt)
+        }
+
+        SportsTalk247.setJWTProvider(
+            config = config,
+            provider = jwtProvider
         )
 
         userService = ServiceFactory.User.get(config)
@@ -218,13 +222,13 @@ class JWTRefreshCallbackTest {
         delay(250)
 
         // Set INVALID JWT
-        SportsTalk247.JWTRefreshCallback(
-            callbackFlow = flow {
+        SportsTalk247.setJWTProvider(
+            config = config,
+            provider = jwtProvider.apply {
                 // Just emit an INVALID JWT
                 val jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJ0ZXN0dXNlcjEiLCJyb2xlIjoidXNlciJ9.L43SmGmnKwVyPTMzLLIcY3EUb83A4YPBc0l6778Od_0"
-                emit(jwt)
-            },
-            coroutineScope = GlobalScope
+                setToken(jwt)
+            }
         )
 
         // EXPECT

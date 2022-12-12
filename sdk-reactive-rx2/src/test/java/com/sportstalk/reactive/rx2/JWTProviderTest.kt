@@ -12,6 +12,7 @@ import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.ListUserNotificationsResponse
 import com.sportstalk.datamodels.users.User
 import com.sportstalk.datamodels.users.UserNotification
+import com.sportstalk.reactive.rx2.api.JWTProvider
 import com.sportstalk.reactive.rx2.service.ChatService
 import com.sportstalk.reactive.rx2.service.ChatServiceTest
 import com.sportstalk.reactive.rx2.service.UserService
@@ -38,10 +39,11 @@ import kotlin.test.fail
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.KITKAT])
-class JWTRefreshCallbackTest {
+class JWTProviderTest {
 
     private lateinit var context: Context
     private lateinit var config: ClientConfig
+    private lateinit var jwtProvider: JWTProvider
     private lateinit var userService: UserService
     private lateinit var chatService: ChatService
     private lateinit var json: Json
@@ -65,25 +67,24 @@ class JWTRefreshCallbackTest {
             endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
         )
 
-        rxDisposeBag = CompositeDisposable()
 
-        SportsTalk247.JWTRefreshCallback(
-            callbackFlowable = Flowable.fromCallable(
-                object: Callable<String> {
-                    override fun call(): String {
-                        val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
-                        // ... Derive JWT using SECRET
-                        val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
-                        return jwt
-                    }
-                }
-            ),
-            disposeBag = rxDisposeBag
+        jwtProvider = JWTProvider().apply {
+            val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
+            // ... Derive JWT using SECRET
+            val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
+            setToken(jwt)
+        }
+
+        SportsTalk247.setJWTProvider(
+            config = config,
+            provider = jwtProvider
         )
 
         userService = ServiceFactory.User.get(config)
         chatService = ServiceFactory.Chat.get(config)
         json = ServiceFactory.RestApi.json
+
+        rxDisposeBag = CompositeDisposable()
     }
 
     @After
@@ -213,17 +214,13 @@ class JWTRefreshCallbackTest {
             .blockingGet()
 
         // Set INVALID JWT
-        SportsTalk247.JWTRefreshCallback(
-            callbackFlowable = Flowable.fromCallable(
-                object: Callable<String> {
-                    override fun call(): String {
-                        // Just emit an INVALID JWT
-                        val jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJ0ZXN0dXNlcjEiLCJyb2xlIjoidXNlciJ9.L43SmGmnKwVyPTMzLLIcY3EUb83A4YPBc0l6778Od_0"
-                        return jwt
-                    }
-                }
-            ),
-            disposeBag = rxDisposeBag
+        SportsTalk247.setJWTProvider(
+            config = config,
+            provider = jwtProvider.apply {
+                // Just emit an INVALID JWT
+                val jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJ0ZXN0dXNlcjEiLCJyb2xlIjoidXNlciJ9.L43SmGmnKwVyPTMzLLIcY3EUb83A4YPBc0l6778Od_0"
+                setToken(jwt)
+            }
         )
 
         // WHEN
