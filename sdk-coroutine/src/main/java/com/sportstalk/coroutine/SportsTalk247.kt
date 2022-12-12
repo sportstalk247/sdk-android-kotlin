@@ -1,5 +1,6 @@
 package com.sportstalk.coroutine
 
+import androidx.annotation.RestrictTo
 import com.sportstalk.coroutine.api.ChatClient
 import com.sportstalk.coroutine.api.CommentClient
 import com.sportstalk.coroutine.api.JWTRefreshManager
@@ -34,11 +35,12 @@ object SportsTalk247 {
     fun CommentClient(config: ClientConfig): CommentClient =
             CommentClientImpl(config)
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmStatic
+    var jwtRefreshManager: JWTRefreshManager? = null
     /**
      * Setter method to implement JWT Refresh callback.
      */
-    @JvmStatic
-    var jwtRefreshManager: JWTRefreshManager? = null
     @JvmStatic
     fun JWTRefreshCallback(
         callbackFlow: Flow<String>,

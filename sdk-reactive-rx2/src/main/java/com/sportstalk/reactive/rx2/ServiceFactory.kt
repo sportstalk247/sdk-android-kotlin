@@ -25,8 +25,6 @@ object ServiceFactory {
                 encodeDefaults = false
                 prettyPrint = true
                 strictMode = false
-//                isLenient = true
-//                ignoreUnknownKeys = true
             }
         }
 
@@ -42,9 +40,16 @@ object ServiceFactory {
                 OkHttpClient.Builder()
                         .addInterceptor { chain ->
                             chain.proceed(
-                                    chain.request().newBuilder()
-                                            .addHeader("x-api-token", config.apiToken)
-                                            .build()
+                                chain.request().newBuilder()
+                                    .addHeader("x-api-token", config.apiToken)
+                                    .apply {
+                                        val jwtRefreshManager = SportsTalk247.jwtRefreshManager
+                                        val customJWT = jwtRefreshManager?.customJWT
+                                        customJWT?.trim()?.takeIf { it.isNotEmpty() }?.let { jwt ->
+                                            addHeader("Authorization", "Bearer $jwt")
+                                        }
+                                    }
+                                    .build()
                             )
                         }
                         .connectTimeout(10, TimeUnit.SECONDS)
