@@ -90,6 +90,14 @@ interface ChatRetrofitService {
             @Query("cursor") cursor: String? = null
     ): Response<ApiResponse<ListChatRoomParticipantsResponse>>
 
+    @GET("{appId}/chat/user/{userid}/subscriptions")
+    suspend fun listUserSubscribedRooms(
+            @Path("appId") appId: String,
+            @Path("userid") userid: String,
+            @Query("limit") limit: Int? = null,
+            @Query("cursor") cursor: String? = null
+    ): Response<ApiResponse<ListUserSubscribedRoomsResponse>>
+
     @POST("{appId}/chat/rooms/{chatroomid}/exit")
     suspend fun exitRoom(
             @Path("appId") appId: String,

@@ -1174,6 +1174,106 @@ class ChatServiceTest {
     }
 
     @Test
+    fun `J) List User Subscribed Rooms`() {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${RandomString.make(6)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+
+        var testCreatedUserData: User? = null
+        var testCreatedChatRoomData: ChatRoom? = null
+
+        try {
+            // Should create a test user first
+            testCreatedUserData = userService
+                .createOrUpdateUser(request = testCreateUserInputRequest)
+                .blockingGet()
+
+            val testChatRoomData = TestData.chatRooms(config.appId).first()
+            val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+                name = testChatRoomData.name!!,
+                customid = testChatRoomData.customid,
+                description = testChatRoomData.description,
+                moderation = testChatRoomData.moderation,
+                enableactions = testChatRoomData.enableactions,
+                enableenterandexit = testChatRoomData.enableenterandexit,
+                enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+                delaymessageseconds = testChatRoomData.delaymessageseconds,
+                roomisopen = testChatRoomData.open,
+                maxreports = testChatRoomData.maxreports
+            )
+            // Should create a test chat room first
+            testCreatedChatRoomData = chatService
+                .createRoom(testCreateChatRoomInputRequest)
+                .blockingGet()
+
+            val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+            val testInputJoinRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!
+            )
+
+            // WHEN
+            val testJoinChatRoomData = chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testInputJoinRequest
+            ).blockingGet()
+
+            val testExpectedResult = ListUserSubscribedRoomsResponse(
+                kind = Kind.LIST_USER_ROOM_SUBSCRIPTIONS,
+                subscriptions = listOf(
+                    ChatSubscription(
+                        kind = Kind.CHAT_SUBSCRIPTION,
+                        roomid = testCreatedChatRoomData.id,
+                        roomcustomid = testCreatedChatRoomData.customid,
+                        userid = testCreatedUserData.userid,
+                        roomname = testCreatedChatRoomData.name,
+                        roomcustomtags = testCreatedChatRoomData.customtags
+                    )
+                )
+            )
+
+            val testInputUserId = testCreatedUserData?.userid!!
+            val testInputLimit = 10
+
+            // WHEN
+            val testActualResult = chatService.listUserSubscribedRooms(
+                userid = testInputUserId,
+                limit = testInputLimit
+            ).blockingGet()
+
+            // THEN
+            println(
+                "`List User Subscribed Rooms`() -> testActualResult = \n" +
+                        json.stringify/*encodeToString*/(
+                            ListUserSubscribedRoomsResponse.serializer(),
+                            testActualResult
+                        )
+            )
+
+            assertTrue { testActualResult.kind == testExpectedResult.kind }
+            assertTrue { testActualResult.subscriptions.first().kind == testExpectedResult.subscriptions.first().kind }
+            assertTrue { testActualResult.subscriptions.first().roomid == testExpectedResult.subscriptions.first().roomid }
+            assertTrue { testActualResult.subscriptions.first().roomcustomid == testExpectedResult.subscriptions.first().roomcustomid }
+            assertTrue { testActualResult.subscriptions.first().userid == testExpectedResult.subscriptions.first().userid }
+            assertTrue { testActualResult.subscriptions.first().roomname == testExpectedResult.subscriptions.first().roomname }
+            assertTrue { testActualResult.subscriptions.first().roomcustomtags == testExpectedResult.subscriptions.first().roomcustomtags }
+        } catch(err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData?.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData?.userid)
+        }
+    }
+
+    @Test
     fun `J) Exit a Room`() {
         // GIVEN
         val testUserData = TestData.users.first()

@@ -239,6 +239,17 @@ constructor(
                     cursor = cursor
             )
 
+    override fun listUserSubscribedRooms(
+        userid: String,
+        limit: Int?,
+        cursor: String?
+    ): Single<ListUserSubscribedRoomsResponse> =
+        chatService.listUserSubscribedRooms(
+            userid = userid,
+            limit = limit,
+            cursor = cursor
+        )
+
     override fun exitRoom(chatRoomId: String, userId: String): Completable =
             chatService.exitRoom(
                     chatRoomId = chatRoomId,

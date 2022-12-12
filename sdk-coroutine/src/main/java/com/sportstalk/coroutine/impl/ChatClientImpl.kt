@@ -225,6 +225,17 @@ constructor(
                     cursor = cursor
             )
 
+    override suspend fun listUserSubscribedRooms(
+        userid: String,
+        limit: Int?,
+        cursor: String?
+    ): ListUserSubscribedRoomsResponse =
+        chatService.listUserSubscribedRooms(
+            userid = userid,
+            limit = limit,
+            cursor = cursor
+        )
+
     override suspend fun exitRoom(chatRoomId: String, userId: String) =
             chatService.exitRoom(
                     chatRoomId = chatRoomId,

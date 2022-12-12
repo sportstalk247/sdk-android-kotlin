@@ -204,6 +204,19 @@ constructor(
             )
                     .handleSdkResponse(json)
 
+    override fun listUserSubscribedRooms(
+        userid: String,
+        limit: Int?,
+        cursor: String?
+    ): Single<ListUserSubscribedRoomsResponse> =
+        service.listUserSubscribedRooms(
+            appId = appId,
+            userid = userid,
+            limit = limit,
+            cursor = cursor
+        )
+            .handleSdkResponse(json)
+
     override fun exitRoom(chatRoomId: String, userId: String): Completable =
             service.exitRoom(
                     appId = appId,

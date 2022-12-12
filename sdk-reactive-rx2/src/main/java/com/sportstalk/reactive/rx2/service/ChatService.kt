@@ -154,6 +154,17 @@ interface ChatService {
     ): Single<ListChatRoomParticipantsResponse>
 
     /**
+     * [GET] /{appId}/chat/user/{userid}/subscriptions?cursor&limit=200
+     * - https://apiref.sportstalk247.com/#a0c20768-bacd-4565-a628-e884ff3cc82a
+     * - List the rooms the user is subscribed to
+     */
+    fun listUserSubscribedRooms(
+        userid: String,
+        limit: Int? = null /* Defaults to 200 on backend API server */,
+        cursor: String? = null
+    ): Single<ListUserSubscribedRoomsResponse>
+
+    /**
      * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/exit
      * - https://apiref.sportstalk247.com/?version=latest#408b43ca-fca9-4f2d-8883-f6f725d140f2
      * - Exit a Room
