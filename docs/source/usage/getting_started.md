@@ -23,9 +23,14 @@ Then click on "Application Management" link to generate the above
 
 ## Authentication
 
-* All requests that require authentication must have the x-api-token header with your application token.
+* All requests that require authentication must have the `x-api-token` header with your application token.
 * Most requests require authentication.
 * If you provide authentication on a request that does not require authentication the header will be ignored and it will have no effect.
+
+### Apply Custom JWT
+
+* The developers may want to enforce their own JWT implementation. With this, they will have to set the JWT through the SDK (See link). 
+* Add support for "Extra Security" token in `Authorization` header
 
 ## SDK flow for Chat Applications
 

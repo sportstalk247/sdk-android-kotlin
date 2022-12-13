@@ -464,6 +464,56 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
+## List User Subscribed Rooms
+
+Invoke this function to list the rooms the user is subscribed to .
+
+Use this method to cursor through all the rooms the user is subscribed to.
+
+To cursor through the results if there are many participants, invoke this function many times. Each result will return a cursor value and you can pass that value to the next invokation to get the next page of results. The result set will also include a next field with the full URL to get the next page, so you can just keep reading that and requesting that URL until you reach the end. When you reach the end, no more results will be returned or the result set will be less than maxresults and the next field will be empty.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#a0c20768-bacd-4565-a628-e884ff3cc82a>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            val listUserSubscribedRooms = withContext(Dispatchers.IO) {
+                chatClient.listUserSubscribedRooms(
+                    userid = "023976080242ac120002" // ID of an existing user
+                    limit = 20, /* Defaults to 200 on backend API server */
+                    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of chatroom participant(s).
+                )
+            }
+
+            // Resolve `listUserSubscribedRooms` from HERE onwards(ex. update UI displaying the response data)...
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.listUserSubscribedRooms(
+            userid = "023976080242ac120002" // ID of an existing user
+            limit = 20, /* Defaults to 200 on backend API server */
+            cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of chatroom participant(s).
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe { listUserSubscribedRooms ->
+                // Resolve `listUserSubscribedRooms` (ex. Display prompt OR Update UI)
+            }
+```
+
 ## Update Room
 
 Invoke this function to update an existing room.
