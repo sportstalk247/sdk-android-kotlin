@@ -18,6 +18,7 @@ import com.sportstalk.reactive.rx2.service.ChatServiceTest
 import com.sportstalk.reactive.rx2.service.UserService
 import com.sportstalk.reactive.rx2.service.UserServiceTest
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.observers.TestObserver
 import kotlinx.serialization.json.Json
@@ -68,12 +69,22 @@ class JWTProviderTest {
         )
 
 
-        jwtProvider = JWTProvider().apply {
-            val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
-            // ... Derive JWT using SECRET
-            val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
-            setToken(jwt)
-        }
+        val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
+        // ... Derive JWT using SECRET
+        val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
+        jwtProvider = JWTProvider(
+            initialToken = jwt,
+            refreshCallback = { _ -> Single.create<String?> { e -> e.onSuccess(jwt) } }
+        )
+
+        rxDisposeBag = CompositeDisposable()
+
+        jwtProvider
+            .observe()
+            .doOnSubscribe {
+                rxDisposeBag.add(it)
+            }
+            .subscribe()
 
         SportsTalk247.setJWTProvider(
             config = config,
@@ -84,7 +95,6 @@ class JWTProviderTest {
         chatService = ServiceFactory.Chat.get(config)
         json = ServiceFactory.RestApi.json
 
-        rxDisposeBag = CompositeDisposable()
     }
 
     @After
