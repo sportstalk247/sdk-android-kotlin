@@ -14,7 +14,7 @@ fun <T> Response<ApiResponse<T>>.handleSdkResponse(
         if (this.isSuccessful && this.body() != null && this.body()!!.data != null) {
             this.body()!!.data!!
         } else {
-            throw this.errorBody()?.string()?.let { errBodyStr ->
+            throw this.errorBody()?.string()?.trim()?.takeIf { it.isNotEmpty() }?.let { errBodyStr ->
                 json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
             }
                     ?: SportsTalkException(

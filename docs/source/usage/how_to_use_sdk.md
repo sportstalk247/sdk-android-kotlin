@@ -143,6 +143,169 @@ class MyFragment: Fragment() {
 
 ```
 
+## Implement Custom JWT
+
+``` tabs::
+    
+    .. tab:: sdk-coroutine
+
+        .. code-block:: kotlin
+
+            // ...
+            // ...
+        
+            // YOUR APP ID
+            val appId = "c84cb9c852932a6b0411e75e" // This is just a sample app id
+            // YOUR API TOKEN
+            val apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA" // This is just a sample token
+            val endpoint = "http://api.custom.endpoint/v1/" // please ensure out of the box the SDKs are configured for production URL
+            
+            val config = ClientConfig(
+                appId = appId,
+                apiToken = apiToken,
+                endpoint = endpoint
+            )
+            
+            // Prepare JWTProvider
+            val initialJwt = "..." // This will be provided by the developer.
+            val myJwtProvider = JWTProvider(
+                initialToken = initialJwt,
+                refreshCallback = /* This callback is a suspend function */ { oldToken -> 
+                    val newToken = doPerformFetchNewToken() // Developer may perform a long-running operation to generate a new JWT
+                    return@JWTProvider newToken
+                }
+            )
+            
+            // Set custom JWTProvider
+            SportsTalk247.setJWTProvider(
+                config = config,
+                provider = myJwtProvider
+            )
+            
+            //
+            // In order to make refresh callback work, developer must bind through a coroutine scope by calling `observe()` function.
+            // 
+            val coroutineScope = viewLifecycleOwner.lifecycleScope  // If called from within a Fragment
+            // val coroutineScope = this.lifecycleScope  // If called from within a Fragment
+            // val coroutineScope = CoroutineScope(context = EmptyCoroutineContext) // Developer may also provide a custom coroutine scope of choice
+            myJwtProvider.observe()
+                .launchIn(coroutineScope) 
+            
+            // ...
+            // Instantiate Chat Client
+            val chatClient = SportsTalk247.ChatClient(
+                config = ClientConfig(
+                    appId = appId,
+                    apiToken = apiToken,
+                    endpoint = endpoint
+                )
+            )
+            
+            // Launch thru coroutine block
+            // https://developer.android.com/topic/libraries/architecture/coroutines
+            lifecycleScope.launch {
+                try {
+                    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+                    val joinRoomResponse = withContext(Dispatchers.IO) {
+                        chatClient.joinRoom(
+                            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                            request = JoinChatRoomRequest(
+                                userid = "023976080242ac120002" // ID of an existing user from this chatroom
+                            )
+                        )
+                    }                    
+                } catch(err: SportsTalkException) {
+                    err.printStackTrace()
+                    
+                    //
+                    // Handle Unauthorized Error
+                    //  - Attempt request refresh token
+                    // 
+                    if(err.code == 401) {
+                        jwtProvider.refreshToken()
+                        // Then, prompt UI layer to perform the operation again after a short while(this is to ensure that the token gets refreshed first before retry attempt)
+                    }
+                }
+    
+            }
+
+    .. tab:: sdk-reactive-rx2
+
+        This Android Sportstalk SDK artifact is a Reactive-driven API, powered by `RxJava <https://github.com/ReactiveX/RxJava>`_ to gracefully handle reactive operations.
+
+        Client SDK functions returns RxJava types. See the example below:
+
+        .. code-block:: kotlin
+            
+            // ...
+            // ...
+            val rxDisposeBag = CompositeDisposable()
+            
+            // Prepare JWTProvider
+            val initialJwt = "..." // This will be provided by the developer.
+            val myJwtProvider = JWTProvider(
+                initialToken = initialJwt,
+                refreshCallback = { oldToken ->
+                    return@JWTProvider Single.create<String?> { e ->
+                        val newToken = doPerformFetchNewToken() // Developer may perform a long-running operation to generate a new JWT                                 
+                        e.onSuccess(newToken) 
+                    } 
+                }
+            )
+            
+            // Set custom JWTProvider
+            SportsTalk247.setJWTProvider(
+                config = config,
+                provider = myJwtProvider
+            )
+            
+            //
+            // In order to make refresh callback work, developer must be subscribe by calling `observe()` function.
+            // 
+            jwtProvider
+                .observe()
+                .doOnSubscribe {
+                    rxDisposeBag.add(it)
+                }
+                .subscribe()
+
+            // Instantiate User Client
+            val userClient = SportsTalk247.UserClient(/*...*/)
+
+            // Instantiate Chat Client
+            val chatClient = SportsTalk247.ChatClient(/*...*/)
+
+            override fun onViewCreated(view: View) {
+            //
+            // ...
+            //
+            chatClient.joinRoom(
+                chatRoomId = "080001297623242ac002",    // ID of an existing chat room
+                request = JoinChatRoomRequest(
+                    userid = "023976080242ac120002" // ID of an existing user from this chatroom
+                )
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe { rxDisposeBag.add(it) }
+                .doOnError { 
+                    val err = it as? SportsTalkException ?: return@doOnError
+                    err.printStackTrace()
+                    //
+                    // Handle Unauthorized Error
+                    //  - Attempt request refresh token
+                    // 
+                    if(err.code == 401) {
+                        jwtProvider.refreshToken()
+                        // Then, prompt UI layer to perform the operation again after a short while(this is to ensure that the token gets refreshed first before retry attempt)
+                    }
+                }
+                .subscribe { joinRoomResponse ->
+                    // Resolve `joinRoomResponse` (ex. Display prompt OR Update UI)
+                }
+
+```
+
 ## Handling SDK Exception
 
 If any client operations receive an error response, whether it be Network, Server, or Validation Error, these functions will throw an instance of `SportsTalkException`.

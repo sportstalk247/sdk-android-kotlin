@@ -1,8 +1,7 @@
 package com.sportstalk.coroutine
 
-import com.sportstalk.coroutine.api.ChatClient
-import com.sportstalk.coroutine.api.CommentClient
-import com.sportstalk.coroutine.api.UserClient
+import androidx.annotation.RestrictTo
+import com.sportstalk.coroutine.api.*
 import com.sportstalk.coroutine.impl.ChatClientImpl
 import com.sportstalk.coroutine.impl.CommentClientImpl
 import com.sportstalk.coroutine.impl.UserClientImpl
@@ -29,4 +28,24 @@ object SportsTalk247 {
     @JvmStatic
     fun CommentClient(config: ClientConfig): CommentClient =
             CommentClientImpl(config)
+
+    @JvmStatic
+    private var jwtProviders: MutableMap<ClientConfig, JWTProvider?> = mutableMapOf()
+    /**
+     * Method to set a JWT Provider instance for a specific config.
+     */
+    fun setJWTProvider(
+        config: ClientConfig,
+        provider: JWTProvider
+    ) {
+        jwtProviders[config] = provider
+    }
+
+    /**
+     * Method to get the JWT Provider instance for the provided config.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @JvmStatic
+    fun getJWTProvider(config: ClientConfig): JWTProvider? = jwtProviders[config]
+
 }

@@ -312,6 +312,28 @@ constructor(
                 )
             }
 
+    override suspend fun listUserSubscribedRooms(
+        userid: String,
+        limit: Int?,
+        cursor: String?
+    ): ListUserSubscribedRoomsResponse =
+        try {
+            service.listUserSubscribedRooms(
+                appId = appId,
+                userid = userid,
+                limit = limit,
+                cursor = cursor
+            )
+                .handleSdkResponse(json)
+        } catch (err: SportsTalkException) {
+            throw err
+        } catch (err: Throwable) {
+            throw SportsTalkException(
+                message = err.message,
+                err = err
+            )
+        }
+
     override suspend fun exitRoom(chatRoomId: String, userId: String) {
         try {
             val response = service.exitRoom(
