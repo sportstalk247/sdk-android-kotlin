@@ -32,12 +32,13 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.test.assertTrue
 import kotlin.test.fail
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.KITKAT])
-class JWTRefreshCallbackTest {
+class JWTProviderTest {
 
     private lateinit var context: Context
     private lateinit var config: ClientConfig
@@ -246,6 +247,8 @@ class JWTRefreshCallbackTest {
                         err
                     )
             )
+
+            assertTrue { err.code == 401 }
 
             throw err
         } finally {
