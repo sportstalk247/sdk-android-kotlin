@@ -15,11 +15,9 @@ import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
 import com.sportstalk.datamodels.users.UserNotification
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
@@ -32,6 +30,8 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
@@ -47,11 +47,15 @@ class JWTProviderTest {
     private lateinit var chatService: ChatService
     private lateinit var json: Json
 
+    private lateinit var coroutineScope: CoroutineScope
+    private lateinit var jwtProviderJob: Job
+
     private val testDispatcher = TestCoroutineDispatcher()
 
     @get:Rule
     val thrown = ExpectedException.none()
 
+    @UseExperimental(ExperimentalCoroutinesApi::class)
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
@@ -69,12 +73,18 @@ class JWTProviderTest {
             endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
         )
 
-        jwtProvider = JWTProvider().apply {
-            val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
-            // ... Derive JWT using SECRET
-            val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
-            setToken(jwt)
-        }
+        val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
+        // ... Derive JWT using SECRET
+        val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
+        jwtProvider = JWTProvider(
+            initialToken = jwt,
+            refreshCallback = { _ -> jwt }
+        )
+
+        coroutineScope = CoroutineScope(context = EmptyCoroutineContext)
+        jwtProviderJob = jwtProvider
+            .observe()
+            .launchIn(coroutineScope)
 
         SportsTalk247.setJWTProvider(
             config = config,
@@ -92,6 +102,9 @@ class JWTProviderTest {
     fun cleanUp() {
         testDispatcher.cleanupTestCoroutines()
         Dispatchers.resetMain()
+
+        jwtProviderJob.cancel()
+        coroutineScope.cancel()
     }
 
     /**
@@ -231,6 +244,8 @@ class JWTProviderTest {
                 setToken(jwt)
             }
         )
+
+        delay(250)
 
         // EXPECT
         thrown.expect(SportsTalkException::class.java)
