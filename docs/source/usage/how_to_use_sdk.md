@@ -148,6 +148,8 @@ class MyFragment: Fragment() {
 ``` tabs::
     
     .. tab:: sdk-coroutine
+    
+        You can instantiate a JWTProvider instance and provide a token refresh action function that returns a new token. Then you just have to launch the coroutine flow by calling `JWTProvider.observe()` method.
 
         .. code-block:: kotlin
 
@@ -229,11 +231,9 @@ class MyFragment: Fragment() {
             }
 
     .. tab:: sdk-reactive-rx2
-
-        This Android Sportstalk SDK artifact is a Reactive-driven API, powered by `RxJava <https://github.com/ReactiveX/RxJava>`_ to gracefully handle reactive operations.
-
-        Client SDK functions returns RxJava types. See the example below:
-
+        
+        You can instantiate a JWTProvider instance and provide a token refresh action observable that returns a new token. Then you just have to launch the coroutine flow by calling `JWTProvider.observe()` method.
+        
         .. code-block:: kotlin
             
             // ...
@@ -301,8 +301,13 @@ class MyFragment: Fragment() {
                 .subscribe { joinRoomResponse ->
                     // Resolve `joinRoomResponse` (ex. Display prompt OR Update UI)
                 }
-
+    
 ```
+
+You can also directly specify the JWT value by calling `JWTProvider.setToken(newToken)`.
+There is also a function provided to explicitly refresh token by calling `JWTProvider.refreshToken()`, which will trigger the provided token refresh action above to fetch a new token and will automatically add that on the SDK.
+
+Once the User Token has been added to the SDK, the SDK will automatically append it to all requests.
 
 ## Handling SDK Exception
 
