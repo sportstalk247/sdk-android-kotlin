@@ -5,16 +5,11 @@ import io.reactivex.Single
 import io.reactivex.subjects.PublishSubject
 
 class JWTProvider(
-    initialToken: String? = null,
-    private val refreshCallback: ((String?/* Old Token */) -> Single<String?>)? = null
+    private var token: String? = null,
+    private val tokenRefreshObservable: (() -> Single<String?>)? = null
 ) {
 
-    private var token: String? = null
     private val refreshSubj = PublishSubject.create<String?>()
-
-    init {
-        this.token = initialToken
-    }
 
     fun getToken(): String? = this.token
 
@@ -28,8 +23,8 @@ class JWTProvider(
 
     fun observe(): Observable<String?> =
         refreshSubj
-            .flatMap<String?> { oldToken ->
-                return@flatMap refreshCallback?.invoke(oldToken)?.toObservable()
+            .flatMap<String?> {
+                return@flatMap tokenRefreshObservable?.invoke()?.toObservable()
                     ?: Observable.never<String?>()
             }
             .doOnNext { newToken ->

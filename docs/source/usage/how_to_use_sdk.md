@@ -167,10 +167,9 @@ class MyFragment: Fragment() {
             )
             
             // Prepare JWTProvider
-            val initialJwt = "..." // This will be provided by the developer.
             val myJwtProvider = JWTProvider(
-                initialToken = initialJwt,
-                refreshCallback = /* This callback is a suspend function */ { oldToken -> 
+                token = "...",  // Developer may immediately provide a token on init
+                tokenRefreshAction = /* This is a suspend function */ { 
                     val newToken = doPerformFetchNewToken() // Developer may perform a long-running operation to generate a new JWT
                     return@JWTProvider newToken
                 }
@@ -242,10 +241,9 @@ class MyFragment: Fragment() {
             val rxDisposeBag = CompositeDisposable()
             
             // Prepare JWTProvider
-            val initialJwt = "..." // This will be provided by the developer.
             val myJwtProvider = JWTProvider(
-                initialToken = initialJwt,
-                refreshCallback = { oldToken ->
+                token = "...", // Developer may immediately provide a token on init
+                tokenRefreshObservable = {
                     return@JWTProvider Single.create<String?> { e ->
                         val newToken = doPerformFetchNewToken() // Developer may perform a long-running operation to generate a new JWT                                 
                         e.onSuccess(newToken) 
