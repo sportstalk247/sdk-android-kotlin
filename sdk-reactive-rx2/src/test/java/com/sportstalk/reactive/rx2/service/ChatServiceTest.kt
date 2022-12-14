@@ -248,6 +248,77 @@ class ChatServiceTest {
     }
 
     @Test
+    fun `A - 1) Create Room With Custom Tags`() {
+        // GIVEN
+        val testExpectedData = TestData.chatRooms(config.appId).first()
+        val testInputCustomTags = listOf("messenger", "whatsapp")
+
+        val testInputRequest = CreateChatRoomRequest(
+            name = testExpectedData.name!!,
+            customid = testExpectedData.customid,
+            description = testExpectedData.description,
+            moderation = testExpectedData.moderation,
+            enableactions = testExpectedData.enableactions,
+            enableenterandexit = testExpectedData.enableenterandexit,
+            enableprofanityfilter = testExpectedData.enableprofanityfilter,
+            enableautoexpiresessions = testExpectedData.enableautoexpiresessions,
+            delaymessageseconds = testExpectedData.delaymessageseconds,
+            roomisopen = testExpectedData.open,
+            maxreports = testExpectedData.maxreports,
+            customtags = testInputCustomTags
+        )
+
+        val testExpectedResult = ChatRoom(
+            kind = Kind.ROOM,
+            appid = testExpectedData.appid,
+            name = testExpectedData.name,
+            customid = testExpectedData.customid,
+            description = testExpectedData.description,
+            moderation = testExpectedData.moderation,
+            enableactions = testExpectedData.enableactions,
+            enableenterandexit = testExpectedData.enableenterandexit,
+            enableprofanityfilter = testExpectedData.enableprofanityfilter,
+            enableautoexpiresessions = testExpectedData.enableautoexpiresessions,
+            delaymessageseconds = testExpectedData.delaymessageseconds,
+            open = testExpectedData.open,
+            maxreports = testExpectedData.maxreports,
+            customtags = testInputCustomTags
+        )
+
+        // WHEN
+        val testActualResult = chatService.createRoom(
+            request = testInputRequest
+        ).blockingGet()
+
+        // THEN
+        println(
+            "`Create Room With Custom Tags`() -> testActualResult = \n" +
+                    json.stringify/*encodeToString*/(
+                        ChatRoom.serializer(),
+                        testActualResult
+                    )
+        )
+
+        assertTrue { testActualResult.kind == testExpectedResult.kind }
+        assertTrue { testActualResult.appid == testExpectedResult.appid }
+        assertTrue { testActualResult.name == testExpectedResult.name }
+        assertTrue { testActualResult.customid == testExpectedResult.customid }
+        assertTrue { testActualResult.description == testExpectedResult.description }
+        assertTrue { testActualResult.moderation == testExpectedResult.moderation }
+        assertTrue { testActualResult.enableactions == testExpectedResult.enableactions }
+        assertTrue { testActualResult.enableenterandexit == testExpectedResult.enableenterandexit }
+        assertTrue { testActualResult.enableautoexpiresessions == testExpectedResult.enableautoexpiresessions }
+        assertTrue { testActualResult.enableprofanityfilter == testExpectedResult.enableprofanityfilter }
+        assertTrue { testActualResult.delaymessageseconds == testExpectedResult.delaymessageseconds }
+        assertTrue { testActualResult.open == testExpectedResult.open }
+        assertTrue { testActualResult.maxreports == testExpectedResult.maxreports }
+        assertTrue { testActualResult.customtags == testExpectedResult.customtags }
+
+        // Perform Delete Test Chat Room
+        deleteTestChatRooms(testActualResult.id)
+    }
+
+    @Test
     fun `B - 1) Get Room Details`() {
         // GIVEN
         val testData = TestData.chatRooms(config.appId).first()

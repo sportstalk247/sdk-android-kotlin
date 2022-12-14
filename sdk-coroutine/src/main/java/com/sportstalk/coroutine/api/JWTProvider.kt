@@ -8,17 +8,12 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 class JWTProvider(
-    initialToken: String? = null,
-    private val refreshCallback: (suspend (String? /* Old Token */) -> String? /* New Token */)? = null
+    private var token: String? = null,
+    private val tokenRefreshAction: (suspend (String? /* Old Token */) -> String? /* New Token */)? = null
 ) {
-    private var token: String? = null
     private val mutex = Mutex()
 
     private val refreshChannel = Channel<String?>(capacity = Channel.RENDEZVOUS)
-
-    init {
-        this.token = initialToken
-    }
 
     fun getToken(): String? = this.token
 
@@ -40,7 +35,7 @@ class JWTProvider(
         refreshChannel
             .consumeAsFlow()
             .map { oldToken ->
-                refreshCallback?.invoke(oldToken)
+                tokenRefreshAction?.invoke(oldToken)
             }
             .onEach { newToken ->
                 mutex.withLock {

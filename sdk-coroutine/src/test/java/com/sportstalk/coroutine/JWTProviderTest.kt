@@ -77,8 +77,8 @@ class JWTProviderTest {
         // ... Derive JWT using SECRET
         val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
         jwtProvider = JWTProvider(
-            initialToken = jwt,
-            refreshCallback = { _ -> jwt }
+            token = jwt,
+            tokenRefreshAction = { jwt }
         )
 
         coroutineScope = CoroutineScope(context = EmptyCoroutineContext)

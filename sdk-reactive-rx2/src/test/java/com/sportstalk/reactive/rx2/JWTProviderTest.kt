@@ -73,8 +73,8 @@ class JWTProviderTest {
         // ... Derive JWT using SECRET
         val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
         jwtProvider = JWTProvider(
-            initialToken = jwt,
-            refreshCallback = { _ -> Single.create<String?> { e -> e.onSuccess(jwt) } }
+            token = jwt,
+            tokenRefreshObservable = { Single.create<String?> { e -> e.onSuccess(jwt) } }
         )
 
         rxDisposeBag = CompositeDisposable()
