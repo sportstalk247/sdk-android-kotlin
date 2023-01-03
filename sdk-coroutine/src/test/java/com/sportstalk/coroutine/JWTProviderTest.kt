@@ -16,7 +16,6 @@ import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
 import com.sportstalk.datamodels.users.UserNotification
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -30,7 +29,6 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.assertTrue
 import kotlin.test.fail
@@ -55,7 +53,6 @@ class JWTProviderTest {
     @get:Rule
     val thrown = ExpectedException.none()
 
-    @UseExperimental(ExperimentalCoroutinesApi::class)
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
@@ -257,7 +254,7 @@ class JWTProviderTest {
             )
         } catch(err: SportsTalkException) {
             println("Unsigned User -> testActualResult = \n" +
-                    json.stringify/*encodeToString*/(
+                    json.encodeToString(
                         SportsTalkException.serializer(),
                         err
                     )

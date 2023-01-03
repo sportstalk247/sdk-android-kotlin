@@ -122,7 +122,7 @@ class ChatModerationServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
-                            json.stringify/*encodeToString*/(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -206,7 +206,7 @@ class ChatModerationServiceTest {
         // THEN
         println(
                 "`Approve Message`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 testActualResult
                         )
@@ -245,7 +245,7 @@ class ChatModerationServiceTest {
         } catch (err: SportsTalkException) {
             println(
                     "`ERROR-404 - Approve Message`() -> testActualResult = \n" +
-                            json.stringify/*encodeToString*/(
+                            json.encodeToString(
                                     SportsTalkException.serializer(),
                                     err
                             )
@@ -326,7 +326,7 @@ class ChatModerationServiceTest {
         // THEN
         println(
                 "`List Messages Needing Moderation`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListMessagesNeedingModerationResponse.serializer(),
                                 testActualResult
                         )

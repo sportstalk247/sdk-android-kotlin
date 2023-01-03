@@ -14,16 +14,14 @@ import com.sportstalk.datamodels.users.User
 import com.sportstalk.reactive.rx2.ServiceFactory
 import com.sportstalk.reactive.rx2.SportsTalk247
 import com.sportstalk.reactive.rx2.api.polling.allEventUpdates
-import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.functions.BiFunction
 import io.reactivex.observers.TestObserver
 import io.reactivex.subscribers.TestSubscriber
-import kotlinx.serialization.internal.ArrayListSerializer
-// import kotlinx.serialization.builtins.ArraySerializer
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonLiteral
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
 import net.bytebuddy.utility.RandomString
 import org.junit.After
 import org.junit.Before
@@ -134,7 +132,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-403 - Request is not authorized with a token`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -188,7 +186,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Create Room`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatRoom.serializer(),
                                 testActualResult
                         )
@@ -235,7 +233,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404-User-not-found - Create Room`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -293,7 +291,7 @@ class ChatServiceTest {
         // THEN
         println(
             "`Create Room With Custom Tags`() -> testActualResult = \n" +
-                    json.stringify/*encodeToString*/(
+                    json.encodeToString(
                         ChatRoom.serializer(),
                         testActualResult
                     )
@@ -349,7 +347,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Get Room Details`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatRoom.serializer(),
                                 testActualResult
                         )
@@ -391,7 +389,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Get Room Details`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -437,7 +435,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Get Room Extended Details Batch`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 GetRoomDetailsExtendedBatchResponse.serializer(),
                                 testActualResult
                         )
@@ -476,7 +474,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Get Room Extended Details Batch`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -546,7 +544,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Get Room Details - By Custom ID`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -593,7 +591,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Delete Room`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 DeleteChatRoomResponse.serializer(),
                                 testActualResult
                         )
@@ -624,7 +622,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Delete Room`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -687,7 +685,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Update Room`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatRoom.serializer(),
                                 testActualResult
                         )
@@ -739,7 +737,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Update Room`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -859,7 +857,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`List Rooms`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListRoomsResponse.serializer(),
                                 testActualResult
                         )
@@ -930,7 +928,7 @@ class ChatServiceTest {
             // THEN
             println(
                     "`Join Room - Authenticated User`() -> testActualResult = \n" +
-                            json.stringify/*encodeToString*/(
+                            json.encodeToString(
                                     JoinChatRoomResponse.serializer(),
                                     testActualResult
                             )
@@ -992,7 +990,7 @@ class ChatServiceTest {
 //        // THEN
 //        println(
 //                "`Join Room - Anonymous User`() -> testActualResult = \n" +
-//                        json.stringify/*encodeToString*/(
+//                        json.encodeToString(
 //                                JoinChatRoomResponse.serializer(),
 //                                testActualResult
 //                        )
@@ -1036,7 +1034,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -1101,7 +1099,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Join Room - By Custom ID`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 JoinChatRoomResponse.serializer(),
                                 testActualResult
                         )
@@ -1189,7 +1187,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`List Room Participants`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListChatRoomParticipantsResponse.serializer(),
                                 testActualResult
                         )
@@ -1232,7 +1230,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -1320,7 +1318,7 @@ class ChatServiceTest {
             // THEN
             println(
                 "`List User Subscribed Rooms`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                             ListUserSubscribedRoomsResponse.serializer(),
                             testActualResult
                         )
@@ -1441,7 +1439,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404-Room-not-found - Join Room`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -1529,7 +1527,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Get Updates`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 GetUpdatesResponse.serializer(),
                                 testActualResult
                         )
@@ -1577,7 +1575,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Get Updates`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -1682,8 +1680,8 @@ class ChatServiceTest {
                 .assertValueAt(0) { testActualResult ->
                     println(
                             "`All Event Updates[0]`() -> response = \n" +
-                                    json.stringify/*encodeToString*/(
-                                            ArrayListSerializer/*ArraySerializer*/(ChatEvent.serializer()),
+                                    json.encodeToString(
+                                            ListSerializer(ChatEvent.serializer()),
                                             testActualResult/*.toTypedArray()*/
                                     )
                     )
@@ -1848,7 +1846,7 @@ class ChatServiceTest {
 
         println(
                 "`Message Is Reacted To`() -> reactToEventResponse = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 reactToEventResponse
                         )
@@ -1944,7 +1942,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`List Previous Events`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListEvents.serializer(),
                                 testActualResult
                         )
@@ -2036,7 +2034,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Get Event By ID`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 testActualResult
                         )
@@ -2149,7 +2147,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Report User In Room`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatRoom.serializer(),
                                 testActualResult
                         )
@@ -2288,7 +2286,7 @@ class ChatServiceTest {
                     // THEN
                     println(
                             "`ERROR-403) Report User In Room`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -2371,7 +2369,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`List Events History`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListEvents.serializer(),
                                 testActualResult
                         )
@@ -2469,7 +2467,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`List Events By Type`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListEvents.serializer(),
                                 testActualResult
                         )
@@ -2571,7 +2569,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`List Events By Type - Custom Type`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListEvents.serializer(),
                                 testActualResult
                         )
@@ -2669,7 +2667,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`List Events By Timestamp`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListEventsByTimestamp.serializer(),
                                 testActualResult
                         )
@@ -2863,7 +2861,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Execute Chat Command - Action`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ExecuteChatCommandResponse.serializer(),
                                 testActualResult
                         )
@@ -2966,7 +2964,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Execute Chat Command - Reply to a Message - Threaded`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 testActualResult
                         )
@@ -3079,7 +3077,7 @@ class ChatServiceTest {
             // THEN
             println(
                     "`Execute Chat Command - Purge User Messages`() -> testActualResult = \n" +
-                            json.stringify/*encodeToString*/(
+                            json.encodeToString(
                                     ExecuteChatCommandResponse.serializer(),
                                     testActualResult
                             )
@@ -3167,7 +3165,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Execute Chat Command - Admin - Delete All Events`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ExecuteChatCommandResponse.serializer(),
                                 testActualResult
                         )
@@ -3263,7 +3261,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Send Quoted Reply`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 testActualResult
                         )
@@ -3358,7 +3356,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Execute Chat Command - Announcement`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ExecuteChatCommandResponse.serializer(),
                                 testActualResult
                         )
@@ -3431,7 +3429,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404-User-NOT-found - Execute Chat Command`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -3507,7 +3505,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404-User-not-yet-joined - Execute Chat Command`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -3596,7 +3594,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404-REPLY-NOT-FOUND - Execute Chat Command`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -3605,8 +3603,8 @@ class ChatServiceTest {
                     return@assertError err.kind == Kind.API
                             && err.message == "The message you want to reply to can't be found."
                             && err.code == 404
-                            && err.data?.getPrimitiveOrNull("kind")?.contentOrNull == Kind.CHAT_COMMAND
-                            && err.data?.getPrimitiveOrNull("op")?.contentOrNull == "speech"
+                            && err.data?.get("kind")?.jsonPrimitive?.contentOrNull == Kind.CHAT_COMMAND
+                            && err.data?.get("op")?.jsonPrimitive?.contentOrNull == "speech"
                 }
     }
 
@@ -3699,7 +3697,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-418-NOT-ALLOWED - Execute Chat Command`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -3784,7 +3782,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`List Messages By User`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ListMessagesByUser.serializer(),
                                 testActualResult
                         )
@@ -3876,7 +3874,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Bounce User - Ban user`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 BounceUserResponse.serializer(),
                                 testActualResult
                         )
@@ -3967,7 +3965,7 @@ class ChatServiceTest {
             // THEN
             println(
                     "`Search Event History`() -> testActualResult = \n" +
-                            json.stringify/*encodeToString*/(
+                            json.encodeToString(
                                     SearchEventHistoryResponse.serializer(),
                                     testActualResult
                             )
@@ -4068,7 +4066,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Update Chat Message`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 testActualResult
                         )
@@ -4163,7 +4161,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Delete Event`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 DeleteEventResponse.serializer(),
                                 testActualResult
                         )
@@ -4261,7 +4259,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Flag Message Event as Deleted`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 DeleteEventResponse.serializer(),
                                 testActualResult
                         )
@@ -4360,7 +4358,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Report a Message`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 testActualResult
                         )
@@ -4454,7 +4452,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404-EVENT-NOT-FOUND - Report a Message`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -4463,7 +4461,7 @@ class ChatServiceTest {
                     return@assertError err.kind == Kind.API
                             && err.message == "The specified event was not found."
                             && err.code == 404
-                            && err.data?.getPrimitive("eventId")?.contentOrNull == testChatIdNonExisting
+                            && err.data?.get("eventId")?.jsonPrimitive?.contentOrNull == testChatIdNonExisting
                 }
     }
 
@@ -4558,7 +4556,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`React to a Message`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatEvent.serializer(),
                                 testActualResult
                         )
@@ -4649,7 +4647,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Shadow Ban User In Room`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatRoom.serializer(),
                                 testActualResult
                         )
@@ -4692,7 +4690,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Shadow Ban User In Room - Room Does NOT Exist`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -4750,7 +4748,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Shadow Ban User In Room - User Does NOT Exist`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -4824,7 +4822,7 @@ class ChatServiceTest {
         // THEN
         println(
                 "`Mute User In Room`() -> testActualResult = \n" +
-                        json.stringify/*encodeToString*/(
+                        json.encodeToString(
                                 ChatRoom.serializer(),
                                 testActualResult
                         )
@@ -4867,7 +4865,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Mute User In Room - Room Does NOT Exist`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )
@@ -4925,7 +4923,7 @@ class ChatServiceTest {
 
                     println(
                             "`ERROR-404 - Mute User In Room - User Does NOT Exist`() -> testActualResult = \n" +
-                                    json.stringify/*encodeToString*/(
+                                    json.encodeToString(
                                             SportsTalkException.serializer(),
                                             err
                                     )

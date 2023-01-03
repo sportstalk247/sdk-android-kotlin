@@ -2,7 +2,6 @@ package com.sportstalk.datamodels
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import java.lang.Exception
 
