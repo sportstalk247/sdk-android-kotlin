@@ -4,19 +4,4 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <!--<application>
-        <meta-data android:name="sportstalk.api.app_id" android:value="602e6fc50c916c171cb9a4e8" />
-        <meta-data android:name="sportstalk.api.auth_token" android:value="P1slSgD5l0yYBTWixyZ3_gGt69p5SOu0KEuGYLBXY8sw" />
-        <meta-data android:name="sportstalk.api.url.endpoint" android:value="https://api.sportstalk247.com/api/v3/" />
-    </application>-->
-
-    <application>
-        <meta-data android:name="sportstalk.api.app_id" android:value="5ffd115386c29223e4de754c" />
-        <meta-data android:name="sportstalk.api.auth_token" android:value="Cjh2_2VLhk2iyQUSEsfphAZkrrs6J-Vk2ELL7YzzwWJw" />
-        <!--<meta-data android:name="sportstalk.api.url.endpoint" android:value="https://api.sportstalk247.com/api/v3/" />-->
-        <meta-data android:name="sportstalk.api.url.endpoint" android:value="https://prod-api.sportstalk247.com/api/v3/" />
-        <meta-data android:name="sportstalk.api.secret" android:value="B28D0982C9D6F6CFBA9637F561B923D7" />
-        <meta-data android:name="sportstalk.api.jwt" android:value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJ0ZXN0dXNlcjEiLCJyb2xlIjoidXNlciJ9.H1cMH21k1m6zNFgVhvvxkG1DdTAOCyGCfxMzP-5XT7U" />
-    </application>
-
 </manifest>

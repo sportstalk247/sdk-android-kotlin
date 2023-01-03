@@ -10,7 +10,7 @@ import com.sportstalk.coroutine.impl.restapi.ChatRestApiServiceImpl
 import com.sportstalk.coroutine.impl.restapi.UserRestApiServiceImpl
 import com.sportstalk.datamodels.ClientConfig
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
@@ -23,9 +23,9 @@ object ServiceFactory {
         @JvmStatic
         internal val json: Json by lazy {
             Json {
-                encodeDefaults = false
                 prettyPrint = true
-                strictMode = false
+                isLenient = true
+                ignoreUnknownKeys = true
             }
         }
 
@@ -72,7 +72,7 @@ object ServiceFactory {
                     Retrofit.Builder()
                             .baseUrl(config.endpoint)
                             .addConverterFactory(
-                                    json.asConverterFactory(MediaType.get("application/json"))
+                                json.asConverterFactory("application/json".toMediaType())
                             )
                             .client(okHttpClient)
                             .build()

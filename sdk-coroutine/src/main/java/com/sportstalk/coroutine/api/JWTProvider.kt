@@ -1,9 +1,11 @@
 package com.sportstalk.coroutine.api
 
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.channels.sendBlocking
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.channels.trySendBlocking
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -22,7 +24,7 @@ class JWTProvider(
     }
 
     fun refreshToken() {
-        refreshChannel.sendBlocking(this.token)
+        refreshChannel.trySendBlocking(this.token)
     }
 
     /**
@@ -30,7 +32,6 @@ class JWTProvider(
      * @return  A cold observable that performs refresh token operation, then internally updates and stores
      * the new token.
      */
-    @UseExperimental(FlowPreview::class)
     fun observe(): Flow<String?> =
         refreshChannel
             .consumeAsFlow()

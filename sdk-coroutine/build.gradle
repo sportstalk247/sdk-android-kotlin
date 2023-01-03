@@ -1,7 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-parcelize'
 apply plugin: 'kotlinx-serialization'
 
 android {
@@ -44,12 +43,9 @@ android {
         }
     }
 
-    kapt {
-        generateStubs = true
-    }
     compileOptions {
-        targetCompatibility 1.8
-        sourceCompatibility 1.8
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 
     // https://stackoverflow.com/a/48988779/11419056
@@ -58,12 +54,13 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
         freeCompilerArgs += [
-                "-Xopt-in=kotlin.RequiresOptIn",
-                "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
-                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi",
-                "-Xuse-experimental=kotlinx.serialization.UnstableDefault",
-                "-Xuse-experimental=kotlinx.serialization.ImplicitReflectionSerializer"
+                "-opt-in=kotlin.RequiresOptIn",
+                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=kotlinx.coroutines.FlowPreview",
+                "-opt-in=kotlinx.coroutines.ObsoleteCoroutinesApi",
+                "-opt-in=kotlinx.serialization.UnstableDefault",
+                "-opt-in=kotlinx.serialization.ImplicitReflectionSerializer",
+                "-opt-in=kotlinx.serialization.ExperimentalSerializationApi",
         ]
     }
 
@@ -91,8 +88,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    /*implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"*/
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlinx_serialization_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version"
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$rootProject.retrofitVersion"
@@ -114,15 +110,13 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$rootProject.ext.mockitoVersion"
 
     // AndroidX Lifecycle
-    implementation "androidx.lifecycle:lifecycle-extensions:$androidXLifecycleVersion"
-    kapt "androidx.lifecycle:lifecycle-common-java8:$androidXLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidXLifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidXLifecycleVersion"
 
 }
 
 configurations.all {
-    resolutionStrategy{
+    resolutionStrategy {
         cacheChangingModulesFor 0, 'seconds'
     }
 }

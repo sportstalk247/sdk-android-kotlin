@@ -8,7 +8,7 @@ import com.sportstalk.reactive.rx2.impl.restapi.UserRestApiServiceImpl
 import com.sportstalk.reactive.rx2.service.ChatService
 import com.sportstalk.reactive.rx2.service.UserService
 import kotlinx.serialization.json.Json
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -22,9 +22,9 @@ object ServiceFactory {
         @JvmStatic
         internal val json: Json by lazy {
             Json {
-                encodeDefaults = false
                 prettyPrint = true
-                strictMode = false
+                isLenient = true
+                ignoreUnknownKeys = true
             }
         }
 
@@ -71,7 +71,7 @@ object ServiceFactory {
                     Retrofit.Builder()
                             .baseUrl(config.endpoint)
                             .addConverterFactory(
-                                    json.asConverterFactory(MediaType.get("application/json"))
+                                json.asConverterFactory("application/json".toMediaType())
                             )
                             .addCallAdapterFactory(
                                     RxJava2CallAdapterFactory.create()

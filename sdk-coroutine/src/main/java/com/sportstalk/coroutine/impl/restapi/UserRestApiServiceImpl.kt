@@ -173,7 +173,7 @@ constructor(
                     GloballyPurgeUserContentResponse()
                 } else {
                     throw response.errorBody()?.string()?.let { errBodyStr ->
-                        json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                        json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
                     }
                             ?: SportsTalkException(
                                     kind = respBody?.kind ?: Kind.API,
@@ -315,7 +315,7 @@ constructor(
                     // No more additional step(s)
                 } else {
                     throw response.errorBody()?.string()?.let { errBodyStr ->
-                        json.parse/*decodeFromString*/(SportsTalkException.serializer(), errBodyStr)
+                        json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
                     }
                             ?: SportsTalkException(
                                     kind = Kind.API,
