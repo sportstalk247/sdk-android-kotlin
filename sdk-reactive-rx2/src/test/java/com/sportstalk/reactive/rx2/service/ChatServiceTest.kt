@@ -62,9 +62,9 @@ class ChatServiceTest {
                 }
 
         config = ClientConfig(
-                appId = appInfo?.metaData?.getString("sportstalk.api.app_id")!!,
-                apiToken = appInfo.metaData?.getString("sportstalk.api.auth_token")!!,
-                endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
+            appId = "602e6fc50c916c171cb9a4e8",
+            apiToken = "P1slSgD5l0yYBTWixyZ3_gGt69p5SOu0KEuGYLBXY8sw",
+            endpoint = "https://api.sportstalk247.com/api/v3"
         )
         json = ServiceFactory.RestApi.json
         userService = ServiceFactory.User.get(config)

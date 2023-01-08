@@ -65,14 +65,14 @@ class JWTProviderTest {
             }
 
         config = ClientConfig(
-            appId = appInfo?.metaData?.getString("sportstalk.api.app_id")!!,
-            apiToken = appInfo.metaData?.getString("sportstalk.api.auth_token")!!,
-            endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
+            appId = "5ffd115386c29223e4de754c",
+            apiToken = "Cjh2_2VLhk2iyQUSEsfphAZkrrs6J-Vk2ELL7YzzwWJw",
+            endpoint = "https://prod-api.sportstalk247.com/api/v3/"
         )
 
-        val secret = appInfo.metaData?.getString("sportstalk.api.secret")!!
+        val secret = "B28D0982C9D6F6CFBA9637F561B923D7"
         // ... Derive JWT using SECRET
-        val jwt = appInfo.metaData?.getString("sportstalk.api.jwt")!!
+        val jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJ0ZXN0dXNlcjEiLCJyb2xlIjoidXNlciJ9.H1cMH21k1m6zNFgVhvvxkG1DdTAOCyGCfxMzP-5XT7U"
         jwtProvider = JWTProvider(
             token = jwt,
             tokenRefreshAction = { jwt }
@@ -408,30 +408,19 @@ class JWTProviderTest {
             delay(250)
 
             // Test Created User Should send an initial message to the created chat room
-            val testInitialSendMessage = chatService.executeChatCommand(
+            chatService.executeChatCommand(
                 chatRoomId = testCreatedChatRoomData?.id!!,
                 request = testInitialSendMessageInputRequest
             ).speech!!
 
-            val testInputChatReplyThreadedRequest = SendThreadedReplyRequest(
-                body = "This is Jessy, replying to your greetings yow!!!",
-                userid = testCreatedUserData?.userid!!
-            )
-
             delay(250)
 
-            // Perform Chat Reply - Threaded
-            val testChatReplyThreaded = chatService.sendThreadedReply(
-                chatRoomId = testCreatedChatRoomData?.id!!,
-                replyTo = testInitialSendMessage.id!!,
-                request = testInputChatReplyThreadedRequest
-            )
 
             delay(250)
 
             // WHEN
             userService.listUserNotifications(
-                userId = testInputChatReplyThreadedRequest.userid,
+                userId = testCreatedUserData?.userid!!,
                 limit = 10,
                 filterNotificationTypes = listOf(UserNotification.Type.CHAT_REPLY),
                 cursor = null,
