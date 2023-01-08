@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.coroutine.ServiceFactory
+import com.sportstalk.datamodels.ClientConfig
 import kotlinx.serialization.json.Json
 import org.junit.After
 import org.junit.Before
@@ -37,10 +38,10 @@ class CommentServiceTest {
                     null
                 }
 
-        config = com.sportstalk.datamodels.ClientConfig(
-                appId = appInfo?.metaData?.getString("sportstalk.api.app_id")!!,
-                apiToken = appInfo.metaData?.getString("sportstalk.api.auth_token")!!,
-                endpoint = appInfo.metaData?.getString("sportstalk.api.url.endpoint")!!
+        config = ClientConfig(
+            appId = "602e6fc50c916c171cb9a4e8",
+            apiToken = "P1slSgD5l0yYBTWixyZ3_gGt69p5SOu0KEuGYLBXY8sw",
+            endpoint = "https://api.sportstalk247.com/api/v3"
         )
         json = ServiceFactory.RestApi.json
         userService = ServiceFactory.User.get(config)

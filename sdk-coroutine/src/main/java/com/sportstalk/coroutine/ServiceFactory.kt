@@ -9,9 +9,11 @@ import com.sportstalk.coroutine.impl.restapi.ChatModerationRestApiServiceImpl
 import com.sportstalk.coroutine.impl.restapi.ChatRestApiServiceImpl
 import com.sportstalk.coroutine.impl.restapi.UserRestApiServiceImpl
 import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.ConfigUtils
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
@@ -53,6 +55,13 @@ object ServiceFactory {
                                     .build()
                             )
                         }
+                        .apply {
+                            if(BuildConfig.DEBUG) {
+                                addNetworkInterceptor(
+                                    HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+                                )
+                            }
+                        }
                         .connectTimeout(10, TimeUnit.SECONDS)
                         .readTimeout(10, TimeUnit.SECONDS)
                         .build()
@@ -70,7 +79,9 @@ object ServiceFactory {
         ): Retrofit =
                 if (okRetrofitInstances.containsKey(config.endpoint)) okRetrofitInstances[config.endpoint]!! else
                     Retrofit.Builder()
-                            .baseUrl(config.endpoint)
+                            .baseUrl(
+                                config.endpoint.let(ConfigUtils::validateEndpoint)
+                            )
                             .addConverterFactory(
                                 json.asConverterFactory("application/json".toMediaType())
                             )

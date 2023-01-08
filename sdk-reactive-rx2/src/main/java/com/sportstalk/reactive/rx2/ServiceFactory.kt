@@ -3,6 +3,8 @@ package com.sportstalk.reactive.rx2
 import androidx.annotation.RestrictTo
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.sportstalk.datamodels.ClientConfig
+import com.sportstalk.datamodels.ConfigUtils
+import com.sportstalk.reactive.BuildConfig
 import com.sportstalk.reactive.rx2.impl.restapi.ChatRestApiServiceImpl
 import com.sportstalk.reactive.rx2.impl.restapi.UserRestApiServiceImpl
 import com.sportstalk.reactive.rx2.service.ChatService
@@ -10,6 +12,7 @@ import com.sportstalk.reactive.rx2.service.UserService
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import java.util.concurrent.TimeUnit
@@ -52,6 +55,13 @@ object ServiceFactory {
                                     .build()
                             )
                         }
+                        .apply {
+                            if(BuildConfig.DEBUG) {
+                                addNetworkInterceptor(
+                                    HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
+                                )
+                            }
+                        }
                         .connectTimeout(10, TimeUnit.SECONDS)
                         .readTimeout(10, TimeUnit.SECONDS)
                         .build()
@@ -69,7 +79,9 @@ object ServiceFactory {
         ): Retrofit =
                 if (okRetrofitInstances.containsKey(config.endpoint)) okRetrofitInstances[config.endpoint]!! else
                     Retrofit.Builder()
-                            .baseUrl(config.endpoint)
+                            .baseUrl(
+                                config.endpoint.let(ConfigUtils::validateEndpoint)
+                            )
                             .addConverterFactory(
                                 json.asConverterFactory("application/json".toMediaType())
                             )
