@@ -2,12 +2,8 @@ package com.sportstalk.coroutine
 
 import androidx.annotation.RestrictTo
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.sportstalk.coroutine.service.ChatModerationService
-import com.sportstalk.coroutine.service.ChatService
-import com.sportstalk.coroutine.service.UserService
-import com.sportstalk.coroutine.impl.restapi.ChatModerationRestApiServiceImpl
-import com.sportstalk.coroutine.impl.restapi.ChatRestApiServiceImpl
-import com.sportstalk.coroutine.impl.restapi.UserRestApiServiceImpl
+import com.sportstalk.coroutine.impl.restapi.*
+import com.sportstalk.coroutine.service.*
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.ConfigUtils
 import kotlinx.serialization.json.Json
@@ -157,6 +153,52 @@ object ServiceFactory {
                         instances[config] = it
                     }
                 }
+    }
+
+    object Comment {
+        @JvmStatic
+        private val instances: HashMap<ClientConfig, CommentService> = hashMapOf()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun get(config: ClientConfig): CommentService =
+            if(instances.containsKey(config)) {
+                instances[config]!!
+            } else {
+                val okHttpClient = RestApi.getOkHttpInstance(config)
+                val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
+                // REST API Implementation
+                CommentRestApiServiceImpl(
+                    appId = config.appId,
+                    json = RestApi.json,
+                    mRetrofit = retrofit
+                ).also {
+                    instances[config] = it
+                }
+            }
+    }
+
+    object CommentModeration {
+        @JvmStatic
+        private val instances: HashMap<ClientConfig, CommentModerationService> = hashMapOf()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun get(config: ClientConfig): CommentModerationService =
+            if(instances.containsKey(config)) {
+                instances[config]!!
+            } else {
+                val okHttpClient = RestApi.getOkHttpInstance(config)
+                val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
+                // REST API Implementation
+                CommentModerationRestApiServiceImpl(
+                    appId = config.appId,
+                    json = RestApi.json,
+                    mRetrofit = retrofit
+                ).also {
+                    instances[config] = it
+                }
+            }
     }
 
 }

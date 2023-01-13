@@ -1,7 +1,7 @@
 package com.sportstalk.datamodels.users
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 typealias UserNotificationType = String

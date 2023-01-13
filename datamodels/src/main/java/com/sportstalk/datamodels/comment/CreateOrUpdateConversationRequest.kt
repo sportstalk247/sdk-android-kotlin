@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class CreateOrUpdateConversationRequest(
         val conversationid: String? = null,
-        val property: String,
+        val property: String,   // i.e. "dev", "uat", "stage", "prod"
         val moderation: String, /* "pre"/"post" */
         val maxreports: Long? = null, // OPTIONAL, defaults to 3
         val enableprofanityfilter: Boolean? = null, // OPTIONAL, defaults to true

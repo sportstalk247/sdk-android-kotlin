@@ -1,9 +1,8 @@
-package com.sportstalk.coroutine.service
+package com.sportstalk.reactive.rx2.service
 
 import android.app.Activity
 import android.content.Context
 import android.os.Build
-import com.sportstalk.coroutine.ServiceFactory
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.Kind
 import com.sportstalk.datamodels.comment.*
@@ -13,18 +12,11 @@ import com.sportstalk.datamodels.reports.Report
 import com.sportstalk.datamodels.reports.ReportType
 import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
+import com.sportstalk.reactive.rx2.ServiceFactory
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
-import org.junit.After
-import org.junit.Before
-import org.junit.FixMethodOrder
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.ExpectedException
+import org.junit.*
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
@@ -44,11 +36,7 @@ class CommentServiceTest {
     private lateinit var commentService: CommentService
     private lateinit var json: Json
 
-    @Suppress("DEPRECATION")
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @get:Rule
-    val thrown = ExpectedException.none()
+    private lateinit var rxDisposeBag: CompositeDisposable
 
     @Before
     fun setup() {
@@ -62,22 +50,23 @@ class CommentServiceTest {
         json = ServiceFactory.RestApi.json
         userService = ServiceFactory.User.get(config)
         commentService = ServiceFactory.Comment.get(config)
+
+        rxDisposeBag = CompositeDisposable()
     }
 
     @After
     fun cleanUp() {
-        testDispatcher.cleanupTestCoroutines()
-        Dispatchers.resetMain()
+        rxDisposeBag.dispose()
     }
 
     /**
      * Helper function to clean up Test Users from the Backend Server
      */
-    private suspend fun deleteTestUsers(vararg userIds: String?) {
+    private fun deleteTestUsers(vararg userIds: String?) {
         for (id in userIds) {
             id ?: continue
             try {
-                userService.deleteUser(userId = id)
+                userService.deleteUser(userId = id).blockingGet()
             } catch (err: Throwable) {
             }
         }
@@ -86,18 +75,18 @@ class CommentServiceTest {
     /**
      * Helper function to clean up Test Conversations from the Backend Server
      */
-    private suspend fun deleteConversations(vararg conversationIds: String?) {
-        for (id in conversationIds) {
+    private fun deleteTestConversations(vararg conversationIds: String?) {
+        for(id in conversationIds) {
             id ?: continue
             try {
-                commentService.deleteConversation(id)
+                commentService.deleteConversation(id).blockingGet()
             } catch (err: Throwable) {
             }
         }
     }
 
     @Test
-    fun `A) Create Conversation`() = runBlocking {
+    fun `A) Create Conversation`() {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)[0]
         val testInputRequest = CreateOrUpdateConversationRequest(
@@ -115,6 +104,7 @@ class CommentServiceTest {
         // WHEN
         try {
             val testActualResult = commentService.createOrUpdateConversation(testInputRequest)
+                .blockingGet()
 
             // THEN
             println(
@@ -137,12 +127,13 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(testExpectedData.conversationid)
+            deleteTestConversations(testExpectedData.conversationid)
         }
+
     }
 
     @Test
-    fun `B) Get Conversation`() = runBlocking {
+    fun `B) Get Conversation`() {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)[0]
         val testInputRequest = CreateOrUpdateConversationRequest(
@@ -159,10 +150,16 @@ class CommentServiceTest {
 
         // WHEN
         try {
-            val createdConversation = commentService.createOrUpdateConversation(testInputRequest)
-            val testExpectedResult = createdConversation
+            val createdConversation =
+                commentService
+                    .createOrUpdateConversation(testInputRequest)
+                    .blockingGet()
 
-            val testActualResult = commentService.getConversation(conversationid = createdConversation.conversationid!!)
+            val testExpectedResult = createdConversation
+            val testActualResult =
+                commentService
+                    .getConversation(conversationid = createdConversation.conversationid!!)
+                    .blockingGet()
 
             // THEN
             println(
@@ -180,12 +177,12 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(testExpectedData.conversationid)
+            deleteTestConversations(testExpectedData.conversationid)
         }
     }
 
     @Test
-    fun `C) Get Conversation By Custom ID`() = runBlocking {
+    fun `C) Get Conversation By Custom ID`() {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)[0]
         val testInputRequest = CreateOrUpdateConversationRequest(
@@ -200,10 +197,16 @@ class CommentServiceTest {
 
         // WHEN
         try {
-            val createdConversation = commentService.createOrUpdateConversation(testInputRequest)
-            val testExpectedResult = createdConversation
+            val createdConversation =
+                commentService
+                    .createOrUpdateConversation(testInputRequest)
+                    .blockingGet()
 
-            val testActualResult = commentService.getConversationByCustomId(customid = createdConversation.customid!!)
+            val testExpectedResult = createdConversation
+            val testActualResult =
+                commentService
+                    .getConversationByCustomId(customid = createdConversation.customid!!)
+                    .blockingGet()
 
             // THEN
             println(
@@ -220,12 +223,12 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(testExpectedData.conversationid)
+            deleteTestConversations(testExpectedData.conversationid)
         }
     }
 
     @Test
-    fun `C) List Conversations`() = runBlocking {
+    fun `D) Batch Get Conversation Details`() {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)
         val testInputRequests = testExpectedData.map { item ->
@@ -246,64 +249,19 @@ class CommentServiceTest {
             // Create the Conversation instances
             for(input in testInputRequests) {
                 createdConversations.add(
-                    commentService.createOrUpdateConversation(input)
+                    commentService
+                        .createOrUpdateConversation(input)
+                        .blockingGet()
                 )
             }
 
             val testExpectedResult = createdConversations
-
-            val testActualResult = commentService.listConversations()
-
-            // THEN
-            println(
-                "`List Conversations`() -> testActualResult = \n" +
-                        json.encodeToString(
-                            ListConversations.serializer(),
-                            testActualResult,
-                        )
-            )
-
-            assert(testActualResult.conversations.containsAll(testExpectedResult))
-
-        } catch (err: Throwable) {
-            err.printStackTrace()
-            fail(err.message)
-        } finally {
-            deleteConversations(*(testExpectedData.map { it.conversationid }.toTypedArray()))
-        }
-    }
-
-    @Test
-    fun `D) Batch Get Conversation Details`() = runBlocking {
-        // GIVEN
-        val testExpectedData = TestData.conversations(config.appId)
-        val testInputRequests = testExpectedData.map { item ->
-            CreateOrUpdateConversationRequest(
-                conversationid = item.conversationid!!,
-                property = item.property!!,
-                moderation = item.moderation!!,
-                enableprofanityfilter = item.enableprofanityfilter,
-                title = item.title,
-                open = item.open,
-                customid = item.customid
-            )
-        }
-
-        // WHEN
-        val createdConversations = mutableListOf<Conversation>()
-        try {
-            // Create the Conversation instances
-            for(input in testInputRequests) {
-                createdConversations.add(
-                    commentService.createOrUpdateConversation(input)
-                )
-            }
-
-            val testExpectedResult = createdConversations
-
-            val testActualResult = commentService.batchGetConversationDetails(
-                ids = createdConversations.mapNotNull { it.conversationid },
-            )
+            val testActualResult =
+                commentService
+                    .batchGetConversationDetails(
+                        ids = createdConversations.mapNotNull { it.conversationid },
+                    )
+                    .blockingGet()
 
             // THEN
             println(
@@ -324,12 +282,12 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(*(testExpectedData.map { it.conversationid }.toTypedArray()))
+            deleteTestConversations(*(testExpectedData.map { it.conversationid }.toTypedArray()))
         }
     }
 
     @Test
-    fun `E) React to Conversation Topic`() = runBlocking {
+    fun `E) React to Conversation Topic`() {
         // GIVEN
         val testUserData = TestData.TestUser
 
@@ -355,10 +313,13 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
 
             // Then, create Conversation instance
-            val createdConversation = commentService.createOrUpdateConversation(testInputRequest)
+            val createdConversation =
+                commentService
+                    .createOrUpdateConversation(testInputRequest)
+                    .blockingGet()
 
             val testActualResult = commentService.reactToConversationTopic(
                 conversationid = createdConversation.conversationid!!,
@@ -367,7 +328,7 @@ class CommentServiceTest {
                     reaction = ReactionType.LIKE,
                     reacted = true,
                 )
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -389,12 +350,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(testUserData.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `F) Create Comment`() = runBlocking {
+    fun `F) Create Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -411,7 +372,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -423,7 +384,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Finally, create Comment instance
             val testExpectedResult = testCommentData
             val testActualResult = commentService.createComment(
@@ -437,7 +398,7 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -462,12 +423,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `G) Reply To Comment`() = runBlocking {
+    fun `G) Reply To Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -485,7 +446,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -497,7 +458,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -510,7 +471,7 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             val testExpectedResult = testCommentReplyData.copy(
                 parentid = createdComment.id,
@@ -528,7 +489,7 @@ class CommentServiceTest {
                     customfield2 = testCommentReplyData.customfield2,
                     custompayload = testCommentReplyData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -554,12 +515,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `H) List Replies`() = runBlocking {
+    fun `H) List Replies`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -578,7 +539,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -590,7 +551,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -603,7 +564,7 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Create several reply comments
             val replyComments = mutableListOf<Comment>().apply {
@@ -620,7 +581,7 @@ class CommentServiceTest {
                             customfield2 = testCommentReplyData1.customfield2,
                             custompayload = testCommentReplyData1.custompayload,
                         )
-                    )
+                    ).blockingGet()
                 )
                 add(
                     commentService.replyToComment(
@@ -635,7 +596,7 @@ class CommentServiceTest {
                             customfield2 = testCommentReplyData2.customfield2,
                             custompayload = testCommentReplyData2.custompayload,
                         )
-                    )
+                    ).blockingGet()
                 )
             }
 
@@ -645,7 +606,7 @@ class CommentServiceTest {
                 commentid = createdComment.id!!,
                 includechildren = true,
                 includeinactive = true
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -673,12 +634,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `I) Get Comment`() = runBlocking {
+    fun `I) Get Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -695,7 +656,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -707,7 +668,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create a Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -720,13 +681,13 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             val testExpectedResult = createdComment
             val testActualResult = commentService.getComment(
                 conversationid = createdConversation.conversationid!!,
                 commentid = createdComment.id!!,
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -751,12 +712,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `J) List Comments`() = runBlocking {
+    fun `J) List Comments`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -775,7 +736,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -787,7 +748,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
 
             // Create multiple comment instances
             val createdComments = mutableListOf<Comment>().apply {
@@ -803,7 +764,7 @@ class CommentServiceTest {
                             customfield2 = testCommentData1.customfield2,
                             custompayload = testCommentData1.custompayload,
                         )
-                    )
+                    ).blockingGet()
                 )
                 add(
                     commentService.createComment(
@@ -817,7 +778,7 @@ class CommentServiceTest {
                             customfield2 = testCommentData2.customfield2,
                             custompayload = testCommentData2.custompayload,
                         )
-                    )
+                    ).blockingGet()
                 )
                 add(
                     commentService.createComment(
@@ -831,7 +792,7 @@ class CommentServiceTest {
                             customfield2 = testCommentData3.customfield2,
                             custompayload = testCommentData3.custompayload,
                         )
-                    )
+                    ).blockingGet()
                 )
             }
 
@@ -842,7 +803,7 @@ class CommentServiceTest {
                 limit = null,
                 includechildren = true,
                 includeinactive = true
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -870,12 +831,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `K) React To Comment`() = runBlocking {
+    fun `K) React To Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -892,7 +853,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -904,7 +865,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -917,7 +878,7 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Finally, react to above comment
             val reaction = Reaction(
@@ -936,7 +897,7 @@ class CommentServiceTest {
                     reaction = ReactionType.LIKE,
                     reacted = true,
                 )
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -966,12 +927,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `L) Vote on Comment`() = runBlocking {
+    fun `L) Vote on Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -988,7 +949,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -1000,7 +961,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -1013,7 +974,7 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Finally, vote on above comment
             val vote = VoteDetail(
@@ -1033,7 +994,7 @@ class CommentServiceTest {
                     vote = VoteType.Up,
                     userid = createdUser.userid!!,
                 ),
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -1063,12 +1024,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `M) Report Comment`() = runBlocking {
+    fun `M) Report Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1085,7 +1046,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -1097,7 +1058,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -1110,7 +1071,7 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Finally, report above comment
             val report = Report(
@@ -1127,7 +1088,7 @@ class CommentServiceTest {
                     userid = createdUser.userid!!,
                     reporttype = ReportType.ABUSE,
                 ),
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -1149,12 +1110,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `N) Update Comment`() = runBlocking {
+    fun `N) Update Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1172,7 +1133,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -1184,7 +1145,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -1197,12 +1158,11 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Finally, update above comment
             val testExpectedResult = createdComment.copy(
                 body = testCommentUpdateData.body,
-
             )
             val testActualResult = commentService.updateComment(
                 conversationid = createdConversation.conversationid!!,
@@ -1211,7 +1171,7 @@ class CommentServiceTest {
                     userid = createdUser.userid!!,
                     body = testCommentUpdateData.body!!,
                 ),
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -1232,12 +1192,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `O) Flag Comment Logically Deleted`() = runBlocking {
+    fun `O) Flag Comment Logically Deleted`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1254,7 +1214,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -1266,7 +1226,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -1279,7 +1239,7 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Finally, flag comment as logically deleted
             val testExpectedResult = createdComment.copy(
@@ -1291,7 +1251,7 @@ class CommentServiceTest {
                 commentid = createdComment.id!!,
                 userid = createdUser.userid!!,
                 deleted = true,
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -1313,12 +1273,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `O-1) Flag Comment Logically Deleted - permanintifnoreplies`() = runBlocking {
+    fun `O-1) Flag Comment Logically Deleted - permanintifnoreplies`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1335,7 +1295,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -1347,7 +1307,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -1360,7 +1320,7 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Finally, flag comment as logically deleted
             val testExpectedResult = createdComment.copy(
@@ -1373,7 +1333,7 @@ class CommentServiceTest {
                 userid = createdUser.userid!!,
                 deleted = true,
                 permanentifnoreplies = true,
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -1394,12 +1354,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `P) Delete Comment`() = runBlocking {
+    fun `P) Delete Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1416,7 +1376,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -1428,7 +1388,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -1441,14 +1401,14 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Finally, delete above comment
             val testExpectedResult = createdComment
             val testActualResult = commentService.permanentlyDeleteComment(
                 conversationid = createdConversation.conversationid!!,
                 commentid = createdComment.id!!,
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -1470,12 +1430,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `Q) Delete Conversation`() = runBlocking {
+    fun `Q) Delete Conversation`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1492,7 +1452,7 @@ class CommentServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -1504,7 +1464,7 @@ class CommentServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an initial Comment instance
             val createdComment = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -1517,12 +1477,12 @@ class CommentServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Finally, delete conversation
             val testActualResult = commentService.deleteConversation(
                 conversationid = createdConversation.conversationid!!,
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -1544,6 +1504,7 @@ class CommentServiceTest {
             deleteTestUsers(TestData.TestUser.userid)
         }
     }
+
 
     object TestData {
 
@@ -1683,7 +1644,7 @@ class CommentServiceTest {
                         originalbody = "Hello test comment 1-2!!!",
                     ),
 
-                )
+                    )
 
     }
 

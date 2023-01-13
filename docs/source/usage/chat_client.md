@@ -1562,7 +1562,7 @@ Below is a code sample on how to use this SDK feature:
             val messageIsReactedTo = chatClient.messageIsReactedTo(
                 eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
                 userid = "023976080242ac120002", // ID of an existing user from the chat room
-                reaction = "like"   // One of the EventReaction string constants
+                reaction = "like"   // One of the ReactionType string constants
             )
 
             // Resolve `messageIsReactedTo` from HERE onwards(ex. update UI displaying the response data)...
@@ -1574,7 +1574,7 @@ Below is a code sample on how to use this SDK feature:
         val messageIsReactedTo = chatClient.messageIsReactedTo(
             eventId = "7620812242ac09300002"    // ID of an existing event from the chat room
             userid = "023976080242ac120002", // ID of an existing user from the chat room
-            reaction = "like"   // One of the EventReaction string constants
+            reaction = "like"   // One of the ReactionType string constants
         )
         
         // Resolve `messageIsReactedTo` (ex. Display prompt OR Update UI)

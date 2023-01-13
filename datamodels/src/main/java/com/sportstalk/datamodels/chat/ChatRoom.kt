@@ -1,7 +1,7 @@
 package com.sportstalk.datamodels.chat
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @Parcelize
@@ -18,7 +18,7 @@ data class ChatRoom(
         val customtype: String? = null,
         val customid: String? = null,
         val custompayload: String? = null,
-        val customtags: List<String> = listOf(),
+        val customtags: List<String>? = null,
         val customfield1: String? = null,
         val customfield2: String? = null,
 

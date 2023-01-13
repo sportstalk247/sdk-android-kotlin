@@ -1,23 +1,22 @@
-package com.sportstalk.coroutine.service
+package com.sportstalk.reactive.rx2.service
 
 import android.app.Activity
 import android.content.Context
 import android.os.Build
-import com.sportstalk.coroutine.ServiceFactory
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.Kind
 import com.sportstalk.datamodels.comment.*
 import com.sportstalk.datamodels.reports.ReportType
 import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
-import kotlinx.coroutines.test.resetMain
+import com.sportstalk.reactive.rx2.ServiceFactory
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
-import org.junit.*
-import org.junit.rules.ExpectedException
+import org.junit.After
+import org.junit.Before
+import org.junit.FixMethodOrder
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
@@ -32,17 +31,13 @@ import kotlin.test.fail
 class CommentModerationServiceTest {
 
     private lateinit var context: Context
-    private lateinit var config: com.sportstalk.datamodels.ClientConfig
+    private lateinit var config: ClientConfig
     private lateinit var userService: UserService
     private lateinit var commentService: CommentService
     private lateinit var commentModerationService: CommentModerationService
     private lateinit var json: Json
 
-    @Suppress("DEPRECATION")
-    private val testDispatcher = TestCoroutineDispatcher()
-
-    @get:Rule
-    val thrown = ExpectedException.none()
+    private lateinit var rxDisposeBag: CompositeDisposable
 
     @Before
     fun setup() {
@@ -57,22 +52,23 @@ class CommentModerationServiceTest {
         userService = ServiceFactory.User.get(config)
         commentService = ServiceFactory.Comment.get(config)
         commentModerationService = ServiceFactory.CommentModeration.get(config)
+
+        rxDisposeBag = CompositeDisposable()
     }
 
     @After
     fun cleanUp() {
-        testDispatcher.cleanupTestCoroutines()
-        Dispatchers.resetMain()
+        rxDisposeBag.dispose()
     }
 
     /**
      * Helper function to clean up Test Users from the Backend Server
      */
-    private suspend fun deleteTestUsers(vararg userIds: String?) {
+    private fun deleteTestUsers(vararg userIds: String?) {
         for (id in userIds) {
             id ?: continue
             try {
-                userService.deleteUser(userId = id)
+                userService.deleteUser(userId = id).blockingGet()
             } catch (err: Throwable) {
             }
         }
@@ -81,18 +77,18 @@ class CommentModerationServiceTest {
     /**
      * Helper function to clean up Test Conversations from the Backend Server
      */
-    private suspend fun deleteTestConversations(vararg conversationIds: String?) {
-        for (id in conversationIds) {
+    private fun deleteTestConversations(vararg conversationIds: String?) {
+        for(id in conversationIds) {
             id ?: continue
             try {
-                commentService.deleteConversation(id)
+                commentService.deleteConversation(id).blockingGet()
             } catch (err: Throwable) {
             }
         }
     }
 
     @Test
-    fun `A) List Comments In Moderation Queue`() = runBlocking {
+    fun `A) List Comments In Moderation Queue`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -109,7 +105,7 @@ class CommentModerationServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -121,7 +117,7 @@ class CommentModerationServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an 2 Comment instances
             val createdComment1 = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -134,7 +130,7 @@ class CommentModerationServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
             val createdComment2 = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
                 request = CreateCommentRequest(
@@ -146,7 +142,7 @@ class CommentModerationServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Report above comments
             val reportedComment1 = commentService.reportComment(
@@ -156,7 +152,7 @@ class CommentModerationServiceTest {
                     userid = createdUser.userid!!,
                     reporttype = ReportType.ABUSE,
                 ),
-            )
+            ).blockingGet()
 
             val reportedComment2 = commentService.reportComment(
                 conversationid = createdConversation.conversationid!!,
@@ -165,7 +161,7 @@ class CommentModerationServiceTest {
                     userid = createdUser.userid!!,
                     reporttype = ReportType.SPAM,
                 ),
-            )
+            ).blockingGet()
 
             val testExpectedResult = listOf(
                 reportedComment1,
@@ -173,7 +169,7 @@ class CommentModerationServiceTest {
             )
             val testActualResult = commentModerationService.listCommentsInModerationQueue(
                 conversationid = createdConversation.conversationid!!,
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -197,7 +193,7 @@ class CommentModerationServiceTest {
     }
 
     @Test
-    fun `B) Approve Message In Queue`() = runBlocking {
+    fun `B) Approve Message In Queue`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -214,7 +210,7 @@ class CommentModerationServiceTest {
                     pictureurl = testUserData.pictureurl,
                     profileurl = testUserData.profileurl,
                 )
-            )
+            ).blockingGet()
             // Then, create the Conversation instance
             val createdConversation = commentService.createOrUpdateConversation(
                 request = CreateOrUpdateConversationRequest(
@@ -226,7 +222,7 @@ class CommentModerationServiceTest {
                     open = testConversationData.open,
                     customid = testConversationData.customid
                 )
-            )
+            ).blockingGet()
             // Create an 2 Comment instances
             val createdComment1 = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
@@ -239,7 +235,7 @@ class CommentModerationServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
             val createdComment2 = commentService.createComment(
                 conversationid = createdConversation.conversationid!!,
                 request = CreateCommentRequest(
@@ -251,7 +247,7 @@ class CommentModerationServiceTest {
                     customfield2 = testCommentData.customfield2,
                     custompayload = testCommentData.custompayload,
                 )
-            )
+            ).blockingGet()
 
             // Report above comments
             val reportedComment1 = commentService.reportComment(
@@ -261,7 +257,7 @@ class CommentModerationServiceTest {
                     userid = createdUser.userid!!,
                     reporttype = ReportType.ABUSE,
                 ),
-            )
+            ).blockingGet()
 
             val reportedComment2 = commentService.reportComment(
                 conversationid = createdConversation.conversationid!!,
@@ -270,7 +266,7 @@ class CommentModerationServiceTest {
                     userid = createdUser.userid!!,
                     reporttype = ReportType.SPAM,
                 ),
-            )
+            ).blockingGet()
 
             // Finally, Approve/Deny for-moderation comments
             val testExpectedResult1 = reportedComment1.copy(
@@ -279,14 +275,14 @@ class CommentModerationServiceTest {
             val testActualResult1 = commentModerationService.approveMessageInQueue(
                 commentid = reportedComment1.id!!,
                 request = ApproveMessageRequest(approve = true),
-            )
+            ).blockingGet()
             val testExpectedResult2 = reportedComment2.copy(
                 moderation = "na",
             )
             val testActualResult2 = commentModerationService.approveMessageInQueue(
                 commentid = reportedComment2.id!!,
                 request = ApproveMessageRequest(approve = true),
-            )
+            ).blockingGet()
 
             // THEN
             println(
@@ -462,6 +458,5 @@ class CommentModerationServiceTest {
                     )
 
     }
-
 
 }
