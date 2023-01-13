@@ -197,8 +197,8 @@ interface ChatService {
      * Checks if the user has already reported a message.
      * @param which     The [ChatEvent] to check.
      * @param userid    The userid of the [User] to check if he/she has reacted to the [ChatEvent]
-     * @param reaction  The type of reaction([EventReaction]]) to check.
-     * @return          Returns true if specified [User] has reacted with a certain reaction([EventReaction]) to the [ChatEvent]. Otherwise, returns false.
+     * @param reaction  The type of reaction([ReactionType]]) to check.
+     * @return          Returns true if specified [User] has reacted with a certain reaction([ReactionType]) to the [ChatEvent]. Otherwise, returns false.
      */
     suspend fun messageIsReactedTo(
             which: ChatEvent,

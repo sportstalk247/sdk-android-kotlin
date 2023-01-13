@@ -2,7 +2,6 @@ package com.sportstalk.coroutine.service
 
 import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.coroutine.ServiceFactory
 import com.sportstalk.coroutine.SportsTalk247
@@ -11,6 +10,10 @@ import com.sportstalk.coroutine.api.polling.allEventUpdates
 import com.sportstalk.datamodels.*
 import com.sportstalk.datamodels.users.*
 import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.reactions.Reaction
+import com.sportstalk.datamodels.reactions.ReactionType
+import com.sportstalk.datamodels.reports.Report
+import com.sportstalk.datamodels.reports.ReportType
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -51,17 +54,10 @@ class ChatServiceTest {
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
-        val appInfo =
-                try {
-                    context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-                } catch (err: Throwable) {
-                    err.printStackTrace()
-                    null
-                }
 
         config = ClientConfig(
-            appId = "602e6fc50c916c171cb9a4e8",
-            apiToken = "P1slSgD5l0yYBTWixyZ3_gGt69p5SOu0KEuGYLBXY8sw",
+            appId = "63c16f13c3e89411881ba085",
+            apiToken = "cXSVhVOVYEewANzl7CuoWgw08gtq8FTUS4nxI_pHcQKg",
             endpoint = "https://api.sportstalk247.com/api/v3"
         )
         json = ServiceFactory.RestApi.json
@@ -1747,7 +1743,7 @@ class ChatServiceTest {
                 request = testInitialSendMessageInputRequest
         ).speech!!
 
-        val testInputReaction = EventReaction.LIKE
+        val testInputReaction = ReactionType.LIKE
 
         val testInputRequest = ReactToAMessageRequest(
                 userid = testCreatedUserData.userid!!,
@@ -4103,7 +4099,7 @@ class ChatServiceTest {
                 active = false,
                 moderation = "flagged",
                 reports = listOf(
-                        ChatEventReport(
+                        Report(
                                 userid = testInputRequest.userid,
                                 reason = testInputRequest.reporttype
                         )
@@ -4272,7 +4268,7 @@ class ChatServiceTest {
 
         val testInputRequest = ReactToAMessageRequest(
                 userid = testCreatedUserData.userid!!,
-                reaction = EventReaction.LIKE,
+                reaction = ReactionType.LIKE,
                 reacted = true
         )
         val testExpectedResult = testSendMessageData.copy(
@@ -4281,7 +4277,7 @@ class ChatServiceTest {
                 eventtype = EventType.SPEECH,
                 userid = testInputRequest.userid,
                 reactions = listOf(
-                        ChatEventReaction(
+                        Reaction(
                                 type = testInputRequest.reaction,
                                 count = 1,
                                 users = listOf(
@@ -4671,6 +4667,7 @@ class ChatServiceTest {
         val ADMIN_PASSWORD = "zola"
 
         private val USER_HANDLE_RANDOM_NUM = Random(System.currentTimeMillis())
+        private val CHATROOM_RANDOM_NUM = Random(System.currentTimeMillis())
 
         val users = listOf(
                 User(
@@ -4719,17 +4716,17 @@ class ChatServiceTest {
                                 name = "Test Chat Room 1",
                                 description = "This is a test chat room 1.",
                                 customtype = null,
-                                customid = "test-room-1",
+                                customid = "test-room-${CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
                                 custompayload = null,
-                                customtags = listOf(),
+                                customtags = null,
                                 customfield1 = null,
                                 customfield2 = null,
                                 enableactions = true,
                                 enableenterandexit = true,
                                 open = true,
                                 inroom = 1,
-                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
-                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                added = null/*DateUtils.toUtcISODateTime(System.currentTimeMillis())*/,
+                                whenmodified = null/*DateUtils.toUtcISODateTime(System.currentTimeMillis())*/,
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableautoexpiresessions = true,
@@ -4744,17 +4741,17 @@ class ChatServiceTest {
                                 name = "Test Chat Room 2",
                                 description = "This is a test chat room 2.",
                                 customtype = null,
-                                customid = "test-room-2",
+                                customid = "test-room-${CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
                                 custompayload = null,
-                                customtags = listOf(),
+                                customtags = null,
                                 customfield1 = null,
                                 customfield2 = null,
                                 enableactions = false,
                                 enableenterandexit = false,
                                 open = false,
                                 inroom = 1,
-                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
-                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                added = null/*DateUtils.toUtcISODateTime(System.currentTimeMillis())*/,
+                                whenmodified = null/*DateUtils.toUtcISODateTime(System.currentTimeMillis())*/,
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableautoexpiresessions = false,
@@ -4769,17 +4766,17 @@ class ChatServiceTest {
                                 name = "Test Chat Room 3",
                                 description = "This is a test chat room 3.",
                                 customtype = null,
-                                customid = "test-room-3",
+                                customid = "test-room-${CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
                                 custompayload = null,
-                                customtags = listOf(),
+                                customtags = null,
                                 customfield1 = null,
                                 customfield2 = null,
                                 enableactions = true,
                                 enableenterandexit = true,
                                 open = false,
                                 inroom = 1,
-                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
-                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                added = null/*DateUtils.toUtcISODateTime(System.currentTimeMillis())*/,
+                                whenmodified = null/*DateUtils.toUtcISODateTime(System.currentTimeMillis())*/,
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableautoexpiresessions = true,
@@ -4794,17 +4791,17 @@ class ChatServiceTest {
                                 name = "Test Chat Room 4",
                                 description = "This is a test chat room 4.",
                                 customtype = null,
-                                customid = "test-room-4",
+                                customid = "test-room-${CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
                                 custompayload = null,
-                                customtags = listOf(),
+                                customtags = null,
                                 customfield1 = null,
                                 customfield2 = null,
                                 enableactions = false,
                                 enableenterandexit = false,
                                 open = true,
                                 inroom = 1,
-                                added = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
-                                whenmodified = DateUtils.toUtcISODateTime(System.currentTimeMillis()),
+                                added = null/*DateUtils.toUtcISODateTime(System.currentTimeMillis())*/,
+                                whenmodified = null/*DateUtils.toUtcISODateTime(System.currentTimeMillis())*/,
                                 moderation = "post",
                                 maxreports = 0L,
                                 enableautoexpiresessions = false,

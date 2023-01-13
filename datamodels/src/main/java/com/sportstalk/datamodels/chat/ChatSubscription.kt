@@ -12,6 +12,6 @@ data class ChatSubscription(
     val updated: String? = null,    // ISODateTime Format
     val added: String? = null,    // ISODateTime Format
     val roomname: String? = null,
-    val roomcustomtags: List<String> = listOf(),
+    val roomcustomtags: List<String>? = null,
     val persist: Boolean? = null
 )

@@ -2,14 +2,11 @@ package com.sportstalk.coroutine.service
 
 import android.app.Activity
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.coroutine.ServiceFactory
-import com.sportstalk.datamodels.ClientConfig
-import com.sportstalk.datamodels.DateUtils
-import com.sportstalk.datamodels.Kind
-import com.sportstalk.datamodels.SportsTalkException
+import com.sportstalk.datamodels.*
 import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.reports.ReportType
 import com.sportstalk.datamodels.users.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -50,17 +47,10 @@ class UserServiceTest {
     @Before
     fun setup() {
         context = Robolectric.buildActivity(Activity::class.java).get().applicationContext
-        val appInfo =
-                try {
-                    context.packageManager.getApplicationInfo(context.packageName, PackageManager.GET_META_DATA)
-                } catch (err: Throwable) {
-                    err.printStackTrace()
-                    null
-                }
 
         config = ClientConfig(
-            appId = "602e6fc50c916c171cb9a4e8",
-            apiToken = "P1slSgD5l0yYBTWixyZ3_gGt69p5SOu0KEuGYLBXY8sw",
+            appId = "63c16f13c3e89411881ba085",
+            apiToken = "cXSVhVOVYEewANzl7CuoWgw08gtq8FTUS4nxI_pHcQKg",
             endpoint = "https://api.sportstalk247.com/api/v3"
         )
         json = ServiceFactory.RestApi.json
@@ -857,7 +847,7 @@ class UserServiceTest {
             assertTrue { testActualResult.displayname == testExpectedResult.displayname }
             // A User Report will be added
             assertTrue {
-                testActualResult.reports.find { _rprt ->
+                testActualResult.reports?.find { _rprt ->
                     _rprt.userid == testInputRequest.userid
                             && _rprt.reason == testInputRequest.reporttype
                 } != null

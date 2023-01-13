@@ -1,13 +1,13 @@
 package com.sportstalk.datamodels.comment
 
 import kotlinx.serialization.Serializable
+import com.sportstalk.datamodels.reports.ReportType
 
 @Serializable
 data class ReportCommentRequest(
-        val userid: String,
-        val reporttype: String // [CommentReportType]
-)
+    val userid: String,
+    /** [ReportType] */
+    val reporttype: String,
+) {
 
-object CommentReportType {
-    const val ABUSE = "abuse"
 }

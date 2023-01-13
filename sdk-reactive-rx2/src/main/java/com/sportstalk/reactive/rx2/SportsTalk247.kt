@@ -3,9 +3,11 @@ package com.sportstalk.reactive.rx2
 import androidx.annotation.RestrictTo
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.reactive.rx2.api.ChatClient
+import com.sportstalk.reactive.rx2.api.CommentClient
 import com.sportstalk.reactive.rx2.api.JWTProvider
 import com.sportstalk.reactive.rx2.api.UserClient
 import com.sportstalk.reactive.rx2.impl.ChatClientImpl
+import com.sportstalk.reactive.rx2.impl.CommentClientImpl
 import com.sportstalk.reactive.rx2.impl.UserClientImpl
 
 object SportsTalk247 {
@@ -22,6 +24,13 @@ object SportsTalk247 {
     @JvmStatic
     fun ChatClient(config: ClientConfig): ChatClient =
             ChatClientImpl(config)
+
+    /**
+     * Factory method to create `CommentClient` instance.
+     */
+    @JvmStatic
+    fun CommentClient(config: ClientConfig): CommentClient =
+        CommentClientImpl(config)
 
     @JvmStatic
     private var jwtProviders: MutableMap<ClientConfig, JWTProvider?> = mutableMapOf()

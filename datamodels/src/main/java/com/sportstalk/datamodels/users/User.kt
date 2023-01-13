@@ -1,7 +1,7 @@
 package com.sportstalk.datamodels.users
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @Parcelize
@@ -18,7 +18,7 @@ data class User(
          * [Role]
          */
         val role: String? = null,
-        val customtags: List<String> = listOf(),
+        val customtags: List<String>? = null,
         val banned: Boolean? = null,
         val banexpires: String? = null, // ISODate ex. "2020-11-11T11:35:07.657812Z"
         val shadowbanned: Boolean? = null,
@@ -26,7 +26,7 @@ data class User(
         val muted: Boolean? = null,
         val muteexpires: String? = null, // ISODate ex. "2020-11-11T11:35:07.657812Z"
         val moderation: String? = null,   // "unknown"
-        val reports: List<UserReport> = listOf()
+        val reports: List<UserReport>? = null,
 ): Parcelable {
         object Role {
                 const val USER = "user"
