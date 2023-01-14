@@ -229,7 +229,7 @@ class CommentRestApiServiceImpl
             appId = appId,
             conversationId = conversationid,
             childlimit = childlimit,
-            parentids = parentids,
+            parentids = parentids.joinToString(",") { id -> id.trim() },
             includeInactive = includeinactive,
         ).handleSdkResponse(json)
     } catch (err: SportsTalkException) {

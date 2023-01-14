@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ListRepliesBatchResponse(
     val kind: String? = null, // "list.repliesbyparentid"
-    val repliesgroupedbyparentid: CommentReplyGroup? = null,
+    val repliesgroupedbyparentid: List<CommentReplyGroup> = listOf(),
 ) {
 
     @Serializable

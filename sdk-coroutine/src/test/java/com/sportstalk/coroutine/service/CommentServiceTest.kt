@@ -86,7 +86,7 @@ class CommentServiceTest {
     /**
      * Helper function to clean up Test Conversations from the Backend Server
      */
-    private suspend fun deleteConversations(vararg conversationIds: String?) {
+    private suspend fun deleteTestConversations(vararg conversationIds: String?) {
         for (id in conversationIds) {
             id ?: continue
             try {
@@ -137,7 +137,7 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(testExpectedData.conversationid)
+            deleteTestConversations(testExpectedData.conversationid)
         }
     }
 
@@ -180,7 +180,7 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(testExpectedData.conversationid)
+            deleteTestConversations(testExpectedData.conversationid)
         }
     }
 
@@ -220,12 +220,12 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(testExpectedData.conversationid)
+            deleteTestConversations(testExpectedData.conversationid)
         }
     }
 
     @Test
-    fun `C) List Conversations`() = runBlocking {
+    fun `D) List Conversations`() = runBlocking {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)
         val testInputRequests = testExpectedData.map { item ->
@@ -269,12 +269,12 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(*(testExpectedData.map { it.conversationid }.toTypedArray()))
+            deleteTestConversations(*(testExpectedData.map { it.conversationid }.toTypedArray()))
         }
     }
 
     @Test
-    fun `D) Batch Get Conversation Details`() = runBlocking {
+    fun `E) Batch Get Conversation Details`() = runBlocking {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)
         val testInputRequests = testExpectedData.map { item ->
@@ -324,12 +324,12 @@ class CommentServiceTest {
             err.printStackTrace()
             fail(err.message)
         } finally {
-            deleteConversations(*(testExpectedData.map { it.conversationid }.toTypedArray()))
+            deleteTestConversations(*(testExpectedData.map { it.conversationid }.toTypedArray()))
         }
     }
 
     @Test
-    fun `E) React to Conversation Topic`() = runBlocking {
+    fun `F) React to Conversation Topic`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
 
@@ -389,12 +389,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(testUserData.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `F) Create Comment`() = runBlocking {
+    fun `G) Create Comment`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -462,12 +462,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `G) Reply To Comment`() = runBlocking {
+    fun `H) Reply To Comment`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -554,12 +554,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `H) List Replies`() = runBlocking {
+    fun `I) List Replies`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -673,12 +673,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `I) Get Comment`() = runBlocking {
+    fun `J) Get Comment`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -751,12 +751,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `J) List Comments`() = runBlocking {
+    fun `K) List Comments`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -870,12 +870,153 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `K) React To Comment`() = runBlocking {
+    fun `L) List Replies Batch`() = runBlocking {
+        // GIVEN
+        val testUserData = TestData.TestUser
+        val testConversationData = TestData.conversations(config.appId)[0]
+        val testCommentData1 = TestData.comments(config.appId)[0]
+        val testCommentData2 = TestData.comments(config.appId)[1]
+        val testCommentData3 = TestData.comments(config.appId)[2]
+        val testCommentData4 = TestData.comments(config.appId)[3]
+
+        // WHEN
+        try {
+            // First create the User instance
+            val createdUser = userService.createOrUpdateUser(
+                request = CreateUpdateUserRequest(
+                    userid = testUserData.userid!!,
+                    handle = testUserData.handle,
+                    displayname = testUserData.displayname,
+                    pictureurl = testUserData.pictureurl,
+                    profileurl = testUserData.profileurl,
+                )
+            )
+            // Then, create the Conversation instance
+            val createdConversation = commentService.createOrUpdateConversation(
+                request = CreateOrUpdateConversationRequest(
+                    conversationid = testConversationData.conversationid!!,
+                    property = testConversationData.property!!,
+                    moderation = testConversationData.moderation!!,
+                    enableprofanityfilter = testConversationData.enableprofanityfilter,
+                    title = testConversationData.title,
+                    open = testConversationData.open,
+                    customid = testConversationData.customid
+                )
+            )
+
+            // Create multiple comment instances with 1 reply each
+            val parentComment1 = commentService.createComment(
+                conversationid = createdConversation.conversationid!!,
+                request = CreateCommentRequest(
+                    userid = createdUser.userid!!,
+                    displayname = createdUser.displayname,
+                    body = testCommentData1.body!!,
+                    customtype = testCommentData1.customtype,
+                    customfield1 = testCommentData1.customfield1,
+                    customfield2 = testCommentData1.customfield2,
+                    custompayload = testCommentData1.custompayload,
+                )
+            )
+            val replyComment1 = commentService.replyToComment(
+                conversationid = createdConversation.conversationid!!,
+                replyto = parentComment1.id!!,
+                request = CreateCommentRequest(
+                    userid = createdUser.userid!!,
+                    displayname = createdUser.displayname,
+                    body = testCommentData2.body!!,
+                    customtype = testCommentData2.customtype,
+                    customfield1 = testCommentData2.customfield1,
+                    customfield2 = testCommentData2.customfield2,
+                    custompayload = testCommentData2.custompayload,
+                )
+            )
+            val parentComment2 = commentService.createComment(
+                conversationid = createdConversation.conversationid!!,
+                request = CreateCommentRequest(
+                    userid = createdUser.userid!!,
+                    displayname = createdUser.displayname,
+                    body = testCommentData3.body!!,
+                    customtype = testCommentData3.customtype,
+                    customfield1 = testCommentData3.customfield1,
+                    customfield2 = testCommentData3.customfield2,
+                    custompayload = testCommentData3.custompayload,
+                )
+            )
+            val replyComment2 = commentService.replyToComment(
+                conversationid = createdConversation.conversationid!!,
+                replyto = parentComment2.id!!,
+                request = CreateCommentRequest(
+                    userid = createdUser.userid!!,
+                    displayname = createdUser.displayname,
+                    body = testCommentData4.body!!,
+                    customtype = testCommentData4.customtype,
+                    customfield1 = testCommentData4.customfield1,
+                    customfield2 = testCommentData4.customfield2,
+                    custompayload = testCommentData4.custompayload,
+                )
+            )
+
+            val testExpectedResult = ListRepliesBatchResponse(
+                kind = Kind.COMMENT_REPLIES_BY_PARENT,
+                repliesgroupedbyparentid = listOf(
+                    ListRepliesBatchResponse.CommentReplyGroup(
+                        kind = Kind.COMMENT_REPLY_GROUP,
+                        parentid = parentComment1.id,
+                        comments = listOf(replyComment1)
+                    ),
+                    ListRepliesBatchResponse.CommentReplyGroup(
+                        kind = Kind.COMMENT_REPLY_GROUP,
+                        parentid = parentComment2.id,
+                        comments = listOf(replyComment2)
+                    ),
+                )
+            )
+            val testActualResult = commentService.listRepliesBatch(
+                conversationid = createdConversation.conversationid!!,
+                childlimit = 50,
+                parentids = listOf(parentComment1.id!!, parentComment2.id!!),
+                includeinactive = true,
+            )
+
+            // THEN
+            println(
+                "`List Replies Batch`() -> testActualResult = \n" +
+                        json.encodeToString(
+                            ListRepliesBatchResponse.serializer(),
+                            testActualResult,
+                        )
+            )
+
+            assert(testActualResult.repliesgroupedbyparentid.size == testExpectedResult.repliesgroupedbyparentid.size)
+            assert(testActualResult.repliesgroupedbyparentid[0].parentid == testExpectedResult.repliesgroupedbyparentid[0].parentid)
+            assert(testActualResult.repliesgroupedbyparentid[0].comments.size == testExpectedResult.repliesgroupedbyparentid[0].comments.size)
+            assert(testActualResult.repliesgroupedbyparentid[0].comments.first().id == testExpectedResult.repliesgroupedbyparentid[0].comments.first().id)
+            assert(testActualResult.repliesgroupedbyparentid[0].comments.first().body == testExpectedResult.repliesgroupedbyparentid[0].comments.first().body)
+            assert(testActualResult.repliesgroupedbyparentid[0].comments.first().parentid != null)
+            assert(testExpectedResult.repliesgroupedbyparentid[0].comments.first().parentid != null)
+            assert(testActualResult.repliesgroupedbyparentid[1].parentid == testExpectedResult.repliesgroupedbyparentid[1].parentid)
+            assert(testActualResult.repliesgroupedbyparentid[1].comments.size == testExpectedResult.repliesgroupedbyparentid[1].comments.size)
+            assert(testActualResult.repliesgroupedbyparentid[1].comments.first().id == testExpectedResult.repliesgroupedbyparentid[1].comments.first().id)
+            assert(testActualResult.repliesgroupedbyparentid[1].comments.first().body == testExpectedResult.repliesgroupedbyparentid[1].comments.first().body)
+            assert(testActualResult.repliesgroupedbyparentid[1].comments.first().parentid != null)
+            assert(testExpectedResult.repliesgroupedbyparentid[1].comments.first().parentid != null)
+
+        } catch (err: Throwable) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            deleteTestUsers(TestData.TestUser.userid)
+            deleteTestConversations(testConversationData.conversationid)
+        }
+    }
+
+    @Test
+    fun `M) React To Comment`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -966,12 +1107,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `L) Vote on Comment`() = runBlocking {
+    fun `N) Vote on Comment`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1063,12 +1204,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `M) Report Comment`() = runBlocking {
+    fun `O) Report Comment`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1149,12 +1290,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `N) Update Comment`() = runBlocking {
+    fun `P) Update Comment`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1232,12 +1373,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `O) Flag Comment Logically Deleted`() = runBlocking {
+    fun `Q) Flag Comment Logically Deleted`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1313,12 +1454,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `O-1) Flag Comment Logically Deleted - permanintifnoreplies`() = runBlocking {
+    fun `Q-1) Flag Comment Logically Deleted - permanintifnoreplies`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1394,12 +1535,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `P) Delete Comment`() = runBlocking {
+    fun `R) Delete Comment`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1470,12 +1611,12 @@ class CommentServiceTest {
             fail(err.message)
         } finally {
             deleteTestUsers(TestData.TestUser.userid)
-            deleteConversations(testConversationData.conversationid)
+            deleteTestConversations(testConversationData.conversationid)
         }
     }
 
     @Test
-    fun `Q) Delete Conversation`() = runBlocking {
+    fun `S) Delete Conversation`() = runBlocking {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1679,8 +1820,22 @@ class CommentServiceTest {
                         tsunix = null,
                         userid = TestUser.userid,
                         user = TestUser,
-                        body = "Hello test comment 1-2!!!",
-                        originalbody = "Hello test comment 1-2!!!",
+                        body = "Hello test comment 2-0!!!",
+                        originalbody = "Hello test comment 2-0!!!",
+                    ),
+                    Comment(
+                        kind = Kind.COMMENT,
+                        id = "comment-id-2-1",
+                        appid = appId,
+                        conversationid = conversations(appId)[0].conversationid,
+                        commenttype = CommentType.COMMENT,
+                        added = null,
+                        modified = null,
+                        tsunix = null,
+                        userid = TestUser.userid,
+                        user = TestUser,
+                        body = "Hello test comment 2-1!!!",
+                        originalbody = "Hello test comment 2-1!!!",
                     ),
 
                 )

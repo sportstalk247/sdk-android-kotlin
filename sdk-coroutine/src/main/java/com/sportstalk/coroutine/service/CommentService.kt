@@ -118,7 +118,8 @@ interface CommentService {
      * - Get a list of comments within a conversation
      */
     suspend fun listComments(
-        conversationid: String, cursor: String? = null, // OPTIONAL
+        conversationid: String,
+        cursor: String? = null, // OPTIONAL
         limit: Int? = null, // OPTIONAL
         direction: DirectionType? = null, // OPTIONAL, defaults to "forward", Must be "forward" or "backward"
         sort: SortType? = null, // OPTIONAL, defaults to "oldest", Either "oldest", "newest", "likes", "votescore", "mostreplies"

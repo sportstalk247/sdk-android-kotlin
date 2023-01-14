@@ -100,7 +100,7 @@ interface CommentRetrofitService {
         @Path("appId") appId: String,
         @Path("conversationid") conversationId: String,
         @Query("childlimit") childlimit: Int? = null,
-        @Query("parentids") parentids: List<String>,    // A comma delimited list of parentids, up to 30.
+        @Query("parentids") parentids: String,    // A comma delimited list of parentids, up to 30.
         @Query("includeinactive") includeInactive: Boolean? = null,
     ): Response<ApiResponse<ListRepliesBatchResponse>>
 
