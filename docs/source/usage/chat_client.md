@@ -5,7 +5,7 @@ val chatClient = SportsTalk247.ChatClient(
    config = ClientConfig(
       appId = "c84cb9c852932a6b0411e75e", // This is just a sample app id
       apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA", // This is just a sample token
-      endpoint = "http://api.custom.endpoint/v1/" // This is just a sample API endpoint
+      endpoint = "http://api.custom.endpoint/v3/" // This is just a sample API endpoint
    )
 )
 ```

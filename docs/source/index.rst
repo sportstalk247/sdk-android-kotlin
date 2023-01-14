@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-SportsTalk 247 Android SDK Documentation
+SportsTalk 24/7 Android SDK Documentation
 ========================================
 
 .. toctree::
@@ -15,6 +15,7 @@ SportsTalk 247 Android SDK Documentation
    usage/how_to_use_sdk
    usage/user_client
    usage/chat_client
+   usage/comment_client
 
 Indices and tables
 ==================
