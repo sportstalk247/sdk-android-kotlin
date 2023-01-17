@@ -107,7 +107,7 @@ constructor(
                     request = request
             )
 
-    override suspend fun touchSession(chatRoomId: String, userId: String) =
+    override suspend fun touchSession(chatRoomId: String, userId: String): ChatSubscription =
             chatService.touchSession(chatRoomId, userId)
 
     override suspend fun listRooms(limit: Int?, cursor: String?): ListRoomsResponse =

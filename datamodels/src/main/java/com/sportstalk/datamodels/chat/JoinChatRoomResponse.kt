@@ -13,5 +13,6 @@ data class JoinChatRoomResponse(
         /**
          * The cursor that will be used to fetch paginated previous list of chat events
          */
-        val previouseventscursor: String? = null
+        val previouseventscursor: String? = null,
+        val subscription: ChatSubscription? = null,
 )

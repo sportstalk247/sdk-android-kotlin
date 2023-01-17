@@ -106,7 +106,7 @@ interface ChatService {
      * - Touch a Session to keep it alive. Users who are not active will automatically exit the room. This method lets the room know that the user is still active so the user doesn't need to rejoin. The SDKs will do this for you automatically.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun touchSession(chatRoomId: String, userId: String): Completable
+    fun touchSession(chatRoomId: String, userId: String): Single<ChatSubscription>
 
     /**
      * [GET] /{{api_appid}}/chat/rooms/

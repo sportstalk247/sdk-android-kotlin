@@ -117,8 +117,9 @@ fun ChatService.allEventUpdates(
                                     chatRoomId = chatRoomId,
                                     userId = userid
                             )
-                                    .toFlowable<List<ChatEvent>>()
-                        } ?: Flowable.empty<List<ChatEvent>>()
+                                .map<List<ChatEvent>> { listOf() }
+                                .toFlowable()
+                        } ?: Flowable.empty()
                     }
     )
             .map { allEventUpdates ->
