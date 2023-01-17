@@ -76,7 +76,7 @@ class CommentServiceTest {
      * Helper function to clean up Test Conversations from the Backend Server
      */
     private fun deleteTestConversations(vararg conversationIds: String?) {
-        for(id in conversationIds) {
+        for (id in conversationIds) {
             id ?: continue
             try {
                 commentService.deleteConversation(id).blockingGet()
@@ -247,7 +247,7 @@ class CommentServiceTest {
         val createdConversations = mutableListOf<Conversation>()
         try {
             // Create the Conversation instances
-            for(input in testInputRequests) {
+            for (input in testInputRequests) {
                 createdConversations.add(
                     commentService.createOrUpdateConversation(input)
                         .blockingGet()
@@ -297,7 +297,7 @@ class CommentServiceTest {
         val createdConversations = mutableListOf<Conversation>()
         try {
             // Create the Conversation instances
-            for(input in testInputRequests) {
+            for (input in testInputRequests) {
                 createdConversations.add(
                     commentService
                         .createOrUpdateConversation(input)
@@ -463,10 +463,22 @@ class CommentServiceTest {
             assert(testActualResult.commenttype == testExpectedResult.commenttype)
             assert(testActualResult.userid == testExpectedResult.userid)
             assert(testActualResult.body == testExpectedResult.body)
-            assert(testActualResult.customtype?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield1?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield2?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.custompayload?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() })
 
         } catch (err: Throwable) {
             err.printStackTrace()
@@ -555,10 +567,22 @@ class CommentServiceTest {
             assert(testActualResult.commenttype == testExpectedResult.commenttype)
             assert(testActualResult.userid == testExpectedResult.userid)
             assert(testActualResult.body == testExpectedResult.body)
-            assert(testActualResult.customtype?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield1?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield2?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.custompayload?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() })
 
         } catch (err: Throwable) {
             err.printStackTrace()
@@ -752,10 +776,22 @@ class CommentServiceTest {
             assert(testActualResult.commenttype == testExpectedResult.commenttype)
             assert(testActualResult.userid == testExpectedResult.userid)
             assert(testActualResult.body == testExpectedResult.body)
-            assert(testActualResult.customtype?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield1?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield2?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.custompayload?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() })
 
         } catch (err: Throwable) {
             err.printStackTrace()
@@ -1717,7 +1753,7 @@ class CommentServiceTest {
                     Conversation(
                         kind = Kind.CONVERSATION,
                         appid = appId,
-                        owneruserid = null/*TestUser.userid*/,
+                        owneruserid = null,/*TestUser.userid*/
                         conversationid = "conversation-id-1",
                         property = "sportstalk247.com/test",
                         moderation = "post",
@@ -1741,7 +1777,7 @@ class CommentServiceTest {
                     Conversation(
                         kind = Kind.CONVERSATION,
                         appid = appId,
-                        owneruserid = null/*TestUser.userid*/,
+                        owneruserid = null,/*TestUser.userid*/
                         conversationid = "conversation-id-2",
                         property = "sportstalk247.com/test",
                         moderation = "post",
@@ -1765,7 +1801,7 @@ class CommentServiceTest {
                     Conversation(
                         kind = Kind.CONVERSATION,
                         appid = appId,
-                        owneruserid = null/*TestUser.userid*/,
+                        owneruserid = null,/*TestUser.userid*/
                         conversationid = "conversation-id-3",
                         property = "sportstalk247.com/test",
                         moderation = "post",

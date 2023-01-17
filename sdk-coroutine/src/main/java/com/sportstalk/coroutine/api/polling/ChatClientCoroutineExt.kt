@@ -73,7 +73,7 @@ fun ChatService.allEventUpdates(
                     if (roomSubscriptions().contains(chatRoomId)) {
                         try {
                             // Perform GET UPDATES operation
-                            val response = kotlinx.coroutines.withContext(Dispatchers.IO) {
+                            val response = withContext(Dispatchers.IO) {
                                 getUpdates(
                                         chatRoomId = chatRoomId,
                                         limit = limit,
@@ -122,7 +122,7 @@ fun ChatService.allEventUpdates(
                         this.ensureActive()
                         currentUser?.userid?.let { userid ->
                             if(this.isActive) {
-                                kotlinx.coroutines.withContext(Dispatchers.IO) {
+                                withContext(Dispatchers.IO) {
                                     this.coroutineContext.ensureActive()
                                     if(this.coroutineContext.isActive) {
                                         touchSession(

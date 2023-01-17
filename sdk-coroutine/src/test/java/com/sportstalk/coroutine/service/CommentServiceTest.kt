@@ -19,11 +19,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
-import org.junit.After
-import org.junit.Before
-import org.junit.FixMethodOrder
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -162,7 +158,8 @@ class CommentServiceTest {
             val createdConversation = commentService.createOrUpdateConversation(testInputRequest)
             val testExpectedResult = createdConversation
 
-            val testActualResult = commentService.getConversation(conversationid = createdConversation.conversationid!!)
+            val testActualResult =
+                commentService.getConversation(conversationid = createdConversation.conversationid!!)
 
             // THEN
             println(
@@ -203,7 +200,8 @@ class CommentServiceTest {
             val createdConversation = commentService.createOrUpdateConversation(testInputRequest)
             val testExpectedResult = createdConversation
 
-            val testActualResult = commentService.getConversationByCustomId(customid = createdConversation.customid!!)
+            val testActualResult =
+                commentService.getConversationByCustomId(customid = createdConversation.customid!!)
 
             // THEN
             println(
@@ -244,7 +242,7 @@ class CommentServiceTest {
         val createdConversations = mutableListOf<Conversation>()
         try {
             // Create the Conversation instances
-            for(input in testInputRequests) {
+            for (input in testInputRequests) {
                 createdConversations.add(
                     commentService.createOrUpdateConversation(input)
                 )
@@ -293,7 +291,7 @@ class CommentServiceTest {
         val createdConversations = mutableListOf<Conversation>()
         try {
             // Create the Conversation instances
-            for(input in testInputRequests) {
+            for (input in testInputRequests) {
                 createdConversations.add(
                     commentService.createOrUpdateConversation(input)
                 )
@@ -452,10 +450,22 @@ class CommentServiceTest {
             assert(testActualResult.commenttype == testExpectedResult.commenttype)
             assert(testActualResult.userid == testExpectedResult.userid)
             assert(testActualResult.body == testExpectedResult.body)
-            assert(testActualResult.customtype?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield1?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield2?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.custompayload?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() })
 
         } catch (err: Throwable) {
             err.printStackTrace()
@@ -544,10 +554,22 @@ class CommentServiceTest {
             assert(testActualResult.commenttype == testExpectedResult.commenttype)
             assert(testActualResult.userid == testExpectedResult.userid)
             assert(testActualResult.body == testExpectedResult.body)
-            assert(testActualResult.customtype?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield1?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield2?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.custompayload?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() })
 
         } catch (err: Throwable) {
             err.printStackTrace()
@@ -741,10 +763,22 @@ class CommentServiceTest {
             assert(testActualResult.commenttype == testExpectedResult.commenttype)
             assert(testActualResult.userid == testExpectedResult.userid)
             assert(testActualResult.body == testExpectedResult.body)
-            assert(testActualResult.customtype?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield1?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.customfield2?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()?.takeIf { it.isNotEmpty() })
-            assert(testActualResult.custompayload?.trim()?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customtype?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield1?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.customfield2?.trim()
+                    ?.takeIf { it.isNotEmpty() })
+            assert(
+                testActualResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()
+                    ?.takeIf { it.isNotEmpty() })
 
         } catch (err: Throwable) {
             err.printStackTrace()
@@ -1344,7 +1378,7 @@ class CommentServiceTest {
             val testExpectedResult = createdComment.copy(
                 body = testCommentUpdateData.body,
 
-            )
+                )
             val testActualResult = commentService.updateComment(
                 conversationid = createdConversation.conversationid!!,
                 commentid = createdComment.id!!,
@@ -1706,7 +1740,7 @@ class CommentServiceTest {
                     Conversation(
                         kind = Kind.CONVERSATION,
                         appid = appId,
-                        owneruserid = null/*TestUser.userid*/,
+                        owneruserid = null,/*TestUser.userid*/
                         conversationid = "conversation-id-1",
                         property = "sportstalk247.com/test",
                         moderation = "post",
@@ -1730,7 +1764,7 @@ class CommentServiceTest {
                     Conversation(
                         kind = Kind.CONVERSATION,
                         appid = appId,
-                        owneruserid = null/*TestUser.userid*/,
+                        owneruserid = null,/*TestUser.userid*/
                         conversationid = "conversation-id-2",
                         property = "sportstalk247.com/test",
                         moderation = "post",
@@ -1754,7 +1788,7 @@ class CommentServiceTest {
                     Conversation(
                         kind = Kind.CONVERSATION,
                         appid = appId,
-                        owneruserid = null/*TestUser.userid*/,
+                        owneruserid = null,/*TestUser.userid*/
                         conversationid = "conversation-id-3",
                         property = "sportstalk247.com/test",
                         moderation = "post",
@@ -1838,7 +1872,7 @@ class CommentServiceTest {
                         originalbody = "Hello test comment 2-1!!!",
                     ),
 
-                )
+                    )
 
     }
 

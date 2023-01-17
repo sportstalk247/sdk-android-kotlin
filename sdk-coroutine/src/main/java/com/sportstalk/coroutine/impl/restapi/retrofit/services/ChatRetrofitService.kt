@@ -53,7 +53,7 @@ interface ChatRetrofitService {
             @Path("appId") appId: String,
             @Path("chatroomid") chatRoomId: String,
             @Path("userid") userId: String
-    ): Response<ApiResponse<String>>
+    ): Response<ApiResponse<ChatSubscription>>
 
     @GET("{appId}/chat/rooms/")
     suspend fun listRooms(

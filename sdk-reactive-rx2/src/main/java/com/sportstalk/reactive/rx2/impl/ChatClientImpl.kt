@@ -107,7 +107,7 @@ constructor(
                     request = request
             )
 
-    override fun touchSession(chatRoomId: String, userId: String): Completable =
+    override fun touchSession(chatRoomId: String, userId: String): Single<ChatSubscription> =
             chatService.touchSession(
                     chatRoomId = chatRoomId,
                     userId = userId

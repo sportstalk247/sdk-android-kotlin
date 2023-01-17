@@ -22,7 +22,7 @@ interface CommentModerationService {
     ): ListComments
 
     /*
-     * [GET] /{{api_appid}}/comment/moderation/queues/comments/{{comment_id}}/applydecision
+     * [POST] /{{api_appid}}/comment/moderation/queues/comments/{{comment_id}}/applydecision
      * - https://apiref.sportstalk247.com/?version=latest#71eb7668-f9d1-4ecf-9e07-1f64699ff071
      * - APPROVE/REJECT a message in the moderation queue.
      */

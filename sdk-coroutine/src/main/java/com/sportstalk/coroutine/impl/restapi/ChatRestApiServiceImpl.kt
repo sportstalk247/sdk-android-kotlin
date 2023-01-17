@@ -169,26 +169,14 @@ constructor(
                 )
             }
 
-    override suspend fun touchSession(chatRoomId: String, userId: String) =
+    override suspend fun touchSession(chatRoomId: String, userId: String): ChatSubscription =
             try {
-                val response = service.touchSession(
-                        appId = appId,
-                        chatRoomId = chatRoomId,
-                        userId = userId
+                service.touchSession(
+                    appId = appId,
+                    chatRoomId = chatRoomId,
+                    userId = userId
                 )
-
-                if (response.isSuccessful) {
-
-                } else {
-                    throw response.errorBody()?.string()?.let { errBodyStr ->
-                        json.decodeFromString(SportsTalkException.serializer(), errBodyStr)
-                    }
-                            ?: SportsTalkException(
-                                    kind = Kind.API,
-                                    message = response.message(),
-                                    code = response.code()
-                            )
-                }
+                    .handleSdkResponse(json)
             } catch (err: SportsTalkException) {
                 throw err
             } catch (err: Throwable) {
