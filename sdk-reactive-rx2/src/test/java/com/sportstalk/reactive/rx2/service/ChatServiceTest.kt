@@ -134,7 +134,7 @@ class ChatServiceTest {
 
                 return@assertError err.kind == Kind.API
                         && err.message == "Request is not authorized with a token."
-                        && err.code == 403
+                        && err.code == 401
             }
     }
 
@@ -3521,7 +3521,7 @@ class ChatServiceTest {
                 )
 
                 return@assertError err.kind == Kind.API
-                        && err.message == "The specified user was not found"
+                        && err.message == "The specified user was not found within your user database"
                         && err.code == 404
             }
     }

@@ -89,11 +89,11 @@ constructor(
             )
                     .handleSdkResponse(json)
 
-    override fun globallyPurgeUserContent(userId: String, banned: Boolean): Single<GloballyPurgeUserContentResponse> =
+    override fun globallyPurgeUserContent(userId: String, byuserid: String): Single<GloballyPurgeUserContentResponse> =
             service.globallyPurgeUserContent(
                     appId = appId,
                     userId = userId,
-                    request = GloballyPurgeUserContentRequest(banned = banned)
+                    request = GloballyPurgeUserContentRequest(byuserid = byuserid)
             )
                     .map { response ->
                         val respBody = response.body()

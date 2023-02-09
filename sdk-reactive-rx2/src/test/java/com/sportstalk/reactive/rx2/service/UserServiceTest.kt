@@ -799,7 +799,7 @@ class UserServiceTest {
         try {
             val testActualResult = userService.globallyPurgeUserContent(
                 userId = testInputRequest.userid,
-                banned = true
+                byuserid = testInputRequest.userid,
             ).blockingGet()
 
             // THEN

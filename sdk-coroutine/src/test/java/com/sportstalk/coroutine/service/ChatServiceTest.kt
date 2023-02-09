@@ -129,7 +129,7 @@ class ChatServiceTest {
             )
             assertTrue { err.kind == Kind.API }
             assertTrue { err.message == "Request is not authorized with a token." }
-            assertTrue { err.code == 403 }
+            assertTrue { err.code == 401 }
 
             throw err
         }
@@ -3363,7 +3363,7 @@ class ChatServiceTest {
                         )
             )
             assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "The specified user was not found" }
+            assertTrue { err.message == "The specified user was not found within your user database" }
             assertTrue { err.code == 404 }
 
             throw err
