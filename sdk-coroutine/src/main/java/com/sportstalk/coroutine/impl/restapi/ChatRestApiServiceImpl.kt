@@ -268,10 +268,13 @@ constructor(
                             _currentUser = resp.user
                             val cursor = resp.eventscursor?.cursor ?: ""
                             // Internally store chatroom event cursor
-                            setChatRoomEventUpdateCursor(
-                                    forRoomId = chatRoomCustomId,
+                            resp.room?.id?.let { roomId ->
+                                val cursor = resp.eventscursor?.cursor ?: ""
+                                setChatRoomEventUpdateCursor(
+                                    forRoomId = roomId,
                                     cursor = cursor
-                            )
+                                )
+                            }
                         }
             } catch (err: SportsTalkException) {
                 throw err

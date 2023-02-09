@@ -1699,6 +1699,7 @@ class UserServiceTest {
         val ADMIN_PASSWORD = "zola"
 
         private val USER_HANDLE_RANDOM_NUM = Random(System.currentTimeMillis())
+        private val CHATROOM_RANDOM_NUM = Random(System.currentTimeMillis())
 
         val users = listOf(
             User(
@@ -1747,7 +1748,7 @@ class UserServiceTest {
                     name = "Test Chat Room 1",
                     description = "This is a test chat room 1.",
                     customtype = null,
-                    customid = "test-room-1",
+                    customid = "test-room-${CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
                     custompayload = null,
                     customtags = listOf(),
                     customfield1 = null,
@@ -1771,7 +1772,7 @@ class UserServiceTest {
                     name = "Test Chat Room 2",
                     description = "This is a test chat room 2.",
                     customtype = null,
-                    customid = "test-room-2",
+                    customid = "test-room-${CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
                     custompayload = null,
                     customtags = listOf(),
                     customfield1 = null,
@@ -1795,7 +1796,7 @@ class UserServiceTest {
                     name = "Test Chat Room 3",
                     description = "This is a test chat room 3.",
                     customtype = null,
-                    customid = "test-room-3",
+                    customid = "test-room-${CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
                     custompayload = null,
                     customtags = listOf(),
                     customfield1 = null,
@@ -1819,7 +1820,7 @@ class UserServiceTest {
                     name = "Test Chat Room 4",
                     description = "This is a test chat room 4.",
                     customtype = null,
-                    customid = "test-room-4",
+                    customid = "test-room-${CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
                     custompayload = null,
                     customtags = listOf(),
                     customfield1 = null,
