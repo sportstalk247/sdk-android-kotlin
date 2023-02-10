@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GloballyPurgeUserContentRequest(
-        private val banned: Boolean
+        private val byuserid: String,
 )

@@ -135,6 +135,9 @@ constructor(
                     forRoomId = chatRoomId,
                     cursor = cursor
             )
+
+            // Clear Pre-rendered events
+            preRenderedMessages.clear()
         }
         val filteredEvents = (response.eventscursor?.events ?: listOf())
                 // Filter out shadowban events for shadowbanned user
@@ -168,6 +171,9 @@ constructor(
                             forRoomId = chatRoomIdOrLabel,
                             cursor = cursor
                     )
+
+                    // Clear Pre-rendered events
+                    preRenderedMessages.clear()
                 }
 
         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -198,11 +204,16 @@ constructor(
                     _lastExecuteCommandTimestamp = 0L
 
                     // Internally store chatroom event cursor
-                    val cursor = resp.eventscursor?.cursor ?: ""
-                    setChatRoomEventUpdateCursor(
-                            forRoomId = chatRoomCustomId,
+                    resp.room?.id?.let { roomId ->
+                        val cursor = resp.eventscursor?.cursor ?: ""
+                        setChatRoomEventUpdateCursor(
+                            forRoomId = roomId,
                             cursor = cursor
-                    )
+                        )
+                    }
+
+                    // Clear Pre-rendered events
+                    preRenderedMessages.clear()
                 }
 
         val filteredEvents = (response.eventscursor?.events ?: listOf())
@@ -252,6 +263,8 @@ constructor(
 
                         // Remove internally stored event cursor
                         clearChatRoomEventUpdateCursor(fromRoomId = chatRoomId)
+                        // Clear Pre-rendered events
+                        preRenderedMessages.clear()
                     }
 
     override suspend fun getUpdates(chatRoomId: String, limit: Int?, cursor: String?): GetUpdatesResponse =

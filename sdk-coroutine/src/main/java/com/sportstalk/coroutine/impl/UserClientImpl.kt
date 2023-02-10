@@ -35,8 +35,8 @@ constructor(
     override suspend fun setShadowBanStatus(userId: String, applyeffect: Boolean, expireseconds: Long?): User =
             userService.setShadowBanStatus(userId, applyeffect, expireseconds)
 
-    override suspend fun globallyPurgeUserContent(userId: String, banned: Boolean): GloballyPurgeUserContentResponse =
-            userService.globallyPurgeUserContent(userId, banned)
+    override suspend fun globallyPurgeUserContent(userId: String, byuserid: String): GloballyPurgeUserContentResponse =
+            userService.globallyPurgeUserContent(userId, byuserid)
 
     override suspend fun reportUser(userId: String, reporttype: String): ReportUserResponse =
             userService.reportUser(userId, reporttype)

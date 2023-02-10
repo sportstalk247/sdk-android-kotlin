@@ -159,12 +159,12 @@ constructor(
                 )
             }
 
-    override suspend fun globallyPurgeUserContent(userId: String, banned: Boolean): GloballyPurgeUserContentResponse =
+    override suspend fun globallyPurgeUserContent(userId: String, byuserid: String): GloballyPurgeUserContentResponse =
             try {
                 val response = service.globallyPurgeUserContent(
                         appId = appId,
                         userId = userId,
-                        request = GloballyPurgeUserContentRequest(banned = banned)
+                        request = GloballyPurgeUserContentRequest(byuserid = byuserid),
                 )
 
                 val respBody = response.body()

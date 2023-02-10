@@ -209,11 +209,13 @@ constructor(
                         _lastExecuteCommandTimestamp = 0L
 
                         // Internally store chatroom event cursor
-                        val cursor = resp.eventscursor?.cursor ?: ""
-                        setChatRoomEventUpdateCursor(
-                                forRoomId = chatRoomCustomId,
+                        resp.room?.id?.let { roomId ->
+                            val cursor = resp.eventscursor?.cursor ?: ""
+                            setChatRoomEventUpdateCursor(
+                                forRoomId = roomId,
                                 cursor = cursor
-                        )
+                            )
+                        }
 
                         // Clear Pre-rendered events
                         preRenderedMessages.clear()

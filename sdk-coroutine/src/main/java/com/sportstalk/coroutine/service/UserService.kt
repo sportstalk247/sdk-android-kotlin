@@ -82,8 +82,8 @@ interface UserService {
      * - Will purge all chat content published by the specified user
      */
     suspend fun globallyPurgeUserContent(
-            userId: String,
-            banned: Boolean
+            userId: String, // ID of the User who's content is about to be purged
+            byuserid: String,   // ID of the User who is about to perform the purge action(requires admin privileges)
     ): GloballyPurgeUserContentResponse
 
     /**

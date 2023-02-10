@@ -134,7 +134,7 @@ class ChatServiceTest {
 
                 return@assertError err.kind == Kind.API
                         && err.message == "Request is not authorized with a token."
-                        && err.code == 403
+                        && err.code == 401
             }
     }
 
@@ -209,7 +209,8 @@ class ChatServiceTest {
     fun `A-ERROR-404-User-not-found) Create Room`() {
         // GIVEN
         val testInputRequest = CreateChatRoomRequest(
-            userid = "NON-Existing-User-ID"
+            userid = "NON-Existing-User-ID",
+            name = "Test Chat Room ${TestData.CHATROOM_RANDOM_NUM.nextInt(999_999_999)}",
         )
 
         val createRoom = TestObserver<ChatRoom>()
@@ -3520,7 +3521,7 @@ class ChatServiceTest {
                 )
 
                 return@assertError err.kind == Kind.API
-                        && err.message == "The specified user was not found"
+                        && err.message == "The specified user was not found within your user database"
                         && err.code == 404
             }
     }
@@ -5040,8 +5041,8 @@ class ChatServiceTest {
     object TestData {
         val ADMIN_PASSWORD = "zola"
 
-        private val USER_HANDLE_RANDOM_NUM = Random(System.currentTimeMillis())
-        private val CHATROOM_RANDOM_NUM = Random(System.currentTimeMillis())
+        internal val USER_HANDLE_RANDOM_NUM = Random(System.currentTimeMillis())
+        internal val CHATROOM_RANDOM_NUM = Random(System.currentTimeMillis())
 
         val users = listOf(
             User(
