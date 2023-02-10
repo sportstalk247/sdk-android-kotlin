@@ -217,8 +217,8 @@ Below is a code sample on how to use this SDK feature:
             // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
             val response = withContext(Dispatchers.IO) {
                 userClient.globallyPurgeUserContent(
-                    userid = "023976080242ac120002",
-                    banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
+                    userid = "023976080242ac120002", // ID of the User who's content is about to be purged
+                    byuserid = "1234567890" // ID of the User who is about to perform the purge action(requires admin privileges)
                 )
             }
 
@@ -230,8 +230,8 @@ Below is a code sample on how to use this SDK feature:
         val rxDisposeBag = CompositeDisposable()
 
         userClient.globallyPurgeUserContent(
-            userid = "023976080242ac120002",
-            banned = true // If set to true, attempt to purge all the chat messages published by the specified user.
+            userid = "023976080242ac120002", // ID of the User who's content is about to be purged
+            byuserid = "1234567890" // ID of the User who is about to perform the purge action(requires admin privileges)
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
