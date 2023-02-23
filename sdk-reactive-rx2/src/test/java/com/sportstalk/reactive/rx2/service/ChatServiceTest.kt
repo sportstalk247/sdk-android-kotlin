@@ -1350,23 +1350,30 @@ class ChatServiceTest {
             )
 
             // WHEN
-            val testJoinChatRoomData = chatService.joinRoom(
+            chatService.joinRoom(
                 chatRoomId = testInputJoinChatRoomId,
                 request = testInputJoinRequest
             ).blockingGet()
 
+            val expectedChatSubscriptionAndStatus = ListUserSubscribedRoomsResponse.Data(
+                kind = Kind.CHAT_SUBSCRIPTION_AND_STATUS,
+                subscription = ChatSubscription(
+                    kind = Kind.CHAT_SUBSCRIPTION,
+                    roomid = testCreatedChatRoomData.id,
+                    roomcustomid = testCreatedChatRoomData.customid,
+                    userid = testCreatedUserData.userid,
+                    roomname = testCreatedChatRoomData.name,
+                    roomcustomtags = testCreatedChatRoomData.customtags
+                ),
+                roomstatus = ListUserSubscribedRoomsResponse.RoomStatus(
+                    kind = Kind.CHAT_ROOM_STATUS,
+                    messagecount = 1L,
+                    participantcount = 1L,
+                ),
+            )
             val testExpectedResult = ListUserSubscribedRoomsResponse(
                 kind = Kind.LIST_USER_ROOM_SUBSCRIPTIONS,
-                subscriptions = listOf(
-                    ChatSubscription(
-                        kind = Kind.CHAT_SUBSCRIPTION,
-                        roomid = testCreatedChatRoomData.id,
-                        roomcustomid = testCreatedChatRoomData.customid,
-                        userid = testCreatedUserData.userid,
-                        roomname = testCreatedChatRoomData.name,
-                        roomcustomtags = testCreatedChatRoomData.customtags
-                    )
-                )
+                subscriptions = listOf(expectedChatSubscriptionAndStatus)
             )
 
             val testInputUserId = testCreatedUserData?.userid!!
@@ -1388,12 +1395,17 @@ class ChatServiceTest {
             )
 
             assertTrue { testActualResult.kind == testExpectedResult.kind }
-            assertTrue { testActualResult.subscriptions.first().kind == testExpectedResult.subscriptions.first().kind }
-            assertTrue { testActualResult.subscriptions.first().roomid == testExpectedResult.subscriptions.first().roomid }
-            assertTrue { testActualResult.subscriptions.first().roomcustomid == testExpectedResult.subscriptions.first().roomcustomid }
-            assertTrue { testActualResult.subscriptions.first().userid == testExpectedResult.subscriptions.first().userid }
-            assertTrue { testActualResult.subscriptions.first().roomname == testExpectedResult.subscriptions.first().roomname }
-            assertTrue { testActualResult.subscriptions.first().roomcustomtags == testExpectedResult.subscriptions.first().roomcustomtags }
+            val actualChatSubscriptionAndStatus = testActualResult.subscriptions.first()
+            assertTrue { actualChatSubscriptionAndStatus.kind == expectedChatSubscriptionAndStatus.kind }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.roomid == expectedChatSubscriptionAndStatus.subscription?.roomid }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.roomcustomid == expectedChatSubscriptionAndStatus.subscription?.roomcustomid }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.userid == expectedChatSubscriptionAndStatus.subscription?.userid }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.roomname == expectedChatSubscriptionAndStatus.subscription?.roomname }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.roomcustomtags == expectedChatSubscriptionAndStatus.subscription?.roomcustomtags }
+            assertTrue { actualChatSubscriptionAndStatus.roomstatus?.kind == expectedChatSubscriptionAndStatus.roomstatus?.kind }
+            assertTrue { actualChatSubscriptionAndStatus.roomstatus?.messagecount == expectedChatSubscriptionAndStatus.roomstatus?.messagecount }
+            assertTrue { actualChatSubscriptionAndStatus.roomstatus?.participantcount == expectedChatSubscriptionAndStatus.roomstatus?.participantcount }
+            assertTrue { actualChatSubscriptionAndStatus.roomstatus?.newestmessage != null }    // "[user] has entered the room"
 
         } catch (err: SportsTalkException) {
             err.printStackTrace()
