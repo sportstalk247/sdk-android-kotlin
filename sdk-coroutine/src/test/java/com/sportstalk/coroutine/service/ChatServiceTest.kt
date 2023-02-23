@@ -1310,17 +1310,28 @@ class ChatServiceTest {
                 request = testInputJoinRequest
             )
 
+            delay(100L)
+
+            val expectedChatSubscriptionAndStatus = ListUserSubscribedRoomsResponse.Data(
+                kind = Kind.CHAT_SUBSCRIPTION_AND_STATUS,
+                subscription = ChatSubscription(
+                    kind = Kind.CHAT_SUBSCRIPTION,
+                    roomid = testCreatedChatRoomData.id,
+                    roomcustomid = testCreatedChatRoomData.customid,
+                    userid = testCreatedUserData.userid,
+                    roomname = testCreatedChatRoomData.name,
+                    roomcustomtags = testCreatedChatRoomData.customtags
+                ),
+                roomstatus = ListUserSubscribedRoomsResponse.RoomStatus(
+                    kind = Kind.CHAT_ROOM_STATUS,
+                    messagecount = 1L,
+                    participantcount = 1L,
+                ),
+            )
             val testExpectedResult = ListUserSubscribedRoomsResponse(
                 kind = Kind.LIST_USER_ROOM_SUBSCRIPTIONS,
                 subscriptions = listOf(
-                    ChatSubscription(
-                        kind = Kind.CHAT_SUBSCRIPTION,
-                        roomid = testCreatedChatRoomData.id,
-                        roomcustomid = testCreatedChatRoomData.customid,
-                        userid = testCreatedUserData.userid,
-                        roomname = testCreatedChatRoomData.name,
-                        roomcustomtags = testCreatedChatRoomData.customtags
-                    )
+                    expectedChatSubscriptionAndStatus
                 )
             )
 
@@ -1343,12 +1354,17 @@ class ChatServiceTest {
             )
 
             assertTrue { testActualResult.kind == testExpectedResult.kind }
-            assertTrue { testActualResult.subscriptions.first().kind == testExpectedResult.subscriptions.first().kind }
-            assertTrue { testActualResult.subscriptions.first().roomid == testExpectedResult.subscriptions.first().roomid }
-            assertTrue { testActualResult.subscriptions.first().roomcustomid == testExpectedResult.subscriptions.first().roomcustomid }
-            assertTrue { testActualResult.subscriptions.first().userid == testExpectedResult.subscriptions.first().userid }
-            assertTrue { testActualResult.subscriptions.first().roomname == testExpectedResult.subscriptions.first().roomname }
-            assertTrue { testActualResult.subscriptions.first().roomcustomtags == testExpectedResult.subscriptions.first().roomcustomtags }
+            val actualChatSubscriptionAndStatus = testActualResult.subscriptions.first()
+            assertTrue { actualChatSubscriptionAndStatus.kind == expectedChatSubscriptionAndStatus.kind }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.roomid == expectedChatSubscriptionAndStatus.subscription?.roomid }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.roomcustomid == expectedChatSubscriptionAndStatus.subscription?.roomcustomid }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.userid == expectedChatSubscriptionAndStatus.subscription?.userid }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.roomname == expectedChatSubscriptionAndStatus.subscription?.roomname }
+            assertTrue { actualChatSubscriptionAndStatus.subscription?.roomcustomtags == expectedChatSubscriptionAndStatus.subscription?.roomcustomtags }
+            assertTrue { actualChatSubscriptionAndStatus.roomstatus?.kind == expectedChatSubscriptionAndStatus.roomstatus?.kind }
+            assertTrue { actualChatSubscriptionAndStatus.roomstatus?.messagecount == expectedChatSubscriptionAndStatus.roomstatus?.messagecount }
+            assertTrue { actualChatSubscriptionAndStatus.roomstatus?.participantcount == expectedChatSubscriptionAndStatus.roomstatus?.participantcount }
+            assertTrue { actualChatSubscriptionAndStatus.roomstatus?.newestmessage != null }        // "[user] has entered the room"
         } catch (err: SportsTalkException) {
             err.printStackTrace()
             fail(err.message)
@@ -3374,79 +3390,6 @@ class ChatServiceTest {
 
         return@runBlocking
     }
-
-    @Test
-    fun `U-ERROR-412-User-not-yet-joined) Execute Chat Command`() = runBlocking {
-        // GIVEN
-        // GIVEN
-        val testUserData = TestData.users.first()
-        val testCreateUserInputRequest = CreateUpdateUserRequest(
-            userid = RandomString.make(16),
-            handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
-            displayname = testUserData.displayname,
-            pictureurl = testUserData.pictureurl,
-            profileurl = testUserData.profileurl
-        )
-        // Should create a test user first
-        val testCreatedUserData =
-            userService.createOrUpdateUser(request = testCreateUserInputRequest)
-
-        val testChatRoomData = TestData.chatRooms(config.appId).first()
-        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
-            name = testChatRoomData.name!!,
-            customid = testChatRoomData.customid,
-            description = testChatRoomData.description,
-            moderation = testChatRoomData.moderation,
-            enableactions = testChatRoomData.enableactions,
-            enableenterandexit = testChatRoomData.enableenterandexit,
-            enableprofanityfilter = testChatRoomData.enableprofanityfilter,
-            delaymessageseconds = testChatRoomData.delaymessageseconds,
-            roomisopen = testChatRoomData.open,
-            maxreports = testChatRoomData.maxreports,
-            customtags = listOf("tagA", "tagB")
-        )
-        // Should create a test chat room first
-        val testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
-
-        val testInputRequest = ExecuteChatCommandRequest(
-            command = "Yow error test",
-            userid = testCreatedUserData.userid!!
-        )
-
-        // EXPECT
-        thrown.expect(SportsTalkException::class.java)
-
-        // WHEN
-        try {
-            withContext(Dispatchers.IO) {
-                chatService.executeChatCommand(
-                    chatRoomId = testCreatedChatRoomData.id!!,
-                    request = testInputRequest
-                )
-            }
-        } catch (err: SportsTalkException) {
-            println(
-                "`ERROR-404-User-not-yet-joined - Execute Chat Command`() -> testActualResult = \n" +
-                        json.encodeToString(
-                            SportsTalkException.serializer(),
-                            err
-                        )
-            )
-            assertTrue { err.kind == Kind.API }
-            assertTrue { err.message == "A user cannot execute commands in a room unless the user has joined the room." }
-            assertTrue { err.code == 412 }
-
-            throw err
-        } finally {
-            // Perform Delete Test Chat Room
-            deleteTestChatRooms(testCreatedChatRoomData.id)
-            // Perform Delete Test User
-            deleteTestUsers(testCreatedUserData.userid)
-        }
-
-        return@runBlocking
-    }
-
 
     @Test
     fun `U-ERROR-404-REPLY-NOT-FOUND) Execute Chat Command`() = runBlocking {

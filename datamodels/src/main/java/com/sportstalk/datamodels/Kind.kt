@@ -29,6 +29,8 @@ object Kind {
     const val CHAT_LIST_PARTICIPANTS = "chat.list.participants"
     const val LIST_USER_ROOM_SUBSCRIPTIONS = "chat.list.userroomsubscriptions"
     const val CHAT_SUBSCRIPTION = "chat.subscription"
+    const val CHAT_SUBSCRIPTION_AND_STATUS = "chat.subscriptionandstatus"
+    const val CHAT_ROOM_STATUS = "chat.roomstatus"
     const val JOIN_ROOM = "chat.joinroom"
     const val ROOM_LIST = "list.chatrooms"
     const val USER_LIST = "list.users"
