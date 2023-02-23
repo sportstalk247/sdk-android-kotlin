@@ -57,8 +57,8 @@ class ChatModerationServiceTest {
                 }
 
         config = ClientConfig(
-            appId = "602e6fc50c916c171cb9a4e8",
-            apiToken = "P1slSgD5l0yYBTWixyZ3_gGt69p5SOu0KEuGYLBXY8sw",
+            appId = "63c16f13c3e89411881ba085",
+            apiToken = "cXSVhVOVYEewANzl7CuoWgw08gtq8FTUS4nxI_pHcQKg",
             endpoint = "https://api.sportstalk247.com/api/v3"
         )
         json = ServiceFactory.RestApi.json
