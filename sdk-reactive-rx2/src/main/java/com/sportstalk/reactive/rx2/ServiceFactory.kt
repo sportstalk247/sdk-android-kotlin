@@ -5,14 +5,8 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.ConfigUtils
 import com.sportstalk.reactive.BuildConfig
-import com.sportstalk.reactive.rx2.impl.restapi.ChatRestApiServiceImpl
-import com.sportstalk.reactive.rx2.impl.restapi.CommentModerationRestApiServiceImpl
-import com.sportstalk.reactive.rx2.impl.restapi.CommentRestApiServiceImpl
-import com.sportstalk.reactive.rx2.impl.restapi.UserRestApiServiceImpl
-import com.sportstalk.reactive.rx2.service.ChatService
-import com.sportstalk.reactive.rx2.service.CommentModerationService
-import com.sportstalk.reactive.rx2.service.CommentService
-import com.sportstalk.reactive.rx2.service.UserService
+import com.sportstalk.reactive.rx2.impl.restapi.*
+import com.sportstalk.reactive.rx2.service.*
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
@@ -133,6 +127,29 @@ object ServiceFactory {
                     val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
                     // REST API Implementation
                     ChatRestApiServiceImpl(
+                            appId = config.appId,
+                            json = RestApi.json,
+                            mRetrofit = retrofit
+                    ).also {
+                        instances[config] = it
+                    }
+                }
+    }
+
+    object ChatModeration {
+        @JvmStatic
+        private val instances: HashMap<ClientConfig, ChatModerationService> = hashMapOf()
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun get(config: ClientConfig): ChatModerationService =
+                if (instances.containsKey(config)) {
+                    instances[config]!!
+                } else {
+                    val okHttpClient = RestApi.getOkHttpInstance(config)
+                    val retrofit = RestApi.getRetrofitInstance(config, okHttpClient, RestApi.json)
+                    // REST API Implementation
+                    ChatModerationRestApiServiceImpl(
                             appId = config.appId,
                             json = RestApi.json,
                             mRetrofit = retrofit
