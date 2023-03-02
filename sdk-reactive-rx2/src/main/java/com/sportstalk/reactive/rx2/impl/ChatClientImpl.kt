@@ -4,9 +4,11 @@ import androidx.annotation.RestrictTo
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
+import com.sportstalk.datamodels.chat.moderation.ListMessagesNeedingModerationResponse
 import com.sportstalk.datamodels.users.User
 import com.sportstalk.reactive.rx2.ServiceFactory
 import com.sportstalk.reactive.rx2.api.ChatClient
+import com.sportstalk.reactive.rx2.service.ChatModerationService
 import com.sportstalk.reactive.rx2.service.ChatService
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Completable
@@ -21,6 +23,7 @@ constructor(
 ): ChatClient {
 
     private val chatService: ChatService = ServiceFactory.Chat.get(config)
+    private val moderationService: ChatModerationService = ServiceFactory.ChatModeration.get(config)
 
     // Current User state tracking
     private var _currentUser: User? = null
@@ -526,6 +529,16 @@ constructor(
 
     override fun muteUser(chatRoomId: String, userid: String, applyeffect: Boolean, expireseconds: Long?): Single<ChatRoom> =
             chatService.muteUser(chatRoomId, userid, applyeffect, expireseconds)
+
+    override fun approveMessage(eventId: String, approve: Boolean): Single<ChatEvent> =
+        moderationService.approveMessage(eventId, approve)
+
+    override fun listMessagesNeedingModeration(
+        roomId: String?,
+        limit: Int?,
+        cursor: String?
+    ): Single<ListMessagesNeedingModerationResponse> =
+        moderationService.listMessagesNeedingModeration(roomId, limit, cursor)
 
     companion object {
         private const val DURATION_EXECUTE_COMMAND = 20_000L

@@ -8,6 +8,8 @@ data class ListChatRoomParticipantsResponse(
         /** [Kind] */
         val kind: String? = null /* "list.chatparticipants" */,
         val cursor: String? = null,
+        val more: Boolean? = null,
+        val itemcount: Long? = null,
         val participants: List<ChatRoomParticipant> = listOf()
 )
 
