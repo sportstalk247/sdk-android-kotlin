@@ -24,7 +24,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import net.bytebuddy.utility.RandomString
 import org.junit.*
-import org.junit.rules.ExpectedException
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
@@ -37,7 +36,7 @@ import kotlin.test.fail
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.KITKAT])
+@Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
 class ChatServiceTest {
 
     private lateinit var context: Context
@@ -47,9 +46,6 @@ class ChatServiceTest {
     private lateinit var json: Json
 
     private lateinit var rxDisposeBag: CompositeDisposable
-
-    @get:Rule
-    val thrown = ExpectedException.none()
 
     @Before
     fun setup() {

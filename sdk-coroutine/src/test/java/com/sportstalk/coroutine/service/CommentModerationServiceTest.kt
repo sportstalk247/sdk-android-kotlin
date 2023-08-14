@@ -11,9 +11,10 @@ import com.sportstalk.datamodels.reports.ReportType
 import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
 import org.junit.*
@@ -28,21 +29,21 @@ import kotlin.test.fail
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.P])
+@Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
 class CommentModerationServiceTest {
 
     private lateinit var context: Context
-    private lateinit var config: com.sportstalk.datamodels.ClientConfig
+    private lateinit var config: ClientConfig
     private lateinit var userService: UserService
     private lateinit var commentService: CommentService
     private lateinit var commentModerationService: CommentModerationService
     private lateinit var json: Json
 
-    @Suppress("DEPRECATION")
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
+    @Suppress("DEPRECATION")
     @get:Rule
-    val thrown = ExpectedException.none()
+    val thrown: ExpectedException = ExpectedException.none()
 
     @Before
     fun setup() {
@@ -57,11 +58,12 @@ class CommentModerationServiceTest {
         userService = ServiceFactory.User.get(config)
         commentService = ServiceFactory.Comment.get(config)
         commentModerationService = ServiceFactory.CommentModeration.get(config)
+
+        Dispatchers.setMain(testDispatcher)
     }
 
     @After
     fun cleanUp() {
-        testDispatcher.cleanupTestCoroutines()
         Dispatchers.resetMain()
     }
 
@@ -73,8 +75,7 @@ class CommentModerationServiceTest {
             id ?: continue
             try {
                 userService.deleteUser(userId = id)
-            } catch (err: Throwable) {
-            }
+            } catch (_: Throwable) {}
         }
     }
 
@@ -86,13 +87,12 @@ class CommentModerationServiceTest {
             id ?: continue
             try {
                 commentService.deleteConversation(id)
-            } catch (err: Throwable) {
-            }
+            } catch (_: Throwable) {}
         }
     }
 
     @Test
-    fun `A) List Comments In Moderation Queue`() = runBlocking {
+    fun `A) List Comments In Moderation Queue`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -197,7 +197,7 @@ class CommentModerationServiceTest {
     }
 
     @Test
-    fun `B) Approve Message In Queue`() = runBlocking {
+    fun `B) Approve Message In Queue`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]

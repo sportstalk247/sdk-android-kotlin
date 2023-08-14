@@ -5,16 +5,15 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import com.sportstalk.coroutine.ServiceFactory
-import com.sportstalk.datamodels.DateUtils
 import com.sportstalk.datamodels.*
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.chat.moderation.*
 import com.sportstalk.datamodels.users.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -32,7 +31,7 @@ import kotlin.test.fail
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.KITKAT])
+@Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
 class ChatModerationServiceTest {
 
     private lateinit var context: Context
@@ -42,10 +41,11 @@ class ChatModerationServiceTest {
     private lateinit var chatModerationService: ChatModerationService
     private lateinit var json: Json
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
+    @Suppress("DEPRECATION")
     @get:Rule
-    val thrown = ExpectedException.none()
+    val thrown: ExpectedException = ExpectedException.none()
 
     @Before
     fun setup() {
@@ -73,7 +73,6 @@ class ChatModerationServiceTest {
 
     @After
     fun cleanUp() {
-        testDispatcher.cleanupTestCoroutines()
         Dispatchers.resetMain()
     }
 
@@ -98,7 +97,7 @@ class ChatModerationServiceTest {
     }
 
     @Test
-    fun `0-ERROR-403) Request is not authorized with a token`() = runBlocking {
+    fun `0-ERROR-403) Request is not authorized with a token`() = runTest {
         val userCaseChatModService = ServiceFactory.ChatModeration.get(
                 config.copy(
                         apiToken = "not-a-valid-auth-api-token"
@@ -136,11 +135,11 @@ class ChatModerationServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `A-1) Approve Message - Pre-moderated - Approved`() = runBlocking {
+    fun `A-1) Approve Message - Pre-moderated - Approved`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -230,7 +229,7 @@ class ChatModerationServiceTest {
     }
 
     @Test
-    fun `A-1) Approve Message - Pre-moderated - Rejected`() = runBlocking {
+    fun `A-1) Approve Message - Pre-moderated - Rejected`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -320,7 +319,7 @@ class ChatModerationServiceTest {
     }
 
     @Test
-    fun `A-ERROR-404) Approve Message`() = runBlocking {
+    fun `A-ERROR-404) Approve Message`() = runTest {
 
         // GIVEN
         val testInputNonExistingEventId = "non-existing-event-id"
@@ -351,11 +350,11 @@ class ChatModerationServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `A-ERROR-400) Approve Message - Not in a Moderatable State`() = runBlocking {
+    fun `A-ERROR-400) Approve Message - Not in a Moderatable State`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -454,11 +453,11 @@ class ChatModerationServiceTest {
             deleteTestUsers(testCreatedUserData?.userid)
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `B) List Messages Needing Moderation`() = runBlocking {
+    fun `B) List Messages Needing Moderation`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(

@@ -9,3 +9,4 @@
 /captures
 .externalNativeBuild
 .idea/
+gradle/wrapper/gradle-wrapper.jar

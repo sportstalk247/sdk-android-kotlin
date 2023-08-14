@@ -1,12 +1,12 @@
-[![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
 
 # sdk-reactive-rx2
 
 ```groovy
-implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:vX.Y.Z'
+implementation 'com.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z'
 ```
 
-[![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
 
 # How to Use
 
@@ -49,8 +49,60 @@ class MyFragment: Fragment() {
 ```
 
 ## User Client Features
+### Create or Update User
+```kotlin
+val rxDisposeBag = CompositeDisposable()
 
-### Work-in-progress...
+userClient.createOrUpdateUser(
+    request = CreateUpdateUserRequest(
+        userid = "023976080242ac120002",
+        handle = "sample_handle_123",
+        displayname = "Test Name 123", // OPTIONAL
+        pictureurl = "<Image URL>", // OPTIONAL
+        profileurl = "<Image URL>" // OPTIONAL
+    )
+)
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .doOnSubscribe { rxDisposeBag.add(it) }
+    .subscribe { createdUser ->
+        // Resolve `createdUser` (ex. Display prompt OR Update UI)
+    }
+```
+
+### Get User Details
+```kotlin
+val rxDisposeBag = CompositeDisposable()
+
+userClient.getUserDetails(
+    userid = "023976080242ac120002"
+)
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .doOnSubscribe { rxDisposeBag.add(it) }
+    .subscribe { userDetails ->
+        // Resolve `userDetails` (ex. Display prompt OR Update UI)
+    }
+
+```
+
+### List Users
+```kotlin
+val rxDisposeBag = CompositeDisposable()
+
+userClient.listUsers(
+    limit = 10, /* Defaults to 200 on backend API server */
+    cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+)
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .doOnSubscribe { rxDisposeBag.add(it) }
+    .subscribe { listUsers ->
+        // Resolve `listUsers` (ex. Display prompt OR Update UI)
+    }
+```
+
+For more API documentation reference, you may browse our [read-the-docs documentation](https://sdk-android-kotlin.readthedocs.io/en/latest/usage/user_client.html).
 
 ## Chat Client Features
 
@@ -219,9 +271,114 @@ chatClient.bounceUser(
    }
 ```
 
+For more API documentation reference, you may browse our [read-the-docs documentation](https://sdk-android-kotlin.readthedocs.io/en/latest/usage/chat_client.html).
+
 ## How to use Comment Client
 
-### Work-in-progress...
+```kotlin
+// Under Fragment class
+val commentClient = SportsTalk247.CommentClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e",
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA",
+      endpoint = "http://api.custom.endpoint/v1/"
+   )
+)
+```
+
+### Create a Conversation
+
+```kotlin
+val rxDisposeBag = CompositeDisposable()
+
+commentClient.createOrUpdateConversation(
+    request = CreateOrUpdateConversationRequest(
+        conversationid = "test-conversation-id123",
+        property = "sportstalk247.com/apidemo",
+        moderation = "post",
+        enableprofanityfilter = false,
+        title = "Sample Conversation",
+        open = true,
+        customid = "/articles/2020-03-01/article1/something-very-important-happened"
+    )
+)
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .doOnSubscribe { rxDisposeBag.add(it) }
+    .subscribe { createdConversation ->
+        // Resolve `createdConversation` (ex. Display prompt OR Update UI)
+    }
+```
+
+### Create/Publish a comment against a Conversation
+
+```kotlin
+val rxDisposeBag = CompositeDisposable()
+
+commentClient.createComment(
+    conversationid = "test-conversation-id123",
+    request = CreateCommentRequest(
+        userid = "test-user-id123", // ID of the User who is attempting to create the comment
+        displayname = "HelloUser1", // [OPTIONAL] Override display name of the User who is attempting to create the comment
+        body = "Hello, this is my comment!",
+        customtype = null,    // [OPTIONAL]
+        customfield1 = null,    // [OPTIONAL]
+        customfield2 = null,    // [OPTIONAL]
+        custompayload = "{ num: 0 }",    // [OPTIONAL]
+    )
+)
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .doOnSubscribe { rxDisposeBag.add(it) }
+    .subscribe { createdComment ->
+        // Resolve `createdComment` (ex. Display prompt OR Update UI)
+    }
+```
+
+### Reply to a comment
+
+```kotlin
+val rxDisposeBag = CompositeDisposable()
+
+commentClient.replyToComment(
+    conversationid = "test-conversation-id123",
+    replyto = "test-comment-id123", // ID of the comment you are about to reply to
+    request = CreateCommentRequest(
+        userid = "test-user-id123", // ID of the User who is attempting to create the comment
+        displayname = "HelloUser1", // [OPTIONAL] Override display name of the User who is attempting to create the comment
+        body = "Hello, this is my comment!",
+        customtype = null,    // [OPTIONAL]
+        customfield1 = null,    // [OPTIONAL]
+        customfield2 = null,    // [OPTIONAL]
+        custompayload = "{ num: 0 }",    // [OPTIONAL]
+    )
+)
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .doOnSubscribe { rxDisposeBag.add(it) }
+    .subscribe { commentReply ->
+        // Resolve `commentReply` (ex. Display prompt OR Update UI)
+    }
+```
+
+### Permanently Delete Comment
+
+```kotlin
+val rxDisposeBag = CompositeDisposable()
+
+commentClient.permanentlyDeleteComment(
+    conversationid = "test-conversation-id123",
+    commentid = "test-comment-id123",
+)
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .doOnSubscribe { rxDisposeBag.add(it) }
+    .subscribe { deletedComment ->
+        // Resolve `deletedComment` (ex. Display prompt OR Update UI)
+    }
+```
+
+For more API documentation reference, you may browse our [read-the-docs documentation](https://sdk-android-kotlin.readthedocs.io/en/latest/usage/comment_client.html).
 
 ## Handling SDK Exception
 
@@ -258,5 +415,3 @@ commentClient.permanentlyDeleteComment(
       // Resolve `setCommentDeletedResponse` (ex. Display prompt OR Update UI)
    }
 ```
-
-## Work-in-progress...

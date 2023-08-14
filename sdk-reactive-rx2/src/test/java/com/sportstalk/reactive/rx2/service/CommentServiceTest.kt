@@ -27,7 +27,7 @@ import kotlin.test.fail
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.P])
+@Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
 class CommentServiceTest {
 
     private lateinit var context: Context
@@ -67,8 +67,7 @@ class CommentServiceTest {
             id ?: continue
             try {
                 userService.deleteUser(userId = id).blockingGet()
-            } catch (err: Throwable) {
-            }
+            } catch (_: Throwable) {}
         }
     }
 
@@ -80,8 +79,7 @@ class CommentServiceTest {
             id ?: continue
             try {
                 commentService.deleteConversation(id).blockingGet()
-            } catch (err: Throwable) {
-            }
+            } catch (_: Throwable) {}
         }
     }
 

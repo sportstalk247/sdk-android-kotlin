@@ -1,3 +1,0 @@
-include ':sdk-reactive-rx2'
-include ':datamodels'
-include ':sdk-coroutine'

@@ -9,7 +9,7 @@ Use this API to create experiences powered by SportsTalk and interact with those
 
 You can download the latest SportsTalk Android SDK from the following location:
 
-<https://gitlab.com/sportstalk247/sdk-android-kotlin>
+<https://github.com/sportstalk247/sdk-android-kotlin>
 
 You need to register SportsTalk API with 'Appkey' and 'Token'.
 

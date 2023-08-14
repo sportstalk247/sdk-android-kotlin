@@ -14,9 +14,10 @@ import com.sportstalk.datamodels.reports.ReportType
 import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
 import org.junit.*
@@ -31,7 +32,7 @@ import kotlin.test.fail
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.P])
+@Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
 class CommentServiceTest {
 
     private lateinit var context: Context
@@ -40,11 +41,11 @@ class CommentServiceTest {
     private lateinit var commentService: CommentService
     private lateinit var json: Json
 
-    @Suppress("DEPRECATION")
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
+    @Suppress("DEPRECATION")
     @get:Rule
-    val thrown = ExpectedException.none()
+    val thrown: ExpectedException = ExpectedException.none()
 
     @Before
     fun setup() {
@@ -58,11 +59,12 @@ class CommentServiceTest {
         json = ServiceFactory.RestApi.json
         userService = ServiceFactory.User.get(config)
         commentService = ServiceFactory.Comment.get(config)
+        
+        Dispatchers.setMain(testDispatcher)
     }
 
     @After
     fun cleanUp() {
-        testDispatcher.cleanupTestCoroutines()
         Dispatchers.resetMain()
     }
 
@@ -93,7 +95,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `A) Create Conversation`() = runBlocking {
+    fun `A) Create Conversation`() = runTest {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)[0]
         val testInputRequest = CreateOrUpdateConversationRequest(
@@ -138,7 +140,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `B) Get Conversation`() = runBlocking {
+    fun `B) Get Conversation`() = runTest {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)[0]
         val testInputRequest = CreateOrUpdateConversationRequest(
@@ -182,7 +184,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `C) Get Conversation By Custom ID`() = runBlocking {
+    fun `C) Get Conversation By Custom ID`() = runTest {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)[0]
         val testInputRequest = CreateOrUpdateConversationRequest(
@@ -223,7 +225,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `D) List Conversations`() = runBlocking {
+    fun `D) List Conversations`() = runTest {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)
         val testInputRequests = testExpectedData.map { item ->
@@ -272,7 +274,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `E) Batch Get Conversation Details`() = runBlocking {
+    fun `E) Batch Get Conversation Details`() = runTest {
         // GIVEN
         val testExpectedData = TestData.conversations(config.appId)
         val testInputRequests = testExpectedData.map { item ->
@@ -327,7 +329,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `F) React to Conversation Topic`() = runBlocking {
+    fun `F) React to Conversation Topic`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
 
@@ -392,7 +394,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `G) Create Comment`() = runBlocking {
+    fun `G) Create Comment`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -477,7 +479,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `H) Reply To Comment`() = runBlocking {
+    fun `H) Reply To Comment`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -581,7 +583,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `I) List Replies`() = runBlocking {
+    fun `I) List Replies`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -700,7 +702,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `J) Get Comment`() = runBlocking {
+    fun `J) Get Comment`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -790,7 +792,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `K) List Comments`() = runBlocking {
+    fun `K) List Comments`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -909,7 +911,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `L) List Replies Batch`() = runBlocking {
+    fun `L) List Replies Batch`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1050,7 +1052,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `M) React To Comment`() = runBlocking {
+    fun `M) React To Comment`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1146,7 +1148,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `N) Vote on Comment`() = runBlocking {
+    fun `N) Vote on Comment`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1243,7 +1245,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `O) Report Comment`() = runBlocking {
+    fun `O) Report Comment`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1329,7 +1331,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `P) Update Comment`() = runBlocking {
+    fun `P) Update Comment`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1412,7 +1414,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `Q) Flag Comment Logically Deleted`() = runBlocking {
+    fun `Q) Flag Comment Logically Deleted`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1493,7 +1495,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `Q-1) Flag Comment Logically Deleted - permanintifnoreplies`() = runBlocking {
+    fun `Q-1) Flag Comment Logically Deleted - permanintifnoreplies`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1574,7 +1576,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `R) Delete Comment`() = runBlocking {
+    fun `R) Delete Comment`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -1650,7 +1652,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `S) Delete Conversation`() = runBlocking {
+    fun `S) Delete Conversation`() = runTest {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
