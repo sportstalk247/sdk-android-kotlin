@@ -25,7 +25,7 @@ import kotlin.test.fail
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.KITKAT])
+@Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
 class UserServiceTest {
 
     private lateinit var context: Context
@@ -35,9 +35,6 @@ class UserServiceTest {
     private lateinit var json: Json
 
     private val rxDisposeBag = CompositeDisposable()
-
-    @get:Rule
-    val thrown = ExpectedException.none()
 
     @Before
     fun setup() {

@@ -2,19 +2,17 @@ package com.sportstalk.coroutine.impl
 
 import androidx.annotation.RestrictTo
 import com.sportstalk.coroutine.ServiceFactory
-import com.sportstalk.coroutine.service.ChatService
 import com.sportstalk.coroutine.api.ChatClient
 import com.sportstalk.coroutine.service.ChatModerationService
+import com.sportstalk.coroutine.service.ChatService
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.SportsTalkException
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.chat.moderation.*
 import com.sportstalk.datamodels.users.User
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 class ChatClientImpl
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -60,11 +58,11 @@ constructor(
      */
     override var preRenderedMessages: MutableSet<String> = chatService.preRenderedMessages
 
-    private var _chatEventsEmitter = BroadcastChannel<List<ChatEvent>>(Channel.BUFFERED)
+    private var _chatEventsEmitter = MutableSharedFlow<List<ChatEvent>>(replay = 1, extraBufferCapacity = 1)
     override var chatEventsEmitter: Flow<List<ChatEvent>>
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        get() = _chatEventsEmitter.asFlow()
-        set(value) {}
+        get() = _chatEventsEmitter.asSharedFlow()
+        set(_) {}
 
     override fun roomSubscriptions(): Set<String> =
             chatService.roomSubscriptions()
@@ -388,7 +386,7 @@ constructor(
                         // [Anti-flood Feature] Add to preRenderedMessages
                         execCommandResponse.speech?.let { chatEvent ->
                             // Emit/Trigger Event Update
-                            _chatEventsEmitter.send(listOf(chatEvent))
+                            _chatEventsEmitter.emit(listOf(chatEvent))
                             // Add to Pre-Rendered Messages
                             chatEvent.id?.let { id -> preRenderedMessages.add(id) }
                         }

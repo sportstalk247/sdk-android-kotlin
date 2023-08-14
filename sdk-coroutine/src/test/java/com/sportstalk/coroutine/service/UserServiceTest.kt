@@ -9,9 +9,9 @@ import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.reports.ReportType
 import com.sportstalk.datamodels.users.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -27,10 +27,9 @@ import kotlin.random.Random
 import kotlin.test.assertTrue
 import kotlin.test.fail
 
-@Suppress("MainFunctionReturnUnit")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.KITKAT])
+@Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
 class UserServiceTest {
 
     private lateinit var context: Context
@@ -39,10 +38,11 @@ class UserServiceTest {
     private lateinit var chatService: ChatService
     private lateinit var json: Json
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
+    @Suppress("DEPRECATION")
     @get:Rule
-    val thrown = ExpectedException.none()
+    val thrown: ExpectedException = ExpectedException.none()
 
     @Before
     fun setup() {
@@ -62,7 +62,6 @@ class UserServiceTest {
 
     @After
     fun cleanUp() {
-        testDispatcher.cleanupTestCoroutines()
         Dispatchers.resetMain()
     }
 
@@ -90,7 +89,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `A-ERROR-403) Request is not authorized with a token`() = runBlocking {
+    fun `A-ERROR-403) Request is not authorized with a token`() = runTest {
         val userCaseUserService = ServiceFactory.User.get(
             config.copy(
                 apiToken = "not-a-valid-auth-api-token"
@@ -127,11 +126,11 @@ class UserServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `A) Create or Update User`() = runBlocking {
+    fun `A) Create or Update User`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -169,7 +168,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `A-ERROR-405) Create or Update User`() = runBlocking {
+    fun `A-ERROR-405) Create or Update User`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -200,11 +199,11 @@ class UserServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `B) Delete User`() = runBlocking {
+    fun `B) Delete User`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -242,7 +241,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `B-ERROR-404) Delete User`() = runBlocking {
+    fun `B-ERROR-404) Delete User`() = runTest {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -271,11 +270,11 @@ class UserServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `C) Get User Details`() = runBlocking {
+    fun `C) Get User Details`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -312,7 +311,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `C-ERROR-404) Get User Details`() = runBlocking {
+    fun `C-ERROR-404) Get User Details`() = runTest {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -341,11 +340,11 @@ class UserServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `D) List Users`() = runBlocking {
+    fun `D) List Users`() = runTest {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -407,7 +406,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `E) Ban User`() = runBlocking {
+    fun `E) Ban User`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -448,7 +447,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `E-ERROR-404) Ban User`() = runBlocking {
+    fun `E-ERROR-404) Ban User`() = runTest {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -479,11 +478,11 @@ class UserServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `F) Restore User`() = runBlocking {
+    fun `F) Restore User`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -530,7 +529,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `F-ERROR-404) Restore User`() = runBlocking {
+    fun `F-ERROR-404) Restore User`() = runTest {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -560,11 +559,11 @@ class UserServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `F1) Search Users - By Handle`() = runBlocking {
+    fun `F1) Search Users - By Handle`() = runTest {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -605,7 +604,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `F2) Search Users - By Name`() = runBlocking {
+    fun `F2) Search Users - By Name`() = runTest {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -646,7 +645,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `F3) Search Users - By UserId`() = runBlocking {
+    fun `F3) Search Users - By UserId`() = runTest {
         // GIVEN
         val testInputRequest1 = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -687,7 +686,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `F-ERROR-400) Search Users`() = runBlocking {
+    fun `F-ERROR-400) Search Users`() = runTest {
         // GIVEN
 
         // EXPECT
@@ -716,11 +715,11 @@ class UserServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `G) Set Shadow Ban Status`() = runBlocking {
+    fun `G) Set Shadow Ban Status`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -763,7 +762,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `H) Globally Purge User Content`() = runBlocking {
+    fun `H) Globally Purge User Content`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -801,7 +800,7 @@ class UserServiceTest {
 
 
     @Test
-    fun `I) Report User`() = runBlocking {
+    fun `I) Report User`() = runTest {
         // GIVEN
         val testInputCreateRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -861,7 +860,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `J-1) List User Notifications - Chat Reply`() = runBlocking {
+    fun `J-1) List User Notifications - Chat Reply`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -968,11 +967,11 @@ class UserServiceTest {
             deleteTestUsers(testCreatedUserData?.userid)
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `J-2) List User Notifications - Chat Quote`() = runBlocking {
+    fun `J-2) List User Notifications - Chat Quote`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1079,11 +1078,11 @@ class UserServiceTest {
             deleteTestUsers(testCreatedUserData?.userid)
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `K) Set User Notification As Read`() = runBlocking {
+    fun `K) Set User Notification As Read`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1191,11 +1190,11 @@ class UserServiceTest {
             deleteTestUsers(testCreatedUserData?.userid)
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `L) Set User Notification As Read by Chat Event`() = runBlocking {
+    fun `L) Set User Notification As Read by Chat Event`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1294,11 +1293,11 @@ class UserServiceTest {
             deleteTestUsers(testCreatedUserData?.userid)
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `M) Delete User Notification`() = runBlocking {
+    fun `M) Delete User Notification`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1404,11 +1403,11 @@ class UserServiceTest {
             deleteTestUsers(testCreatedUserData?.userid)
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `N) Delete User Notification by Chat Event`() = runBlocking {
+    fun `N) Delete User Notification by Chat Event`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1505,11 +1504,11 @@ class UserServiceTest {
             deleteTestUsers(testCreatedUserData?.userid)
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `O) Mark All User Notifications as Read`() = runBlocking {
+    fun `O) Mark All User Notifications as Read`() = runTest {
         // GIVEN
         val testUserData = TestData.users.first()
         val testCreateUserInputRequest = CreateUpdateUserRequest(
@@ -1616,11 +1615,11 @@ class UserServiceTest {
             deleteTestUsers(testCreatedUserData?.userid)
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     @Test
-    fun `P) Mute User`() = runBlocking {
+    fun `P) Mute User`() = runTest {
         // GIVEN
         val testInputRequest = CreateUpdateUserRequest(
             userid = RandomString.make(16),
@@ -1661,7 +1660,7 @@ class UserServiceTest {
     }
 
     @Test
-    fun `P-ERROR-404) Mute User`() = runBlocking {
+    fun `P-ERROR-404) Mute User`() = runTest {
         // GIVEN
         val testInputUserId = "non-existing-ID-1234"
 
@@ -1692,7 +1691,7 @@ class UserServiceTest {
             throw err
         }
 
-        return@runBlocking
+        return@runTest
     }
 
     object TestData {

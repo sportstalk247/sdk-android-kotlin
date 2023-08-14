@@ -17,7 +17,7 @@ import com.sportstalk.datamodels.users.User
 import com.sportstalk.datamodels.users.UserNotification
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.test.TestCoroutineDispatcher
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.Json
@@ -35,7 +35,7 @@ import kotlin.test.fail
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [Build.VERSION_CODES.KITKAT])
+@Config(sdk = [Build.VERSION_CODES.LOLLIPOP])
 class JWTProviderTest {
 
     private lateinit var context: Context
@@ -48,10 +48,11 @@ class JWTProviderTest {
     private lateinit var coroutineScope: CoroutineScope
     private lateinit var jwtProviderJob: Job
 
-    private val testDispatcher = TestCoroutineDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
+    @Suppress("DEPRECATION")
     @get:Rule
-    val thrown = ExpectedException.none()
+    val thrown: ExpectedException = ExpectedException.none()
 
     @Before
     fun setup() {
@@ -97,7 +98,6 @@ class JWTProviderTest {
 
     @After
     fun cleanUp() {
-        testDispatcher.cleanupTestCoroutines()
         Dispatchers.resetMain()
 
         jwtProviderJob.cancel()
@@ -246,6 +246,7 @@ class JWTProviderTest {
 
         // EXPECT
         thrown.expect(SportsTalkException::class.java)
+
         // WHEN
         try {
             chatService.joinRoom(

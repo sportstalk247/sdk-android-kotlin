@@ -4,7 +4,7 @@ import androidx.annotation.RestrictTo
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.sportstalk.datamodels.ClientConfig
 import com.sportstalk.datamodels.ConfigUtils
-import com.sportstalk.reactive.BuildConfig
+import com.sportstalk.reactive.rx2.BuildConfig
 import com.sportstalk.reactive.rx2.impl.restapi.*
 import com.sportstalk.reactive.rx2.service.*
 import kotlinx.serialization.json.Json

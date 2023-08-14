@@ -1,17 +1,15 @@
 package com.sportstalk.coroutine.impl.restapi
 
 import androidx.annotation.RestrictTo
-import com.sportstalk.coroutine.service.ChatService
 import com.sportstalk.coroutine.impl.handleSdkResponse
 import com.sportstalk.coroutine.impl.restapi.retrofit.services.ChatRetrofitService
+import com.sportstalk.coroutine.service.ChatService
 import com.sportstalk.datamodels.*
 import com.sportstalk.datamodels.chat.*
 import com.sportstalk.datamodels.users.User
-import kotlinx.coroutines.channels.BroadcastChannel
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.serialization.json.Json
 import retrofit2.Retrofit
 import retrofit2.create
@@ -42,10 +40,10 @@ constructor(
      */
     override var preRenderedMessages: MutableSet<String> = mutableSetOf()
 
-    internal var _chatEventEmitter = BroadcastChannel<List<ChatEvent>>(Channel.BUFFERED)
+    private var _chatEventEmitter = MutableSharedFlow<List<ChatEvent>>(replay = 1, extraBufferCapacity = 1)
     override var chatEventsEmitter: Flow<List<ChatEvent>>
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        get() = _chatEventEmitter.asFlow()
+        get() = _chatEventEmitter.asSharedFlow()
         set(value) {}
 
     override fun roomSubscriptions(): Set<String> = roomSubscriptions
