@@ -72,6 +72,18 @@ Then sync again. The gradle build should now be successful.
 
 # Migration Guide
 
+Changed repository from [Gitlab](https://gitlab.com/sportstalk247/sdk-android-kotlin) to [Github](https://github.com/sportstalk247/sdk-android-kotlin), hence, dependency module identifier changed:
+From:
+```kotlin
+/*implementation("com.gitlab.sportstalk247:sdk-android-kotlin:sdk-coroutine:X.Y.Z")*/
+/*implementation("com.gitlab.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z")*/
+```
+To:
+```kotlin
+implementation("com.github.sportstalk247:sdk-android-kotlin:sdk-coroutine:X.Y.Z")
+implementation("com.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z")
+```
+
 There are significant dependency updates made on version `1.3.0`. Notable changes are as follows:
 * Using Kotlin version (1.9.0)[https://github.com/JetBrains/kotlin/releases/tag/v1.9.0]
 * Built on Gradle version (8.2.1)[https://docs.gradle.org/8.2.1/release-notes.html]
