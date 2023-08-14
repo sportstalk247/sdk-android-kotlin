@@ -25,6 +25,7 @@ In order to use it in your application, do the following:
 
 1. Add the following in root **build.gradle** file
 
+For Groovy:
 ```groovy
 allprojects {
     repositories {
@@ -35,9 +36,20 @@ allprojects {
     }
 }
 ```
+For Kotlin DSL:
+```kotlin
+allprojects {
+    repositories { 
+       // ...
+       maven("https://jitpack.io")
+       // ...
+    }
+}
+```
 
 2. Add the following lines in your module **build.gradle** file, depending on the chosen SDK implementation(Coroutine or Rx2Java), under dependencies section:
 
+For Groovy:
 ```groovy
 // For SDK coroutine implementation
 implementation 'com.github.sportstalk247:sdk-android-kotlin:sdk-coroutine:X.Y.Z'
@@ -45,17 +57,38 @@ implementation 'com.github.sportstalk247:sdk-android-kotlin:sdk-coroutine:X.Y.Z'
 // For SDK Rx2Java implementation
 implementation 'com.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z'
 ```
+For Kotlin DSL:
+```groovy
+// For SDK coroutine implementation
+implementation("com.github.sportstalk247:sdk-android-kotlin:sdk-coroutine:X.Y.Z")
+// OR
+// For SDK Rx2Java implementation
+implementation("com.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z")
+```
 
 [![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
 
 Then sync again. The gradle build should now be successful.
+
+# Migration Guide
+
+There are significant dependency updates made on version `1.3.0`. Notable changes are as follows:
+* Using Kotlin version (1.9.0)[https://github.com/JetBrains/kotlin/releases/tag/v1.9.0]
+* Built on Gradle version (8.2.1)[https://docs.gradle.org/8.2.1/release-notes.html]
+* Build on Android Gradle Plugin version (8.1.0)[https://docs.gradle.org/8.2.1/release-notes.html]
+* Using Kotlin Coroutines (1.7.3)[https://github.com/Kotlin/kotlinx.coroutines/releases/tag/1.7.3]
+ 
+Therefore, it is recommended that the client apps should be using:
+* Kotlin version of at least `1.8.10` and above
+* Built on Gradle version of at least `7.5.1` and above
+* Built on Android Gradle Plugin version of at least `7.4.2` and above
 
 # Modules
 
 * [sdk-coroutine](sdk-coroutine/README.md) - Provides [kotlinx.coroutines](https://github.com/Kotlin/kotlinx.coroutines) implementation of the SDK, using suspend functions.
    * The project implementing this artifact must at least have the following dependencies:
    ```groovy
-   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.50"
+   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.10"  // also compatible with `1.9.0`
    ```
 
 * [reactive-rx2](sdk-reactive-rx2/README.md) - Provides [RxJava 2.x](https://github.com/ReactiveX/RxJava/tree/2.x) implementation of the SDK, using RxJava return types.
