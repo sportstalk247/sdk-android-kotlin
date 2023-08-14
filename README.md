@@ -1,5 +1,5 @@
 
-[![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
 
 # sdk-android-kotlin
 
@@ -7,7 +7,7 @@
 
 You can download the latest SportsTalk Android SDK from the following location:
 
-https://gitlab.com/sportstalk247/sdk-android-kotlin
+https://github.com/sportstalk247/sdk-android-kotlin
 
 You need to register SportsTalk API with 'Appkey' and 'Token'.
 How to get API Key and Token
@@ -40,13 +40,13 @@ allprojects {
 
 ```groovy
 // For SDK coroutine implementation
-implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:sdk-coroutine:vX.Y.Z'
+implementation 'com.github.sportstalk247:sdk-android-kotlin:sdk-coroutine:X.Y.Z'
 // OR
 // For SDK Rx2Java implementation
-implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:vX.Y.Z'
+implementation 'com.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z'
 ```
 
-[![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
 
 Then sync again. The gradle build should now be successful.
 

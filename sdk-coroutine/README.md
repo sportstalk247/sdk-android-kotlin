@@ -1,13 +1,16 @@
 
-[![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
 
 # sdk-coroutine
 
 ```groovy
-implementation 'com.gitlab.sportstalk247:sdk-android-kotlin:sdk-coroutine:vX.Y.Z'
+implementation 'com.github.sportstalk247.sdk-android-kotlin:sdk-coroutine:X.Y.Z'
+```
+```kotlin
+implementation 'com.github.sportstalk247.sdk-android-kotlin:sdk-coroutine:X.Y.Z'
 ```
 
-[![Release](https://jitpack.io/v/com.gitlab.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.gitlab.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
 
 # How to Use
 
@@ -52,7 +55,73 @@ class MyFragment: Fragment() {
 
 ## User Client Features
 
-### Work-in-progress...
+```kotlin
+// Under Fragment class
+val commentClient = SportsTalk247.UserClient(
+   config = ClientConfig(
+      appId = "c84cb9c852932a6b0411e75e",
+      apiToken = "5MGq3XbsspBEQf3kj154_OSQV-jygEKwHJyuHjuAeWHA",
+      endpoint = "http://api.custom.endpoint/v1/"
+   )
+)
+```
+
+### Create or Update User
+```kotlin
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val createdUser = withContext(Dispatchers.IO) {
+        userClient.createOrUpdateUser(
+            request = CreateUpdateUserRequest(
+                        userid = "023976080242ac120002",
+                        handle = "sample_handle_123",
+                        displayname = "Test Name 123", // OPTIONAL
+                        pictureurl = "<Image URL>", // OPTIONAL
+                        profileurl = "<Image URL>" // OPTIONAL
+            )
+        )
+    }
+
+    // Resolve `createdUser` from HERE onwards(ex. update UI displaying the response data)...
+}
+```
+
+### Get User Details
+```kotlin
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val userDetails = withContext(Dispatchers.IO) {
+        userClient.getUserDetails(
+            userid = "023976080242ac120002"
+        )
+    }
+
+    // Resolve `userDetails` from HERE onwards(ex. update UI displaying the response data)...
+}
+```
+
+### List Users
+```kotlin
+// Launch thru coroutine block
+// https://developer.android.com/topic/libraries/architecture/coroutines
+lifecycleScope.launch {
+    // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+    val listUsers = withContext(Dispatchers.IO) {
+        userClient.listUsers(
+            limit = 10, /* Defaults to 200 on backend API server */
+            cursor = null // OPTIONAL: The cursor value from previous search attempt to indicate next paginated fetch. Null if fetching the first list of user(s).
+        )
+    }
+
+    // Resolve `listUsers` from HERE onwards(ex. update UI displaying the response data)...
+}
+```
+
+For more API documentation reference, you may browse our [read-the-docs documentation](https://sdk-android-kotlin.readthedocs.io/en/latest/usage/user_client.html). 
 
 ## Chat Client Features
 
@@ -199,6 +268,8 @@ lifecycleScope.launch {
 }
 ```
 
+For more API documentation reference, you may browse our [read-the-docs documentation](https://sdk-android-kotlin.readthedocs.io/en/latest/usage/chat_client.html).
+
 ## How to use Comment Client
 
 ```kotlin
@@ -292,7 +363,7 @@ lifecycleScope.launch {
 }
 ```
 
-### Flag comment logically deleted / Permanently Delete Comment
+### Permanently Delete Comment
 
 ```kotlin
 // Under Fragment class
@@ -313,6 +384,8 @@ lifecycleScope.launch {
    // Resolve `setCommentDeletedResponse` from HERE(ex. Display Prompt, update UI)
 }
 ```
+
+For more API documentation reference, you may browse our [read-the-docs documentation](https://sdk-android-kotlin.readthedocs.io/en/latest/usage/comment_client.html).
 
 ## Handling SDK Exception
 
@@ -346,5 +419,3 @@ lifecycleScope.launch {
    }
 }
 ```
-
-## Work-in-progress...
