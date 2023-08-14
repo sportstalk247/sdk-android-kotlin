@@ -2,7 +2,7 @@ import java.io.FileInputStream
 import java.util.Properties
 
 val packageGroup by extra { "com.github.sportstalk247.sdk-android-kotlin" }
-val packageVersion by extra { "1.2.10" }
+val packageVersion by extra { "1.3.0" }
 
 // https://youtrack.jetbrains.com/issue/KTIJ-19369
 @Suppress("DSL_SCOPE_VIOLATION")
