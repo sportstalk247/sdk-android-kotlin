@@ -1,12 +1,14 @@
-[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-coroutine-android?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-coroutine-android)
 
 # sdk-reactive-rx2
 
 ```groovy
-implementation 'com.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z'
+implementation 'io.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z'
 ```
 
-[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-coroutine-android?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-coroutine-android)
 
 # How to Use
 
