@@ -44,10 +44,10 @@ In order to use it in your application, just do the following:
         // ...
         dependencies {
             // For SDK coroutine implementation
-            implementation 'com.github.sportstalk247.sdk-android-kotlin:sdk-coroutine:X.Y.Z'
+            implementation 'io.github.sportstalk247.sdk-android-kotlin:sdk-coroutine:X.Y.Z'
             // OR
             // For SDK Rx2Java implementation
-            implementation 'com.github.sportstalk247.sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z'
+            implementation 'io.github.sportstalk247.sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z'
         }
         // ...
 
@@ -56,15 +56,16 @@ In order to use it in your application, just do the following:
         // ...
         dependencies {
             // For SDK coroutine implementation
-            implementation("com.github.sportstalk247.sdk-android-kotlin:sdk-coroutine:X.Y.Z")
+            implementation("io.github.sportstalk247.sdk-android-kotlin:sdk-coroutine:X.Y.Z")
             // OR
             // For SDK Rx2Java implementation
-            implementation("com.github.sportstalk247.sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z")
+            implementation("io.github.sportstalk247.sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z")
         }
         // ...
         
 ```
 
-[![Release](https://jitpack.io/v/com.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#com.github.sportstalk247/sdk-android-kotlin)
+[![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-android-kotlin?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-android-kotlin)
 
 Then sync again. The gradle build should now be successful.

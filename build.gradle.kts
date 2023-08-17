@@ -1,7 +1,7 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-val packageGroup by extra { "com.github.sportstalk247.sdk-android-kotlin" }
+val packageGroup by extra { "io.github.sportstalk247.${rootProject.name}" }
 val packageVersion by extra { "1.3.0" }
 
 // https://youtrack.jetbrains.com/issue/KTIJ-19369
