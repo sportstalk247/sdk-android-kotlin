@@ -1,18 +1,18 @@
 
 [![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-coroutine-android?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-coroutine-android)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-android-kotlin?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-android-kotlin)
 
 # sdk-coroutine
 
 ```groovy
-implementation 'io.github.sportstalk247:sdk-coroutine-android:X.Y.Z'
+implementation 'io.github.sportstalk247.sdk-android-kotlin:sdk-coroutine:X.Y.Z'
 ```
 ```kotlin
-implementation 'io.github.sportstalk247:sdk-coroutine-android:X.Y.Z'
+implementation 'io.github.sportstalk247.sdk-android-kotlin:sdk-coroutine:X.Y.Z'
 ```
 
 [![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-coroutine-android?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-coroutine-android)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-android-kotlin?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-android-kotlin)
 
 # How to Use
 

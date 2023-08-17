@@ -1,6 +1,6 @@
 
 [![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-coroutine-android?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-coroutine-android)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-android-kotlin?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-android-kotlin)
 
 # sdk-android-kotlin
 
@@ -30,8 +30,11 @@ For Groovy:
 ```groovy
 allprojects {
     repositories {
-    // ...
-       mavenCentral()   // Make sure that Maven Central is declared
+        // ...
+       mavenCentral()
+       maven {
+          url "https://s01.oss.sonatype.org/content/repositories/snapshots/"
+       }
        maven {
           url "https://jitpack.io"
        }
@@ -43,7 +46,8 @@ For Kotlin DSL:
 allprojects {
     repositories { 
        // ...
-       mavenCentral()   // Make sure that Maven Central is declared
+       mavenCentral()
+       maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
        maven("https://jitpack.io")
        // ...
     }
@@ -70,7 +74,7 @@ implementation("io.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.
 ```
 
 [![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-coroutine-android?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-coroutine-android)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-android-kotlin?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-android-kotlin)
 
 Then sync again. The gradle build should now be successful.
 

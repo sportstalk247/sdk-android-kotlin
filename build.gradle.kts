@@ -1,7 +1,7 @@
 import java.io.FileInputStream
 import java.util.Properties
 
-val packageGroup by extra { "io.github.sportstalk247" }
+val packageGroup by extra { "io.github.sportstalk247.${rootProject.name}" }
 val packageVersion by extra { "1.3.0" }
 
 // https://youtrack.jetbrains.com/issue/KTIJ-19369
@@ -39,9 +39,6 @@ allprojects {
         extensions.findByType<PublishingExtension>()?.apply {
 
             publications.withType<MavenPublication>().configureEach {
-
-                // "sdk-coroutine-android", "sdk-reactive-rx2-android"
-                artifactId = "${artifactId}-android"
 
                 artifact(emptyJavadocJar.get())
 
