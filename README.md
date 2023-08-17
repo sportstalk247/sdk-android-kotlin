@@ -23,7 +23,7 @@ Then click on ''Application Management'' link to generate the above
 
 # How to download the SDK from public repository
 
-The SportsTalk SDK has been published into **jitpack.io**.
+The SportsTalk SDK has been published into [Maven Central](https://central.sonatype.com/).
 
 In order to use it in your application, do the following:
 
