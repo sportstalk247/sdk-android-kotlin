@@ -1,6 +1,9 @@
+![Jitpack](https://img.shields.io/jitpack/version/io.github.sportstalk247/sdk-android-kotlin?label=Jitpack%20%7C%20sdk-coroutine&color=4DC621)
+![Jitpack](https://img.shields.io/jitpack/version/io.github.sportstalk247/sdk-android-kotlin?label=Jitpack%20%7C%20sdk-reactive-rx2&color=4DC621)
 
-[![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-android-kotlin?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-android-kotlin)
+
+![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247.sdk-android-kotlin/sdk-coroutine?label=Maven%20Central%20%7C%20sdk-coroutine)
+![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247.sdk-android-kotlin/sdk-reactive-rx2?label=Maven%20Central%20%7C%20sdk-reactive-rx2)
 
 # sdk-android-kotlin
 
@@ -73,8 +76,12 @@ implementation("io.github.sportstalk247:sdk-android-kotlin:sdk-coroutine:X.Y.Z")
 implementation("io.github.sportstalk247:sdk-android-kotlin:sdk-reactive-rx2:X.Y.Z")
 ```
 
-[![Release](https://jitpack.io/v/io.github.sportstalk247/sdk-android-kotlin.svg)](https://jitpack.io/#io.github.sportstalk247/sdk-android-kotlin)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247/sdk-android-kotlin?label=Maven%20Central)](https://search.maven.org/artifact/io.github.sportstalk247/sdk-android-kotlin)
+![Jitpack](https://img.shields.io/jitpack/version/io.github.sportstalk247/sdk-android-kotlin?label=Jitpack%20%7C%20sdk-coroutine&color=4DC621)
+![Jitpack](https://img.shields.io/jitpack/version/io.github.sportstalk247/sdk-android-kotlin?label=Jitpack%20%7C%20sdk-reactive-rx2&color=4DC621)
+
+
+![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247.sdk-android-kotlin/sdk-coroutine?label=Maven%20Central%20%7C%20sdk-coroutine)
+![Maven Central](https://img.shields.io/maven-central/v/io.github.sportstalk247.sdk-android-kotlin/sdk-reactive-rx2?label=Maven%20Central%20%7C%20sdk-reactive-rx2)
 
 Then sync again. The gradle build should now be successful.
 
