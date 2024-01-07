@@ -19,6 +19,7 @@ data class Conversation(
         val title: String? = null,
         val maxcommentlen: Long? = null,
         val commentcount: Long? = null,
+        val replycount: Long? = null,
         val reactions: List<Reaction>? = null,
         val likecount: Long? = null,
         val open: Boolean? = null, // OPTIONAL, defaults to true

@@ -13,7 +13,9 @@ import com.sportstalk.datamodels.reports.ReportType
 import com.sportstalk.datamodels.users.CreateUpdateUserRequest
 import com.sportstalk.datamodels.users.User
 import com.sportstalk.reactive.rx2.ServiceFactory
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.internal.operators.flowable.FlowableJust
 import kotlinx.serialization.json.Json
 import net.bytebuddy.utility.RandomString
 import org.junit.*
@@ -22,6 +24,7 @@ import org.junit.runners.MethodSorters
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 import kotlin.test.fail
 
@@ -488,7 +491,7 @@ class CommentServiceTest {
     }
 
     @Test
-    fun `H) Reply To Comment`() {
+    fun `H-1) Reply To Comment`() {
         // GIVEN
         val testUserData = TestData.TestUser
         val testConversationData = TestData.conversations(config.appId)[0]
@@ -582,6 +585,100 @@ class CommentServiceTest {
                     ?.takeIf { it.isNotEmpty() } == testExpectedResult.custompayload?.trim()
                     ?.takeIf { it.isNotEmpty() })
 
+        } catch (err: Throwable) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            deleteTestUsers(TestData.TestUser.userid)
+            deleteTestConversations(testConversationData.conversationid)
+        }
+    }
+
+    @Test
+    fun `H-2) Reply To Comment - Get Reply Count`() {
+        // GIVEN
+        val testUserData = TestData.TestUser
+        val testConversationData = TestData.conversations(config.appId)[0]
+        val testCommentData = TestData.comments(config.appId)[0]
+        val testCommentReplyData = TestData.comments(config.appId)[1]
+
+        // WHEN
+        try {
+            // First create the User instance
+            val createdUser = userService.createOrUpdateUser(
+                request = CreateUpdateUserRequest(
+                    userid = testUserData.userid!!,
+                    handle = testUserData.handle,
+                    displayname = testUserData.displayname,
+                    pictureurl = testUserData.pictureurl,
+                    profileurl = testUserData.profileurl,
+                )
+            ).blockingGet()
+            // Then, create the Conversation instance
+            val createdConversation = commentService.createOrUpdateConversation(
+                request = CreateOrUpdateConversationRequest(
+                    conversationid = testConversationData.conversationid!!,
+                    property = testConversationData.property!!,
+                    moderation = testConversationData.moderation!!,
+                    enableprofanityfilter = testConversationData.enableprofanityfilter,
+                    title = testConversationData.title,
+                    open = testConversationData.open,
+                    customid = testConversationData.customid
+                )
+            ).blockingGet()
+            // Create an initial Comment instance
+            val createdComment = commentService.createComment(
+                conversationid = createdConversation.conversationid!!,
+                request = CreateCommentRequest(
+                    userid = createdUser.userid!!,
+                    displayname = createdUser.displayname,
+                    body = testCommentData.body!!,
+                    customtype = testCommentData.customtype,
+                    customfield1 = testCommentData.customfield1,
+                    customfield2 = testCommentData.customfield2,
+                    custompayload = testCommentData.custompayload,
+                )
+            ).blockingGet()
+
+            // Attempt Reply to a Comment
+            @Suppress("UNUSED_VARIABLE") val replyComment = commentService.replyToComment(
+                conversationid = createdConversation.conversationid!!,
+                replyto = createdComment.id!!,
+                request = CreateCommentRequest(
+                    userid = createdUser.userid!!,
+                    displayname = createdUser.displayname,
+                    body = testCommentReplyData.body!!,
+                    customtype = testCommentReplyData.customtype,
+                    customfield1 = testCommentReplyData.customfield1,
+                    customfield2 = testCommentReplyData.customfield2,
+                    custompayload = testCommentReplyData.custompayload,
+                )
+            ).blockingGet()
+
+            val testExpectedResult = createdConversation.copy(
+                replycount = 1,    // Append `replycount` value
+            )
+
+            val testActualResult = Single.just(0)
+                // Wait atleast 3 seconds to get updated Conversation
+                .delay(3_000L, TimeUnit.MILLISECONDS)
+                .flatMap {
+                    commentService.getConversation(
+                        conversationid = createdConversation.conversationid!!,
+                    )
+                }.blockingGet()
+
+            // THEN
+            println(
+                "`Reply To Comment`() -> testActualResult = \n" +
+                        json.encodeToString(
+                            Conversation.serializer(),
+                            testActualResult,
+                        )
+            )
+
+            assert(testActualResult.conversationid == testExpectedResult.conversationid)
+            assert(testActualResult.replycount == 1L)
         } catch (err: Throwable) {
             err.printStackTrace()
             fail(err.message)
