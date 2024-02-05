@@ -2,7 +2,7 @@ import java.io.FileInputStream
 import java.util.Properties
 
 val packageGroup by extra { "io.github.sportstalk247.${rootProject.name}" }
-val packageVersion by extra { "1.3.1" }
+val packageVersion by extra { "1.3.2" }
 
 // https://youtrack.jetbrains.com/issue/KTIJ-19369
 @Suppress("DSL_SCOPE_VIOLATION")
