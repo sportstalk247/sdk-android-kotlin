@@ -123,6 +123,23 @@ Therefore, it is recommended that the client apps should be using:
    implementation "io.reactivex.rxjava2:rxjava:2.2.0"
    ```
 
+# Publish to Maven using Nexus Publishing
+
+Must provide the following config values under `local.properties`:
+```properties
+### KeyId, Password, and Signing Key will be used as params for useInMemoryPgpKeys()
+signing.keyId=
+signing.password=
+signing.key=
+### OSSRH Username and Password are your Sonatype Account Credentials
+ossrhUsername=
+ossrhPassword=
+```
+To create Sonatype account, proceed to https://central.sonatype.com/.
+Also, you may need to download [GPG Keychain](https://gpgtools.org/) App to allow your workstation to publish an artifact.
+See the Gradle Nexus [publish-plugin](https://github.com/gradle-nexus/publish-plugin) Github Repo for more info.
+
+
 # Documentation
 
 Full Android SDK documentation found here: https://sdk-android-kotlin.readthedocs.io/en/latest/

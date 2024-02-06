@@ -394,6 +394,7 @@ class CommentServiceTest {
             assert(testActualResult.reactions?.isNotEmpty() == true)
             assert(testActualResult.reactions?.any { rxn -> rxn.type == ReactionType.LIKE } == true)
             assert(testActualResult.reactions?.any { rxn -> rxn.count == 1L } == true)
+            assert(testActualResult.reactioncount!! == 1L)
             assert(testActualResult.reactions?.any { rxn -> rxn.users.any { usr -> usr.userid == createdUser.userid } } == true)
 
         } catch (err: Throwable) {
