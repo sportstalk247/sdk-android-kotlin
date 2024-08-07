@@ -540,6 +540,13 @@ constructor(
     ): Single<ListMessagesNeedingModerationResponse> =
         moderationService.listMessagesNeedingModeration(roomId, limit, cursor)
 
+    override fun purgeUserMessages(
+        chatRoomId: String,
+        userId: String,
+        byUserId: String
+    ): Completable =
+        moderationService.purgeUserMessages(chatRoomId, userId, byUserId)
+
     companion object {
         private const val DURATION_EXECUTE_COMMAND = 20_000L
     }

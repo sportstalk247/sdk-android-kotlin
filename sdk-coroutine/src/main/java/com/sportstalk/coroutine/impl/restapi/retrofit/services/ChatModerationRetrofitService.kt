@@ -4,6 +4,7 @@ import com.sportstalk.datamodels.ApiResponse
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.moderation.ApproveMessageRequest
 import com.sportstalk.datamodels.chat.moderation.ListMessagesNeedingModerationResponse
+import com.sportstalk.datamodels.chat.moderation.PurgeUserMessagesRequest
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -23,5 +24,12 @@ interface ChatModerationRetrofitService {
             @Query("limit") limit: Int? = null,
             @Query("cursor") cursor: String? = null
     ): Response<ApiResponse<ListMessagesNeedingModerationResponse>>
+
+    @POST("{appId}/chat/rooms/{chatroomid}/commands/purge")
+    suspend fun purgeUserMessages(
+            @Path("appId") appId: String,
+            @Path("chatroomid") roomId: String,
+            @Body request: PurgeUserMessagesRequest? = null,
+    ): Response<ApiResponse<String>>
 
 }

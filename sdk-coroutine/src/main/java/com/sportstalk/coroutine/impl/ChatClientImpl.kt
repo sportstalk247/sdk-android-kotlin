@@ -532,6 +532,13 @@ constructor(
                     cursor = cursor
             )
 
+    override suspend fun purgeUserMessages(chatRoomId: String, userId: String, byUserId: String) =
+        moderationService.purgeUserMessages(
+            chatRoomId = chatRoomId,
+            userId = userId,
+            byUserId = byUserId,
+        )
+
     companion object {
         private const val DURATION_EXECUTE_COMMAND = 20_000L
     }

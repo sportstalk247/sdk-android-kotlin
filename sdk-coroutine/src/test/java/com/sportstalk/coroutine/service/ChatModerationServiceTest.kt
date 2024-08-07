@@ -544,6 +544,241 @@ class ChatModerationServiceTest {
         deleteTestUsers(testCreatedUserData.userid)
     }
 
+    @Test
+    fun `C) Purge User Messages`() = runTest {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+            name = testChatRoomData.name!!,
+            customid = testChatRoomData.customid,
+            description = testChatRoomData.description,
+            moderation = testChatRoomData.moderation,
+            enableactions = testChatRoomData.enableactions,
+            enableenterandexit = testChatRoomData.enableenterandexit,
+            enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+            delaymessageseconds = testChatRoomData.delaymessageseconds,
+            roomisopen = testChatRoomData.open,
+            maxreports = testChatRoomData.maxreports
+        )
+
+        var testCreatedUserData: User? = null
+        var testCreatedChatRoomData: ChatRoom? = null
+
+        try {
+            // Should create a test user first
+            testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+            // Should create a test chat room first
+            testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+            val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+            val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle!!
+            )
+            // Test Created User Should join test created chat room
+            chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+            )
+
+            val testInputChatRoomId = testCreatedChatRoomData.id!!
+            val testInputUserId = testCreatedUserData.userid!!
+            val testInputByUserId = "moderator"
+
+            // WHEN
+            chatModerationService.purgeUserMessages(
+                chatRoomId = testInputChatRoomId,
+                userId = testInputUserId,
+                byUserId = testInputByUserId,
+            )
+
+            // THEN
+            println("`C) Purge User Messages`()")
+            assertTrue { true }
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            fail(err.message)
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData?.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData?.userid)
+        }
+
+    }
+
+    @Test
+    fun `C-ERROR-403) Purge User Messages - NO Local Purge Permission`() = runTest {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+            name = testChatRoomData.name!!,
+            customid = testChatRoomData.customid,
+            description = testChatRoomData.description,
+            moderation = testChatRoomData.moderation,
+            enableactions = testChatRoomData.enableactions,
+            enableenterandexit = testChatRoomData.enableenterandexit,
+            enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+            delaymessageseconds = testChatRoomData.delaymessageseconds,
+            roomisopen = testChatRoomData.open,
+            maxreports = testChatRoomData.maxreports
+        )
+
+        var testCreatedUserData: User? = null
+        var testCreatedChatRoomData: ChatRoom? = null
+
+        try {
+            // Should create a test user first
+            testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+            // Should create a test chat room first
+            testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+            val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+            val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle!!
+            )
+            // Test Created User Should join test created chat room
+            chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+            )
+
+            val testInputChatRoomId = testCreatedChatRoomData.id!!
+            val testInputUserId = testCreatedUserData.userid!!
+            val testInputByUserId = testInputUserId // Same User purging his/her own message MUST NOT HAVE purge permission
+
+            // WHEN
+            chatModerationService.purgeUserMessages(
+                chatRoomId = testInputChatRoomId,
+                userId = testInputUserId,
+                byUserId = testInputByUserId,
+            )
+
+            // THEN
+            fail("Must throw error because specified user MUST NOT have local purge permission.")
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            println(
+                "`C-ERROR-403) Purge User Messages - NO Local Purge Permission`() -> testActualResult = \n" +
+                        json.encodeToString(
+                            SportsTalkException.serializer(),
+                            err
+                        )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "User performing the action does not have local purge permission" }
+            assertTrue { err.code == 403 }
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData?.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData?.userid)
+        }
+
+    }
+
+    @Test
+    fun `C-ERROR-404) Purge User Messages - Purging User Not Found`() = runTest {
+        // GIVEN
+        val testUserData = TestData.users.first()
+        val testCreateUserInputRequest = CreateUpdateUserRequest(
+            userid = RandomString.make(16),
+            handle = "${testUserData.handle}_${Random.nextInt(100, 999)}",
+            displayname = testUserData.displayname,
+            pictureurl = testUserData.pictureurl,
+            profileurl = testUserData.profileurl
+        )
+
+        val testChatRoomData = TestData.chatRooms(config.appId).first()
+        val testCreateChatRoomInputRequest = CreateChatRoomRequest(
+            name = testChatRoomData.name!!,
+            customid = testChatRoomData.customid,
+            description = testChatRoomData.description,
+            moderation = testChatRoomData.moderation,
+            enableactions = testChatRoomData.enableactions,
+            enableenterandexit = testChatRoomData.enableenterandexit,
+            enableprofanityfilter = testChatRoomData.enableprofanityfilter,
+            delaymessageseconds = testChatRoomData.delaymessageseconds,
+            roomisopen = testChatRoomData.open,
+            maxreports = testChatRoomData.maxreports
+        )
+
+        var testCreatedUserData: User? = null
+        var testCreatedChatRoomData: ChatRoom? = null
+
+        try {
+            // Should create a test user first
+            testCreatedUserData = userService.createOrUpdateUser(request = testCreateUserInputRequest)
+
+            // Should create a test chat room first
+            testCreatedChatRoomData = chatService.createRoom(testCreateChatRoomInputRequest)
+
+            val testInputJoinChatRoomId = testCreatedChatRoomData.id!!
+            val testJoinRoomInputRequest = JoinChatRoomRequest(
+                userid = testCreatedUserData.userid!!,
+                handle = testCreatedUserData.handle!!
+            )
+            // Test Created User Should join test created chat room
+            chatService.joinRoom(
+                chatRoomId = testInputJoinChatRoomId,
+                request = testJoinRoomInputRequest
+            )
+
+            val testInputChatRoomId = testCreatedChatRoomData.id!!
+            val testInputUserId = testCreatedUserData.userid!!
+            val testInputByUserId = "invalid_user_id"
+
+            // WHEN
+            chatModerationService.purgeUserMessages(
+                chatRoomId = testInputChatRoomId,
+                userId = testInputUserId,
+                byUserId = testInputByUserId,
+            )
+
+            // THEN
+            fail("Must throw error because specified user is NOT found.")
+        } catch (err: SportsTalkException) {
+            err.printStackTrace()
+            println(
+                "`C-ERROR-404) Purge User Messages - Purging User Not Found`() -> testActualResult = \n" +
+                        json.encodeToString(
+                            SportsTalkException.serializer(),
+                            err
+                        )
+            )
+            assertTrue { err.kind == Kind.API }
+            assertTrue { err.message == "The purging user was not found in the application database" }
+            assertTrue { err.code == 404 }
+        } finally {
+            // Perform Delete Test Chat Room
+            deleteTestChatRooms(testCreatedChatRoomData?.id)
+            // Perform Delete Test User
+            deleteTestUsers(testCreatedUserData?.userid)
+        }
+
+    }
+
     object TestData {
 
         private val USER_HANDLE_RANDOM_NUM = Random(System.currentTimeMillis())
