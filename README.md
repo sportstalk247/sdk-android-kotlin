@@ -152,7 +152,6 @@ If you want to generate the Android SDK documentation locally:
 #   - There are dependency issues on sphinx version 8.x, so we'll stick to 7.x for now 
 #  
 export PYTHON_SITE_PACKAGES=path/to/python/site-packages
-# open conf.py and uncomment the `sys.path.insert()` statement
 # Change directory to `sdk-android-kotlin/docs` 
 cd path/to/sdk-android-kotlin/docs
 # Execute build
