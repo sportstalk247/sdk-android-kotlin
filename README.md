@@ -143,3 +143,18 @@ See the Gradle Nexus [publish-plugin](https://github.com/gradle-nexus/publish-pl
 # Documentation
 
 Full Android SDK documentation found here: https://sdk-android-kotlin.readthedocs.io/en/latest/
+
+If you want to generate the Android SDK documentation locally:
+```bash
+# install Python3
+# setup pip3 virtual environment
+# pip3 install sphinx-doc==7.4.7
+#   - There are dependency issues on sphinx version 8.x, so we'll stick to 7.x for now 
+#  
+export PYTHON_SITE_PACKAGES=path/to/python/site-packages
+# Change directory to `sdk-android-kotlin/docs` 
+cd path/to/sdk-android-kotlin/docs
+# Execute build
+make html
+```
+

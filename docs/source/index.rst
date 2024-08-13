@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 SportsTalk 24/7 Android SDK Documentation
-========================================
+=========================================
 
 .. toctree::
    :maxdepth: 2

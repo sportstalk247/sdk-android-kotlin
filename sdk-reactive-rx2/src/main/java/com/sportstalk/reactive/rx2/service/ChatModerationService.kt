@@ -2,6 +2,7 @@ package com.sportstalk.reactive.rx2.service
 
 import com.sportstalk.datamodels.chat.ChatEvent
 import com.sportstalk.datamodels.chat.moderation.ListMessagesNeedingModerationResponse
+import io.reactivex.Completable
 import io.reactivex.Single
 
 interface ChatModerationService {
@@ -24,4 +25,14 @@ interface ChatModerationService {
         cursor: String? = null
     ): Single<ListMessagesNeedingModerationResponse>
 
+    /**
+     * [POST] /{{api_appid}}/chat/rooms/{{chatroomid}}/commands/purge
+     * - https://apiref.sportstalk247.com/?version=latest#04ffee45-a3e6-49b8-8968-46b219020b66
+     * - Executes a command in a chat room to purge all messages for a user
+     */
+    fun purgeUserMessages(
+        chatRoomId: String,
+        userId: String,
+        byUserId: String,
+    ): Completable
 }

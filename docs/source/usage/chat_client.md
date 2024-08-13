@@ -1732,60 +1732,6 @@ Below is a code sample on how to use this SDK feature:
             }
 ```
 
-## Purge User Messages
-
-Invoke this function to execute a command in a chat room to purge all messages for a user.
-
-Refer to the SportsTalk API Documentation for more details:
-
-<https://apiref.sportstalk247.com/?version=latest#04ffee45-a3e6-49b8-8968-46b219020b66>
-
-Below is a code sample on how to use this SDK feature:
-
-``` tabs::
-
-    .. code-tab:: kotlin sdk-coroutine
-
-        // Launch thru coroutine block
-        // https://developer.android.com/topic/libraries/architecture/coroutines
-        lifecycleScope.launch {
-            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
-            val purgeCmdResponse = withContext(Dispatchers.IO) {
-                chatClient.executeChatCommand(
-                    chatRoomId = "080001297623242ac002",    // ID of an existing chat room
-                    // Assuming ADMIN password "testpassword123"
-                    // Assuming user "@nicoleWd" exists
-                    request = ExecuteChatCommandRequest(
-                        command = "*purge testpassword123 nicoleWd",
-                        userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
-                    )
-                )
-            }
-
-            // Resolve `purgeCmdResponse` from HERE onwards(ex. update UI displaying the response data)...
-        }
-
-    .. code-tab:: kotlin sdk-reactive-rx2
-
-        val rxDisposeBag = CompositeDisposable()
-
-        chatClient.executeChatCommand(
-            chatRoomId = "080001297623242ac002",    // ID of an existing chat room
-            // Assuming ADMIN password "testpassword123"
-            // Assuming user "@nicoleWd" exists
-            request = ExecuteChatCommandRequest(
-                command = "*purge testpassword123 nicoleWd",
-                userid = "023976080242ac120002" // ID of an existing user "@nicoleWd" from this chatroom
-            )
-        )
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { rxDisposeBag.add(it) }
-            .subscribe { chatEventResponse ->
-                // Resolve `chatEventResponse` (ex. Display prompt OR Update UI)
-            }
-```
-
 ## Shadow Ban User (In Room Only)
 
 Invoke this function to toggle the user's shadow banned flag from within the specified Chatroom.
@@ -2497,3 +2443,52 @@ Below is a code sample on how to use this SDK feature:
                 // Resolve `approveResponse` (ex. Display prompt OR Update UI)
             }
 ```
+
+## Purge User Messages
+
+Invoke this function to executes a command in a chat room to purge all messages for a user.
+
+Refer to the SportsTalk API Documentation for more details:
+
+<https://apiref.sportstalk247.com/?version=latest#04ffee45-a3e6-49b8-8968-46b219020b66>
+
+Below is a code sample on how to use this SDK feature:
+
+``` tabs::
+
+    .. code-tab:: kotlin sdk-coroutine
+
+        // Launch thru coroutine block
+        // https://developer.android.com/topic/libraries/architecture/coroutines
+        lifecycleScope.launch {
+            // Switch to IO Coroutine Context(Operation will be executed on IO Thread)
+            withContext(Dispatchers.IO) {
+                chatClient.purgeUserMessages(
+                    chatRoomId = "0976280012ac00023242",   // ID of an existing chatroom
+                    userId = "023976080242ac120002",    // ID of an existing user from this chatroom whose Chat Message(s) will be purged
+                    byUserId = "moderator",             // Any User ID whose role is either 'Moderator' OR 'Admin'.
+                )
+            }
+
+            // This API does NOT return any response. Either is succeeds OR throws SportsTalkException if it fails.
+        }
+
+    .. code-tab:: kotlin sdk-reactive-rx2
+
+        val rxDisposeBag = CompositeDisposable()
+
+        chatClient.purgeUserMessages(
+            chatRoomId = "0976280012ac00023242",   // ID of an existing chatroom
+            userId = "023976080242ac120002",    // ID of an existing user from this chatroom whose Chat Message(s) will be purged
+            byUserId = "moderator",             // Any User ID whose role is either 'Moderator' OR 'Admin'
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnSubscribe { rxDisposeBag.add(it) }
+            .subscribe {
+                // This API does NOT return any response. Either is succeeds OR throws SportsTalkException if it fails.
+            }
+```
+
+
+
