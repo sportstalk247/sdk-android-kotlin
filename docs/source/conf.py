@@ -13,7 +13,8 @@
 import os
 import sys
 # sys.path.insert(0, os.path.abspath('.'))
-sys.path.insert(0, os.path.abspath(os.getenv("PYTHON_SITE_PACKAGES")))
+# Uncomment this part if building on local machine
+# sys.path.insert(0, os.path.abspath(os.getenv("PYTHON_SITE_PACKAGES")))
 import recommonmark
 from recommonmark.transform import AutoStructify
 import sphinx_tabs
